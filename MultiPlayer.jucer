@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="tfw8KZ" name="MultiPlayer" projectType="guiapp" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+  <MAINGROUP id="xbXPa2" name="MultiPlayer">
+    <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
+      <FILE id="Oskf2m" name="Mixer.cpp" compile="1" resource="0" file="Source/Mixer.cpp"/>
+      <FILE id="vjYBJf" name="Mixer.h" compile="0" resource="0" file="Source/Mixer.h"/>
+      <FILE id="lhfgYC" name="RemoteInput.cpp" compile="1" resource="0" file="Source/RemoteInput.cpp"/>
+      <FILE id="GHrFKT" name="RemoteInput.h" compile="0" resource="0" file="Source/RemoteInput.h"/>
+      <GROUP id="{08A6ACDD-BDD6-9325-6E8A-38EFA8F5D4C1}" name="nanodbc">
+        <FILE id="FuaZkG" name="nanodbc.cpp" compile="1" resource="0" file="Source/nanodbc-master/nanodbc/nanodbc.cpp"/>
+        <FILE id="LIqIHp" name="nanodbc.h" compile="0" resource="0" file="Source/nanodbc-master/nanodbc/nanodbc.h"/>
+      </GROUP>
+      <FILE id="Ck1or0" name="AudioBrowser.cpp" compile="1" resource="0"
+            file="Source/AudioBrowser.cpp"/>
+      <FILE id="MArcpb" name="AudioBrowser.h" compile="0" resource="0" file="Source/AudioBrowser.h"/>
+      <FILE id="JPdFqd" name="BottomComponent.cpp" compile="1" resource="0"
+            file="Source/BottomComponent.cpp"/>
+      <FILE id="RCdBfj" name="BottomComponent.h" compile="0" resource="0"
+            file="Source/BottomComponent.h"/>
+      <FILE id="zOzmFO" name="Ebu128LoudnessMeter.cpp" compile="1" resource="0"
+            file="Source/LUFSMeter/Ebu128LoudnessMeter.cpp"/>
+      <FILE id="fCKeMC" name="Ebu128LoudnessMeter.h" compile="0" resource="0"
+            file="Source/LUFSMeter/Ebu128LoudnessMeter.h"/>
+      <FILE id="SOtmgk" name="MacrosAndJuceHeaders.h" compile="0" resource="0"
+            file="Source/LUFSMeter/MacrosAndJuceHeaders.h"/>
+      <FILE id="Kv4IAn" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="jWratW" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+      <FILE id="MOagvb" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+      <FILE id="mYOtQI" name="Player.cpp" compile="1" resource="0" file="Source/Player.cpp"/>
+      <FILE id="curOBt" name="Player.h" compile="0" resource="0" file="Source/Player.h"/>
+      <FILE id="Tsv6wi" name="Playlist.cpp" compile="1" resource="0" file="Source/Playlist.cpp"/>
+      <FILE id="VRuIHF" name="Playlist.h" compile="0" resource="0" file="Source/Playlist.h"/>
+      <FILE id="Elc1Ju" name="Recorder.cpp" compile="1" resource="0" file="Source/Recorder.cpp"/>
+      <FILE id="Wcxw5n" name="Recorder.h" compile="0" resource="0" file="Source/Recorder.h"/>
+      <FILE id="eptmtT" name="SecondOrderIIRFilter.cpp" compile="1" resource="0"
+            file="Source/LUFSMeter/filters/SecondOrderIIRFilter.cpp"/>
+      <FILE id="FusvhA" name="SecondOrderIIRFilter.h" compile="0" resource="0"
+            file="Source/LUFSMeter/filters/SecondOrderIIRFilter.h"/>
+      <FILE id="DaU4l3" name="Settings.cpp" compile="1" resource="0" file="Source/Settings.cpp"/>
+      <FILE id="RlP1VN" name="Settings.h" compile="0" resource="0" file="Source/Settings.h"/>
+      <FILE id="hy5idU" name="SoundPlayer.cpp" compile="1" resource="0" file="Source/SoundPlayer.cpp"/>
+      <FILE id="gE64MG" name="SoundPlayer.h" compile="0" resource="0" file="Source/SoundPlayer.h"/>
+      <FILE id="sECmoQ" name="PlayHead.cpp" compile="1" resource="0" file="Source/PlayHead.cpp"/>
+      <FILE id="Oih2Gw" name="PlayHead.h" compile="0" resource="0" file="Source/PlayHead.h"/>
+      <FILE id="zGi8bw" name="LoudnessBar.cpp" compile="1" resource="0" file="Source/LoudnessBar.cpp"/>
+      <FILE id="sywl8F" name="LoudnessBar.h" compile="0" resource="0" file="Source/LoudnessBar.h"/>
+      <FILE id="sylIhd" name="DataBaseBrowser.cpp" compile="1" resource="0"
+            file="Source/DataBaseBrowser.cpp"/>
+      <FILE id="Zd4WzE" name="DataBaseBrowser.h" compile="0" resource="0"
+            file="Source/DataBaseBrowser.h"/>
+      <FILE id="eqyqq7" name="helpers.h" compile="0" resource="0" file="Source/helpers.h"/>
+      <FILE id="ca9F8r" name="DataBaseImport.cpp" compile="1" resource="0"
+            file="Source/DataBaseImport.cpp"/>
+      <FILE id="hNkghM" name="DataBaseImport.h" compile="0" resource="0"
+            file="Source/DataBaseImport.h"/>
+      <FILE id="RvgWcF" name="MixerInput.cpp" compile="1" resource="0" file="Source/MixerInput.cpp"/>
+      <FILE id="f8I8Hs" name="MixerInput.h" compile="0" resource="0" file="Source/MixerInput.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK="0"
+               JUCE_ASIO="1" JUCE_USE_LAME_AUDIO_FORMAT="1"/>
+  <EXPORTFORMATS>
+    <VS2019 externalLibraries="opus.lib&#10;uvgrtp.lib" targetFolder="C:/Juce/Projects">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="MultiPlayer" libraryPath="C:\JUCE\ffmpeg-cpp-master\lib\x64\Release\&#10;C:\JUCE\Projects\MultiPlayer\Source\LUFSMeter&#10;C:\JUCE\Projects\MultiPlayer\Source\LUFSMeter\filters&#10;C:\JUCE\Projects\MultiPlayer\Source&#10;C:\local\lib\debug"
+                       headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\JUCE\Projects\Source\LUFSMeter&#10;C:\JUCE\Projects\Source\LUFSMeter\filters&#10;C:\JUCE\Libraries\odbc-cpp-wrapper-master\src\odbc&#10;C:\JUCE\Projects\Source\nanodbc&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="MultiPlayer" headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\JUCE\Projects\Source\LUFSMeter&#10;C:\JUCE\Projects\Source\LUFSMeter\filters&#10;C:\JUCE\Libraries\odbc-cpp-wrapper-master\src\odbc&#10;C:\JUCE\Projects\Source\nanodbc&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3"
+                       libraryPath="C:\JUCE\ffmpeg-cpp-master\lib\x64\Release\&#10;C:\JUCE\Projects\MultiPlayer\Source\LUFSMeter&#10;C:\JUCE\Projects\MultiPlayer\Source\LUFSMeter\filters&#10;C:\JUCE\Projects\MultiPlayer\Source&#10;C:\local\lib\release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="ff_meters" path="ff_meters"/>
+        <MODULEPATH id="juce_osc" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2019>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="ff_meters" showAllCode="1" useLocalCopy="1" useGlobalPath="0"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_osc" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <LIVE_SETTINGS>
+    <WINDOWS/>
+  </LIVE_SETTINGS>
+</JUCERPROJECT>

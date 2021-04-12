@@ -1,0 +1,20 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2019
+
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MultiPlayer - App", "MultiPlayer_App.vcxproj", "{05955D26-5CB7-5094-26F0-FB5FE555F9BC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{05955D26-5CB7-5094-26F0-FB5FE555F9BC}.Debug|x64.ActiveCfg = Debug|x64
+		{05955D26-5CB7-5094-26F0-FB5FE555F9BC}.Debug|x64.Build.0 = Debug|x64
+		{05955D26-5CB7-5094-26F0-FB5FE555F9BC}.Release|x64.ActiveCfg = Release|x64
+		{05955D26-5CB7-5094-26F0-FB5FE555F9BC}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
