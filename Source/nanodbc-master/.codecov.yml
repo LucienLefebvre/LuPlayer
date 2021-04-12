@@ -1,7 +1,0 @@
-comment: off
-
-ignore:
-  - "doc"
-  - "example"
-  - "test/catch"
-  - "utility"
