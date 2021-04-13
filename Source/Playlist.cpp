@@ -1526,6 +1526,7 @@ void Playlist::valueChanged(juce::Value& value)
         {
             draggedPlayer.setValue(-1);
             draggedPlayer.setValue(i);
+
             //draggedPlayer = players[i]->draggedPlayer.toString().getIntValue();
         }
 
@@ -1715,3 +1716,4 @@ void Playlist::isEightPlayerMode(bool eightPlayersMode)
         players[i]->setEightPlayerMode(true);
     }
 }
+

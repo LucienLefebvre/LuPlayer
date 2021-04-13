@@ -247,5 +247,8 @@ private:
     void Playlist::timerCallback();
     void Playlist::assignPlaylistFader(int playerToAssign);
 
+
+    void Playlist::updateDraggedPlayerDisplay();
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Playlist)
 };

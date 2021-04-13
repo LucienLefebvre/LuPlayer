@@ -55,6 +55,7 @@ public:
     void SoundPlayer::savePlaylist();
     void SoundPlayer::loadPlaylist();
     void SoundPlayer::positionViewport(int player);
+    void SoundPlayer::updateDraggedPlayerDisplay(int playerDragged, int playlistDragged);
     juce::MixerAudioSource myMixer;
     juce::MixerAudioSource myCueMixer;
     juce::OwnedArray<Playlist> myPlaylists;

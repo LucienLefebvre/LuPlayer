@@ -128,6 +128,7 @@ public:
     float Player::getStop();
     void Player::setStartTime(float startTime);
     void Player::setStopTime(float stopTime);
+    void Player::setActivePlayer(bool isActive);
 
     void Player::setEightPlayerMode(bool isEight);
     bool isEightPlayerMode = false;

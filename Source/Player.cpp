@@ -1897,3 +1897,19 @@ void Player::setEightPlayerMode(bool isEight)
 {
     isEightPlayerMode = isEight;
 }
+
+void Player::setActivePlayer(bool isActive)
+{
+    if (isActive)
+    {
+        //startTimeButton.setButtonText("X");
+        //stopTimeButton.setButtonText("X");
+        cueButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::red);
+    }
+    else
+    {
+        //startTimeButton.setButtonText("");
+        //stopTimeButton.setButtonText("");
+        cueButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+    }
+}

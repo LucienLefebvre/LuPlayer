@@ -579,6 +579,16 @@ void SoundPlayer::valueChanged(juce::Value& value)
         draggedPlaylist = -1;
         draggedPlaylist = 0;
         myPlaylists[1]->draggedPlayer = -1;
+        for (int i = 0; i < myPlaylists[0]->players.size(); i++)
+        {
+                myPlaylists[0]->players[i]->setActivePlayer(false);
+        }
+        for (int i = 0; i < myPlaylists[1]->players.size(); i++)
+        {
+                myPlaylists[1]->players[i]->setActivePlayer(false);
+        }
+        if (myPlaylists[0]->players[draggedPlayer] != nullptr)
+            myPlaylists[0]->players[draggedPlayer]->setActivePlayer(true);
     }
     else if (value.refersToSameSourceAs(myPlaylists[1]->draggedPlayer))
     {
@@ -587,6 +597,16 @@ void SoundPlayer::valueChanged(juce::Value& value)
         draggedPlaylist = -1;
         draggedPlaylist = 1;
         myPlaylists[0]->draggedPlayer = -1;
+        for (int i = 0; i < myPlaylists[0]->players.size(); i++)
+        {
+            myPlaylists[0]->players[i]->setActivePlayer(false);
+        }
+        for (int i = 0; i < myPlaylists[1]->players.size(); i++)
+        {
+            myPlaylists[1]->players[i]->setActivePlayer(false);
+        }
+        if (myPlaylists[1]->players[draggedPlayer] != nullptr)
+            myPlaylists[1]->players[draggedPlayer]->setActivePlayer(true);
     }
 
 }
@@ -1781,4 +1801,10 @@ void SoundPlayer::setTimerTime(int timertime)
 void SoundPlayer::setEightPlayersMode(bool isEightPlayers)
 {
     isEightPlayerMode = isEightPlayers;
+}
+
+void SoundPlayer::updateDraggedPlayerDisplay(int playerDragged, int playlistDragged)
+{
+
+
 }
