@@ -446,7 +446,10 @@ bool SoundPlayer::keyPressed(const juce::KeyPress& key, juce::Component* origina
     return false;
 }
 
-
+void SoundPlayer::positionViewport(int player)
+{
+    playlistbisViewport.setViewPosition(0, (player - 1) * 105);
+}
 void SoundPlayer::valueChanged(juce::Value& value)
 {
     if (value.refersToSameSourceAs(myPlaylists[0]->minimumPlayer))
@@ -458,6 +461,7 @@ void SoundPlayer::valueChanged(juce::Value& value)
         //channelsMapping();
         
         metersInitialize();
+        resized();
     }
     else if (value.refersToSameSourceAs(myPlaylists[0]->fader1Value))
     {

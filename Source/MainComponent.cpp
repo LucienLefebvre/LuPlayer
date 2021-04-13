@@ -688,6 +688,7 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
             soundPlayers[0]->myPlaylists[1]->playPlayer(0);
         else
             soundPlayers[0]->myPlaylists[0]->playPlayer(0);
+        soundPlayers[0]->positionViewport(0);
     }
     else if (key == juce::KeyPress::F2Key)
     {
@@ -695,6 +696,7 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
         soundPlayers[0]->myPlaylists[1]->playPlayer(1);
         else
             soundPlayers[0]->myPlaylists[0]->playPlayer(1);
+        soundPlayers[0]->positionViewport(1);
     }
     else if (key == juce::KeyPress::F3Key)
     {
@@ -702,13 +704,15 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
         soundPlayers[0]->myPlaylists[1]->playPlayer(2);
         else
             soundPlayers[0]->myPlaylists[0]->playPlayer(2);
+        soundPlayers[0]->positionViewport(2);
     }
     else if (key == juce::KeyPress::F4Key)
     {
         if (!isEightPlayerMode)
-        soundPlayers[0]->myPlaylists[1]->playPlayer(3);
+            soundPlayers[0]->myPlaylists[1]->playPlayer(3);
         else
             soundPlayers[0]->myPlaylists[0]->playPlayer(3);
+        soundPlayers[0]->positionViewport(3);
     }
     else if (key == juce::KeyPress::F5Key)
     {
@@ -716,6 +720,7 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
         soundPlayers[0]->myPlaylists[1]->playPlayer(4);
         else
             soundPlayers[0]->myPlaylists[1]->playPlayer(0);
+        soundPlayers[0]->positionViewport(4);
     }
     else if (key == juce::KeyPress::F6Key)
     {
@@ -723,6 +728,7 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
         soundPlayers[0]->myPlaylists[1]->playPlayer(5);
         else
             soundPlayers[0]->myPlaylists[1]->playPlayer(1);
+        soundPlayers[0]->positionViewport(5);
     }
     else if (key == juce::KeyPress::F7Key)
     {
@@ -730,6 +736,7 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
         soundPlayers[0]->myPlaylists[1]->playPlayer(6);
         else
             soundPlayers[0]->myPlaylists[1]->playPlayer(2);
+        soundPlayers[0]->positionViewport(6);
     }
     else if (key == juce::KeyPress::F8Key)
     {
@@ -737,26 +744,31 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
         soundPlayers[0]->myPlaylists[1]->playPlayer(7);
         else
             soundPlayers[0]->myPlaylists[1]->playPlayer(3);
+        soundPlayers[0]->positionViewport(7);
     }
     else if (key == juce::KeyPress::F9Key)
     {
         if (!isEightPlayerMode)
             soundPlayers[0]->myPlaylists[1]->playPlayer(8);
+        soundPlayers[0]->positionViewport(8);
     }
     else if (key == juce::KeyPress::F10Key)
     {
         if (!isEightPlayerMode)
             soundPlayers[0]->myPlaylists[1]->playPlayer(9);
+        soundPlayers[0]->positionViewport(9);
     }
     else if (key == juce::KeyPress::F11Key)
     {
         if (!isEightPlayerMode)
             soundPlayers[0]->myPlaylists[1]->playPlayer(10);
+        soundPlayers[0]->positionViewport(10);
     }
     else if (key == juce::KeyPress::F12Key)
     {
         if (!isEightPlayerMode)
             soundPlayers[0]->myPlaylists[1]->playPlayer(11);
+        soundPlayers[0]->positionViewport(11);
     }
     else if (key == juce::KeyPress::escapeKey)
     {
