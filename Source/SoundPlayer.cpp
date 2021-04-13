@@ -16,7 +16,6 @@
 SoundPlayer::SoundPlayer(bool isEightPlayer)
 {
     isEightPlayerMode = isEightPlayer;
-
     juce::Timer::startTimer(50);
     addKeyListener(this);
 

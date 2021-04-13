@@ -679,8 +679,8 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
     }
     else if (key == juce::KeyPress::spaceKey)
     {
-
-        soundPlayers[0]->myPlaylists[0]->spaceBarPressed();
+        if (!eightPlayersLaunched)
+            soundPlayers[0]->myPlaylists[0]->spaceBarPressed();
     }
     else if (key == juce::KeyPress::F1Key)
     {
