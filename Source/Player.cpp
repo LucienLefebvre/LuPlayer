@@ -168,6 +168,19 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
     addAndMakeVisible(optionButton);
     optionButton.onClick = [this] {optionButtonClicked(); };
     optionButton.setButtonText("HPF");
+    optionButton.addListener(this);
+
+    addChildComponent(&filterFrequencySlider);
+    filterFrequencySlider.setRange(20, 200);
+    filterFrequencySlider.setValue(filterFrequency, juce::NotificationType::dontSendNotification);
+    filterFrequencySlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    filterFrequencySlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 10);
+    filterFrequencySlider.setDoubleClickReturnValue(true, 0.);
+    filterFrequencySlider.setPopupDisplayEnabled(true, true, this, 2000);
+    filterFrequencySlider.setScrollWheelEnabled(false);
+    filterFrequencySlider.setWantsKeyboardFocus(false);
+    filterFrequencySlider.setNumDecimalPlacesToDisplay(0);
+    filterFrequencySlider.addListener(this);
 
     filterSource.makeInactive();
     cuefilterSource.makeInactive();
@@ -1146,7 +1159,16 @@ void Player::sliderValueChanged(juce::Slider* slider)
             repaint();
         }
     }
-
+    if (slider == &filterFrequencySlider)
+    {
+        filterFrequency = filterFrequencySlider.getValue();
+        DBG(filterFrequency);
+        if (hpfEnabled)
+        {
+            filterSource.setCoefficients(filterCoefficients.makeHighPass(actualSampleRate, filterFrequency, 0.4));
+            cuefilterSource.setCoefficients(filterCoefficients.makeHighPass(actualSampleRate, filterFrequency, 0.4));
+        }
+    }
 }
 
 
@@ -1736,16 +1758,34 @@ void Player::stopTimeClicked()
 
 void Player::optionButtonClicked()
 {
-    if (hpfEnabled)
+    if (!rightClickDown)
     {
-        enableHPF(false);
+        if (hpfEnabled)
+        {
+            enableHPF(false);
+        }
+        else if (!hpfEnabled)
+        {
+            enableHPF(true);
+        }
     }
-    else if (!hpfEnabled)
+    else
     {
-        enableHPF(true);
+        if (!filterFrequencySlider.isVisible())
+        {
+            filterFrequencySlider.setVisible(true);
+            filterFrequencySlider.setBounds(optionButton.getRight(), 0, 55, 55);
+            rightClickDown = false;
+        }
+        else
+        {
+            filterFrequencySlider.setVisible(false);
+            rightClickDown = false;
+        }
     }
 
 }
+
 
 void Player::enableHPF(bool shouldBeEnabled)
 {
@@ -1759,8 +1799,8 @@ void Player::enableHPF(bool shouldBeEnabled)
     }
     else if (shouldBeEnabled)
     {
-        filterSource.setCoefficients(filterCoefficients.makeHighPass(actualSampleRate, 100, 0.4));
-        cuefilterSource.setCoefficients(filterCoefficients.makeHighPass(actualSampleRate, 100, 0.4));
+        filterSource.setCoefficients(filterCoefficients.makeHighPass(actualSampleRate, filterFrequency, 0.4));
+        cuefilterSource.setCoefficients(filterCoefficients.makeHighPass(actualSampleRate, filterFrequency, 0.4));
         optionButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::lightblue);
         optionButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::black);
         hpfEnabled = true;

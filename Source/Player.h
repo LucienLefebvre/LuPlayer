@@ -116,6 +116,7 @@ public:
     void Player::enableHPF(bool shouldBeEnabled);
     bool Player::isHpfEnabled();
 
+
     void Player::setStart();
     void Player::deleteStart();
     void Player::setStop();
@@ -270,7 +271,9 @@ private:
     juce::TextButton stopTimeButton;
 
     juce::TextButton optionButton;
+    juce::Slider filterFrequencySlider;
     bool hpfEnabled = false;
+    double filterFrequency = 100;
     juce::IIRCoefficients filterCoefficients;
 
 
