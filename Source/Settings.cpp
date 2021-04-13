@@ -40,6 +40,7 @@ juce::BigInteger Settings::inputChannels;
 bool Settings::useDefaultInputChannels;
 juce::BigInteger Settings::outputChannels;
 bool Settings::useDefaultOutputsChannels;
+bool Settings::lauchAtZeroDB;
 
 int Settings::outputChannelsNumber;
 juce::Value Settings::sampleRateValue;
@@ -98,6 +99,11 @@ Settings::Settings() : settingsFile(options)
     Settings::outOscPort = properties.getUserSettings()->getValue("Out OSC Port").getIntValue();
     Settings::preferedAudioDeviceType = properties.getUserSettings()->getValue("Audio Device Type");
     Settings::preferedAudioDeviceName = properties.getUserSettings()->getValue("audioDeviceName");
+
+    if (properties.getUserSettings()->getValue("Launchatzero").isEmpty())
+        Settings::lauchAtZeroDB = true;
+    else
+    Settings::lauchAtZeroDB = properties.getUserSettings()->getValue("Launchatzero").getIntValue();
 
     //SAVE & CLOSE BUTTon
     saveButton.setBounds(250, 400, 100, 50);
@@ -264,15 +270,20 @@ Settings::Settings() : settingsFile(options)
     ipAdress4.setColour(juce::Label::outlineColourId, juce::Colours::black);
 
 
-    addAndMakeVisible(localIpAdressLabel);
+    /*addAndMakeVisible(localIpAdressLabel);
     localIpAdressLabel.setBounds(0, 250, 100, 25);
     localIpAdressLabel.setText("Local Ip Adress", juce::NotificationType::sendNotification);
 
     addAndMakeVisible(localIpAdressValue);
     localIpAdressValue.setBounds(200, 250, 100, 25);
     juce::IPAddress localIP;
-    localIpAdressValue.setText(localIP.getLocalAddress().toString(), juce::NotificationType::sendNotification);
+    localIpAdressValue.setText(localIP.getLocalAddress().toString(), juce::NotificationType::sendNotification);*/
 
+    addAndMakeVisible(&launchLevelButton);
+    launchLevelButton.setButtonText("Always launch sounds at 0dB");
+    launchLevelButton.setBounds(0, 250, 200, 25);
+    launchLevelButton.setToggleState(Settings::lauchAtZeroDB, juce::NotificationType::dontSendNotification);
+    launchLevelButton.addListener(this);
 
     //AUDIO OUTPUT MODE
     addAndMakeVisible(audioOutputModeLabel);
@@ -582,4 +593,16 @@ void Settings::updateSampleRateValue(double sampleRate)
 int Settings::getAudioOutputMode()
 {
     return properties.getUserSettings()->getValue("Audio Output Mode").getIntValue();
+}
+
+
+void Settings::buttonClicked(juce::Button* button)
+{
+    if (button == &launchLevelButton)
+    {
+        Settings::lauchAtZeroDB = button->getToggleState();
+        properties.getUserSettings()->setValue("Launchatzero", (int)Settings::lauchAtZeroDB);
+        properties.saveIfNeeded();
+        settingsFile.save();
+    }
 }

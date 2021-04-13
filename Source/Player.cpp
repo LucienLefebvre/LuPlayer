@@ -873,6 +873,8 @@ void Player::playButtonClicked()
 {
     if (!transport.isPlaying())
     {
+        if (Settings::lauchAtZeroDB)
+            volumeSlider.setValue(1.0);
         //sliderValueToset = 1.0;
         //volumeSlider.setValue(1.0);
         //transport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * monoReductionGain);
@@ -916,7 +918,8 @@ void Player::spaceBarPlay()
     //}
     else
     {
-        //volumeSlider.setValue(1.0);
+        if (Settings::lauchAtZeroDB)
+            volumeSlider.setValue(1.0);
         play();
     }
 

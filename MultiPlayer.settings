@@ -15,4 +15,5 @@
   <VALUE name="Skew Factor" val="0.5"/>
   <VALUE name="Audio Output Mode" val="2"/>
   <VALUE name="Converted Sound Path" val="D:\MultiPlayer\Sounds"/>
+  <VALUE name="Launchatzero" val="1"/>
 </PROPERTIES>

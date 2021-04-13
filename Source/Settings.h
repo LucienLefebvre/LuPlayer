@@ -19,8 +19,8 @@
 class Settings  :   public juce::Component,
                     public juce::Slider::Listener,
                     public juce::Label::Listener,
-                    public juce::ComboBox::Listener
-        
+                    public juce::ComboBox::Listener,
+                    public juce::Button::Listener
 {
 
 public:
@@ -54,7 +54,6 @@ public:
     juce::String Settings::getPreferedAudioDeviceName();
     void Settings::updateSampleRateValue(double sampleRate);
     int Settings::getAudioOutputMode();
-
 
     juce::TextButton saveButton;
     //int maxFaderValue = 0;
@@ -95,7 +94,7 @@ public:
     static int Settings::outputChannelsNumber;
     static juce::Value Settings::sampleRateValue;
 
-
+    static bool Settings::lauchAtZeroDB;
 
 private:
 
@@ -144,6 +143,7 @@ private:
 
     juce::Slider timerSlider;
 
+    juce::ToggleButton launchLevelButton;
 
 
     void Settings::selectFFmpeg();
@@ -154,7 +154,7 @@ private:
     void Settings::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 
 
-
+    void Settings::buttonClicked(juce::Button* button) override;
 
     
 
