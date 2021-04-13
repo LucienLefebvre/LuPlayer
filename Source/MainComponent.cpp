@@ -738,6 +738,26 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
         else
             soundPlayers[0]->myPlaylists[1]->playPlayer(3);
     }
+    else if (key == juce::KeyPress::F9Key)
+    {
+        if (!isEightPlayerMode)
+            soundPlayers[0]->myPlaylists[1]->playPlayer(8);
+    }
+    else if (key == juce::KeyPress::F10Key)
+    {
+        if (!isEightPlayerMode)
+            soundPlayers[0]->myPlaylists[1]->playPlayer(9);
+    }
+    else if (key == juce::KeyPress::F11Key)
+    {
+        if (!isEightPlayerMode)
+            soundPlayers[0]->myPlaylists[1]->playPlayer(10);
+    }
+    else if (key == juce::KeyPress::F12Key)
+    {
+        if (!isEightPlayerMode)
+            soundPlayers[0]->myPlaylists[1]->playPlayer(11);
+    }
     else if (key == juce::KeyPress::escapeKey)
     {
         if (soundPlayers[0]->myPlaylists[0]->spaceBarIsPlaying == false)

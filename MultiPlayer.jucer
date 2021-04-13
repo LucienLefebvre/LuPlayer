@@ -67,8 +67,8 @@
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="MultiPlayer" libraryPath="C:\local\lib\debug"
                        headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3&#10;C:\local\include\nanodbc&#10;C:\local\include\LUFSMeter&#10;"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="MultiPlayer" headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3&#10;C:\local\include\nanodbc"
-                       libraryPath="C:\JUCE\ffmpeg-cpp-master\lib\x64\Release\&#10;C:\JUCE\Projects\MultiPlayer\Source\LUFSMeter&#10;C:\JUCE\Projects\MultiPlayer\Source\LUFSMeter\filters&#10;C:\JUCE\Projects\MultiPlayer\Source&#10;C:\local\lib\release"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="MultiPlayer" headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3&#10;C:\local\include\nanodbc&#10;C:\local\include\LUFSMeter&#10;"
+                       libraryPath="C:\local\lib\release"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
