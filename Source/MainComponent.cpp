@@ -669,7 +669,7 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
 
 bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* originatingComponent)
 {
-    //DBG(key.getKeyCode());
+    DBG(key.getKeyCode());
     if (key == 73 || key == 75 || key == 79 || key == 76 || key == 67 || key == 88 || key == 86)
     {
         if (soundPlayers[0]->draggedPlaylist != -1)
@@ -762,6 +762,16 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
     {
         if (soundPlayers[0]->myPlaylists[0]->spaceBarIsPlaying == false)
             soundPlayers[0]->myPlaylists[0]->playersResetPositionClicked();
+    }
+    else if (key == 65570)
+    {
+        if (!isEightPlayerMode)
+            soundPlayers[0]->myPlaylists[0]->playersNextPositionClicked();
+    }
+    else if (key == 65569)
+    {
+        if (!isEightPlayerMode)
+            soundPlayers[0]->myPlaylists[0]->playersPreviousPositionClicked();
     }
     else if (key == 82)
     {
