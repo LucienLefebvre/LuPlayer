@@ -865,7 +865,7 @@ void Player::deleteFile()
     soundName.setText("", juce::NotificationType::dontSendNotification);
     fileName.setValue("");
     fileLoaded = false;
-
+    sliderValueToset = 1.0;
 }
 
 
@@ -1455,6 +1455,8 @@ bool Player::loadFile(const juce::String& path)
         transport.setSource(tempSource.get());
         transport.addChangeListener(this);
         transport.setGain(1.0);
+        sliderValueToset = 1.0;
+
         resampledSource.setResamplingRatio(reader->sampleRate / Settings::sampleRate);
         fileSampleRate = reader->sampleRate;
         playSource.reset(tempSource.release());
