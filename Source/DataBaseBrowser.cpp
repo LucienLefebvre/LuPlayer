@@ -73,6 +73,7 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
 
     fileDraggedFromDataBase = new juce::ChangeBroadcaster();
     fileDroppedFromDataBase = new juce::ChangeBroadcaster();
+    cuePlay = new juce::ChangeBroadcaster();
 
     formatManager.registerBasicFormats();
 
@@ -101,6 +102,7 @@ DataBaseBrowser::~DataBaseBrowser()
     thumbnail.setSource(nullptr);
     delete fileDraggedFromDataBase;
     delete fileDroppedFromDataBase;
+    delete cuePlay;
     table.removeComponentListener(this);
     transport.removeAllChangeListeners();
     //transport.releaseResources();
@@ -387,6 +389,7 @@ void DataBaseBrowser::startOrStop()
     }
     else
     {
+        cuePlay->sendChangeMessage();
         transport.start();
         startStopButton.setColour(juce::TextButton::buttonColourId, juce::Colours::green);
     }

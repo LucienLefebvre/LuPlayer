@@ -60,6 +60,9 @@ MainComponent::MainComponent() :
     myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
     myCueMixer.addInputSource(&soundPlayers[0]->myCueMixer, false);
 
+    soundPlayers[0]->myPlaylists[0]->cuePlaylistBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
+
     //ADD BOTTOM COMPONENT
     addAndMakeVisible(bottomComponent);
     myMixer.addInputSource(&bottomComponent.myMixer, false);
@@ -69,6 +72,7 @@ MainComponent::MainComponent() :
     bottomComponent.dbBrowser.fileDroppedFromDataBase->addChangeListener(this);
     bottomComponent.recorderComponent.mouseDragInRecorder->addChangeListener(this);
     bottomComponent.recorderComponent.spaceBarKeyPressed->addChangeListener(this);
+    bottomComponent.cuePlay->addChangeListener(this);
     bottomComponent.setName("bottom component");
     bottomComponent.setWantsKeyboardFocus(false);
     bottomComponent.getTabbedButtonBar().addChangeListener(this);
@@ -203,7 +207,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
           Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
           myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
     }
-    if (source == &deviceManager)
+    if (source == &deviceManager) //save devicemanager state each time it changes
     {
         if (deviceManager.getCurrentAudioDevice() != nullptr)
         {
@@ -228,7 +232,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         }
     }
 
-    else if (source == bottomComponent.audioPlaybackDemo.fileDraggedFromBrowser)
+    else if (source == bottomComponent.audioPlaybackDemo.fileDraggedFromBrowser) 
     {
 
         int cartPosition = soundPlayers[0]->playlistbisViewport.getPosition().getX();
@@ -302,12 +306,29 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
         soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
     }
-    else if (source == bottomComponent.recorderComponent.mouseDragInRecorder)
+    else if (source == bottomComponent.recorderComponent.mouseDragInRecorder)//when mouse is dragged in recorder, desactivate shortcuts keys for players
     {
         soundPlayers[0]->draggedPlaylist = -1;
     }
-    else if (source == bottomComponent.recorderComponent.spaceBarKeyPressed)
+    else if (source == bottomComponent.recorderComponent.spaceBarKeyPressed)//security to catch the spacebar if the focus is lost
         soundPlayers[0]->myPlaylists[0]->spaceBarPressed();
+    //XOR Solo on cues
+    else if (source == soundPlayers[0]->myPlaylists[0]->cuePlaylistBroadcaster)
+    {
+    soundPlayers[0]->myPlaylists[1]->stopCues();
+    bottomComponent.stopCue();
+    }
+    else if (source == soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster)
+    {
+    soundPlayers[0]->myPlaylists[0]->stopCues();
+    bottomComponent.stopCue();
+    DBG("maincomponent stop cues");
+    }
+    else if (source == bottomComponent.cuePlay)
+    {
+    soundPlayers[0]->myPlaylists[0]->stopCues();
+    soundPlayers[0]->myPlaylists[1]->stopCues();
+    }
 
 }
 MainComponent::~MainComponent()
@@ -327,7 +348,7 @@ void MainComponent::exitRequested()
 {
 
 }
-void MainComponent::deleteConvertedFiles()
+void MainComponent::deleteConvertedFiles() //this delete the converted files since the opening of the application
 {
     exitAnswered = true;
     while (Settings::tempFiles.size() > 0)
@@ -531,21 +552,19 @@ void MainComponent::paint(juce::Graphics& g)
 
 void MainComponent::resized()
 {
+    //reposition time label
     timeLabel.setBounds(getParentWidth() - 220, 0, 200, 50);
     int windowWidth = getWidth();
     
+    //reposition sound player
    if (soundPlayers[0] != nullptr)
         soundPlayers[0]->setBounds(0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - bottomHeight);
 
-       bottomComponent.setBounds(0, getHeight(), getWidth(), 25);
+    bottomComponent.setBounds(0, getHeight(), getWidth(), 25);
 
+    //Layout the window
     horizontalDividerBar.get()->setBounds(0, 200 - bottomHeight, getWidth(), 8);
-    //horizontalDividerBar.get()->setColour(juce::)
-    // make a list of two of our child components that we want to reposition
     Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
-
-    // this will position the 2 components, one above the other, to fit
-    // vertically into the rectangle provided.
     myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
 }
 
@@ -554,6 +573,7 @@ void MainComponent::timerCallback(int timerID)
 {
     if (timerID == 0)
     {
+        //update time label
         juce::Time* time = new juce::Time(time->getCurrentTime());
         timeLabel.setText(time->toString(false, true, true, true), juce::NotificationType::dontSendNotification);
         timeLabel.toFront(false);
@@ -1034,6 +1054,7 @@ void MainComponent::setCommandLine(juce::String commandLine)
 }
 void MainComponent::launchEightPlayerMode()
 {
+    //This launch the application in 8 players mode
     myMixer.removeAllInputs();
     myCueMixer.removeAllInputs();
     soundPlayers.clear();
@@ -1051,6 +1072,8 @@ void MainComponent::launchEightPlayerMode()
         soundPlayers[0]->myPlaylists[0]->addPlayer(i);
         soundPlayers[0]->myPlaylists[1]->addPlayer(i);
     }
+    soundPlayers[0]->myPlaylists[0]->cuePlaylistBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->isEightPlayerMode(true);
     soundPlayers[0]->myPlaylists[1]->isEightPlayerMode(true);
     soundPlayers[0]->myPlaylists[1]->setEightPlayersSecondCart(true);

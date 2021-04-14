@@ -33,7 +33,8 @@ SoundPlayer::SoundPlayer(bool isEightPlayer)
     myPlaylists[0]->setWantsKeyboardFocus(false);
     myPlaylists[0]->draggedPlayer.addListener(this);
     myPlaylists[0]->minimumPlayer.addListener(this);
-
+    myPlaylists[0]->cuePlaylistBroadcaster->addChangeListener(this);
+    myPlaylists[0]->cuePlaylistActionBroadcaster->addActionListener(this);
     playlistViewport.setBounds(0, playersStartHeightPosition, 715, (getParentHeight() - playersStartHeightPosition));
     playlistViewport.setViewedComponent(myPlaylists[0], false);
     playlistViewport.setWantsKeyboardFocus(false);
@@ -62,7 +63,8 @@ SoundPlayer::SoundPlayer(bool isEightPlayer)
     myPlaylists[1]->mouseDragSource.addListener(this);
     myPlaylists[1]->mouseDraggedUp.addListener(this);
     myPlaylists[1]->draggedPlayer.addListener(this);
-
+    myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
+    myPlaylists[1]->cuePlaylistActionBroadcaster->addActionListener(this);
     playlistbisViewport.setBounds(getParentWidth() / 2, playersStartHeightPosition, getParentWidth() / 2, (getParentHeight() - playersStartHeightPosition));
     playlistbisViewport.setViewedComponent(myPlaylists[1], false);
     playlistbisViewport.setWantsKeyboardFocus(false);
@@ -235,6 +237,7 @@ void SoundPlayer::timerCallback()
         shortTermLoudness = 1;
     loudnessBarComponent.setLoudness(shortTermLoudness);
 
+
     //OSC SEND
     if (oscConnected)
     {
@@ -371,59 +374,62 @@ void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source,
 
 bool SoundPlayer::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
 {
+
+    DBG("dragged playlist key pressed" << draggedPlaylist);
+    DBG("dragged player key pressed" << draggedPlayer);
     if (myPlaylists[draggedPlaylist] != nullptr)
     {
         if (key == 73)
         {
-            if (myPlaylists[draggedPlaylist]->players[draggedPlayer] != nullptr)
+            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
             {
-                myPlaylists[draggedPlaylist]->players[draggedPlayer]->setStart();
+                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->setStart();
             }
         }
         else if (key == 75)
         {
-            if (myPlaylists[draggedPlaylist]->players[draggedPlayer] != nullptr)
+            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
             {
-                myPlaylists[draggedPlaylist]->players[draggedPlayer]->deleteStart();
+                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->deleteStart();
             }
         }
         else if (key == 79)
         {
-            if (myPlaylists[draggedPlaylist]->players[draggedPlayer] != nullptr)
+            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
             {
-                myPlaylists[draggedPlaylist]->players[draggedPlayer]->setStop();
+                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->setStop();
             }
         }
         else if (key == 76)
         {
-            if (myPlaylists[draggedPlaylist]->players[draggedPlayer] != nullptr)
+            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
             {
-                myPlaylists[draggedPlaylist]->players[draggedPlayer]->deleteStop();
+                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->deleteStop();
             }
         }
         else if (key == 67)
         {
-            if (myPlaylists[draggedPlaylist]->players[draggedPlayer] != nullptr)
+            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
             {
-                myPlaylists[draggedPlaylist]->players[draggedPlayer]->cueButtonClicked();
+                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->cueButtonClicked();
                 return true;
             }
         }
         else if (key == 88)
         {
-            if (myPlaylists[draggedPlaylist]->players[draggedPlayer] != nullptr)
+            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
             {
-                myPlaylists[draggedPlaylist]->players[draggedPlayer]->cueTransport.setPosition(myPlaylists[draggedPlaylist]->players[draggedPlayer]->startTime);
-                myPlaylists[draggedPlaylist]->players[draggedPlayer]->cueButtonClicked();
+                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->cueTransport.setPosition(myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->startTime);
+                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->cueButtonClicked();
                 return true;
             }
         }
         else if (key == 86)
         {
-            if (myPlaylists[draggedPlaylist]->players[draggedPlayer] != nullptr)
+            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
             {
-                myPlaylists[draggedPlaylist]->players[draggedPlayer]->cueTransport.setPosition(myPlaylists[draggedPlaylist]->players[draggedPlayer]->stopTime - 6);
-                myPlaylists[draggedPlaylist]->players[draggedPlayer]->cueButtonClicked();
+                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->cueTransport.setPosition(myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->stopTime - 6);
+                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->cueButtonClicked();
                 return true;
             }
         }
@@ -579,16 +585,7 @@ void SoundPlayer::valueChanged(juce::Value& value)
         draggedPlaylist = -1;
         draggedPlaylist = 0;
         myPlaylists[1]->draggedPlayer = -1;
-        for (int i = 0; i < myPlaylists[0]->players.size(); i++)
-        {
-                myPlaylists[0]->players[i]->setActivePlayer(false);
-        }
-        for (int i = 0; i < myPlaylists[1]->players.size(); i++)
-        {
-                myPlaylists[1]->players[i]->setActivePlayer(false);
-        }
-        if (myPlaylists[0]->players[draggedPlayer] != nullptr)
-            myPlaylists[0]->players[draggedPlayer]->setActivePlayer(true);
+        updateDraggedPlayerDisplay(draggedPlayer, 0);
     }
     else if (value.refersToSameSourceAs(myPlaylists[1]->draggedPlayer))
     {
@@ -597,16 +594,7 @@ void SoundPlayer::valueChanged(juce::Value& value)
         draggedPlaylist = -1;
         draggedPlaylist = 1;
         myPlaylists[0]->draggedPlayer = -1;
-        for (int i = 0; i < myPlaylists[0]->players.size(); i++)
-        {
-            myPlaylists[0]->players[i]->setActivePlayer(false);
-        }
-        for (int i = 0; i < myPlaylists[1]->players.size(); i++)
-        {
-            myPlaylists[1]->players[i]->setActivePlayer(false);
-        }
-        if (myPlaylists[1]->players[draggedPlayer] != nullptr)
-            myPlaylists[1]->players[draggedPlayer]->setActivePlayer(true);
+        updateDraggedPlayerDisplay(draggedPlayer, 1);
     }
 
 }
@@ -1787,6 +1775,7 @@ void SoundPlayer::loadPlaylist()
                 myPlaylists[0]->addPlayer(myPlaylists[0]->players.size() - 1);
             while (myPlaylists[1]->players.size() < 4)
                 myPlaylists[1]->addPlayer(myPlaylists[1]->players.size() - 1);
+            Settings::draggedPlayer = -1;
         }
     }
 }
@@ -1805,6 +1794,47 @@ void SoundPlayer::setEightPlayersMode(bool isEightPlayers)
 
 void SoundPlayer::updateDraggedPlayerDisplay(int playerDragged, int playlistDragged)
 {
+    //reset dragged player display on all players
+    if (playerDragged != -1)
+    {
+        for (int i = 0; i < myPlaylists[0]->players.size(); i++)
+        {
+            myPlaylists[0]->players[i]->setActivePlayer(false);
+        }
+        for (int i = 0; i < myPlaylists[1]->players.size(); i++)
+        {
+            myPlaylists[1]->players[i]->setActivePlayer(false);
+        }
+        //set dragged player display on dragged player
+        DBG("playlist dragged " << playlistDragged);
+        DBG("player dragged " << playerDragged);
+        if (myPlaylists[playlistDragged]->players[Settings::draggedPlayer] != nullptr)
+            myPlaylists[playlistDragged]->players[Settings::draggedPlayer]->setActivePlayer(true);
+    }
 
+}
+
+void SoundPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
+{
+    DBG("change message received");
+    if (source == myPlaylists[0]->cuePlaylistBroadcaster)
+    {
+        draggedPlaylist = -1;
+        draggedPlaylist = 0;
+        draggedPlayer = Settings::draggedPlayer;
+        draggedPlayer = myPlaylists[0]->draggedPlayer.toString().getIntValue();
+    }
+    else if (source == myPlaylists[1]->cuePlaylistBroadcaster)
+    {
+        draggedPlaylist = -1;
+        draggedPlaylist = 1;
+        draggedPlayer = Settings::draggedPlayer;
+    }
+    DBG(draggedPlaylist << "draggedplaylist");
+    DBG(draggedPlayer << "draggedplayer");
+}
+
+void SoundPlayer::actionListenerCallback(const juce::String& message)
+{
 
 }

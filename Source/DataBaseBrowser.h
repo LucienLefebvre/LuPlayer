@@ -46,6 +46,7 @@ public:
     juce::ResamplingAudioSource resampledSource;
     juce::ChangeBroadcaster* fileDraggedFromDataBase;
     juce::ChangeBroadcaster* fileDroppedFromDataBase;
+    juce::ChangeBroadcaster* cuePlay;
 
 private:
     void DataBaseBrowser::initialize();

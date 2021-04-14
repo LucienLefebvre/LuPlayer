@@ -34,6 +34,8 @@ Playlist::Playlist(int splaylistType)
 
     setSize(getParentWidth(), getParentHeight());
 
+    cuePlaylistBroadcaster = new juce::ChangeBroadcaster();
+    cuePlaylistActionBroadcaster = new juce::ActionBroadcaster();
     //addPlayer(1);
 
     //addKeyListener(this);
@@ -57,6 +59,8 @@ Playlist::Playlist(int splaylistType)
 
 Playlist::~Playlist()
 {
+    delete cuePlaylistBroadcaster;
+    delete cuePlaylistActionBroadcaster;
     removeMouseListener(this);
     playlistMixer.removeAllInputs();
     playlistCueMixer.removeAllInputs();
@@ -841,7 +845,7 @@ void Playlist::addPlayer(int playerID)
     players[idAddedPlayer]->cueStopped.addListener(this);
     players[idAddedPlayer]->transport.addChangeListener(this);
     players[idAddedPlayer]->cueTransport.addChangeListener(this);
-
+    players[idAddedPlayer]->cueBroadcaster->addActionListener(this);
     playersPositionLabels.insert(idAddedPlayer, new juce::Label);
     playersPositionLabels[idAddedPlayer]->setText(juce::String(idAddedPlayer + 1), juce::NotificationType::dontSendNotification);
     addAndMakeVisible(playersPositionLabels[idAddedPlayer]);
@@ -905,12 +909,14 @@ void Playlist::removePlayer(int playerID)
                     players[playerID]->fileName.removeListener(this);
                     players[playerID]->playerPositionLabel.addListener(this);
                     players[playerID]->cueStopped.addListener(this);
+                    players[playerID]->cueBroadcaster->removeActionListener(this);
                     players.remove(playerID);
                     playersPositionLabels.remove(playerID);
                     //swapNextButtons.remove(playerID);
                     removePlayersButtons.remove(playerID);
                     addPlayersButtons.remove(playerID);
                     playerNumber = players.size();
+
                     updateNextPlayer();
                     rearrangePlayers();
                 }
@@ -928,10 +934,12 @@ void Playlist::removePlayer(int playerID)
                     players[playerID]->fileName.removeListener(this);
                     players[playerID]->playerPositionLabel.addListener(this);
                     players[playerID]->cueStopped.addListener(this);
+                    players[playerID]->cueBroadcaster->removeActionListener(this);
                     players.remove(playerID);
                     playersPositionLabels.remove(playerID);
                     assignLeftFaderButtons.remove(playerID);
                     assignRightFaderButtons.remove(playerID);
+
                     playerNumber = players.size();
                     updateNextPlayer();
                     rearrangePlayers();
@@ -1045,8 +1053,10 @@ void Playlist::rearrangePlayers()
 
     for (auto i = 0; i < players.size() + 1; i++)
     {
+
         if (players[i] != nullptr)
         {
+            players[i]->setPlayerIndex(i);
             //addAndMakeVisible(playersPositionLabels[i]);
             playersPositionLabels[i]->setText(juce::String(i + 1), juce::NotificationType::dontSendNotification);
             if (isEightPlayerSecondCart)
@@ -1286,6 +1296,7 @@ void Playlist::spaceBarPressed()
                     }
                     else
                     {
+                        spaceBarStartTime = juce::Time::currentTimeMillis();
                         players[nextPlayer]->spaceBarPlay();
                         players[nextPlayer]->fader1IsPlaying = true;
                         players[nextPlayer]->fader2IsPlaying = true;
@@ -1311,12 +1322,16 @@ void Playlist::spaceBarStop()
     {
         if (players[spaceBarPlayerId] != nullptr)
         {
+            spaceBarStopTime = juce::Time::currentTimeMillis();
             players[spaceBarPlayerId]->stopButtonClicked();
             players[nextPlayer]->fader1IsPlaying = false;
             players[nextPlayer]->fader2IsPlaying = false;
-            spaceBarPlayerId++;
-            fader1Player++;
-            fader2Player++;
+            if (spaceBarStopTime - spaceBarStartTime >= Settings::faderTempTime)
+            {
+                spaceBarPlayerId++;
+                fader1Player++;
+                fader2Player++;
+            }
             if (spaceBarPlayerId == players.size())
             {
                 spaceBarPlayerId--;
@@ -1526,7 +1541,7 @@ void Playlist::valueChanged(juce::Value& value)
         {
             draggedPlayer.setValue(-1);
             draggedPlayer.setValue(i);
-
+            DBG("dragged player" << i);
             //draggedPlayer = players[i]->draggedPlayer.toString().getIntValue();
         }
 
@@ -1710,6 +1725,7 @@ void Playlist::setEightPlayersSecondCart(bool isSecondCart)
 
 void Playlist::isEightPlayerMode(bool eightPlayersMode)
 {
+    //Set eight players mode for this playlist
     eightPlayerMode = eightPlayersMode;
     for (auto i = 0; i < players.size(); i++)
     {
@@ -1717,3 +1733,28 @@ void Playlist::isEightPlayerMode(bool eightPlayersMode)
     }
 }
 
+
+void Playlist::actionListenerCallback(const juce::String& message)
+{
+    // NOR on cues
+    DBG("cued player" << message);
+    cuedPlayer = message.getIntValue();
+    /*draggedPlayer = -1;
+    draggedPlayer = cuedPlayer;*/
+    for (auto i = 0; i < players.size(); i++)
+    {
+        if (i != cuedPlayer)
+            players[i]->cueTransport.stop(); //stop all other cues on the playlist
+    }
+    cuePlaylistBroadcaster->sendChangeMessage(); //send message to main component so he can stop cues on all others components
+}
+
+void Playlist::stopCues()
+{
+    //Called by maincomponent to stop all cues on this playlist
+    for (auto i = 0; i < players.size(); i++)
+    {
+    
+        players[i]->cueTransport.stop();
+    }
+}

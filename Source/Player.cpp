@@ -35,6 +35,8 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
         waveformThumbnailXStart = leftControlsWidth;
     }
 
+    cueBroadcaster = new juce::ActionBroadcaster();
+    draggedBroadcaster = new juce::ActionBroadcaster();
 
    /* int playerPosition = playerIndex + 1;
     addAndMakeVisible(playerPositionLabel);
@@ -261,6 +263,8 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
 
 Player::~Player()
 {
+    delete cueBroadcaster;
+    delete draggedBroadcaster;
     Settings::maxFaderValue.removeListener(this);
     Settings::audioOutputModeValue.removeListener(this);
     trimVolumeSlider.removeListener(this);
@@ -459,7 +463,11 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
             }
         }
 
-
+        if (isActivePlayer == true)
+        {
+            g.setColour(juce::Colours::red);
+            g.fillRoundedRectangle(startTimeButton.getX() - 2, startTimeButton.getY() - 1, 46, 17, 5);
+        }
 
 }
 
@@ -991,6 +999,12 @@ void Player::cueButtonClicked()
             }
             else
             {
+                Settings::draggedPlayer = playerIndex;
+                draggedPlayer.setValue(-1);
+                draggedPlayer.setValue(playerIndex);
+                cueBroadcaster->sendActionMessage(juce::String(playerIndex));
+                //DBG("play cue");
+
                 cueTransport.setPosition(stopTime - 6);
                 cueTransport.start();
                 cueButton.setButtonText("Stop");
@@ -1002,7 +1016,12 @@ void Player::cueButtonClicked()
 
         else if (!cueTransport.isPlaying())
         {
-            DBG("cue start");
+            Settings::draggedPlayer = playerIndex;
+            draggedPlayer.setValue(-1);
+            draggedPlayer.setValue(playerIndex);
+            cueBroadcaster->sendActionMessage(juce::String(playerIndex));
+
+            //DBG("cue start");
             cueTransport.start();
             cueButton.setButtonText("Stop");
             cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::green);
@@ -1010,7 +1029,7 @@ void Player::cueButtonClicked()
         }
         else if (cueTransport.isPlaying())
         {
-            DBG("cue stop");
+            //DBG("cue stop");
             cueTransport.stop();
             cueTransport.setPosition(0.0);
             cueButton.setButtonText("Cue");
@@ -1084,6 +1103,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
             cueButton.setButtonText("Cue");
             cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         }
+
     }
 }
 
@@ -1190,8 +1210,11 @@ void Player::mouseDown(const juce::MouseEvent& event)
                 mouseDragRelativeXPosition = getMouseXYRelative().getX() - thumbnailBounds.getPosition().getX();
                 mouseDragInSeconds = (((float)mouseDragRelativeXPosition * cueTransport.getLengthInSeconds()) / (float)thumbnailBounds.getWidth());
                 cueTransport.setPosition(mouseDragInSeconds);
+                Settings::draggedPlayer = playerIndex;
                 draggedPlayer.setValue(-1);
                 draggedPlayer.setValue(playerIndex);
+
+                //cueBroadcaster->sendActionMessage(juce::String(playerIndex));
             }
     }
     thumbnailMiddle = waveformThumbnailXSize / 2;
@@ -1223,8 +1246,12 @@ void Player::mouseDrag(const juce::MouseEvent& event)
                 mouseDragRelativeXPosition = getMouseXYRelative().getX() - thumbnailBounds.getPosition().getX();
                 mouseDragInSeconds = (((float)mouseDragRelativeXPosition* cueTransport.getLengthInSeconds()) / (float)thumbnailBounds.getWidth());
                 cueTransport.setPosition(mouseDragInSeconds);
+                Settings::draggedPlayer = playerIndex;
                 draggedPlayer.setValue(-1);
                 draggedPlayer.setValue(playerIndex);
+
+                //draggedBroadcaster->sendActionMessage(juce::String(playerIndex));
+                //cueBroadcaster->sendActionMessage(juce::String(playerIndex));
                 drawCue = true;
 
             }
@@ -1902,14 +1929,23 @@ void Player::setActivePlayer(bool isActive)
 {
     if (isActive)
     {
-        //startTimeButton.setButtonText("X");
-        //stopTimeButton.setButtonText("X");
-        cueButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::red);
+        isActivePlayer = true;
+        repaint();
+        //cueButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::red);
+        //cueButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::red);
     }
     else
     {
+        isActivePlayer = false;
+        repaint();
         //startTimeButton.setButtonText("");
         //stopTimeButton.setButtonText("");
-        cueButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+        //cueButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+        //cueButton.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::white);
     }
+}
+
+void Player::setPlayerIndex(int i)
+{
+    playerIndex = i;
 }

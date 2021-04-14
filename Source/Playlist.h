@@ -28,7 +28,10 @@ class Playlist  : public juce::Component,
     public juce::Value::Listener,
     public juce::Button::Listener,
     public juce::MouseListener,
-    public juce::Timer
+    public juce::Timer,
+    public juce::ChangeBroadcaster,
+    public juce::ActionListener,
+    public juce::ActionBroadcaster
 {
 public:
     Playlist(int splaylistType);
@@ -139,13 +142,19 @@ public:
     bool scrollbarShown = false;
 
     void Playlist::setTimerTime(int timertime);
+
+    juce::ChangeBroadcaster* cuePlaylistBroadcaster;
+    juce::ActionBroadcaster* cuePlaylistActionBroadcaster;
+    void Playlist::stopCues();
+    int cuedPlayer = 0;
+
 private:
     int playlistType;
     juce::String droppedName;
     void Playlist::updateNextPlayer();
     int previousvalueint = 0;
     int valueint = 0;
-    
+
     void Playlist::swapNext(int playerID);
 
     void Playlist::updateButtonsStates();
@@ -237,6 +246,8 @@ private:
     juce::int64 fader1StopTime;
     juce::int64 fader2StartTime;
     juce::int64 fader2StopTime;
+    juce::int64 spaceBarStartTime;
+    juce::int64 spaceBarStopTime;
 
     int fader1StartPlayer;
     int fader2StartPlayer;
@@ -249,6 +260,7 @@ private:
 
 
     void Playlist::updateDraggedPlayerDisplay();
+    void Playlist::actionListenerCallback(const juce::String& message);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Playlist)
 };

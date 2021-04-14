@@ -253,6 +253,7 @@ public:
         fileBrowser = new juce::FileBrowserComponent(flags, *fileFolder, m_wcFileFilter, NULL);
         fileDraggedFromBrowser = new juce::ChangeBroadcaster();
         fileDroppedFromBrowser = new juce::ChangeBroadcaster();
+        cuePlay = new juce::ChangeBroadcaster();
         // add browser compoenent to form and add us as a listener
         addAndMakeVisible(*fileBrowser);
         fileBrowser->setColour(juce::FileBrowserComponent::ColourIds::filenameBoxTextColourId, juce::Colours::white);
@@ -309,7 +310,7 @@ public:
 
         // audio setup
         formatManager.registerBasicFormats();
-
+        transportSource.addChangeListener(this);
         thread.startThread(3);
 
 #ifndef JUCE_DEMO_RUNNER
@@ -335,6 +336,7 @@ public:
         delete fileFolder;
         delete fileDraggedFromBrowser;
         delete fileDroppedFromBrowser;
+        delete cuePlay;
         transportSource.setSource(nullptr);
         //audioSourcePlayer.setSource(nullptr);
 
@@ -421,6 +423,7 @@ public:
     juce::WildcardFileFilter* m_wcFileFilter;
     juce::ChangeBroadcaster* fileDraggedFromBrowser;
     juce::ChangeBroadcaster* fileDroppedFromBrowser;
+    juce::ChangeBroadcaster* cuePlay;
 
 private:
     // if this PIP is running inside the demo runner, we'll use the shared device manager instead
@@ -513,6 +516,7 @@ private:
         }
         else
         {
+            cuePlay->sendChangeMessage();
             transportSource.setPosition(0);
             transportSource.start();
             startStopButton.setColour(juce::TextButton::buttonColourId, juce::Colours::green);

@@ -27,13 +27,14 @@
 */
 class SoundPlayer : public juce::Component,
                     private juce::MidiInputCallback,
-                    //public juce::ChangeListener,
+                    public juce::ChangeListener,
                     private juce::KeyListener,
                     public juce::Timer,
                     public juce::Value::Listener,
                     private juce::OSCReceiver,
                     private juce::OSCReceiver::ListenerWithOSCAddress<juce::OSCReceiver::MessageLoopCallback>,
-                    private juce::OSCReceiver::Listener<juce::OSCReceiver::MessageLoopCallback>
+                    private juce::OSCReceiver::Listener<juce::OSCReceiver::MessageLoopCallback>,
+                    public juce::ActionListener
                     //private juce::Button::Listener,
                     //public juce::DragAndDropContainer
 {
@@ -98,7 +99,8 @@ private:
     void SoundPlayer::checkAndRemovePlayer(int playlist, int player);
     void SoundPlayer::reassignFaders(int playerIdDestination, int playerDragSource, int playlistDestination);
     void SoundPlayer::copyPlayingSound();
-
+    void SoundPlayer::changeListenerCallback(juce::ChangeBroadcaster* source);
+    void SoundPlayer::actionListenerCallback(const juce::String& message);
     //SAVE
     juce::File myFile;
     double loadingProgress = 0;

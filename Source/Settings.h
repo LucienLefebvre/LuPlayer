@@ -96,6 +96,8 @@ public:
 
     static bool Settings::lauchAtZeroDB;
 
+    static int Settings::draggedPlaylist;
+    static int Settings::draggedPlayer;
 private:
 
     

@@ -47,6 +47,8 @@ juce::Value Settings::sampleRateValue;
 
 juce::StringArray Settings::tempFiles;
 
+int Settings::draggedPlaylist;
+int Settings::draggedPlayer;
 //==============================================================================
 Settings::Settings() : settingsFile(options)
 {

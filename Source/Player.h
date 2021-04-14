@@ -33,14 +33,16 @@ typedef char* LPSTR;
 //==============================================================================
 /*
 */
-class Player :  public juce::Component,
-                private juce::ChangeListener,
-                public juce::Slider::Listener,
-                public juce::Timer,
-                public juce::MouseListener,
-                //public juce::KeyListener,
-                public juce::Button::Listener,
-                public juce::Value::Listener
+class Player : public juce::Component,
+    private juce::ChangeListener,
+    public juce::Slider::Listener,
+    public juce::Timer,
+    public juce::MouseListener,
+    //public juce::KeyListener,
+    public juce::Button::Listener,
+    public juce::Value::Listener,
+    public juce::ChangeBroadcaster,
+    public juce::ActionBroadcaster
 {
 public:
     Player(int index);
@@ -86,6 +88,9 @@ public:
     void stopButtonClicked();
     void Player::spaceBarPlay();
     void Player::deleteFile();
+
+
+    void Player::setPlayerIndex(int i);
 
     juce::Slider volumeSlider;
     juce::Label volumeLabel;
@@ -179,6 +184,9 @@ public:
     PlayHead inMark;
     PlayHead outMark;
 
+    juce::ActionBroadcaster* cueBroadcaster;
+    juce::ActionBroadcaster* draggedBroadcaster;
+
 private:
     enum TransportState
     {
@@ -192,7 +200,7 @@ private:
     TransportState newState;
 
     bool rightClickDown = false;
-
+    bool isActivePlayer = false;
     int actualSamplesPerBlockExpected;
     double actualSampleRate;
 

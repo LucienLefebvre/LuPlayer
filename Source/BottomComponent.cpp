@@ -52,14 +52,19 @@ BottomComponent::BottomComponent()
     setWantsKeyboardFocus(false);
     
     recorderComponent.recordingBroadcaster->addChangeListener(this);
+    dbBrowser.cuePlay->addChangeListener(this);
+    audioPlaybackDemo.cuePlay->addChangeListener(this);
 
     recorderComponent.setName("recorder");
     audioPlaybackDemo.setName("browser");
+
+    cuePlay = new juce::ChangeBroadcaster();
 }
 
 
 BottomComponent::~BottomComponent()
 {
+    delete cuePlay;
 }
 
 void BottomComponent::paint (juce::Graphics& g)
@@ -105,6 +110,7 @@ void BottomComponent::tabSelected()
 
 void BottomComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
+    //Color tab button in red if recording
     if (source == recorderComponent.recordingBroadcaster)
     {
         if (recorderComponent.isRecording())
@@ -114,9 +120,26 @@ void BottomComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         else
             getTabbedButtonBar().setTabBackgroundColour(3, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     }
+    //stop the cue on the others components of the panel and send change message to maincomponent
+    else if (source == dbBrowser.cuePlay)
+    {
+        audioPlaybackDemo.transportSource.stop();
+        cuePlay->sendChangeMessage();
+    }
+    else if (source == audioPlaybackDemo.cuePlay)
+    {
+        dbBrowser.transport.stop();
+        cuePlay->sendChangeMessage();
+    }
 }
 
 void BottomComponent::currentTabChanged(int newCurrentTabIndex, const juce::String& newCurrentTabName)
 {
 
+}
+
+void BottomComponent::stopCue() //stop cues on this panel when a cue is launched on the soundplayer
+{
+    audioPlaybackDemo.transportSource.stop();
+    dbBrowser.transport.stop();
 }

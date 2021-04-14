@@ -21,8 +21,9 @@
 //==============================================================================
 /*
 */
-class BottomComponent  : public juce::TabbedComponent,
-    public juce::ChangeListener
+class BottomComponent : public juce::TabbedComponent,
+    public juce::ChangeListener,
+    public juce::ChangeBroadcaster
 {
 public:
     BottomComponent();
@@ -33,7 +34,7 @@ public:
     void resized() override;
     void BottomComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void BottomComponent::tabSelected();
-
+    void BottomComponent::stopCue();
     AudioPlaybackDemo audioPlaybackDemo;
     Recorder recorderComponent;
     DataBaseBrowser dbBrowser;
@@ -43,6 +44,8 @@ public:
     juce::Label noDbLabel{ "No DataBase Found" };
 
     nanodbc::connection conn;
+
+    juce::ChangeBroadcaster* cuePlay;
 
 private:
     void BottomComponent::changeListenerCallback(juce::ChangeBroadcaster* source);
