@@ -674,6 +674,7 @@ void Player::timerCallback()
     auto cuecurrentPosition = cueTransport.getLengthInSeconds();
     auto cuedrawPosition = ((cueaudioPosition / cuecurrentPosition) * (float)thumbnailBounds.getWidth())
         + (float)thumbnailBounds.getX();
+
     if (cuedrawPosition > (leftControlsWidth + borderRectangleWidth) && cuedrawPosition < rightControlsStart)
     {
         cuePlayHead.setVisible(true);
@@ -794,6 +795,21 @@ void Player::timerCallback()
 
 }
 
+void Player::repaintPlayHead()
+{
+    auto cueaudioPosition = (float)cueTransport.getCurrentPosition();
+    auto cuecurrentPosition = cueTransport.getLengthInSeconds();
+    auto cuedrawPosition = ((cueaudioPosition / cuecurrentPosition) * (float)thumbnailBounds.getWidth())
+        + (float)thumbnailBounds.getX();
+
+    if (cuedrawPosition > (leftControlsWidth + borderRectangleWidth) && cuedrawPosition < rightControlsStart)
+    {
+        cuePlayHead.setVisible(true);
+        cuePlayHead.setTopLeftPosition(cuedrawPosition, 0);
+    }
+    else
+        cuePlayHead.setVisible(false);
+}
 void Player::updateRemainingTime()
 {
     int remainingSeconds = juce::int16(trunc((float)transport.getLengthInSeconds() - (float)transport.getCurrentPosition()));
@@ -1229,6 +1245,7 @@ void Player::mouseDown(const juce::MouseEvent& event)
 
 void Player::mouseUp(const juce::MouseEvent& event)
 {
+    DBG("mouse up");
     draggedPlayer.setValue(-1);
     oldThumbnailOffset = thumbnailOffset;
     thumbnailDragStart = 0;
@@ -1278,6 +1295,17 @@ void Player::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWhee
         if (thumbnailHorizontalZoom < 1)
             thumbnailHorizontalZoom = 1;
         calculThumbnailBounds();
+
+
+
+        auto thumbnailDrawMiddle = (thumbnailBounds.getTopLeft().getX() + thumbnailBounds.getWidth() / 2);
+        //DBG("thumbnail middle" << thumbnailDrawMiddle);
+        thumbnailOffset = cuePlayHead.getX() - thumbnailDrawMiddle;
+        thumbnailBounds.setPosition(leftControlsWidth + borderRectangleWidth + thumbnailDrawStart - thumbnailOffset, 0);
+        oldThumbnailOffset = thumbnailOffset;
+        repaintPlayHead();
+        calculThumbnailBounds();
+
     }
     else
     {

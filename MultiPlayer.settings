@@ -2,12 +2,12 @@
 
 <PROPERTIES>
   <VALUE name="IP Adress" val="..."/>
-  <VALUE name="Audio Device Type" val="ASIO"/>
-  <VALUE name="audioDeviceName" val="ASIO Fireface USB"/>
-  <VALUE name="outputDeviceName" val="ASIO Fireface USB"/>
-  <VALUE name="inputDeviceName" val="ASIO Fireface USB"/>
+  <VALUE name="Audio Device Type" val="Windows Audio"/>
+  <VALUE name="audioDeviceName" val="Analog (11+12) (RME Fireface 802)"/>
+  <VALUE name="outputDeviceName" val="Analog (11+12) (RME Fireface 802)"/>
+  <VALUE name="inputDeviceName" val="ADAT 1 (1+2) (RME Fireface 802)"/>
   <VALUE name="sampleRate" val="44100.0"/>
-  <VALUE name="bufferSize" val="1024"/>
+  <VALUE name="bufferSize" val="441"/>
   <VALUE name="inputChannels" val="3"/>
   <VALUE name="useDefaultInputChannels" val="1"/>
   <VALUE name="outputChannels" val="3"/>

@@ -342,6 +342,7 @@ private:
     void Player::mouseDoubleClick(const juce::MouseEvent& event) override;
     void Player::repaintThumbnail();
     void Player::calculThumbnailBounds();
+    void Player::repaintPlayHead();
 
     juce::String Player::secondsToMMSS(int seconds);
 
