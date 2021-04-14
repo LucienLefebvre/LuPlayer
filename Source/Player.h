@@ -283,6 +283,7 @@ private:
     juce::Slider filterFrequencySlider;
     bool hpfEnabled = false;
     double filterFrequency = 100;
+    bool trimIsHpfFrequency = false;
     juce::IIRCoefficients filterCoefficients;
 
 

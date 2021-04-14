@@ -183,6 +183,8 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
     filterFrequencySlider.setWantsKeyboardFocus(false);
     filterFrequencySlider.setNumDecimalPlacesToDisplay(0);
     filterFrequencySlider.addListener(this);
+    filterFrequencySlider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colours::lightblue);
+    filterFrequencySlider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colours::lightblue);
 
     filterSource.makeInactive();
     cuefilterSource.makeInactive();
@@ -1205,7 +1207,7 @@ void Player::mouseDown(const juce::MouseEvent& event)
     if (thumbnail.getNumChannels() != 0)
     {
             mouseDragXPosition = getMouseXYRelative().getX();
-            if (mouseDragXPosition >= leftControlsWidth + borderRectangleWidth && mouseDragXPosition <= waveformThumbnailXEnd)
+            if (mouseDragXPosition > leftControlsWidth + borderRectangleWidth && mouseDragXPosition < waveformThumbnailXEnd)
             {
                 mouseDragRelativeXPosition = getMouseXYRelative().getX() - thumbnailBounds.getPosition().getX();
                 mouseDragInSeconds = (((float)mouseDragRelativeXPosition * cueTransport.getLengthInSeconds()) / (float)thumbnailBounds.getWidth());
@@ -1213,16 +1215,16 @@ void Player::mouseDown(const juce::MouseEvent& event)
                 Settings::draggedPlayer = playerIndex;
                 draggedPlayer.setValue(-1);
                 draggedPlayer.setValue(playerIndex);
-
+                thumbnailMiddle = waveformThumbnailXSize / 2;
+                thumbnailDrawStart = thumbnailMiddle - (thumbnailMiddle * thumbnailHorizontalZoom);
+                thumbnailDrawEnd = thumbnailMiddle + (thumbnailMiddle * thumbnailHorizontalZoom);
+                thumbnailDrawSize = thumbnailDrawEnd - thumbnailDrawStart;
+                drawCue = true;
+                repaintThumbnail();
                 //cueBroadcaster->sendActionMessage(juce::String(playerIndex));
             }
     }
-    thumbnailMiddle = waveformThumbnailXSize / 2;
-    thumbnailDrawStart = thumbnailMiddle - (thumbnailMiddle * thumbnailHorizontalZoom);
-    thumbnailDrawEnd = thumbnailMiddle + (thumbnailMiddle * thumbnailHorizontalZoom);
-    thumbnailDrawSize = thumbnailDrawEnd - thumbnailDrawStart;
-    drawCue = true;
-    repaintThumbnail();
+
 }
 
 void Player::mouseUp(const juce::MouseEvent& event)
@@ -1800,15 +1802,23 @@ void Player::optionButtonClicked()
     {
         if (!filterFrequencySlider.isVisible())
         {
+            if (!hpfEnabled)
+                enableHPF(true);
+            trimVolumeSlider.setVisible(false);
             filterFrequencySlider.setVisible(true);
-            filterFrequencySlider.setBounds(optionButton.getRight(), 0, 55, 55);
+            filterFrequencySlider.setTopLeftPosition(trimVolumeSlider.getPosition());
+            filterFrequencySlider.setSize(trimVolumeSlider.getWidth(), trimVolumeSlider.getHeight());
+            trimLabel.setText("HPF", juce::NotificationType::dontSendNotification);
             rightClickDown = false;
         }
         else
         {
             filterFrequencySlider.setVisible(false);
+            trimVolumeSlider.setVisible(true);
+            trimLabel.setText("Trim", juce::NotificationType::dontSendNotification);
             rightClickDown = false;
         }
+
     }
 
 }

@@ -2,12 +2,12 @@
 
 <PROPERTIES>
   <VALUE name="IP Adress" val="..."/>
-  <VALUE name="Audio Device Type" val="Windows Audio (Low Latency Mode)"/>
-  <VALUE name="audioDeviceName" val="Speakers (Realtek(R) Audio)"/>
-  <VALUE name="outputDeviceName" val="Speakers (Realtek(R) Audio)"/>
-  <VALUE name="inputDeviceName" val="Microphone Array (Realtek(R) Audio)"/>
-  <VALUE name="sampleRate" val="48000.0"/>
-  <VALUE name="bufferSize" val="480"/>
+  <VALUE name="Audio Device Type" val="ASIO"/>
+  <VALUE name="audioDeviceName" val="ASIO Fireface USB"/>
+  <VALUE name="outputDeviceName" val="ASIO Fireface USB"/>
+  <VALUE name="inputDeviceName" val="ASIO Fireface USB"/>
+  <VALUE name="sampleRate" val="44100.0"/>
+  <VALUE name="bufferSize" val="1024"/>
   <VALUE name="inputChannels" val="3"/>
   <VALUE name="useDefaultInputChannels" val="1"/>
   <VALUE name="outputChannels" val="3"/>
