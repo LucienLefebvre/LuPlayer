@@ -518,17 +518,15 @@ void Recorder::timerCallback()
     juce::String markIn = secondsToMMSS((int)startTime);
     juce::String markOut = secondsToMMSS((int)stopTime);
     juce::String lenght = secondsToMMSS(stopTime - startTime);
-    if (isRecording())
+    timeLabel.setText(secondsToMMSS(thumbnail.getTotalLength()), juce::NotificationType::dontSendNotification);
+
+    if (startTimeSet || stopTimeSet)
     {
-        timeLabel.setText(secondsToMMSS(thumbnail.getTotalLength()), juce::NotificationType::dontSendNotification);
-        if (startTimeSet || stopTimeSet)
-        {
-            if (!stopTimeSet)
-                stopTime = (float)thumbnail.getTotalLength();
-            marksLabel.setText(juce::String("In Mark : " + markIn + " // Out Mark : " + markOut + " // Lenght : " + lenght), juce::NotificationType::dontSendNotification);
-        }
+        if (!stopTimeSet)
+            stopTime = (float)thumbnail.getTotalLength();
+        marksLabel.setText(juce::String("In Mark : " + markIn + " // Out Mark : " + markOut + " // Lenght : " + lenght), juce::NotificationType::dontSendNotification);
     }
-    else if (cueTransport.isPlaying())
+        else if (cueTransport.isPlaying())
     {
         DBG(cueTransport.getCurrentPosition());
         if (cueTransport.getCurrentPosition() > stopTime)
