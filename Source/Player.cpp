@@ -1823,6 +1823,8 @@ void Player::optionButtonClicked()
         if (hpfEnabled)
         {
             enableHPF(false);
+            filterFrequencySlider.setVisible(false);
+            trimVolumeSlider.setVisible(true);
         }
         else if (!hpfEnabled)
         {
