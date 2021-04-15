@@ -105,7 +105,7 @@ public:
     bool fader2IsPlaying = false;
     bool keyIsPlaying = false;
     float sliderValueToset;
-    float trimValueToSet = 1.0;
+    float trimValueToSet = 0.0;
     float trimValueInput;
     int totalPlayerWidth;
 

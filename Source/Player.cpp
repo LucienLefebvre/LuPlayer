@@ -131,8 +131,8 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
     trimVolumeSlider.setPopupDisplayEnabled(true, true, this, 2000);
     trimVolumeSlider.setScrollWheelEnabled(false);
     trimVolumeSlider.setWantsKeyboardFocus(false);
+    trimVolumeSlider.setTextValueSuffix("dB");
 
- 
     addAndMakeVisible(trimLabel);
     trimLabel.setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
     trimLabel.setJustificationType(juce::Justification::centred);
@@ -185,7 +185,8 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
     filterFrequencySlider.addListener(this);
     filterFrequencySlider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colours::lightblue);
     filterFrequencySlider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colours::lightblue);
-
+    filterFrequencySlider.setTextValueSuffix("Hz");
+    
     filterSource.makeInactive();
     cuefilterSource.makeInactive();
 
@@ -422,7 +423,7 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
     //thumbnailDrawEnd = thumbnailMiddle + (thumbnailMiddle * thumbnailHorizontalZoom) + thumbnailOffset;
 
 
-
+    //waveform if next player or playing
     if (isNextPlayer || state == Playing)
         g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     else
@@ -465,11 +466,13 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
             }
         }
 
-        if (isActivePlayer == true)
-        {
-            g.setColour(juce::Colours::red);
-            g.fillRoundedRectangle(startTimeButton.getX() - 2, startTimeButton.getY() - 1, 46, 17, 5);
-        }
+    //active player (cue & in/out mark) display
+    if (isActivePlayer == true)
+    {
+        g.setColour(juce::Colours::red);
+        //g.fillRoundedRectangle(startTimeButton.getX() - 2, startTimeButton.getY() - 1, 46, 17, 5);
+        g.fillEllipse(trimVolumeSlider.getX() + 26, trimVolumeSlider.getY() + 23, 12, 12);
+    }
 
 }
 

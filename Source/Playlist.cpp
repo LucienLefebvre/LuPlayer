@@ -761,61 +761,69 @@ void Playlist::updateNextPlayer()
 
 void Playlist::playersResetPositionClicked()
 {
-    if ((fader1IsPlaying == 0) && (fader2IsPlaying == 0))
+    if (!spaceBarIsPlaying)
     {
-        fader1Player = 0;
-        fader2Player = 0;
-        updateNextPlayer();
-
+        if ((fader1IsPlaying == 0) && (fader2IsPlaying == 0))
+        {
+            fader1Player = 0;
+            fader2Player = 0;
+            updateNextPlayer();
+        }
     }
 }
 
 void Playlist::playersPreviousPositionClicked()
 {
-    if ((fader1IsPlaying == 0) && (fader2IsPlaying == 0))
+    if (!spaceBarIsPlaying)
     {
-        nextPlayer = (std::min(fader1Player, fader2Player) - 1);
-        fader1Player = fader2Player = nextPlayer;
-    }
-    else if ((fader2IsPlaying == 0) && (fader2Player > (fader1Player + 1)))
-    {
-        nextPlayer = fader2Player - 1;
-        fader2Player = nextPlayer;
-    }
-    else if ((fader1IsPlaying == 0) && (fader1Player > (fader2Player + 1)))
-    {
-        nextPlayer = fader1Player - 1;
-        fader1Player = nextPlayer;
-    }
+        if ((fader1IsPlaying == 0) && (fader2IsPlaying == 0))
+        {
+            nextPlayer = (std::min(fader1Player, fader2Player) - 1);
+            fader1Player = fader2Player = nextPlayer;
+        }
+        else if ((fader2IsPlaying == 0) && (fader2Player > (fader1Player + 1)))
+        {
+            nextPlayer = fader2Player - 1;
+            fader2Player = nextPlayer;
+        }
+        else if ((fader1IsPlaying == 0) && (fader1Player > (fader2Player + 1)))
+        {
+            nextPlayer = fader1Player - 1;
+            fader1Player = nextPlayer;
+        }
 
-    if (fader1Player < 0)
-        fader1Player = 0;
-    if (fader2Player < 0)
-        fader2Player = 0;
+        if (fader1Player < 0)
+            fader1Player = 0;
+        if (fader2Player < 0)
+            fader2Player = 0;
 
-    updateNextPlayer();
+        updateNextPlayer();
+    }
 }
 
 void Playlist::playersNextPositionClicked()
 {
-    if (nextPlayer < playerNumber)
-        nextPlayer++;
-    if ((fader1IsPlaying == 0) && (fader2IsPlaying == 0))
+    if (!spaceBarIsPlaying)
     {
-        fader1Player = nextPlayer;
-        fader2Player = nextPlayer;
-    }
-    else if (fader2IsPlaying == 0)
-        fader2Player = nextPlayer;
-    else if (fader1IsPlaying == 0)
-        fader1Player = nextPlayer;
+        if (nextPlayer < playerNumber)
+            nextPlayer++;
+        if ((fader1IsPlaying == 0) && (fader2IsPlaying == 0))
+        {
+            fader1Player = nextPlayer;
+            fader2Player = nextPlayer;
+        }
+        else if (fader2IsPlaying == 0)
+            fader2Player = nextPlayer;
+        else if (fader1IsPlaying == 0)
+            fader1Player = nextPlayer;
 
-    if (fader1Player == players.size())
-        fader1Player = (players.size() - 1);
-    if (fader2Player == players.size())
-        fader2Player = (players.size() - 1);
-    setOptions();
-    updateNextPlayer();
+        if (fader1Player == players.size())
+            fader1Player = (players.size() - 1);
+        if (fader2Player == players.size())
+            fader2Player = (players.size() - 1);
+        setOptions();
+        updateNextPlayer();
+    }
 }
 
 void Playlist::addPlayer(int playerID)
