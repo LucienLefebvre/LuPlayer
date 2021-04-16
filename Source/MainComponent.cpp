@@ -381,6 +381,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     myCueMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
     actualSampleRate = sampleRate;
     actualSamplesPerBlockExpected = samplesPerBlockExpected;*/
+    mixerOutputBuffer = std::make_unique<juce::AudioBuffer<float>>(2, samplesPerBlockExpected);
 
 }
 
@@ -491,7 +492,10 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             inputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
             inputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
 
-            bottomComponent.mixerPanel.setInputBuffer(bufferToFill);
+            //MIXER
+            //juce::AudioBuffer<float>* mixerOutputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
+            bottomComponent.mixerPanel.getNextAudioBlock(bufferToFill.buffer, mixerOutputBuffer.get());
+            //
 
             bufferToFill.clearActiveBufferRegion();
             juce::AudioBuffer<float>* outputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
@@ -500,6 +504,11 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
             bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
 
+
+            //MIXER
+            bufferToFill.buffer->addFrom(0, 0, *mixerOutputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
+            bufferToFill.buffer->addFrom(1, 0, *mixerOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
+            //
 
             //OPUS
             //bottomComponent.mixerPanel.remoteInput1.sendStream(outputBuffer);
@@ -527,6 +536,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 }
                 delete newOutputBuffer;
             }
+            //delete(mixerOutputBuffer);
             delete(inputBuffer);
             delete(outputBuffer);
             delete(playAudioSource);
@@ -930,6 +940,7 @@ void MainComponent::channelsMapping()
     }
     else if (Settings::audioOutputMode == 2)
     {
+
         tryPreferedAudioDevice(2);
         setAudioChannels(2, 2);
         myMixer.addInputSource(&soundPlayers[0]->myMixer, false);

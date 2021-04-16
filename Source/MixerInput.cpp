@@ -33,11 +33,28 @@ MixerInput::MixerInput(Mode mode)
     volumeSlider.setDoubleClickReturnValue(true, 0.);
     volumeSlider.setScrollWheelEnabled(false);
     volumeSlider.setTextValueSuffix("dB");
+    volumeSlider.addListener(this);
+    level.setValue(juce::Decibels::decibelsToGain(volumeSlider.getValue()));
+
+    addAndMakeVisible(panKnob);
+    panKnob.setRange(-1.0f, 1.0f);
+    panKnob.setSliderStyle(juce::Slider::LinearHorizontal);
+    panKnob.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
+    panKnob.setNumDecimalPlacesToDisplay(1);
+    panKnob.setDoubleClickReturnValue(true, 0.);
+    panKnob.setPopupDisplayEnabled(true, true, this, 2000);
+    panKnob.setScrollWheelEnabled(false);
+    panKnob.setWantsKeyboardFocus(false);
+    panKnob.addListener(this);
+
+    pan.setValue(panKnob.getValue());
 
     addAndMakeVisible(&inputSelector);
     inputSelector.addListener(this);
 
     comboboxChanged = std::make_unique<juce::ChangeBroadcaster>();
+
+
 }
 
 MixerInput::~MixerInput()
@@ -53,19 +70,42 @@ void MixerInput::paint (juce::Graphics& g)
 void MixerInput::resized()
 {
     inputSelector.setBounds(0, 0, getWidth(), 25);
-    volumeSlider.setBounds(0, inputSelector.getHeight(), getWidth(), getHeight() - inputSelector.getHeight());
+    panKnob.setBounds(0, inputSelector.getBottom(), getWidth(), 25);
+    volumeSlider.setBounds(0, panKnob.getBottom(), getWidth(), getHeight() - panKnob.getBottom());
 
 }
 
-void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* buffer)
+void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::AudioBuffer<float>* outputBuffer)
 {
-    buffer->applyGain(juce::Decibels::decibelsToGain(volumeSlider.getValue()));
+    if (selectedInput != -1)
+    {
+        channelBuffer->clear();//clear buffer channel
+
+
+
+        channelBuffer->copyFrom(0, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples());//copy selected input into buffer channel
+        channelBuffer->copyFrom(1, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples());
+
+        filterProcessor.getNextAudioBlock(channelBuffer.get());
+
+        level.getNextValue();//compute next fader level value
+        pan.getNextValue();
+        panL = juce::jmin(1 - pan.getCurrentValue(), 1.0f);
+        panR = juce::jmin(1 + pan.getCurrentValue(), 1.0f);
+        outputBuffer->addFrom(0, 0, *channelBuffer, 0, 0, channelBuffer->getNumSamples(), level.getCurrentValue() * panL);//copy into output buffer * gain 
+        outputBuffer->addFrom(1, 0, *channelBuffer, 1, 0, channelBuffer->getNumSamples(), level.getCurrentValue() * panR);
+    }
 }
 
 void MixerInput::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     actualSampleRate = sampleRate;
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
+
+    channelBuffer = std::make_unique<juce::AudioBuffer<float>>(2, actualSamplesPerBlockExpected);
+    channelBuffer->setSize(2, actualSamplesPerBlockExpected);
+
+    filterProcessor.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void MixerInput::clearInputSelector()
@@ -105,4 +145,16 @@ int MixerInput::getSelectedInput()
 void MixerInput::updateComboboxItemsState(int itemId, bool isEnabled)
 {
     inputSelector.setItemEnabled(itemId, isEnabled);
+}
+
+void MixerInput::sliderValueChanged(juce::Slider* slider)
+{
+    if (slider == &volumeSlider)
+    {
+        level.setTargetValue(juce::Decibels::decibelsToGain(volumeSlider.getValue()));
+    }
+    else if (slider == &panKnob)
+    {
+        pan.setTargetValue(panKnob.getValue());
+    }
 }

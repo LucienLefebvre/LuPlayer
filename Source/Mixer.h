@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "RemoteInput.h"
 #include "MixerInput.h"
+#include <ff_meters\ff_meters.h>
 //==============================================================================
 /*
 */
@@ -27,7 +28,7 @@ public:
     void resized() override;
     //RemoteInput remoteInput1;
     void Mixer::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
-    void Mixer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
+    void Mixer::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::AudioBuffer<float>* outputBuffer);
     void Mixer::setInputBuffer(const juce::AudioSourceChannelInfo& inputBuffer);
     juce::AudioBuffer<float>* Mixer::getOutputBuffer();
     void Mixer::setDeviceManagerInfos(juce::AudioDeviceManager& devicemanager);
@@ -53,5 +54,10 @@ private:
     juce::Array<bool> selectedInputs;
     bool defaultInputsInitialized = false;
    
+
+    juce::AudioDeviceManager::LevelMeter levelMeter;
+    foleys::LevelMeterLookAndFeel lnf;
+    foleys::LevelMeter meter{ foleys::LevelMeter::Default }; // See foleys::LevelMeter::MeterFlags for options
+    foleys::LevelMeterSource meterSource;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Mixer)
 };

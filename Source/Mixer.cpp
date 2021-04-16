@@ -23,6 +23,7 @@ Mixer::Mixer()
     for (auto i = 0; i < inputs.size(); i++)
         inputs[i]->setInputNumber(i);
 
+    addAndMakeVisible(&meter);
 }
 
 Mixer::~Mixer()
@@ -36,9 +37,45 @@ void Mixer::paint (juce::Graphics& g)
     //g.fillAll(juce::Colours::white);
 }
 
-void Mixer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
+void Mixer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
+    actualSampleRate = sampleRate;
+    actualSamplesPerBlockExpected = samplesPerBlockExpected;
 
+
+    mixerBuffer = std::make_unique<juce::AudioBuffer<float>>(2, actualSamplesPerBlockExpected);
+    mixerBuffer->setSize(2, actualSamplesPerBlockExpected);
+
+    meterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
+    meter.setMeterSource(&meterSource);
+
+    for (auto i = 0; i < inputs.size(); i++)
+    {
+        inputs[i]->prepareToPlay(samplesPerBlockExpected, sampleRate);
+    }
+
+    //DBG("mixer buffer channels " << mixerBuffer->getNumChannels());
+    //remoteInput1.prepareToPlay(samplesPerBlockExpected, sampleRate);
+}
+
+void Mixer::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::AudioBuffer<float>* outputBuffer)
+{
+    mixerBuffer->clear();
+    //Copy inputs into mixerBuffer
+    mixerBuffer->copyFrom(0, 0, *inputBuffer, 0, 0, actualSamplesPerBlockExpected);
+    mixerBuffer->copyFrom(1, 0, *inputBuffer, 1, 0, actualSamplesPerBlockExpected);
+
+
+
+    //Copy mixer Buffer into Outputs
+    outputBuffer->clear();
+    for (auto i = 0; i < inputs.size(); i++)
+    {
+        inputs[i]->getNextAudioBlock(mixerBuffer.get(), outputBuffer);
+    }
+    //outputBuffer->copyFrom(0, 0, *mixerBuffer, 0, 0, actualSamplesPerBlockExpected);
+    //outputBuffer->copyFrom(1, 0, *mixerBuffer, 1, 0, actualSamplesPerBlockExpected);
+    meterSource.measureBlock(*outputBuffer);
 }
 
 void Mixer::setInputBuffer(const juce::AudioSourceChannelInfo& inputBuffer)
@@ -58,20 +95,10 @@ void Mixer::resized()
     {
         inputs[i]->setBounds(i * mixerInputWidth, 0, mixerInputWidth, getHeight());
     }
+    meter.setBounds(getWidth() / 2, 0, 100, getHeight());
 }
 
-void Mixer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
-{
-    actualSampleRate = sampleRate;
-    actualSamplesPerBlockExpected = samplesPerBlockExpected;
 
-
-
-
-
-    //DBG("mixer buffer channels " << mixerBuffer->getNumChannels());
-    //remoteInput1.prepareToPlay(samplesPerBlockExpected, sampleRate);
-}
 
 void Mixer::setDeviceManagerInfos(juce::AudioDeviceManager& devicemanager)
 {
@@ -81,8 +108,7 @@ void Mixer::setDeviceManagerInfos(juce::AudioDeviceManager& devicemanager)
     updateInputSelectors();
 
     int bufferChannelsToset = (numInputsChannels < 2) ? 2 : numInputsChannels;
-    mixerBuffer = std::make_unique<juce::AudioBuffer<float>>(bufferChannelsToset, actualSamplesPerBlockExpected);
-    mixerBuffer->setSize(bufferChannelsToset, actualSamplesPerBlockExpected);
+
 
 }
 

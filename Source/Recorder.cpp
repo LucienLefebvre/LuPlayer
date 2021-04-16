@@ -278,12 +278,12 @@ void Recorder::recordAudioBuffer(juce::AudioBuffer<float>* soundBuffer, juce::Au
         //recordingMicBuffer.copyFrom(1, 0, *micBuffer, 1, 0, actualSamplesPerBlockExpected);
 
 
-
+        //copy the buffer comming from the soundplayer
         recordingSoundBuffer.copyFrom(0, 0, *soundBuffer, 0, 0, actualSamplesPerBlockExpected);
         if (numChannels == 2)
         recordingSoundBuffer.copyFrom(1, 0, *soundBuffer, 1, 0, actualSamplesPerBlockExpected);
 
-        //add them to the recording buffer
+        //add them to the recording buffer and apply gain
         juce::AudioBuffer<float> recordingBuffer(2, actualSamplesPerBlockExpected);
         recordingBuffer.clear();
         recordingBuffer.addFrom(0, 0, recordingMicBuffer, 0, 0, actualSamplesPerBlockExpected, juce::Decibels::decibelsToGain(micSlider.getValue()));
@@ -293,7 +293,7 @@ void Recorder::recordAudioBuffer(juce::AudioBuffer<float>* soundBuffer, juce::Au
         if (numChannels == 2)
         recordingBuffer.addFrom(1, 0, recordingSoundBuffer, 1, 0, actualSamplesPerBlockExpected, juce::Decibels::decibelsToGain(soundSlider.getValue()));
 
-        if (activeWriter.load() != nullptr)
+        if (activeWriter.load() != nullptr)//write
         {
             activeWriter.load()->write(recordingBuffer.getArrayOfReadPointers(), recordingBuffer.getNumSamples());
 

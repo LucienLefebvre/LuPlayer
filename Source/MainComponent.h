@@ -390,5 +390,8 @@ private:
     bool isEightPlayerMode = false;
     void MainComponent::launchEightPlayerMode();
     bool eightPlayersLaunched = false;
+
+    //MIXER
+    std::unique_ptr<juce::AudioBuffer<float>> mixerOutputBuffer;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
