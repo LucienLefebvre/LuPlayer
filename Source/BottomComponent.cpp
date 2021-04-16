@@ -39,7 +39,7 @@ BottomComponent::BottomComponent()
         addTab("Netia Database Import", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &noDbLabel, false);
     }
     addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
-    //addTab("Mixer", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &mixerPanel, false);
+    addTab("Mixer", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &mixerPanel, false);
     setTabBarDepth(tabBarHeight);
 
     getTabbedButtonBar().setWantsKeyboardFocus(false);

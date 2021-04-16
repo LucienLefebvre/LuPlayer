@@ -502,6 +502,12 @@
     <ClCompile Include="Source\MixerInput.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\FilterProcessor.cpp">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FilterEditor.cpp">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClCompile>
     <ClCompile Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.cpp">
       <Filter>JUCE Modules\ff_meters\LevelMeter</Filter>
     </ClCompile>
@@ -2635,6 +2641,12 @@
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\MixerInput.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FilterProcessor.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FilterEditor.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.h">

@@ -229,6 +229,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
                 else
                     deviceManager.removeMidiInputDeviceCallback(input.identifier, this);
             }
+            bottomComponent.mixerPanel.setDeviceManagerInfos(deviceManager);
         }
     }
 
@@ -490,6 +491,8 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             inputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
             inputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
 
+            bottomComponent.mixerPanel.setInputBuffer(bufferToFill);
+
             bufferToFill.clearActiveBufferRegion();
             juce::AudioBuffer<float>* outputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
             juce::AudioSourceChannelInfo* playAudioSource = new juce::AudioSourceChannelInfo(*outputBuffer);
@@ -497,7 +500,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
             bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
 
-            bottomComponent.mixerPanel.getNextAudioBlock(bufferToFill);
+
             //OPUS
             //bottomComponent.mixerPanel.remoteInput1.sendStream(outputBuffer);
             //bottomComponent.mixerPanel.remoteInput1.receiveStream(outputBuffer);

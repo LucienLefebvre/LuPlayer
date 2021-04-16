@@ -14,13 +14,30 @@
 //==============================================================================
 MixerInput::MixerInput(Mode mode)
 {
-    DBG("input mode is " << mode);
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
     if (mode == Stereo)
     {
 
     }
+
+    addAndMakeVisible(&volumeSlider);
+    volumeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+    volumeSlider.setRange(-100, +12);
+    volumeSlider.setValue(0.);
+    //volumeSlider.addListener(this);
+    volumeSlider.setSkewFactor(2, false);
+    volumeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
+    volumeSlider.setNumDecimalPlacesToDisplay(1);
+    volumeSlider.setWantsKeyboardFocus(false);
+    volumeSlider.setDoubleClickReturnValue(true, 0.);
+    volumeSlider.setScrollWheelEnabled(false);
+    volumeSlider.setTextValueSuffix("dB");
+
+    addAndMakeVisible(&inputSelector);
+    inputSelector.addListener(this);
+
+    comboboxChanged = std::make_unique<juce::ChangeBroadcaster>();
 }
 
 MixerInput::~MixerInput()
@@ -29,40 +46,63 @@ MixerInput::~MixerInput()
 
 void MixerInput::paint (juce::Graphics& g)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
 
-    g.setColour (juce::Colours::grey);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
-    g.setColour (juce::Colours::white);
-    g.setFont (14.0f);
-    g.drawText ("MixerInput", getLocalBounds(),
-                juce::Justification::centred, true);   // draw some placeholder text
 }
 
 void MixerInput::resized()
 {
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
+    inputSelector.setBounds(0, 0, getWidth(), 25);
+    volumeSlider.setBounds(0, inputSelector.getHeight(), getWidth(), getHeight() - inputSelector.getHeight());
 
 }
 
-void MixerInput::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
+void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* buffer)
 {
-
+    buffer->applyGain(juce::Decibels::decibelsToGain(volumeSlider.getValue()));
 }
 
 void MixerInput::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     actualSampleRate = sampleRate;
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
+}
 
+void MixerInput::clearInputSelector()
+{
+    inputSelector.clear();
+}
 
+void MixerInput::feedInputSelector(int channel, juce::String name, bool isSelectable)
+{
+    inputSelector.addItem(name, channel );
+    inputSelector.setItemEnabled(channel, isSelectable);
+}
+
+void MixerInput::selectDefaultInput(int defaultInput)
+{
+    inputSelector.setSelectedId(defaultInput + 1);
+}
+
+void MixerInput::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
+{
+    selectedInput = comboBoxThatHasChanged->getSelectedId() - 2;
+    //comboboxChanged->reset(new juce::ChangeBroadcaster());
+
+    comboboxChanged->sendChangeMessage();
+}
+
+void MixerInput::setInputNumber(int number)
+{
+    inputNumber = number;
+}
+
+int MixerInput::getSelectedInput()
+{
+    return selectedInput;
+}
+
+void MixerInput::updateComboboxItemsState(int itemId, bool isEnabled)
+{
+    inputSelector.setItemEnabled(itemId, isEnabled);
 }

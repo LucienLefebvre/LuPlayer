@@ -58,6 +58,13 @@
             file="Source/DataBaseImport.h"/>
       <FILE id="RvgWcF" name="MixerInput.cpp" compile="1" resource="0" file="Source/MixerInput.cpp"/>
       <FILE id="f8I8Hs" name="MixerInput.h" compile="0" resource="0" file="Source/MixerInput.h"/>
+      <FILE id="jLMZar" name="FilterProcessor.cpp" compile="1" resource="0"
+            file="Source/FilterProcessor.cpp"/>
+      <FILE id="i1DCmr" name="FilterProcessor.h" compile="0" resource="0"
+            file="Source/FilterProcessor.h"/>
+      <FILE id="CQmQnD" name="FilterEditor.cpp" compile="1" resource="0"
+            file="Source/FilterEditor.cpp"/>
+      <FILE id="AtdSf4" name="FilterEditor.h" compile="0" resource="0" file="Source/FilterEditor.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK="0"

@@ -170,6 +170,8 @@
     <ClCompile Include="Source\DataBaseBrowser.cpp"/>
     <ClCompile Include="Source\DataBaseImport.cpp"/>
     <ClCompile Include="Source\MixerInput.cpp"/>
+    <ClCompile Include="Source\FilterProcessor.cpp"/>
+    <ClCompile Include="Source\FilterEditor.cpp"/>
     <ClCompile Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2125,6 +2127,8 @@
     <ClInclude Include="Source\helpers.h"/>
     <ClInclude Include="Source\DataBaseImport.h"/>
     <ClInclude Include="Source\MixerInput.h"/>
+    <ClInclude Include="Source\FilterProcessor.h"/>
+    <ClInclude Include="Source\FilterEditor.h"/>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.h"/>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeterSource.h"/>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LookAndFeel\LevelMeterLookAndFeel.h"/>

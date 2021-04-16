@@ -16,7 +16,8 @@
 //==============================================================================
 /*
 */
-class Mixer  : public juce::Component
+class Mixer  : public juce::Component,
+    public juce::ChangeListener
 {
 public:
     Mixer();
@@ -27,12 +28,30 @@ public:
     //RemoteInput remoteInput1;
     void Mixer::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void Mixer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
+    void Mixer::setInputBuffer(const juce::AudioSourceChannelInfo& inputBuffer);
+    juce::AudioBuffer<float>* Mixer::getOutputBuffer();
+    void Mixer::setDeviceManagerInfos(juce::AudioDeviceManager& devicemanager);
+    void Mixer::updateInputSelectors();
+    void Mixer::updateInputSelectorsState();
+    void Mixer::changeListenerCallback(juce::ChangeBroadcaster* source);
+
     juce::OwnedArray<MixerInput> inputs;
 
 private:
     void Mixer::addInput(MixerInput::Mode inputMode);
 
+    std::unique_ptr<juce::AudioBuffer<float>> mixerBuffer;
+
     double actualSampleRate;
     int actualSamplesPerBlockExpected;
+
+    int mixerInputWidth = 100;
+    
+    int numInputsChannels;
+    juce::StringArray inputsChannelsName;
+    juce::AudioDeviceManager* deviceManager;
+    juce::Array<bool> selectedInputs;
+    bool defaultInputsInitialized = false;
+   
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Mixer)
 };
