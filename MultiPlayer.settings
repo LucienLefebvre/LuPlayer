@@ -9,7 +9,7 @@
   <VALUE name="outputDeviceName" val="Analog (11+12) (RME Fireface 802)"/>
   <VALUE name="inputDeviceName" val="Analog (9+10) (RME Fireface 802)"/>
   <VALUE name="sampleRate" val="48000.0"/>
-  <VALUE name="bufferSize" val="480"/>
+  <VALUE name="bufferSize" val="144"/>
   <VALUE name="inputChannels" val="3"/>
   <VALUE name="useDefaultInputChannels" val="1"/>
   <VALUE name="outputChannels" val="3"/>

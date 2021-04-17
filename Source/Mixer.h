@@ -49,7 +49,7 @@ private:
     int actualSamplesPerBlockExpected;
 
     int mixerInputWidth = 100;
-    int selectedMixerInput = 0;
+    int selectedMixerInput = -1;
     int numInputsChannels;
     juce::StringArray inputsChannelsName;
     juce::AudioDeviceManager* deviceManager;

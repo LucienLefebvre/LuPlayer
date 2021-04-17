@@ -21,6 +21,11 @@ Mixer::Mixer()
 
     addAndMakeVisible(&filterEditor);
     addAndMakeVisible(&meter);
+    lnf.setColour(foleys::LevelMeter::lmBackgroundColour, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    lnf.setColour(foleys::LevelMeter::lmMeterGradientLowColour, juce::Colours::green);
+    lnf.setColour(foleys::LevelMeter::lmMeterGradientMaxColour, juce::Colours::red);
+    lnf.setColour(foleys::LevelMeter::lmMeterGradientMidColour, juce::Colours::orange);
+    meter.setLookAndFeel(&lnf);
 }
 
 Mixer::~Mixer()
@@ -46,13 +51,15 @@ void Mixer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     meterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
     meter.setMeterSource(&meterSource);
 
+    filterEditor.prepareToPlay(samplesPerBlockExpected, sampleRate);
+
     for (auto i = 0; i < inputs.size(); i++)
     {
         inputs[i]->prepareToPlay(samplesPerBlockExpected, sampleRate);
     }
 
-    //DBG("mixer buffer channels " << mixerBuffer->getNumChannels());
-    //remoteInput1.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    setSelectedMixerInput(0);
+
 }
 
 void Mixer::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::AudioBuffer<float>* outputBuffer)
@@ -92,7 +99,7 @@ void Mixer::resized()
     {
         inputs[i]->setBounds(i * mixerInputWidth, 0, mixerInputWidth, getHeight());
     }
-    meter.setBounds(getWidth() / 2, 0, 100, getHeight());
+    meter.setBounds(getWidth() / 2 - 200, 0, 100, getHeight());
     filterEditor.setBounds(meter.getRight(), 0, getWidth() - meter.getRight(), getHeight());
 }
 
@@ -175,4 +182,12 @@ void Mixer::setSelectedMixerInput(int selectedInput)
 {
     selectedMixerInput = selectedInput;
     filterEditor.setEditedFilterProcessor(inputs[selectedMixerInput]->filterProcessor);
+    for (auto i = 0; i < inputs.size(); i++)
+        if (i == selectedMixerInput)
+        {
+            inputs[i]->selectButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(40, 134, 189));
+        }
+        else
+            inputs[i]->selectButton.setColour(juce::TextButton::ColourIds::buttonColourId, 
+                               getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 }

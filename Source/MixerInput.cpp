@@ -54,6 +54,7 @@ MixerInput::MixerInput(Mode mode)
     selectButton.setButtonText("Select");
 
     comboboxChanged = std::make_unique<juce::ChangeBroadcaster>();
+
 }
 
 MixerInput::~MixerInput()
@@ -157,6 +158,7 @@ void MixerInput::sliderValueChanged(juce::Slider* slider)
 void MixerInput::setInputIndex(int index)
 {
     inputIndex = index;
+    filterProcessor.displaynumber = inputIndex;
 }
 
 int MixerInput::getInputIndex()

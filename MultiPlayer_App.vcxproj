@@ -2238,6 +2238,7 @@
     <ClInclude Include="Source\MixerInput.h"/>
     <ClInclude Include="Source\FilterProcessor.h"/>
     <ClInclude Include="Source\FilterEditor.h"/>
+    <ClInclude Include="Source\filterGraphPoint.h"/>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.h"/>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeterSource.h"/>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LookAndFeel\LevelMeterLookAndFeel.h"/>
