@@ -19,10 +19,7 @@ Mixer::Mixer()
         addInput(MixerInput::Mode::Mono);
     }
 
-    //assign default input by order
-    for (auto i = 0; i < inputs.size(); i++)
-        inputs[i]->setInputNumber(i);
-
+    addAndMakeVisible(&filterEditor);
     addAndMakeVisible(&meter);
 }
 
@@ -96,6 +93,7 @@ void Mixer::resized()
         inputs[i]->setBounds(i * mixerInputWidth, 0, mixerInputWidth, getHeight());
     }
     meter.setBounds(getWidth() / 2, 0, 100, getHeight());
+    filterEditor.setBounds(meter.getRight(), 0, getWidth() - meter.getRight(), getHeight());
 }
 
 
@@ -161,10 +159,20 @@ void Mixer::addInput(MixerInput::Mode inputMode)
     inputs.add(new MixerInput(inputMode));
     inputs.getLast()->comboboxChanged->addChangeListener(this);
     addAndMakeVisible(inputs.getLast());
+    int inputIndex = inputs.size() - 1;
+    inputs.getLast()->setInputIndex(inputIndex);
+
+    inputs.getLast()->selectButton.onClick = [this, inputIndex] {setSelectedMixerInput(inputIndex); };
 }
 
 
 void Mixer::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     updateInputSelectorsState();
+}
+
+void Mixer::setSelectedMixerInput(int selectedInput)
+{
+    selectedMixerInput = selectedInput;
+    filterEditor.setEditedFilterProcessor(inputs[selectedMixerInput]->filterProcessor);
 }

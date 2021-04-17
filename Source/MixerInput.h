@@ -38,22 +38,27 @@ public:
     void MixerInput::feedInputSelector(int channel, juce::String name, bool isSelectable);
     void MixerInput::clearInputSelector();
     void MixerInput::selectDefaultInput(int defaultInput);
-    void MixerInput::setInputNumber(int inputNumer);
     int MixerInput::getSelectedInput();
     void MixerInput::updateComboboxItemsState(int itemId, bool isEnabled);
+    void MixerInput::setInputIndex(int index);
+    int MixerInput::getInputIndex();
 
     std::unique_ptr<juce::ChangeBroadcaster> comboboxChanged;
+    juce::TextButton selectButton;
+
+    FilterProcessor filterProcessor;
 
 private:
     void MixerInput::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
     void MixerInput::sliderValueChanged(juce::Slider* slider);
     std::unique_ptr<juce::AudioBuffer<float>> channelBuffer;
     Mode inputMode;
-    int inputNumber = 0;
+    int inputIndex;
 
     juce::Slider volumeSlider;
     juce::Slider panKnob;
     juce::ComboBox inputSelector;
+
 
     double actualSampleRate;
     int actualSamplesPerBlockExpected;
@@ -65,6 +70,6 @@ private:
     float panL;
     float panR;
 
-    FilterProcessor filterProcessor;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MixerInput)
 };

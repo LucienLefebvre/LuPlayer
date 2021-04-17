@@ -10,7 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "FilterEditor.h"
+//#include "FilterEditor.h"
 
 class FilterProcessor : public juce::Component
 {
@@ -21,7 +21,11 @@ public:
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(juce::AudioBuffer<float>* buffer);
 
-    FilterEditor* FilterProcessor::getFilterEditor();
+    juce::String sayHelloWorld();
+    float* FilterProcessor::getFilterParameters(int filterBand);
+    void FilterProcessor::setFilterParameters(int filterBand, float* filterParams);
+
+    //FilterEditor* FilterProcessor::getFilterEditor();
 
 private:
     std::unique_ptr<juce::AudioBuffer<float>> filterBuffer;
@@ -40,6 +44,12 @@ private:
     float filtersFrequencies[4] = { 200.0f, 800.0f, 2000.0f, 8000.0f };
     float filtersQs[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
     float filtersGains[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    float lowBandParams[3] = { 1000, 1.0f, 6 };
+    float middleLowBandParams[3] = { 800, 1.0f, 1.0f };
+    float middleHighBandParams[3] = { 2000.0f, 1.0f, 1.0f };
+    float highBandParams[3] = { 8000.0f, 1.0f, 1.0f };
+
 
     //FilterEditor* filterEditor;
 

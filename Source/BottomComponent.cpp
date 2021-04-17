@@ -41,7 +41,7 @@ BottomComponent::BottomComponent()
     addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
     addTab("Mixer", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &mixerPanel, false);
     setTabBarDepth(tabBarHeight);
-
+    setCurrentTabIndex(4);
     getTabbedButtonBar().setWantsKeyboardFocus(false);
     getTabbedButtonBar().addChangeListener(this);
     myMixer.addInputSource(&audioPlaybackDemo.transportSource, false);

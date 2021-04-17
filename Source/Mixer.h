@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "RemoteInput.h"
 #include "MixerInput.h"
+#include "FilterEditor.h"
 #include <ff_meters\ff_meters.h>
 //==============================================================================
 /*
@@ -40,6 +41,7 @@ public:
 
 private:
     void Mixer::addInput(MixerInput::Mode inputMode);
+    void Mixer::setSelectedMixerInput(int selectedInput);
 
     std::unique_ptr<juce::AudioBuffer<float>> mixerBuffer;
 
@@ -47,14 +49,17 @@ private:
     int actualSamplesPerBlockExpected;
 
     int mixerInputWidth = 100;
-    
+    int selectedMixerInput = 0;
     int numInputsChannels;
     juce::StringArray inputsChannelsName;
     juce::AudioDeviceManager* deviceManager;
     juce::Array<bool> selectedInputs;
     bool defaultInputsInitialized = false;
    
+    //FILTER EDITOR
+    FilterEditor filterEditor;
 
+    //METER
     juce::AudioDeviceManager::LevelMeter levelMeter;
     foleys::LevelMeterLookAndFeel lnf;
     foleys::LevelMeter meter{ foleys::LevelMeter::Default }; // See foleys::LevelMeter::MeterFlags for options

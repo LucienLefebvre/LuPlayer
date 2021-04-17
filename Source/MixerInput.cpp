@@ -42,19 +42,18 @@ MixerInput::MixerInput(Mode mode)
     panKnob.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
     panKnob.setNumDecimalPlacesToDisplay(1);
     panKnob.setDoubleClickReturnValue(true, 0.);
-    panKnob.setPopupDisplayEnabled(true, true, this, 2000);
     panKnob.setScrollWheelEnabled(false);
     panKnob.setWantsKeyboardFocus(false);
     panKnob.addListener(this);
-
     pan.setValue(panKnob.getValue());
 
     addAndMakeVisible(&inputSelector);
     inputSelector.addListener(this);
 
+    addAndMakeVisible(&selectButton);
+    selectButton.setButtonText("Select");
+
     comboboxChanged = std::make_unique<juce::ChangeBroadcaster>();
-
-
 }
 
 MixerInput::~MixerInput()
@@ -71,8 +70,8 @@ void MixerInput::resized()
 {
     inputSelector.setBounds(0, 0, getWidth(), 25);
     panKnob.setBounds(0, inputSelector.getBottom(), getWidth(), 25);
-    volumeSlider.setBounds(0, panKnob.getBottom(), getWidth(), getHeight() - panKnob.getBottom());
-
+    selectButton.setBounds(getWidth() / 4, panKnob.getBottom(), getWidth() / 2, 20);
+    volumeSlider.setBounds(0, selectButton.getBottom(), getWidth(), getHeight() - selectButton.getBottom());
 }
 
 void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::AudioBuffer<float>* outputBuffer)
@@ -132,10 +131,6 @@ void MixerInput::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
     comboboxChanged->sendChangeMessage();
 }
 
-void MixerInput::setInputNumber(int number)
-{
-    inputNumber = number;
-}
 
 int MixerInput::getSelectedInput()
 {
@@ -158,3 +153,14 @@ void MixerInput::sliderValueChanged(juce::Slider* slider)
         pan.setTargetValue(panKnob.getValue());
     }
 }
+
+void MixerInput::setInputIndex(int index)
+{
+    inputIndex = index;
+}
+
+int MixerInput::getInputIndex()
+{
+    return inputIndex;
+}
+
