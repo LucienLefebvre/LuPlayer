@@ -2790,6 +2790,9 @@
     <ClInclude Include="Source\filterGraphPoint.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\FilterBandEditor.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.h">
       <Filter>JUCE Modules\ff_meters\LevelMeter</Filter>
     </ClInclude>

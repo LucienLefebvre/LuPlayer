@@ -14,8 +14,6 @@
 //==============================================================================
 MixerInput::MixerInput(Mode mode)
 {
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
     if (mode == Stereo)
     {
 
@@ -25,7 +23,6 @@ MixerInput::MixerInput(Mode mode)
     volumeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     volumeSlider.setRange(-100, +12);
     volumeSlider.setValue(0.);
-    //volumeSlider.addListener(this);
     volumeSlider.setSkewFactor(2, false);
     volumeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
     volumeSlider.setNumDecimalPlacesToDisplay(1);
@@ -127,8 +124,6 @@ void MixerInput::selectDefaultInput(int defaultInput)
 void MixerInput::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
 {
     selectedInput = comboBoxThatHasChanged->getSelectedId() - 2;
-    //comboboxChanged->reset(new juce::ChangeBroadcaster());
-
     comboboxChanged->sendChangeMessage();
 }
 

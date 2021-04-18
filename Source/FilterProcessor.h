@@ -10,48 +10,53 @@
 
 #pragma once
 #include <JuceHeader.h>
+//#include "filterHelpers.h"
 //#include "FilterEditor.h"
 
 class FilterProcessor : public juce::Component
 {
 public:
+    enum FilterTypes
+    {
+        Bell = 0,
+        LowShelf = 1,
+        HighShelf = 2,
+        HPF = 3,
+        LPF = 4
+    };
+
+    struct FilterParameters
+    {
+        float frequency = 1000.0f;
+        float gain = 1.0;
+        float Q = 1.0f;
+        FilterTypes type = FilterTypes::Bell;
+    };
+
     FilterProcessor();
     ~FilterProcessor() override;
 
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(juce::AudioBuffer<float>* buffer);
 
-    juce::String sayHelloWorld();
-    std::array<float, 3> FilterProcessor::getFilterParameters(int filterBand);
-    void FilterProcessor::setFilterParameters(int filterBand, std::array<float, 3>);
+    FilterParameters& FilterProcessor::getFilterParameters(int filterBand);
+    void setFilterParameters(int filterBand, FilterParameters params);
+    FilterTypes getFilterTypes(int filterBand);
+    void setFilterTypes(int filterBand, FilterTypes filterType);
+    void createFilters(juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>& processor, FilterParameters params);
+    juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> getFilterCoefs(int band);
 
-    //FilterEditor* FilterProcessor::getFilterEditor();
     int displaynumber = 0;
+
 private:
+    void initializeParameters();
+
     std::unique_ptr<juce::AudioBuffer<float>> filterBuffer;
     double actualSampleRate;
     int actualSamplesPerBlockExpected;
 
-    void updateParameters();
-
-
-
-    juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> lowBand;
-    juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> middleLowBand;
-    juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> middleHighBand;
-    juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> highBand;
-
-    float filtersFrequencies[4] = { 200.0f, 800.0f, 2000.0f, 8000.0f };
-    float filtersQs[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    float filtersGains[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-    std::array<float, 3> lowBandParams = { 100.0f, 1.0f, 1.0f };
-    std::array<float, 3> middleLowBandParams = { 400.0f, 1.0f, 1.0f };
-    std::array<float, 3> middleHighBandParams = { 2000.0f, 1.0f, 1.0f };
-    std::array<float, 3> highBandParams = { 8000.0f, 1.0f, 1.0f };
-    float result[3] = {};
-
-    //FilterEditor* filterEditor;
+    juce::OwnedArray< juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>> processors;
+    juce::OwnedArray<FilterParameters> filtersParams;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FilterProcessor)
 };

@@ -67,6 +67,8 @@
       <FILE id="AtdSf4" name="FilterEditor.h" compile="0" resource="0" file="Source/FilterEditor.h"/>
       <FILE id="gQacuX" name="filterGraphPoint.h" compile="0" resource="0"
             file="Source/filterGraphPoint.h"/>
+      <FILE id="n8YR31" name="FilterBandEditor.h" compile="0" resource="0"
+            file="Source/FilterBandEditor.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK="0"

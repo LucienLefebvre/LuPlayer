@@ -9,7 +9,6 @@
 */
 
 #pragma once
-
 #include <JuceHeader.h>
 //ajouter double clique pour reset
 //ajouter control pour régler Q
@@ -22,27 +21,9 @@ class filterGraphPoint  : public juce::Component,
     public juce::ChangeBroadcaster
 {
 public:
-    filterGraphPoint(int colourId) : mouseDraggedBroadcaster()
+    filterGraphPoint(int colourId) : mouseDraggedBroadcaster(), mouseCtrlDraggedBroadcaster(), mouseClickResetBroadcaster()
     {
-
-        //addMouseListener(this, false);
-        switch (colourId)
-        {
-        case 0:
-            colour = juce::Colours::red;
-            break;
-        case 1:
-            colour = juce::Colours::green;
-            break;
-        case 2:
-            colour = juce::Colours::blue;
-            break;
-        case 3:
-            colour = juce::Colours::yellow;
-            break;
-        default:
-            colour = juce::Colours::white;
-        }
+        setColour(colourId);
     }
 
     ~filterGraphPoint() override
@@ -51,17 +32,12 @@ public:
 
     void paint (juce::Graphics& g) override
     {
-
-        //g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
         g.setColour(colour);
         g.fillEllipse(0, 0, pointSize, pointSize);
     }
 
     void resized() override
     {
-        // This method is where you should set the bounds of any child
-        // components that your component contains..
-
     }
 
     void setColour(int colourId)
@@ -91,23 +67,51 @@ public:
         return pointSize;
     }
 
+    int getDragYDistance()
+    {
+        return ctrlDragDistance;
+    }
+
     juce::ChangeBroadcaster mouseDraggedBroadcaster;
+    juce::ChangeBroadcaster mouseCtrlDraggedBroadcaster;
+    juce::ChangeBroadcaster mouseClickResetBroadcaster;
 
 private:
     juce::Colour colour;
-    int pointSize = 15;
+    int pointSize = 12;
 
     void mouseDown(const juce::MouseEvent& e)
     {
         dragger.startDraggingComponent(this, e);
+        if (e.getNumberOfClicks() == 2)
+        {
+            mouseClickResetBroadcaster.sendChangeMessage();
+        }
     }
 
     void mouseDrag(const juce::MouseEvent& e)
     {
-        dragger.dragComponent(this, e, nullptr);
-        mouseDraggedBroadcaster.sendChangeMessage();
+        if (!e.mods.isCtrlDown() && mouseCtrlDragged == false)
+        {
+            dragger.dragComponent(this, e, nullptr);
+            mouseDraggedBroadcaster.sendChangeMessage();
+        }
+        else if(e.mods.isCtrlDown())
+        {
+            ctrlDragDistance = e.getDistanceFromDragStartY();
+            mouseCtrlDraggedBroadcaster.sendChangeMessage();
+            mouseCtrlDragged = true;
+        }
+    }
+
+    void mouseUp(const juce::MouseEvent& e)
+    {
+        ctrlDragDistance = 0;
+        mouseCtrlDragged = false;
     }
 
     juce::ComponentDragger dragger;
+    bool mouseCtrlDragged = false;
+    int ctrlDragDistance = 0;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (filterGraphPoint)
 };

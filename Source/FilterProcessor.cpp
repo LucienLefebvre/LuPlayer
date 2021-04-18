@@ -7,14 +7,21 @@
 
   ==============================================================================
 */
+#pragma once
 #include <JuceHeader.h>
 #include "FilterProcessor.h"
 FilterProcessor::FilterProcessor()
 {
-    /*lfFilterParameters.algorithm = filterAlgorithm::kLowShelf;
-    lfFilterParameters.boostCut_dB = -20.;
-    lfFilterParameters.fc = 400;
-    lfFilterParameters.Q = 0.5;*/
+
+    for (auto i = 0; i < 4; i++)
+    {
+        processors.add(new juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>);
+        filtersParams.add(new FilterParameters);
+    }
+    filtersParams[0]->frequency = 100;
+    filtersParams[1]->frequency = 400;
+    filtersParams[2]->frequency = 2000;
+    filtersParams[3]->frequency = 5000;
 }
 
 FilterProcessor::~FilterProcessor()
@@ -22,112 +29,94 @@ FilterProcessor::~FilterProcessor()
 
 }
 
-//FilterEditor* FilterProcessor::getFilterEditor()
-//{
-//    return filterEditor;
-//}
-
 void FilterProcessor::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     actualSampleRate = sampleRate;
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
     filterBuffer = std::make_unique<juce::AudioBuffer<float>>(2, actualSamplesPerBlockExpected);
-    updateParameters();
+    initializeParameters();
 }
 
 void FilterProcessor::getNextAudioBlock(juce::AudioBuffer<float>* buffer)
 {
     juce::dsp::AudioBlock<float> block(*buffer);
 
-    lowBand.process(juce::dsp::ProcessContextReplacing<float>(block));
-    middleLowBand.process(juce::dsp::ProcessContextReplacing<float>(block));
-    middleHighBand.process(juce::dsp::ProcessContextReplacing<float>(block));
-    highBand.process(juce::dsp::ProcessContextReplacing<float>(block));
+    for (auto i = 0; i < processors.size(); i++)
+    {
+        processors[i]->process(juce::dsp::ProcessContextReplacing<float>(block));
+    }
 }
 
-void FilterProcessor::updateParameters()
+void FilterProcessor::initializeParameters()
 {
-    lowBand.reset();
-    middleLowBand.reset();
-    middleHighBand.reset();
-    highBand.reset();
-
+    for (auto i = 0; i < processors.size(); i++)
+    {
+        processors[i]->reset();
+    }
     juce::dsp::ProcessSpec spec;
     spec.sampleRate = actualSampleRate;
     spec.maximumBlockSize = actualSamplesPerBlockExpected;
     spec.numChannels = 2;
-    lowBand.prepare(spec);
-    middleLowBand.prepare(spec);
-    middleHighBand.prepare(spec);
-    highBand.prepare(spec);
-
-
-    *lowBand.state = *juce::dsp::IIR::Coefficients<float>::makePeakFilter(actualSampleRate, 
-                            lowBandParams[0], lowBandParams[1], lowBandParams[2]);
-    *middleLowBand.state = *juce::dsp::IIR::Coefficients<float>::makePeakFilter(actualSampleRate, 
-                            middleLowBandParams[0], middleLowBandParams[1], middleLowBandParams[2]);
-    *middleHighBand.state = *juce::dsp::IIR::Coefficients<float>::makePeakFilter(actualSampleRate, 
-                            middleHighBandParams[0], middleHighBandParams[1], middleHighBandParams[2]);
-    *highBand.state = *juce::dsp::IIR::Coefficients<float>::makePeakFilter(actualSampleRate, 
-                            highBandParams[0], highBandParams[1], highBandParams[2]);
-    //update parameters
-}
-
-
-juce::String FilterProcessor::sayHelloWorld()
-{
-    return "Hello, world ! ";
-}
-
-std::array<float, 3> FilterProcessor::getFilterParameters(int filterBand)
-{
-    std::array<float, 3> result;
-    switch (filterBand)
+    for (auto i = 0; i < processors.size(); i++)
     {
-    case 0:
-        result = lowBandParams;
-        break;
-    case 1:
-        result = middleLowBandParams;
-        break;
-    case 2:
-        result = middleHighBandParams;
-        break;
-    case 3:
-        result = highBandParams;
-        break;
+        processors[i]->prepare(spec);
+        createFilters(*processors[i], *filtersParams[i]);
     }
-    return result;
 }
 
-void FilterProcessor::setFilterParameters(int filterBand, std::array<float, 3> filterParams)
+void FilterProcessor::createFilters(juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>& processor, 
+                                    FilterParameters params)
 {
-    /*lowBand.reset();
-    middleLowBand.reset();
-    middleHighBand.reset();
-    highBand.reset();*/
+   switch (params.type)
+   {
+   case 0 :
+       *processor.state = *juce::dsp::IIR::Coefficients<float>::makePeakFilter(actualSampleRate,
+                            params.frequency, params.Q, params.gain);
+       break;
+   case 1 :
+       *processor.state = *juce::dsp::IIR::Coefficients<float>::makeLowShelf(actualSampleRate,
+                            params.frequency, params.Q, params.gain);
+       break;
+   case 2 :
+       *processor.state = *juce::dsp::IIR::Coefficients<float>::makeHighShelf(actualSampleRate,
+                            params.frequency, params.Q, params.gain);
+       break;
+   case 3 :
+       *processor.state = *juce::dsp::IIR::Coefficients<float>::makeHighPass(actualSampleRate,
+                            params.frequency);
+       break;
+   case 4 :
+       *processor.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(actualSampleRate,
+                            params.frequency);
+       break;
+   }
+}
 
-    switch (filterBand)
-    {
-    case 0:
-        lowBandParams = filterParams;
-        *lowBand.state = *juce::dsp::IIR::Coefficients<float>::makePeakFilter(actualSampleRate, 
-                                lowBandParams[0], lowBandParams[1], lowBandParams[2]);
-        break;
-    case 1:
-        middleLowBandParams = filterParams;
-        *middleLowBand.state = *juce::dsp::IIR::Coefficients<float>::makePeakFilter(actualSampleRate, 
-                                middleLowBandParams[0], middleLowBandParams[1], middleLowBandParams[2]);
-        break;
-    case 2:
-        middleHighBandParams = filterParams;
-        *middleHighBand.state = *juce::dsp::IIR::Coefficients<float>::makePeakFilter(actualSampleRate, 
-                                middleHighBandParams[0], middleHighBandParams[1], middleHighBandParams[2]);
-        break;
-    case 3:
-        highBandParams = filterParams;
-        *highBand.state = *juce::dsp::IIR::Coefficients<float>::makePeakFilter(actualSampleRate, 
-                                highBandParams[0], highBandParams[1], highBandParams[2]);
-        break;
-    }
+juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> FilterProcessor::getFilterCoefs(int band)
+{
+    return processors[band]->state;
+}
+
+FilterProcessor::FilterParameters& FilterProcessor::getFilterParameters(int filterBand)
+{
+    
+    return *filtersParams[filterBand];
+}
+
+FilterProcessor::FilterTypes FilterProcessor::getFilterTypes(int filterBand)
+{
+    return HPF;
+}
+
+void FilterProcessor::setFilterTypes(int filterBand, FilterTypes filterType)
+{
+
+}
+void FilterProcessor::setFilterParameters(int filterBand, FilterParameters params)
+{
+    filtersParams[filterBand]->frequency = params.frequency;
+    filtersParams[filterBand]->gain = params.gain;
+    filtersParams[filterBand]->Q = params.Q;
+    filtersParams[filterBand]->type = params.type;
+    createFilters(*processors[filterBand], params);
 }
