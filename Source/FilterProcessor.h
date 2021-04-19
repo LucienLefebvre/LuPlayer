@@ -58,5 +58,6 @@ private:
     juce::OwnedArray< juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>> processors;
     juce::OwnedArray<FilterParameters> filtersParams;
 
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FilterProcessor)
 };

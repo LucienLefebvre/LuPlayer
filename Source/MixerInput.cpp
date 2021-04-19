@@ -84,6 +84,7 @@ void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::
         channelBuffer->copyFrom(1, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples());
 
         filterProcessor.getNextAudioBlock(channelBuffer.get());
+        compProcessor.getNextAudioBlock(channelBuffer.get());
 
         level.getNextValue();//compute next fader level value
         pan.getNextValue();
@@ -103,6 +104,7 @@ void MixerInput::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     channelBuffer->setSize(2, actualSamplesPerBlockExpected);
 
     filterProcessor.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    compProcessor.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void MixerInput::clearInputSelector()

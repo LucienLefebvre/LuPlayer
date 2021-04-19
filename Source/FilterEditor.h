@@ -41,7 +41,10 @@ private:
     void createMagnitudeArray();
     void plotFrequencies(juce::Graphics& g);
     void updateFilterGraphPoints();
+
     void mouseDrag(const juce::MouseEvent& event);
+    void mouseDown(const juce::MouseEvent& event);
+    void mouseUp(const juce::MouseEvent& event);
 
     float getFrequencyFromXPosition(int xPosition);
     int getXPositionFromFrequency(float frequency);
@@ -72,6 +75,10 @@ private:
     bool magnitudeChanged = false;
     juce::Array<float> frequencyLines;
     juce::Array<float> dBLines{ -9.0f, -6.0f, -3.0f, 0.0f, 3.0f, 6.0f, 9.0f };
+    juce::ComponentDragger dragger;
+
+    int draggedPoint;
+    bool pointDragged = false;
     enum SliderType
     {
         GAIN,

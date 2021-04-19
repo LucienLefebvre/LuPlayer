@@ -14,6 +14,7 @@
 #include "RemoteInput.h"
 #include "MixerInput.h"
 #include "FilterEditor.h"
+#include "CompEditor.h"
 #include <ff_meters\ff_meters.h>
 //==============================================================================
 /*
@@ -56,8 +57,10 @@ private:
     juce::Array<bool> selectedInputs;
     bool defaultInputsInitialized = false;
    
-    //FILTER EDITOR
+    // EDITORS
     FilterEditor filterEditor;
+    CompEditor compEditor;
+
 
     //METER
     juce::AudioDeviceManager::LevelMeter levelMeter;

@@ -17,7 +17,7 @@
 */
 class filterGraphPoint  : public juce::Component,
     //public juce::MouseListener,
-    public juce::ComponentDragger,
+    //public juce::ComponentDragger,
     public juce::ChangeBroadcaster
 {
 public:
@@ -72,6 +72,10 @@ public:
         return ctrlDragDistance;
     }
 
+    void setPlotBounds(juce::Rectangle<int>& plotBounds)
+    {
+        filterPlotBounds = plotBounds;
+    }
     juce::ChangeBroadcaster mouseDraggedBroadcaster;
     juce::ChangeBroadcaster mouseCtrlDraggedBroadcaster;
     juce::ChangeBroadcaster mouseClickResetBroadcaster;
@@ -93,14 +97,14 @@ private:
     {
         if (!e.mods.isCtrlDown() && mouseCtrlDragged == false)
         {
-            dragger.dragComponent(this, e, nullptr);
-            mouseDraggedBroadcaster.sendChangeMessage();
+            /*dragger.dragComponent(this, e, nullptr);
+            mouseDraggedBroadcaster.sendChangeMessage();*/
         }
         else if(e.mods.isCtrlDown())
         {
-            ctrlDragDistance = e.getDistanceFromDragStartY();
+            /*ctrlDragDistance = e.getDistanceFromDragStartY();
             mouseCtrlDraggedBroadcaster.sendChangeMessage();
-            mouseCtrlDragged = true;
+            mouseCtrlDragged = true;*/
         }
     }
 
@@ -110,6 +114,7 @@ private:
         mouseCtrlDragged = false;
     }
 
+    juce::Rectangle<int> filterPlotBounds;
     juce::ComponentDragger dragger;
     bool mouseCtrlDragged = false;
     int ctrlDragDistance = 0;

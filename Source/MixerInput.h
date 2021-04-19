@@ -11,6 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "FilterProcessor.h"
+#include "CompProcessor.h"
 //==============================================================================
 /*
 */
@@ -46,7 +47,7 @@ public:
     juce::TextButton selectButton;
 
     FilterProcessor filterProcessor;
-
+    CompProcessor compProcessor;
 private:
     void MixerInput::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
     void MixerInput::sliderValueChanged(juce::Slider* slider);

@@ -20,6 +20,7 @@ Mixer::Mixer()
     }
 
     addAndMakeVisible(&filterEditor);
+    addAndMakeVisible(&compEditor);
     addAndMakeVisible(&meter);
     lnf.setColour(foleys::LevelMeter::lmBackgroundColour, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     lnf.setColour(foleys::LevelMeter::lmMeterGradientLowColour, juce::Colours::green);
@@ -99,8 +100,9 @@ void Mixer::resized()
     {
         inputs[i]->setBounds(i * mixerInputWidth, 0, mixerInputWidth, getHeight());
     }
-    meter.setBounds(getWidth() / 2 - 200, 0, 100, getHeight());
-    filterEditor.setBounds(meter.getRight(), 0, getWidth() - meter.getRight(), getHeight());
+    meter.setBounds(getWidth() - 100, 0, 100, getHeight());
+    filterEditor.setBounds(getWidth() - 1200, 0, 900, getHeight());
+    compEditor.setBounds(filterEditor.getRight(), 0, 200, getHeight());
 }
 
 
@@ -182,6 +184,7 @@ void Mixer::setSelectedMixerInput(int selectedInput)
 {
     selectedMixerInput = selectedInput;
     filterEditor.setEditedFilterProcessor(inputs[selectedMixerInput]->filterProcessor);
+    compEditor.setEditedCompProcessor(inputs[selectedMixerInput]->compProcessor);
     for (auto i = 0; i < inputs.size(); i++)
         if (i == selectedMixerInput)
         {
