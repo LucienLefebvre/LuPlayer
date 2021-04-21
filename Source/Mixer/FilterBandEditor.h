@@ -22,6 +22,7 @@ class FilterBandEditor : public juce::Component,
 public:
     FilterBandEditor(int b) : comboBoxBroadcaster()
     {
+        addMouseListener(this, true);
         bandId = b;
 
         addAndMakeVisible(&qSlider);
@@ -80,10 +81,10 @@ public:
 
     void resized() override
     {
-        filterTypeSelector.setBounds(0, 0, knobWidth, 20);
-        qSlider.setBounds(0, filterTypeSelector.getBottom(), knobWidth, knobHeight);
-        frequencySlider.setBounds(0, qSlider.getBottom(), knobWidth, knobHeight);
-        gainSlider.setBounds(0, frequencySlider.getBottom(), knobWidth, knobHeight);
+        filterTypeSelector.setBounds(0, 0, knobWidth - 24, 20);
+        qSlider.setBounds(-12, filterTypeSelector.getBottom(), knobWidth, knobHeight);
+        frequencySlider.setBounds(-12, qSlider.getBottom(), knobWidth, knobHeight);
+        gainSlider.setBounds(-12, frequencySlider.getBottom(), knobWidth, knobHeight);
     }
 
     void setFilterType(FilterProcessor::FilterTypes type)
@@ -107,6 +108,16 @@ public:
             filterTypeSelector.setSelectedItemIndex(4);
             break;
         }
+    }
+
+    void mouseEnter(const juce::MouseEvent& event)
+    {
+
+    }
+
+    void mouseExit(const juce::MouseEvent& event)
+    {
+
     }
 
     void setSlidersThumbColours(juce::Colour colour)
@@ -141,6 +152,8 @@ public:
     juce::ComboBox filterTypeSelector;
 
     juce::ChangeBroadcaster comboBoxBroadcaster;
+    juce::ChangeBroadcaster mouseEnterBandBroacaster;
+    juce::ChangeBroadcaster mouseExitBandBroadcaster;
 
 private:
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)

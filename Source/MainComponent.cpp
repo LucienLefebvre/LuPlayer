@@ -144,7 +144,7 @@ MainComponent::MainComponent() :
     myLayout.setItemLayout(1, 4, 4, 4);
     myLayout.setItemLayout(2,          // for item 1
         5, 600, // size must be between 20% and 60% of the available space
-        300);        // and its preferred size is 50 pixels
+        350);        // and its preferred size is 50 pixels
 
     horizontalDividerBar.reset(new juce::StretchableLayoutResizerBar(&myLayout, 1, false));
     addAndMakeVisible(horizontalDividerBar.get());
@@ -202,8 +202,8 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     if (source == &bottomComponent.getTabbedButtonBar())
     {
           myLayout.setItemLayout(2,          // for item 1
-              25, 600, // size must be between 20% and 60% of the available space
-              300);        // and its preferred size is 50 pixels
+              25, 350, // size must be between 20% and 60% of the available space
+              350);        // and its preferred size is 50 pixels
           Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
           myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
     }
@@ -229,7 +229,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
                 else
                     deviceManager.removeMidiInputDeviceCallback(input.identifier, this);
             }
-            bottomComponent.mixerPanel.setDeviceManagerInfos(deviceManager);
+            bottomComponent.mixerPanel.inputPanel.channelEditor.setDeviceManagerInfos(deviceManager);
         }
     }
 
@@ -387,7 +387,6 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
-
     if (soundPlayers[0] != nullptr)
     {
         if (Settings::audioOutputMode == 3 && (bufferToFill.buffer->getNumChannels() > 3))
@@ -991,7 +990,7 @@ void MainComponent::tryPreferedAudioDevice(int outputChannelsNeeded)
 
 void MainComponent::defaultPlayersPlaylist(int playersToAdd)
 {
-    for (auto i = -1; i < 3; ++i)
+    for (auto i = -1; i < 1; ++i)
     {
         soundPlayers[0]->myPlaylists[0]->addPlayer(i);
         soundPlayers[0]->myPlaylists[1]->addPlayer(i);

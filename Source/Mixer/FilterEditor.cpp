@@ -14,7 +14,7 @@
 FilterEditor::FilterEditor()
 {
     addMouseListener(this, true);
-    juce::Timer::startTimer(50);
+    juce::Timer::startTimer(10);
     for (auto i = 0; i < filterBandsNumber; i++)
     {
         addFilterBand(i);
@@ -46,22 +46,22 @@ void FilterEditor::paint(juce::Graphics& g)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
     if (magnitudeArrayCreated)
-        plotFrequencies(g);
+        plotFilterGraph(g);
 }
 
-void FilterEditor::plotFrequencies(juce::Graphics& g)
+void FilterEditor::plotFilterGraph(juce::Graphics& g)
 {
-    int zeroDbYPosition = frequencyPlotBounds.getHeight() / 2;
-    int zeroHzXPosition = frequencyPlotBounds.getPosition().getX();
+    zeroDbY = frequencyPlotBounds.getHeight() / 2;
+    zeroHzX = frequencyPlotBounds.getPosition().getX();
 
     //DRAW 0db Axis
     g.setColour(juce::Colour(134, 141, 145));
-    g.drawHorizontalLine(zeroDbYPosition, zeroHzXPosition, frequencyPlotBounds.getRight());
+    g.drawHorizontalLine(zeroDbY, zeroHzX, frequencyPlotBounds.getRight());
 
     //Draw frequencies lines
     for (auto i = 0; i < frequencyLines.size(); i++)
     {
-        auto xPosition = zeroHzXPosition + getXPositionFromFrequency(frequencyLines[i]);
+        auto xPosition = zeroHzX + getXPositionFromFrequency(frequencyLines[i]);
         g.drawVerticalLine(xPosition, 0, getHeight());
         if (frequencyLines[i] == 100)
             g.drawText("100Hz", xPosition + 2, frequencyPlotBounds.getBottom() - 10, 
@@ -78,31 +78,126 @@ void FilterEditor::plotFrequencies(juce::Graphics& g)
     for (auto i = 0; i < dBLines.size(); i++)
     {
         auto yPosition = zeroDbY - geYPositionFromGain(juce::Decibels::decibelsToGain(dBLines[i]));
-        g.drawHorizontalLine(yPosition, zeroHzXPosition, frequencyPlotBounds.getRight());
+        g.drawHorizontalLine(yPosition, zeroHzX, frequencyPlotBounds.getRight());
         g.drawText(juce::String(dBLines[i]) << "dB", frequencyPlotBounds.getRight() - 30, yPosition - 11,
                         30, 10, juce::Justification::centredRight);
     }
 
-    //Plot filter response
-    int oldX = zeroHzXPosition;
-    int oldY = zeroDbY - magnitudeArray[0] * zeroDbY / 12;
+    //plotFFT(g);
+
+    //Plot filters responses
+    if (drawPointInfo == true && pointInfoIndex == 0)    //Low filter curve
+    {
+        g.setColour(filterPoints[0]->getColour());
+        g.setOpacity(0.7);
+        plotMagnitudeArray(g, lowMagnitudeArray, 2);
+    }
+    else if (drawPointInfo == true && pointInfoIndex == 1)    //Low mid filter curve
+    {
+        g.setColour(filterPoints[1]->getColour());
+        g.setOpacity(0.7);
+        plotMagnitudeArray(g, lowMidMagnitudeArray, 2);
+    }
+    else if (drawPointInfo == true && pointInfoIndex == 2)    //high mid filter curve
+    {
+        g.setColour(filterPoints[2]->getColour());
+        g.setOpacity(0.7);
+        plotMagnitudeArray(g, highMidMagnitudeArray, 2);
+    }
+    else if (drawPointInfo == true && pointInfoIndex == 3)    //high filter curve
+    {
+        g.setColour(filterPoints[3]->getColour());
+        g.setOpacity(0.7);
+        plotMagnitudeArray(g, highMagnitudeArray, 2);
+    }
+    //global filter curve
+    g.setColour(juce::Colour(40, 134, 189));
+    g.setOpacity(1.0);
+    plotMagnitudeArray(g, magnitudeArray, 3, true);
+
+
+    //Draw Point info
+    if (drawPointInfo == true)
+    {
+        //Position of the rectangle
+        int xPos = filterPoints[pointInfoIndex]->getRight() + 4;
+        int yPos = filterPoints[pointInfoIndex]->getBottom() + 4;
+        if (xPos > getWidth() - 52)
+            xPos = getWidth() - 52;
+        if (yPos > getHeight() - 40)
+            yPos = getHeight() - 40;
+        g.setColour(filterPoints[pointInfoIndex]->getColour());
+        g.setOpacity(0.15);
+        g.fillRoundedRectangle(xPos, yPos,
+            50, 40, 5);
+        g.setColour(juce::Colours::white);
+
+
+        g.drawText(juce::String(trunc(filterBands[pointInfoIndex]->frequencySlider.getValue())) << "Hz",
+            xPos, yPos, 52, 20, juce::Justification::centredLeft);
+        auto roundedGain = std::ceil(filterBands[pointInfoIndex]->gainSlider.getValue() * 10.0) / 10.0;
+        g.drawText(juce::String(roundedGain) << "dB",
+            xPos, yPos + 20, 50, 20, juce::Justification::centredLeft);
+    }
+    
+    //Draw Sliders Label
+    g.setColour(juce::Colours::white);
+    g.drawText("Q", 0, 10, 10, 80, juce::Justification::centred);
+    g.drawText("F", 0, 110, 10, 10, juce::Justification::centred);
+    g.drawText("R", 0, 122, 10, 10, juce::Justification::centred);
+    g.drawText("E", 0, 134, 10, 10, juce::Justification::centred);
+    g.drawText("Q", 0, 146, 10, 10, juce::Justification::centred);
+    g.drawText("G", 0, 186, 10, 10, juce::Justification::centred);
+    g.drawText("A", 0, 198, 10, 10, juce::Justification::centred);
+    g.drawText("I", 0, 210, 10, 10, juce::Justification::centred);
+    g.drawText("N", 0, 222, 10, 10, juce::Justification::centred);
+}
+
+void FilterEditor::plotMagnitudeArray(juce::Graphics& g, juce::Array<double> array, int lineSize, bool fill)
+{
+    int oldX = zeroHzX;
+    int oldY = zeroDbY - array[0] * zeroDbY / 12;
     for (auto i = 0; i < frequencyArray.size(); i++)
     {
-        int x = zeroHzXPosition + i;
-        int y = zeroDbY - magnitudeArray[i] * zeroDbY / 12;
-        g.setColour(juce::Colour(40, 134, 189));
-        g.drawLine(oldX, oldY, x, y, 3);
+        int x = zeroHzX + i;
+        int y = zeroDbY - array[i] * zeroDbY / 12;
+
+        if (fill)
+        {
+            g.setOpacity(1.0);
+            g.drawLine(oldX, oldY, x, y, lineSize);
+            g.setOpacity(0.2);
+            g.drawLine(zeroHzX + i, zeroDbY, x, y, 1);
+        }
+        else
+            g.drawLine(oldX, oldY, x, y, lineSize);
         oldX = x;
         oldY = y;
     }
+}
 
+void FilterEditor::plotFFT(juce::Graphics& g)
+{
+    fftArray.clear();
+    auto fftBuffer = editedFilterProcessor->analyser.getFFTBuffer();
+    float fftSize = editedFilterProcessor->analyser.getFFTSize();
+    for (auto i = 0; i < frequencyArray.size(); i++)
+    {
+        auto indexToPlot = round((frequencyArray[i] * fftSize) / actualSampleRate);
+        fftArray.set(i, juce::Decibels::gainToDecibels(fftBuffer.getSample(0, indexToPlot)*0.2));
+
+        //DBG(indexToPlot);
+    }
+    g.setColour(juce::Colours::black);
+    g.setOpacity(0.2);
+    plotMagnitudeArray(g, fftArray, 1);
 }
 
 void FilterEditor::resized()
 {
     for (auto i = 0; i < filterBandsNumber; i++)
     {
-        filterBands[i]->setBounds(i * knobWidth, 0, knobWidth, getHeight());
+        filterBands[i]->setBounds(i * knobWidth + filterLabelWidth, 0, knobWidth, getHeight());
     }
     frequencyPlotXStart = filterBands.getLast()->getRight();
     frequencyPlotBounds.setBounds(frequencyPlotXStart, 0, getWidth() - frequencyPlotXStart, getHeight());
@@ -128,6 +223,8 @@ void FilterEditor::addFilterBand(int i)
     filterBands.getLast()->gainSlider.addListener(this);
     filterBands.getLast()->filterTypeSelector.addListener(this);
     filterBands.getLast()->comboBoxBroadcaster.addChangeListener(this);
+    filterBands.getLast()->mouseEnterBandBroacaster.addChangeListener(this);
+    filterBands.getLast()->mouseExitBandBroadcaster.addChangeListener(this);
 
     filterPoints.add(new filterGraphPoint(i));
     addAndMakeVisible(filterPoints.getLast());
@@ -158,9 +255,14 @@ void FilterEditor::createMagnitudeArray()
 {
     juce::Array< juce::dsp::IIR::Coefficients<float>> filterCoefficients;
     filterCoefficients.clear();
+    lowMagnitudeArray.clear();
+    lowMidMagnitudeArray.clear();
+    highMidMagnitudeArray.clear();
+    highMagnitudeArray.clear();
     for (auto i = 0; i < 4; i++)//create an array of filters coefficients
     {
         filterCoefficients.set(i, *editedFilterProcessor->getFilterCoefs(i).state);
+
     }
     double arraySize = frequencyPlotBounds.getWidth();
     frequencyArray.clear();
@@ -171,10 +273,15 @@ void FilterEditor::createMagnitudeArray()
         //Create log frequency array to calculate magnitude
         frequencyArray.set(i, juce::mapToLog10<double>((double)1 * (i/arraySize), frequencyPlotHzStart, 20000)); 
         //calculate magnitude array
-        magnitudeArray.set(i, juce::Decibels::gainToDecibels(filterCoefficients[0].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)
+        lowMagnitudeArray.set(i, juce::Decibels::gainToDecibels(filterCoefficients[0].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)));
+        lowMidMagnitudeArray.set(i, juce::Decibels::gainToDecibels(filterCoefficients[1].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)));
+        highMidMagnitudeArray.set(i, juce::Decibels::gainToDecibels(filterCoefficients[2].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)));
+        highMagnitudeArray.set(i, juce::Decibels::gainToDecibels(filterCoefficients[3].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)));
+        /*magnitudeArray.set(i, juce::Decibels::gainToDecibels(filterCoefficients[0].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)
                                                             * filterCoefficients[1].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)
                                                             * filterCoefficients[2].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)
-                                                            * filterCoefficients[3].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)));
+                                                            * filterCoefficients[3].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)));*/
+        magnitudeArray.set(i, lowMagnitudeArray[i] + lowMidMagnitudeArray[i] + highMidMagnitudeArray[i] + highMagnitudeArray[i]);
     }
     magnitudeArrayCreated = true;
     magnitudeChanged = false;
@@ -220,7 +327,7 @@ void FilterEditor::mouseDown(const juce::MouseEvent& event)
 
 void FilterEditor::mouseDrag(const juce::MouseEvent& event)
 {
-    if (pointDragged == true && frequencyPlotBounds.contains(getMouseXYRelative()))
+    if (pointDragged == true)
     {
         auto x = getMouseXYRelative().getX();
         auto y = getMouseXYRelative().getY();
@@ -230,6 +337,58 @@ void FilterEditor::mouseDrag(const juce::MouseEvent& event)
     }
 }
 
+void FilterEditor::mouseMove(const juce::MouseEvent& event)
+{
+    for (auto i = 0; i < filterPoints.size(); i++)
+    {
+        auto x = event.getEventRelativeTo(filterPoints[i]).getPosition().getX();
+        auto y = event.getEventRelativeTo(filterPoints[i]).getPosition().getY();
+        if (filterPoints[i]->contains(juce::Point<int>(x, y)))
+        {
+            if (drawPointInfo != true)
+            {
+                drawPointInfo = true;
+                pointInfoIndex = i;
+                repaint();
+            }
+            return;
+        }
+        else
+        {
+            if (drawPointInfo != false)
+            {
+                drawPointInfo = false;
+                repaint();
+            }
+        }
+        x = event.getEventRelativeTo(filterBands[i]).getPosition().getX();
+        y = event.getEventRelativeTo(filterBands[i]).getPosition().getY();
+        if (filterBands[i]->contains(juce::Point<int>(x, y)))
+        {
+            if (drawPointInfo != true)
+            {
+                drawPointInfo = true;
+                pointInfoIndex = i;
+                repaint();
+            }
+            return;
+        }
+        else
+        {
+            if (drawPointInfo != false)
+            {
+                drawPointInfo = false;
+                repaint();
+            }
+        }
+    }
+}
+
+void FilterEditor::mouseExit(const juce::MouseEvent& event)
+{
+    drawPointInfo = false;
+    repaint();
+}
 void FilterEditor::mouseUp(const juce::MouseEvent& event)
 {
     pointDragged = false;
@@ -239,14 +398,7 @@ void FilterEditor::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     for (auto i = 0; i < filterPoints.size(); i++)
     {
-        if (source == &filterPoints[i]->mouseDraggedBroadcaster)
-        {
-            //set the value, (in arguments we get the centre of the point)
-            //filterBands[i]->frequencySlider.setValue(getFrequencyFromXPosition(filterPoints[i]->getX() + filterPoints[i]->getWidth() / 2));
-            //filterBands[i]->gainSlider.setValue(getGainFromYPosition((float)filterPoints[i]->getY()));
-
-        }
-        else if (source == &filterPoints[i]->mouseCtrlDraggedBroadcaster)
+        if (source == &filterPoints[i]->mouseCtrlDraggedBroadcaster)
         {
             filterBands[i]->qSlider.setValue(filterBands[i]->qSlider.getValue() * (1 - (float)filterPoints[0]->getDragYDistance() / 100.0f));
         }
@@ -271,7 +423,6 @@ void FilterEditor::changeListenerCallback(juce::ChangeBroadcaster* source)
         }
         else if (source == &filterBands[i]->comboBoxBroadcaster)
         {
-
             sendParameters(i);
         }
     }
@@ -310,7 +461,10 @@ int FilterEditor::getXPositionFromFrequency(float frequency)
 float FilterEditor::getGainFromYPosition(int yPosition)
 {
     //same as above but for the gain
-    float gain = (zeroDbY - yPosition) / 12.0f;
+    zeroDbY = (float)getHeight() / 2.0f;
+    //float gain = (float)((float)zeroDbY - (float)yPosition) / 12.0f;
+    float gain = ((zeroDbY - yPosition) * 12) / zeroDbY;
+    //(yPosition * 12.0f) / 2*zeroDbY / 2;
     DBG(gain);
     return gain;
 }
@@ -324,5 +478,7 @@ void FilterEditor::timerCallback()
 {
     if (magnitudeChanged)
     createMagnitudeArray();
+    /*if (editedFilterProcessor->analyser.checkForNewData())
+        repaint();*/
 }
 

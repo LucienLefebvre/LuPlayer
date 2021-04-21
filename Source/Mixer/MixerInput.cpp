@@ -31,6 +31,7 @@ MixerInput::MixerInput(Mode mode)
     volumeSlider.setScrollWheelEnabled(false);
     volumeSlider.setTextValueSuffix("dB");
     volumeSlider.addListener(this);
+    volumeSlider.setColour(juce::Slider::ColourIds::textBoxOutlineColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     level.setValue(juce::Decibels::decibelsToGain(volumeSlider.getValue()));
 
     addAndMakeVisible(panKnob);
@@ -44,11 +45,11 @@ MixerInput::MixerInput(Mode mode)
     panKnob.addListener(this);
     pan.setValue(panKnob.getValue());
 
-    addAndMakeVisible(&inputSelector);
-    inputSelector.addListener(this);
-
     addAndMakeVisible(&selectButton);
     selectButton.setButtonText("Select");
+
+    addAndMakeVisible(&inputLabel);
+    inputLabel.setEditable(true);
 
     comboboxChanged = std::make_unique<juce::ChangeBroadcaster>();
 
@@ -66,10 +67,12 @@ void MixerInput::paint (juce::Graphics& g)
 
 void MixerInput::resized()
 {
-    inputSelector.setBounds(0, 0, getWidth(), 25);
-    panKnob.setBounds(0, inputSelector.getBottom(), getWidth(), 25);
-    selectButton.setBounds(getWidth() / 4, panKnob.getBottom(), getWidth() / 2, 20);
-    volumeSlider.setBounds(0, selectButton.getBottom(), getWidth(), getHeight() - selectButton.getBottom());
+    inputLabel.setBounds(0, 0, getWidth(), 20);
+    panKnob.setBounds(0, inputLabel.getBottom(), getWidth(), 25);
+    selectButton.setBounds(15, getBottom() - 20, 70, 20);
+
+    volumeSlider.setBounds(0, panKnob.getBottom(), getWidth(), getHeight() - panKnob.getBottom() - inputLabel.getHeight());
+    
 }
 
 void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::AudioBuffer<float>* outputBuffer)
@@ -107,38 +110,24 @@ void MixerInput::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     compProcessor.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
-void MixerInput::clearInputSelector()
-{
-    inputSelector.clear();
-}
 
-void MixerInput::feedInputSelector(int channel, juce::String name, bool isSelectable)
-{
-    inputSelector.addItem(name, channel );
-    inputSelector.setItemEnabled(channel, isSelectable);
-}
-
-void MixerInput::selectDefaultInput(int defaultInput)
-{
-    inputSelector.setSelectedId(defaultInput + 1);
-}
 
 void MixerInput::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
 {
-    selectedInput = comboBoxThatHasChanged->getSelectedId() - 2;
-    comboboxChanged->sendChangeMessage();
+    /*selectedInput = comboBoxThatHasChanged->getSelectedId() - 2;
+    comboboxChanged->sendChangeMessage();*/
 }
 
-
+void MixerInput::setSelectedInput(int input)
+{
+    selectedInput = input;
+}
 int MixerInput::getSelectedInput()
 {
     return selectedInput;
 }
 
-void MixerInput::updateComboboxItemsState(int itemId, bool isEnabled)
-{
-    inputSelector.setItemEnabled(itemId, isEnabled);
-}
+
 
 void MixerInput::sliderValueChanged(juce::Slider* slider)
 {
@@ -156,6 +145,8 @@ void MixerInput::setInputIndex(int index)
 {
     inputIndex = index;
     filterProcessor.displaynumber = inputIndex;
+    inputLabel.setText(juce::String("Input " + juce::String(index + 1)), juce::NotificationType::dontSendNotification);
+    inputLabel.setJustificationType(juce::Justification::centred);
 }
 
 int MixerInput::getInputIndex()

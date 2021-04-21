@@ -4,10 +4,46 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="xbXPa2" name="MultiPlayer">
     <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
-      <FILE id="Oskf2m" name="Mixer.cpp" compile="1" resource="0" file="Source/Mixer.cpp"/>
-      <FILE id="vjYBJf" name="Mixer.h" compile="0" resource="0" file="Source/Mixer.h"/>
-      <FILE id="lhfgYC" name="RemoteInput.cpp" compile="1" resource="0" file="Source/RemoteInput.cpp"/>
-      <FILE id="GHrFKT" name="RemoteInput.h" compile="0" resource="0" file="Source/RemoteInput.h"/>
+      <GROUP id="{A6A32EBC-A6BD-89D1-EE96-B627C086893D}" name="Mixer">
+        <FILE id="QoCKHM" name="ChannelControlPannel.h" compile="0" resource="0"
+              file="Source/Mixer/ChannelControlPannel.h"/>
+        <FILE id="XQKsrX" name="CompEditor.h" compile="0" resource="0" file="Source/Mixer/CompEditor.h"/>
+        <FILE id="lgJ6Yr" name="CompProcessor.h" compile="0" resource="0" file="Source/Mixer/CompProcessor.h"/>
+        <FILE id="x6LSsH" name="FFTAnalyser.h" compile="0" resource="0" file="Source/Mixer/FFTAnalyser.h"/>
+        <FILE id="hSppaV" name="FilterBandEditor.h" compile="0" resource="0"
+              file="Source/Mixer/FilterBandEditor.h"/>
+        <FILE id="PTpg6B" name="FilterEditor.cpp" compile="1" resource="0"
+              file="Source/Mixer/FilterEditor.cpp"/>
+        <FILE id="YWmJYQ" name="FilterEditor.h" compile="0" resource="0" file="Source/Mixer/FilterEditor.h"/>
+        <FILE id="QBEPYJ" name="filterGraphPoint.h" compile="0" resource="0"
+              file="Source/Mixer/filterGraphPoint.h"/>
+        <FILE id="Q5lOnp" name="FilterProcessor.cpp" compile="1" resource="0"
+              file="Source/Mixer/FilterProcessor.cpp"/>
+        <FILE id="xLEZIm" name="FilterProcessor.h" compile="0" resource="0"
+              file="Source/Mixer/FilterProcessor.h"/>
+        <FILE id="JThrI5" name="InputPanel.cpp" compile="1" resource="0" file="Source/Mixer/InputPanel.cpp"/>
+        <FILE id="RC2efn" name="InputPanel.h" compile="0" resource="0" file="Source/Mixer/InputPanel.h"/>
+        <FILE id="nqPdmK" name="InputsControl.cpp" compile="1" resource="0"
+              file="Source/Mixer/InputsControl.cpp"/>
+        <FILE id="tmQssh" name="InputsControl.h" compile="0" resource="0" file="Source/Mixer/InputsControl.h"/>
+        <FILE id="NGD6CF" name="Mixer.cpp" compile="1" resource="0" file="Source/Mixer/Mixer.cpp"/>
+        <FILE id="kP7ltE" name="Mixer.h" compile="0" resource="0" file="Source/Mixer/Mixer.h"/>
+        <FILE id="rRtGhq" name="MixerInput.cpp" compile="1" resource="0" file="Source/Mixer/MixerInput.cpp"/>
+        <FILE id="J0Ddjw" name="MixerInput.h" compile="0" resource="0" file="Source/Mixer/MixerInput.h"/>
+        <FILE id="M7QcwQ" name="RemoteInput.cpp" compile="1" resource="0" file="Source/Mixer/RemoteInput.cpp"/>
+        <FILE id="Ge64LT" name="RemoteInput.h" compile="0" resource="0" file="Source/Mixer/RemoteInput.h"/>
+      </GROUP>
+      <GROUP id="{B14A7909-DE9B-0519-F1D9-67C76AB4710E}" name="Soundboard">
+        <FILE id="TgIwht" name="PlayerEditor.cpp" compile="1" resource="0"
+              file="Source/Soundboard/PlayerEditor.cpp"/>
+        <FILE id="QAphEq" name="PlayerEditor.h" compile="0" resource="0" file="Source/Soundboard/PlayerEditor.h"/>
+        <FILE id="hTZ2dY" name="PlayerProcessor.cpp" compile="1" resource="0"
+              file="Source/Soundboard/PlayerProcessor.cpp"/>
+        <FILE id="Jk70Dv" name="PlayerProcessor.h" compile="0" resource="0"
+              file="Source/Soundboard/PlayerProcessor.h"/>
+        <FILE id="QsWaWu" name="SoundBoard.cpp" compile="1" resource="0" file="Source/SoundBoard/SoundBoard.cpp"/>
+        <FILE id="ftYY0S" name="SoundBoard.h" compile="0" resource="0" file="Source/SoundBoard/SoundBoard.h"/>
+      </GROUP>
       <GROUP id="{08A6ACDD-BDD6-9325-6E8A-38EFA8F5D4C1}" name="nanodbc">
         <FILE id="FuaZkG" name="nanodbc.cpp" compile="1" resource="0" file="Source/nanodbc-master/nanodbc/nanodbc.cpp"/>
         <FILE id="LIqIHp" name="nanodbc.h" compile="0" resource="0" file="Source/nanodbc-master/nanodbc/nanodbc.h"/>
@@ -56,19 +92,6 @@
             file="Source/DataBaseImport.cpp"/>
       <FILE id="hNkghM" name="DataBaseImport.h" compile="0" resource="0"
             file="Source/DataBaseImport.h"/>
-      <FILE id="RvgWcF" name="MixerInput.cpp" compile="1" resource="0" file="Source/MixerInput.cpp"/>
-      <FILE id="f8I8Hs" name="MixerInput.h" compile="0" resource="0" file="Source/MixerInput.h"/>
-      <FILE id="jLMZar" name="FilterProcessor.cpp" compile="1" resource="0"
-            file="Source/FilterProcessor.cpp"/>
-      <FILE id="i1DCmr" name="FilterProcessor.h" compile="0" resource="0"
-            file="Source/FilterProcessor.h"/>
-      <FILE id="CQmQnD" name="FilterEditor.cpp" compile="1" resource="0"
-            file="Source/FilterEditor.cpp"/>
-      <FILE id="AtdSf4" name="FilterEditor.h" compile="0" resource="0" file="Source/FilterEditor.h"/>
-      <FILE id="gQacuX" name="filterGraphPoint.h" compile="0" resource="0"
-            file="Source/filterGraphPoint.h"/>
-      <FILE id="n8YR31" name="FilterBandEditor.h" compile="0" resource="0"
-            file="Source/FilterBandEditor.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK="0"

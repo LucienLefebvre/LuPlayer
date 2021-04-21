@@ -15,7 +15,7 @@
 #include "Recorder.h"
 #include "DataBaseBrowser.h"
 #include "DataBaseImport.h"
-#include "Mixer.h"
+#include "Mixer/Mixer.h"
 #include "nanodbc/nanodbc.h"
 
 //==============================================================================

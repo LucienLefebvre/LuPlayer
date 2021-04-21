@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "FFTAnalyser.h"
 //#include "filterHelpers.h"
 //#include "FilterEditor.h"
 
@@ -35,7 +36,7 @@ public:
 
     FilterProcessor();
     ~FilterProcessor() override;
-
+    FFTAnalyser analyser;
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(juce::AudioBuffer<float>* buffer);
 
@@ -45,7 +46,8 @@ public:
     void setFilterTypes(int filterBand, FilterTypes filterType);
     void createFilters(juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>& processor, FilterParameters params);
     juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> getFilterCoefs(int band);
-
+    void setBypassed(bool bypassed);
+    bool isBypassed();
     int displaynumber = 0;
 
 private:
@@ -57,7 +59,7 @@ private:
 
     juce::OwnedArray< juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>> processors;
     juce::OwnedArray<FilterParameters> filtersParams;
-
+    bool isFilterBypassed = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FilterProcessor)
 };

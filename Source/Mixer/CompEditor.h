@@ -104,6 +104,8 @@ public:
         if (editedCompProcessor != nullptr)
             reductionDB = editedCompProcessor->getReductionDB();
         int reductionRectHeight = reductionDB * getHeight() / 24;
+        if (reductionRectHeight < 0)
+            reductionRectHeight = 0;
         g.setColour(juce::Colour(40, 134, 189));
         g.fillRoundedRectangle(knobWidth * 2, 0, 20, reductionRectHeight, 4);
 

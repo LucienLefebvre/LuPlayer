@@ -73,7 +73,6 @@ public:
         reductionDB = 1;
         for (auto i = 0; i < reductionsGains.size(); i++)
             reductionDB = reductionDB * reductionsGains[i];
-        DBG(reductionDB);
         reductionMeasured = true;
     }
 

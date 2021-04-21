@@ -1,6 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
+
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="MultiPlayer\Source\Mixer">
+      <UniqueIdentifier>{84A88619-6307-C4E6-74EC-99BA546C6AB8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MultiPlayer\Source\Soundboard">
+      <UniqueIdentifier>{47F235E6-752E-8E21-542A-B8DC02129748}</UniqueIdentifier>
+    </Filter>
     <Filter Include="MultiPlayer\Source\nanodbc">
       <UniqueIdentifier>{F301E40E-967D-7851-CC8A-0D7A5E4BB715}</UniqueIdentifier>
     </Filter>
@@ -468,11 +475,35 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Mixer.cpp">
-      <Filter>MultiPlayer\Source</Filter>
+    <ClCompile Include="Source\Mixer\FilterEditor.cpp">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClCompile>
-    <ClCompile Include="Source\RemoteInput.cpp">
-      <Filter>MultiPlayer\Source</Filter>
+    <ClCompile Include="Source\Mixer\FilterProcessor.cpp">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mixer\InputPanel.cpp">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mixer\InputsControl.cpp">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mixer\Mixer.cpp">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mixer\MixerInput.cpp">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Mixer\RemoteInput.cpp">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Soundboard\PlayerEditor.cpp">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Soundboard\PlayerProcessor.cpp">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SoundBoard\SoundBoard.cpp">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
     </ClCompile>
     <ClCompile Include="Source\nanodbc-master\nanodbc\nanodbc.cpp">
       <Filter>MultiPlayer\Source\nanodbc</Filter>
@@ -520,15 +551,6 @@
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\DataBaseImport.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MixerInput.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\FilterProcessor.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\FilterEditor.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
     <ClCompile Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.cpp">
@@ -637,6 +659,9 @@
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_audio_basics\juce_audio_basics.cpp">
+      <Filter>JUCE Modules\juce_audio_basics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_audio_basics\juce_audio_basics.mm">
       <Filter>JUCE Modules\juce_audio_basics</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_audio_devices\audio_io\juce_AudioDeviceManager.cpp">
@@ -852,6 +877,9 @@
     <ClCompile Include="..\modules\juce_audio_devices\native\juce_mac_CoreAudio.cpp">
       <Filter>JUCE Modules\juce_audio_devices\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_audio_devices\native\juce_mac_CoreMidi.mm">
+      <Filter>JUCE Modules\juce_audio_devices\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_audio_devices\native\juce_win32_ASIO.cpp">
       <Filter>JUCE Modules\juce_audio_devices\native</Filter>
     </ClCompile>
@@ -871,6 +899,9 @@
       <Filter>JUCE Modules\juce_audio_devices\sources</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_audio_devices\juce_audio_devices.cpp">
+      <Filter>JUCE Modules\juce_audio_devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_audio_devices\juce_audio_devices.mm">
       <Filter>JUCE Modules\juce_audio_devices</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_audio_formats\codecs\flac\libFLAC\bitmath.c">
@@ -1044,6 +1075,9 @@
     <ClCompile Include="..\modules\juce_audio_formats\juce_audio_formats.cpp">
       <Filter>JUCE Modules\juce_audio_formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_audio_formats\juce_audio_formats.mm">
+      <Filter>JUCE Modules\juce_audio_formats</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_audio_processors\format\juce_AudioPluginFormat.cpp">
       <Filter>JUCE Modules\juce_audio_processors\format</Filter>
     </ClCompile>
@@ -1119,6 +1153,9 @@
     <ClCompile Include="..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\vst\vstpresetfile.cpp">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\vst</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_audio_processors\format_types\juce_AudioUnitPluginFormat.mm">
+      <Filter>JUCE Modules\juce_audio_processors\format_types</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_audio_processors\format_types\juce_LADSPAPluginFormat.cpp">
       <Filter>JUCE Modules\juce_audio_processors\format_types</Filter>
     </ClCompile>
@@ -1188,6 +1225,9 @@
     <ClCompile Include="..\modules\juce_audio_processors\juce_audio_processors.cpp">
       <Filter>JUCE Modules\juce_audio_processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_audio_processors\juce_audio_processors.mm">
+      <Filter>JUCE Modules\juce_audio_processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_audio_utils\audio_cd\juce_AudioCDReader.cpp">
       <Filter>JUCE Modules\juce_audio_utils\audio_cd</Filter>
     </ClCompile>
@@ -1212,10 +1252,22 @@
     <ClCompile Include="..\modules\juce_audio_utils\native\juce_android_BluetoothMidiDevicePairingDialogue.cpp">
       <Filter>JUCE Modules\juce_audio_utils\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_audio_utils\native\juce_ios_BluetoothMidiDevicePairingDialogue.mm">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_audio_utils\native\juce_linux_AudioCDReader.cpp">
       <Filter>JUCE Modules\juce_audio_utils\native</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_audio_utils\native\juce_linux_BluetoothMidiDevicePairingDialogue.cpp">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_audio_utils\native\juce_mac_AudioCDBurner.mm">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_audio_utils\native\juce_mac_AudioCDReader.mm">
+      <Filter>JUCE Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_audio_utils\native\juce_mac_BluetoothMidiDevicePairingDialogue.mm">
       <Filter>JUCE Modules\juce_audio_utils\native</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_audio_utils\native\juce_win_BluetoothMidiDevicePairingDialogue.cpp">
@@ -1234,6 +1286,9 @@
       <Filter>JUCE Modules\juce_audio_utils\players</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_audio_utils\juce_audio_utils.cpp">
+      <Filter>JUCE Modules\juce_audio_utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_audio_utils\juce_audio_utils.mm">
       <Filter>JUCE Modules\juce_audio_utils</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_core\containers\juce_AbstractFifo.cpp">
@@ -1369,6 +1424,21 @@
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_core\native\juce_linux_Threads.cpp">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_core\native\juce_mac_Files.mm">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_core\native\juce_mac_Network.mm">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_core\native\juce_mac_Strings.mm">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_core\native\juce_mac_SystemStats.mm">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_core\native\juce_mac_Threads.mm">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_core\native\juce_posix_NamedPipe.cpp">
@@ -1545,6 +1615,9 @@
     <ClCompile Include="..\modules\juce_core\juce_core.cpp">
       <Filter>JUCE Modules\juce_core</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_core\juce_core.mm">
+      <Filter>JUCE Modules\juce_core</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_data_structures\app_properties\juce_ApplicationProperties.cpp">
       <Filter>JUCE Modules\juce_data_structures\app_properties</Filter>
     </ClCompile>
@@ -1570,6 +1643,9 @@
       <Filter>JUCE Modules\juce_data_structures\values</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_data_structures\juce_data_structures.cpp">
+      <Filter>JUCE Modules\juce_data_structures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_data_structures\juce_data_structures.mm">
       <Filter>JUCE Modules\juce_data_structures</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_dsp\containers\juce_AudioBlock_test.cpp">
@@ -1680,6 +1756,9 @@
     <ClCompile Include="..\modules\juce_dsp\juce_dsp.cpp">
       <Filter>JUCE Modules\juce_dsp</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_dsp\juce_dsp.mm">
+      <Filter>JUCE Modules\juce_dsp</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_events\broadcasters\juce_ActionBroadcaster.cpp">
       <Filter>JUCE Modules\juce_events\broadcasters</Filter>
     </ClCompile>
@@ -1716,7 +1795,13 @@
     <ClCompile Include="..\modules\juce_events\native\juce_android_Messaging.cpp">
       <Filter>JUCE Modules\juce_events\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_events\native\juce_ios_MessageManager.mm">
+      <Filter>JUCE Modules\juce_events\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_events\native\juce_linux_Messaging.cpp">
+      <Filter>JUCE Modules\juce_events\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_events\native\juce_mac_MessageManager.mm">
       <Filter>JUCE Modules\juce_events\native</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_events\native\juce_win32_Messaging.cpp">
@@ -1732,6 +1817,9 @@
       <Filter>JUCE Modules\juce_events\timers</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_events\juce_events.cpp">
+      <Filter>JUCE Modules\juce_events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_events\juce_events.mm">
       <Filter>JUCE Modules\juce_events</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_graphics\colour\juce_Colour.cpp">
@@ -2016,6 +2104,12 @@
     <ClCompile Include="..\modules\juce_graphics\native\juce_linux_IconHelpers.cpp">
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_graphics\native\juce_mac_CoreGraphicsContext.mm">
+      <Filter>JUCE Modules\juce_graphics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_graphics\native\juce_mac_Fonts.mm">
+      <Filter>JUCE Modules\juce_graphics\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_graphics\native\juce_mac_IconHelpers.cpp">
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClCompile>
@@ -2038,6 +2132,9 @@
       <Filter>JUCE Modules\juce_graphics\placement</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_graphics\juce_graphics.cpp">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_graphics\juce_graphics.mm">
       <Filter>JUCE Modules\juce_graphics</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_gui_basics\application\juce_Application.cpp">
@@ -2313,10 +2410,34 @@
     <ClCompile Include="..\modules\juce_gui_basics\native\juce_ios_ContentSharer.cpp">
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_basics\native\juce_ios_FileChooser.mm">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_basics\native\juce_ios_UIViewComponentPeer.mm">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_basics\native\juce_ios_Windowing.mm">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_gui_basics\native\juce_linux_FileChooser.cpp">
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_gui_basics\native\juce_linux_Windowing.cpp">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_basics\native\juce_mac_FileChooser.mm">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_basics\native\juce_mac_MainMenu.mm">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_basics\native\juce_mac_MouseCursor.mm">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_basics\native\juce_mac_NSViewComponentPeer.mm">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_basics\native\juce_mac_Windowing.mm">
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_gui_basics\native\juce_win32_DragAndDrop.cpp">
@@ -2442,6 +2563,9 @@
     <ClCompile Include="..\modules\juce_gui_basics\juce_gui_basics.cpp">
       <Filter>JUCE Modules\juce_gui_basics</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_basics\juce_gui_basics.mm">
+      <Filter>JUCE Modules\juce_gui_basics</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_gui_extra\code_editor\juce_CodeDocument.cpp">
       <Filter>JUCE Modules\juce_gui_extra\code_editor</Filter>
     </ClCompile>
@@ -2502,6 +2626,9 @@
     <ClCompile Include="..\modules\juce_gui_extra\native\juce_ios_PushNotifications.cpp">
       <Filter>JUCE Modules\juce_gui_extra\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_extra\native\juce_ios_UIViewComponent.mm">
+      <Filter>JUCE Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_gui_extra\native\juce_linux_X11_SystemTrayIcon.cpp">
       <Filter>JUCE Modules\juce_gui_extra\native</Filter>
     </ClCompile>
@@ -2511,10 +2638,19 @@
     <ClCompile Include="..\modules\juce_gui_extra\native\juce_linux_XEmbedComponent.cpp">
       <Filter>JUCE Modules\juce_gui_extra\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_extra\native\juce_mac_AppleRemote.mm">
+      <Filter>JUCE Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_extra\native\juce_mac_NSViewComponent.mm">
+      <Filter>JUCE Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\modules\juce_gui_extra\native\juce_mac_PushNotifications.cpp">
       <Filter>JUCE Modules\juce_gui_extra\native</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_gui_extra\native\juce_mac_SystemTrayIcon.cpp">
+      <Filter>JUCE Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_extra\native\juce_mac_WebBrowserComponent.mm">
       <Filter>JUCE Modules\juce_gui_extra\native</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_gui_extra\native\juce_win32_ActiveXComponent.cpp">
@@ -2530,6 +2666,9 @@
       <Filter>JUCE Modules\juce_gui_extra\native</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_gui_extra\juce_gui_extra.cpp">
+      <Filter>JUCE Modules\juce_gui_extra</Filter>
+    </ClCompile>
+    <ClCompile Include="..\modules\juce_gui_extra\juce_gui_extra.mm">
       <Filter>JUCE Modules\juce_gui_extra</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_osc\osc\juce_OSCAddress.cpp">
@@ -2603,11 +2742,53 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Mixer.h">
-      <Filter>MultiPlayer\Source</Filter>
+    <ClInclude Include="Source\Mixer\ChannelControlPannel.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClInclude>
-    <ClInclude Include="Source\RemoteInput.h">
-      <Filter>MultiPlayer\Source</Filter>
+    <ClInclude Include="Source\Mixer\CompEditor.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\CompProcessor.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\FFTAnalyser.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\FilterBandEditor.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\FilterEditor.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\filterGraphPoint.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\FilterProcessor.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\InputPanel.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\InputsControl.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\Mixer.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\MixerInput.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\RemoteInput.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Soundboard\PlayerEditor.h">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Soundboard\PlayerProcessor.h">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SoundBoard\SoundBoard.h">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
     </ClInclude>
     <ClInclude Include="Source\nanodbc-master\nanodbc\nanodbc.h">
       <Filter>MultiPlayer\Source\nanodbc</Filter>
@@ -2658,21 +2839,6 @@
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\DataBaseImport.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MixerInput.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\FilterProcessor.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\FilterEditor.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\filterGraphPoint.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\FilterBandEditor.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.h">
@@ -5095,12 +5261,6 @@
     </ClInclude>
     <ClInclude Include="JuceLibraryCode\JuceHeader.h">
       <Filter>JUCE Library Code</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\CompEditor.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\CompProcessor.h">
-      <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

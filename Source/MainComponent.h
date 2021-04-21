@@ -12,6 +12,7 @@
 #include <memory>
 #include <math.h>
 #include <Ebu128LoudnessMeter.h>
+
 //#include <MacrosAndJuceHeaders.h>
 //#include <SecondOrderIIRFilter.h>
 //==============================================================================
@@ -393,5 +394,10 @@ private:
 
     //MIXER
     std::unique_ptr<juce::AudioBuffer<float>> mixerOutputBuffer;
+
+
+
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

@@ -11,7 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 //ajouter double clique pour reset
-//ajouter control pour régler Q
+//ajouter control pour rÃ©gler Q
 //==============================================================================
 /*
 */
@@ -60,6 +60,10 @@ public:
             colour = juce::Colours::white;
         }
         repaint();
+    }
+    juce::Colour getColour()
+    {
+        return colour;
     }
 
     int getPointSize()

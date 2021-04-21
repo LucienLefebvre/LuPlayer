@@ -38,6 +38,7 @@ public:
     void MixerInput::feedInputSelector(int channel, juce::String name, bool isSelectable);
     void MixerInput::clearInputSelector();
     void MixerInput::selectDefaultInput(int defaultInput);
+    void setSelectedInput(int input);
     int MixerInput::getSelectedInput();
     void MixerInput::updateComboboxItemsState(int itemId, bool isEnabled);
     void MixerInput::setInputIndex(int index);
@@ -55,9 +56,10 @@ private:
     Mode inputMode;
     int inputIndex;
 
+
+    juce::Label inputLabel;
     juce::Slider volumeSlider;
     juce::Slider panKnob;
-    juce::ComboBox inputSelector;
 
 
     double actualSampleRate;

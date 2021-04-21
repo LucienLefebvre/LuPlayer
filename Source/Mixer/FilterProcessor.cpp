@@ -34,15 +34,17 @@ void FilterProcessor::prepareToPlay(int samplesPerBlockExpected, double sampleRa
     actualSampleRate = sampleRate;
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
     filterBuffer = std::make_unique<juce::AudioBuffer<float>>(2, actualSamplesPerBlockExpected);
+    analyser.prepareToPlay(samplesPerBlockExpected, sampleRate);
     initializeParameters();
 }
 
 void FilterProcessor::getNextAudioBlock(juce::AudioBuffer<float>* buffer)
 {
     juce::dsp::AudioBlock<float> block(*buffer);
-
+    analyser.addAudioData(*buffer);
     for (auto i = 0; i < processors.size(); i++)
     {
+        if (!isFilterBypassed)
         processors[i]->process(juce::dsp::ProcessContextReplacing<float>(block));
     }
 }
@@ -119,4 +121,13 @@ void FilterProcessor::setFilterParameters(int filterBand, FilterParameters param
     filtersParams[filterBand]->Q = params.Q;
     filtersParams[filterBand]->type = params.type;
     createFilters(*processors[filterBand], params);
+}
+
+void FilterProcessor::setBypassed(bool bypassed)
+{
+    isFilterBypassed = bypassed;
+}
+bool FilterProcessor::isBypassed()
+{
+    return isFilterBypassed;
 }
