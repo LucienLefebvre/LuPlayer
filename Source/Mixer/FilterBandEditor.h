@@ -60,14 +60,24 @@ public:
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         frequencySlider.setComponentID("FREQUENCY");
 
-        addAndMakeVisible(&filterTypeSelector);
+        /*addAndMakeVisible(&filterTypeSelector);
         filterTypeSelector.addItem("Bell", 1);
         filterTypeSelector.addItem("Low Shelf", 2);
         filterTypeSelector.addItem("High Shelf", 3);
         filterTypeSelector.addItem("HPF", 4);
         filterTypeSelector.addItem("LPF", 5);
         filterTypeSelector.setSelectedItemIndex(0);
-        filterTypeSelector.addListener(this);
+        filterTypeSelector.addListener(this);*/
+
+        addAndMakeVisible(&filterTypeButton);
+        filterTypeButton.onClick = [this] {popupMenuClicked(); };
+
+        filterTypeMenu.addItem(1, "Bell", true, false);
+        filterTypeMenu.addItem(2, "Low Shelf", true, false);
+        filterTypeMenu.addItem(3, "High Shelf", true, false);
+        filterTypeMenu.addItem(4, "HPF", true, false);
+        filterTypeMenu.addItem(5, "LPF", true, false);
+
     }
 
     ~FilterBandEditor() override
@@ -81,8 +91,8 @@ public:
 
     void resized() override
     {
-        filterTypeSelector.setBounds(0, 0, knobWidth - 24, 20);
-        qSlider.setBounds(-12, filterTypeSelector.getBottom(), knobWidth, knobHeight);
+        filterTypeButton.setBounds(0, 0, knobWidth - 24, 20);
+        qSlider.setBounds(-12, filterTypeButton.getBottom(), knobWidth, knobHeight);
         frequencySlider.setBounds(-12, qSlider.getBottom(), knobWidth, knobHeight);
         gainSlider.setBounds(-12, frequencySlider.getBottom(), knobWidth, knobHeight);
     }
@@ -93,31 +103,61 @@ public:
         switch (filterType)
         {
         case FilterProcessor::FilterTypes::Bell :
-            filterTypeSelector.setSelectedItemIndex(0);
+            filterTypeButton.setButtonText("Bell");
+            setVisibleSlidersForHpfLpf(false);
             break;
         case FilterProcessor::FilterTypes::LowShelf:
-            filterTypeSelector.setSelectedItemIndex(1);
+            filterTypeButton.setButtonText("Low Shelf");
+            setVisibleSlidersForHpfLpf(false);
             break;
         case FilterProcessor::FilterTypes::HighShelf:
-            filterTypeSelector.setSelectedItemIndex(2);
+            filterTypeButton.setButtonText("High Shelf");
+            setVisibleSlidersForHpfLpf(false);
             break;
         case FilterProcessor::FilterTypes::HPF:
-            filterTypeSelector.setSelectedItemIndex(3);
+            filterTypeButton.setButtonText("HPF");
+            setVisibleSlidersForHpfLpf(true);
             break;
         case FilterProcessor::FilterTypes::LPF:
-            filterTypeSelector.setSelectedItemIndex(4);
+            filterTypeButton.setButtonText("LPF");
+            setVisibleSlidersForHpfLpf(true);
             break;
         }
     }
-
-    void mouseEnter(const juce::MouseEvent& event)
+    
+    void popupMenuClicked()
     {
+        int result = filterTypeMenu.show();
+        switch (result)
+        {
+        case 1:
+            filterType = FilterProcessor::FilterTypes::Bell;
+            filterTypeButton.setButtonText("Bell");
+            setVisibleSlidersForHpfLpf(false);
+            break;
+        case 2:
+            filterType = FilterProcessor::FilterTypes::LowShelf;
+            filterTypeButton.setButtonText("Low Shelf");
+            setVisibleSlidersForHpfLpf(false);
+            break;
+        case 3:
+            filterType = FilterProcessor::FilterTypes::HighShelf;
+            filterTypeButton.setButtonText("High Shelf");
+            setVisibleSlidersForHpfLpf(false);
+            break;
+        case 4:
+            filterType = FilterProcessor::FilterTypes::HPF;
+            filterTypeButton.setButtonText("HPF");
+            setVisibleSlidersForHpfLpf(true);
+            break;
+        case 5:
+            filterType = FilterProcessor::FilterTypes::LPF;
+            filterTypeButton.setButtonText("LPF");
+            setVisibleSlidersForHpfLpf(true);
+            break;
 
-    }
-
-    void mouseExit(const juce::MouseEvent& event)
-    {
-
+        }
+        comboBoxBroadcaster.sendChangeMessage();
     }
 
     void setSlidersThumbColours(juce::Colour colour)
@@ -141,6 +181,14 @@ public:
         }
     }
 
+
+    void enableControl(bool isEnabled)
+    {
+        qSlider.setEnabled(isEnabled);
+        frequencySlider.setEnabled(isEnabled);
+        gainSlider.setEnabled(isEnabled);
+        filterTypeButton.setEnabled(isEnabled);
+    }
     FilterProcessor::FilterTypes getFilterType()
     {
         return filterType;
@@ -193,5 +241,10 @@ private:
     int knobWidth = 80;
     int knobHeight = 80;
     FilterProcessor::FilterTypes filterType;
+
+    juce::PopupMenu filterTypeMenu;
+
+
+    juce::TextButton filterTypeButton;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterBandEditor)
 };

@@ -63,6 +63,8 @@ MainComponent::MainComponent() :
     soundPlayers[0]->myPlaylists[0]->cuePlaylistBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
 
+    //ADD MIXER
+    addAndMakeVisible(&mixer);
     //ADD BOTTOM COMPONENT
     addAndMakeVisible(bottomComponent);
     myMixer.addInputSource(&bottomComponent.myMixer, false);
@@ -205,7 +207,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
               25, 350, // size must be between 20% and 60% of the available space
               350);        // and its preferred size is 50 pixels
           Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
-          myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
+          myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - mixerHeight - 4, true, false);
     }
     if (source == &deviceManager) //save devicemanager state each time it changes
     {
@@ -230,6 +232,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
                     deviceManager.removeMidiInputDeviceCallback(input.identifier, this);
             }
             bottomComponent.mixerPanel.inputPanel.channelEditor.setDeviceManagerInfos(deviceManager);
+            mixer.inputPanel.channelEditor.setDeviceManagerInfos(deviceManager);
         }
     }
 
@@ -364,7 +367,7 @@ void MainComponent::deleteConvertedFiles() //this delete the converted files sin
 
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
-
+    mixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
     myMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
     myCueMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
     bottomComponent.prepareToPlay(samplesPerBlockExpected, sampleRate);
@@ -493,7 +496,8 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 
             //MIXER
             //juce::AudioBuffer<float>* mixerOutputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
-            bottomComponent.mixerPanel.getNextAudioBlock(bufferToFill.buffer, mixerOutputBuffer.get());
+            //bottomComponent.mixerPanel.getNextAudioBlock(bufferToFill.buffer, mixerOutputBuffer.get());
+            mixer.getNextAudioBlock(bufferToFill.buffer, mixerOutputBuffer.get());
             //
 
             bufferToFill.clearActiveBufferRegion();
@@ -559,7 +563,7 @@ void MainComponent::paint(juce::Graphics& g)
     g.setColour(juce::Colour(40, 134, 189));
     //horizontalDividerBar.get()->paint(g);
     g.fillRect(horizontalDividerBar.get()->getBounds());
-
+    g.fillRect(0, mixer.getY() - 4, getWidth(), 4);
 }
 
 void MainComponent::resized()
@@ -573,11 +577,11 @@ void MainComponent::resized()
         soundPlayers[0]->setBounds(0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - bottomHeight);
 
     bottomComponent.setBounds(0, getHeight(), getWidth(), 25);
-
+    mixer.setBounds(0, getHeight() - mixerHeight, getWidth(), mixerHeight);
     //Layout the window
     horizontalDividerBar.get()->setBounds(0, 200 - bottomHeight, getWidth(), 8);
     Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
-    myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
+    myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - mixerHeight - 4, true, false);
 }
 
 

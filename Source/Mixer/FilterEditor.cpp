@@ -14,7 +14,7 @@
 FilterEditor::FilterEditor()
 {
     addMouseListener(this, true);
-    juce::Timer::startTimer(10);
+    juce::Timer::startTimer(50);
     for (auto i = 0; i < filterBandsNumber; i++)
     {
         addFilterBand(i);
@@ -111,9 +111,20 @@ void FilterEditor::plotFilterGraph(juce::Graphics& g)
         plotMagnitudeArray(g, highMagnitudeArray, 2);
     }
     //global filter curve
-    g.setColour(juce::Colour(40, 134, 189));
-    g.setOpacity(1.0);
-    plotMagnitudeArray(g, magnitudeArray, 3, true);
+    if (!isFilterBypassed)
+    {
+        g.setColour(juce::Colour(40, 134, 189));
+        g.setOpacity(1.0);
+        plotMagnitudeArray(g, magnitudeArray, 3, true);
+    }
+    else 
+    {
+        g.setColour(juce::Colours::lightgrey);
+        g.setOpacity(0.2);
+        plotMagnitudeArray(g, magnitudeArray, 2, false);
+    }
+
+
 
 
     //Draw Point info
@@ -156,23 +167,25 @@ void FilterEditor::plotFilterGraph(juce::Graphics& g)
 void FilterEditor::plotMagnitudeArray(juce::Graphics& g, juce::Array<double> array, int lineSize, bool fill)
 {
     int oldX = zeroHzX;
-    int oldY = zeroDbY - array[0] * zeroDbY / 12;
+    int oldY = zeroDbY;;
+    juce::Path p;
+    p.clear();
+    p.startNewSubPath(oldX, oldY);
     for (auto i = 0; i < frequencyArray.size(); i++)
     {
         int x = zeroHzX + i;
         int y = zeroDbY - array[i] * zeroDbY / 12;
+        p.lineTo(x, y);
+    }
 
-        if (fill)
-        {
-            g.setOpacity(1.0);
-            g.drawLine(oldX, oldY, x, y, lineSize);
-            g.setOpacity(0.2);
-            g.drawLine(zeroHzX + i, zeroDbY, x, y, 1);
-        }
-        else
-            g.drawLine(oldX, oldY, x, y, lineSize);
-        oldX = x;
-        oldY = y;
+    p.lineTo(frequencyArray.size() + zeroHzX, 2*zeroDbY);
+    p.lineTo(oldX, 2*zeroDbY);
+    p.lineTo(oldX, oldY);
+    g.strokePath(p, juce::PathStrokeType(3.0));
+    if (fill)
+    {
+        g.setOpacity(0.2);
+        g.fillPath(p);
     }
 }
 
@@ -247,6 +260,7 @@ void FilterEditor::setEditedFilterProcessor(FilterProcessor& processor)
         filterBands[i]->qSlider.setValue(bandParams.Q);
         filterBands[i]->setFilterType(bandParams.type);
     }
+    updateBypassed();
     createMagnitudeArray();
     updateFilterGraphPoints();
 }
@@ -277,12 +291,13 @@ void FilterEditor::createMagnitudeArray()
         lowMidMagnitudeArray.set(i, juce::Decibels::gainToDecibels(filterCoefficients[1].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)));
         highMidMagnitudeArray.set(i, juce::Decibels::gainToDecibels(filterCoefficients[2].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)));
         highMagnitudeArray.set(i, juce::Decibels::gainToDecibels(filterCoefficients[3].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)));
-        /*magnitudeArray.set(i, juce::Decibels::gainToDecibels(filterCoefficients[0].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)
-                                                            * filterCoefficients[1].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)
-                                                            * filterCoefficients[2].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)
-                                                            * filterCoefficients[3].getMagnitudeForFrequency(frequencyArray[i], actualSampleRate)));*/
         magnitudeArray.set(i, lowMagnitudeArray[i] + lowMidMagnitudeArray[i] + highMidMagnitudeArray[i] + highMagnitudeArray[i]);
     }
+
+
+
+
+
     magnitudeArrayCreated = true;
     magnitudeChanged = false;
     repaint();
@@ -394,6 +409,25 @@ void FilterEditor::mouseUp(const juce::MouseEvent& event)
     pointDragged = false;
 }
 
+void FilterEditor::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
+{
+    DBG(wheel.deltaY);
+    for (auto i = 0; i < filterPoints.size(); i++)
+    {
+        auto x = event.getEventRelativeTo(filterPoints[i]).getPosition().getX();
+        auto y = event.getEventRelativeTo(filterPoints[i]).getPosition().getY();
+        if (filterPoints[i]->contains(juce::Point<int>(x, y)))
+        {
+            //DBG("wheel");
+            auto* slider = &filterBands[i]->qSlider;
+            if (wheel.deltaY > 0)
+                slider->setValue(slider->getValue() * 1.2);
+            else if (wheel.deltaY < 0)
+                slider->setValue(slider->getValue() * 0.8);
+        }
+    }
+}
+
 void FilterEditor::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     for (auto i = 0; i < filterPoints.size(); i++)
@@ -424,8 +458,35 @@ void FilterEditor::changeListenerCallback(juce::ChangeBroadcaster* source)
         else if (source == &filterBands[i]->comboBoxBroadcaster)
         {
             sendParameters(i);
+            if (filterBands[i]->getFilterType() == FilterProcessor::FilterTypes::HighShelf
+                || filterBands[i]->getFilterType() == FilterProcessor::FilterTypes::LowShelf)
+            {
+                filterBands[i]->qSlider.setRange(0.1f, 1.0f);
+                filterBands[i]->qSlider.setNumDecimalPlacesToDisplay(1);
+            }
+            else
+            {
+                filterBands[i]->qSlider.setRange(0.1f, 10.0f);
+                filterBands[i]->qSlider.setNumDecimalPlacesToDisplay(1);
+            }
         }
     }
+}
+
+void FilterEditor::updateBypassed()
+{
+    isFilterBypassed = editedFilterProcessor->isBypassed();
+
+        DBG("bypassed");
+    for (auto i = 0; i < filterBands.size(); i++)
+    {
+        filterBands[i]->enableControl(!isFilterBypassed);
+        if (isFilterBypassed)
+            filterPoints[i]->setColour(4);
+        else
+            filterPoints[i]->setColour(i);
+    }
+    repaint();
 }
 
 void FilterEditor::sendParameters(int i)
@@ -437,7 +498,8 @@ void FilterEditor::sendParameters(int i)
     params.type = filterBands[i]->getFilterType();
     editedFilterProcessor->setFilterParameters(i, params);
     magnitudeChanged = true;
-    updateFilterGraphPoints();
+    parametersChanged = true;
+    
 }
 
 void FilterEditor::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
@@ -478,6 +540,8 @@ void FilterEditor::timerCallback()
 {
     if (magnitudeChanged)
     createMagnitudeArray();
+    if (parametersChanged)
+        updateFilterGraphPoints();
     /*if (editedFilterProcessor->analyser.checkForNewData())
         repaint();*/
 }

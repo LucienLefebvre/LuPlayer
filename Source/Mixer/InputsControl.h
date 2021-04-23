@@ -41,6 +41,8 @@ private:
     double actualSampleRate;
     int actualSamplesPerBlockExpected;
 
+    bool isSelectedInput = false;
+
     std::unique_ptr<juce::AudioBuffer<float>> mixerBuffer;
     std::unique_ptr<juce::AudioBuffer<float>> selectedInputBuffer;
 

@@ -56,6 +56,9 @@ public:
         case 3:
             colour = juce::Colours::yellow;
             break;
+        case 4:
+            colour = juce::Colours::grey;
+            break;
         default:
             colour = juce::Colours::white;
         }

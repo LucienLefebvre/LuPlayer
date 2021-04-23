@@ -18,7 +18,8 @@
 class MixerInput : public juce::Component,
     public juce::ComboBox::Listener,
     public juce::ChangeBroadcaster,
-    public juce::Slider::Listener
+    public juce::Slider::Listener,
+    public juce::Label::Listener
 {
 public:
     enum Mode
@@ -33,33 +34,48 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
-    void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::AudioBuffer<float>* outputBuffer);
-    void MixerInput::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
-    void MixerInput::feedInputSelector(int channel, juce::String name, bool isSelectable);
-    void MixerInput::clearInputSelector();
-    void MixerInput::selectDefaultInput(int defaultInput);
-    void setSelectedInput(int input);
-    int MixerInput::getSelectedInput();
-    void MixerInput::updateComboboxItemsState(int itemId, bool isEnabled);
-    void MixerInput::setInputIndex(int index);
-    int MixerInput::getInputIndex();
+    void getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::AudioBuffer<float>* outputBuffer);
+    void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
 
-    std::unique_ptr<juce::ChangeBroadcaster> comboboxChanged;
+    void feedInputSelector(int channel, juce::String name, bool isSelectable);
+    void clearInputSelector();
+    void selectDefaultInput(int defaultInput);
+    void updateComboboxItemsState(int itemId, bool isEnabled);
+
+    void setSelectedInput(int input);
+    int getSelectedInput();
+
+    void setInputIndex(int index);
+    int getInputIndex();
+
+    void setName(juce::String s);
+    juce::String getName();
+
+    void setTrimLevel(float l);
+    float getTrimLevel();
+
+    void setInputColour(juce::Colour c);
+    juce::Colour getInputColour();
+
+    std::unique_ptr<juce::ChangeBroadcaster> inputEdited;
     juce::TextButton selectButton;
 
     FilterProcessor filterProcessor;
     CompProcessor compProcessor;
 private:
-    void MixerInput::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
-    void MixerInput::sliderValueChanged(juce::Slider* slider);
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
+    void sliderValueChanged(juce::Slider* slider);
+    void labelTextChanged(juce::Label* labelThatHasChanged);
     std::unique_ptr<juce::AudioBuffer<float>> channelBuffer;
     Mode inputMode;
     int inputIndex;
 
 
     juce::Label inputLabel;
+    juce::String name;
     juce::Slider volumeSlider;
     juce::Slider panKnob;
+
 
 
     double actualSampleRate;
@@ -68,10 +84,11 @@ private:
     int selectedInput = -1;
 
     juce::LinearSmoothedValue<float> level;
+    juce::LinearSmoothedValue<float> trimLevel;
     juce::LinearSmoothedValue<float> pan;
     float panL;
     float panR;
 
-
+    juce::Colour inputColour;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MixerInput)
 };

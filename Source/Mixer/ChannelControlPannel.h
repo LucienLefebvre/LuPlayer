@@ -13,23 +13,25 @@
 #include <JuceHeader.h>
 #include "MixerInput.h"
 #include "FilterProcessor.h"
+#include "FilterEditor.h"
 //#include "InputsControl.h"
 //==============================================================================
 /*
 */
-class ChannelControlPannel  : public juce::Component, public juce::ComboBox::Listener
+class ChannelControlPannel  : public juce::Component, public juce::ComboBox::Listener, public juce::Label::Listener,
+    public juce::Slider::Listener, public juce::ChangeListener
 {
 public:
     ChannelControlPannel()
     {
-        addAndMakeVisible(&inputSelector);
+        channelColour = juce::Colour(juce::uint8(50), 62, 68, 1.0f);
         inputSelector.addListener(this);
 
         addAndMakeVisible(trimSlider);
         trimSlider.setRange(-24, 24, 0.5);
         trimSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
         trimSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 10);
-        //trimSlider.addListener(this);
+        trimSlider.addListener(this);
         trimSlider.setDoubleClickReturnValue(true, 0.);
         trimSlider.setPopupDisplayEnabled(true, true, this, 2000);
         trimSlider.setScrollWheelEnabled(false);
@@ -41,10 +43,12 @@ public:
         inputNameLabel.setText("INPUT", juce::NotificationType::dontSendNotification);
         inputNameLabel.setJustificationType(juce::Justification::centred);
         inputNameLabel.setEditable(true);
-        
+        inputNameLabel.addListener(this);
+
         addAndMakeVisible(&eqButton);
         eqButton.setButtonText("EQ");
         eqButton.setSize(80, 18);
+        eqButton.onClick = [this] {eqButtonClicked(); };
 
         addAndMakeVisible(&gateButton);
         gateButton.setButtonText("Gate");
@@ -62,15 +66,21 @@ public:
         limiterButton.setButtonText("Limiter");
         limiterButton.setSize(80, 18);
         
+        addAndMakeVisible(&optionButton);
+        optionButton.onClick = [this] {optionButtonClicked(); };
+
+        addAndMakeVisible(inputSelector);
+        inputSelector.addListener(this);
     }
 
     ~ChannelControlPannel() override
     {
+
     }
 
     void paint (juce::Graphics& g) override
     {
-        g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
+        g.fillAll (channelColour);   // clear the background
 
     }
 
@@ -84,26 +94,39 @@ public:
         compButton.setCentrePosition(getWidth() / 2, gateButton.getBottom() + 11);
         deesserButton.setCentrePosition(getWidth() / 2, compButton.getBottom() + 11);
         limiterButton.setCentrePosition(getWidth() / 2, deesserButton.getBottom() + 11);
-
+        optionButton.setBounds(0, getHeight() - 20, getWidth(), 20);
     }
 
     void setEditedProcessors(MixerInput& editedInput)
     {
         editedMixerInput = &editedInput;
+        updateInputInfo();
 
 
-        //input selector
+    }
+    void updateInputInfo()
+    {
+        //Colour
+        channelColour = editedMixerInput->getInputColour();
+        //name
+        inputNameLabel.setText(editedMixerInput->getName(), juce::NotificationType::dontSendNotification);
+        //selector
         inputSelector.setSelectedId(editedMixerInput->getSelectedInput() + 2, juce::NotificationType::dontSendNotification);
-
+        //trim knob
+        trimSlider.setValue(juce::Decibels::gainToDecibels(editedMixerInput->getTrimLevel()));
         //eq button
         if (!editedMixerInput->filterProcessor.isBypassed())
             eqButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(40, 134, 189));
+        else
+            eqButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        
+        repaint();
+    }
+    void setEditedEditors(FilterEditor& f)
+    {
+        filterEditor = &f;
     }
 
-    //void setInputsControl(InputsControl& inputs)
-    //{
-    //    //inputsControl = &inputs;
-    //}
 
     void setDeviceManagerInfos(juce::AudioDeviceManager& devicemanager)
     {
@@ -112,19 +135,46 @@ public:
         inputsChannelsName = deviceManager->getCurrentAudioDevice()->getInputChannelNames();
         
         updateInputSelectors();
-        DBG("device selector info");
     }
 
     void updateInputSelectors()
     {
-
         inputSelector.clear();
         inputSelector.addItem("None", 1);
         for (auto g = 0; g < numInputsChannels; g++)
         {
             inputSelector.addItem(inputsChannelsName[g], g + 2);
         }
+    }
 
+    void labelTextChanged(juce::Label* labelThatHasChanged)
+    {
+        if (labelThatHasChanged == &inputNameLabel)
+        editedMixerInput->setName(labelThatHasChanged->getText());
+    }
+
+    void sliderValueChanged(juce::Slider* slider)
+    {
+        if (slider == &trimSlider)
+            editedMixerInput->setTrimLevel(juce::Decibels::decibelsToGain(slider->getValue()));
+    }
+
+    void eqButtonClicked()
+    {
+        if (!editedMixerInput->filterProcessor.isBypassed())
+        {
+            editedMixerInput->filterProcessor.setBypassed(true);
+            eqButton.setColour(juce::TextButton::ColourIds::buttonColourId, 
+                                getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+            filterEditor->updateBypassed();
+        }
+        else
+        {
+            editedMixerInput->filterProcessor.setBypassed(false);
+            eqButton.setColour(juce::TextButton::ColourIds::buttonColourId, 
+                                juce::Colour(40, 134, 189));
+            filterEditor->updateBypassed();
+        }
     }
 
     void updateInputSelectorsState()
@@ -153,8 +203,28 @@ public:
         //}
 
     }
+    void optionButtonClicked()
+    {
+        auto cs = std::make_unique<juce::ColourSelector>();
+        cs->setName("colour");
+        cs->addChangeListener(this);
+        cs->setColour(juce::ColourSelector::backgroundColourId, juce::Colours::transparentBlack);
+        cs->setCurrentColour(channelColour, juce::NotificationType::dontSendNotification);
+        cs->setSize(300, 400);
+        juce::CallOutBox::launchAsynchronously(std::move(cs), optionButton.getScreenBounds(), nullptr);
 
+    }
 
+    void changeListenerCallback(juce::ChangeBroadcaster* source)
+    {
+        if (juce::ColourSelector* cs = dynamic_cast <juce::ColourSelector*> (source))
+        {
+            channelColour = cs->getCurrentColour();
+            editedMixerInput->setInputColour(channelColour);
+            repaint();
+        }
+
+    }
 private:
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
     {
@@ -168,9 +238,17 @@ private:
     MixerInput* editedMixerInput;
     FilterProcessor* editedFilterProcessor;
     CompProcessor* editedCompProcessor;
+    FilterEditor* filterEditor;
+
+    juce::TextButton optionButton;
+    std::unique_ptr<juce::ColourSelector> colourSelector;
+
     juce::ComboBox inputSelector;
     juce::Slider trimSlider;
     juce::Label inputNameLabel;
+
+    juce::Colour channelColour;
+
     juce::TextButton eqButton;
     juce::TextButton compButton;
     juce::TextButton gateButton;
@@ -181,5 +259,7 @@ private:
     juce::StringArray inputsChannelsName;
     juce::AudioDeviceManager* deviceManager;
     juce::Array<bool> selectedInputs;
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelControlPannel)
 };

@@ -12,7 +12,7 @@
 #include <memory>
 #include <math.h>
 #include <Ebu128LoudnessMeter.h>
-
+#include "Mixer/Mixer.h"
 //#include <MacrosAndJuceHeaders.h>
 //#include <SecondOrderIIRFilter.h>
 //==============================================================================
@@ -394,7 +394,8 @@ private:
 
     //MIXER
     std::unique_ptr<juce::AudioBuffer<float>> mixerOutputBuffer;
-
+    Mixer mixer;
+    int mixerHeight = 260;
 
 
 

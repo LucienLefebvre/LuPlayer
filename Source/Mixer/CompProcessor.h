@@ -27,6 +27,24 @@ public:
         float release = 50.0f;
         float gain = 0.0f;
     };
+    struct GateParameters
+    {
+        float threshold = 0.0f;
+        float ratio = 1.0f;
+        float attack = 20.0f;
+        float release = 50.0f;
+    };
+    struct LimitParameters
+    {
+        float threshold = 0.0f;
+        float release = 50.0f;
+    };
+    struct DeesserParameters
+    {
+        float threshold = 0.0f;
+        float range = 1.0f;
+        float frequency = 80000.0f;
+    };
     CompProcessor()
     {
         juce::Timer::startTimer(50);
@@ -135,9 +153,20 @@ public:
 private:
     double actualSampleRate;
     double actualSamplesPerBlockExpected;
+
     juce::dsp::Compressor<float> compressor;
     juce::dsp::Gain<float> gain;
     CompParameters compParams;
+
+    juce::dsp::NoiseGate<float> gate;
+    GateParameters gateParams;
+
+    juce::dsp::Limiter<float> limiter;
+    LimitParameters limitParams;
+
+    juce::dsp::Compressor<float> deesser;
+    DeesserParameters deesserParams;
+
     float inputRMS = 0.0f;
     float beforeGainRms = 0.0f;
     juce::Array<float> reductionsGains;

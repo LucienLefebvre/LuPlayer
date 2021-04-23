@@ -18,6 +18,7 @@ MixerInput::MixerInput(Mode mode)
     {
 
     }
+    inputColour = juce::Colour(juce::uint8(50), 62, 68, 1.0f);
 
     addAndMakeVisible(&volumeSlider);
     volumeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
@@ -50,9 +51,10 @@ MixerInput::MixerInput(Mode mode)
 
     addAndMakeVisible(&inputLabel);
     inputLabel.setEditable(true);
+    inputLabel.addListener(this);
+    inputEdited = std::make_unique<juce::ChangeBroadcaster>();
 
-    comboboxChanged = std::make_unique<juce::ChangeBroadcaster>();
-
+    trimLevel.setValue(1.0);
 }
 
 MixerInput::~MixerInput()
@@ -62,7 +64,8 @@ MixerInput::~MixerInput()
 void MixerInput::paint (juce::Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-
+    g.setColour(inputColour);
+    g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 15);
 }
 
 void MixerInput::resized()
@@ -81,10 +84,9 @@ void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::
     {
         channelBuffer->clear();//clear buffer channel
 
-
-
-        channelBuffer->copyFrom(0, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples());//copy selected input into buffer channel
-        channelBuffer->copyFrom(1, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples());
+        trimLevel.getNextValue();
+        channelBuffer->copyFrom(0, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples(), trimLevel.getCurrentValue());//copy selected input into buffer channel
+        channelBuffer->copyFrom(1, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples(), trimLevel.getCurrentValue());
 
         filterProcessor.getNextAudioBlock(channelBuffer.get());
         compProcessor.getNextAudioBlock(channelBuffer.get());
@@ -127,8 +129,43 @@ int MixerInput::getSelectedInput()
     return selectedInput;
 }
 
+void MixerInput::setName(juce::String s)
+{
+    name = s;
+    inputLabel.setText(name, juce::NotificationType::dontSendNotification);
+}
 
+juce::String MixerInput::getName()
+{
+    return name;
+}
 
+void MixerInput::setTrimLevel(float l)
+{
+    trimLevel.setTargetValue(l);
+}
+
+float MixerInput::getTrimLevel()
+{
+    return trimLevel.getTargetValue();
+}
+
+void MixerInput::setInputColour(juce::Colour c)
+{
+    inputColour = c;
+    repaint();
+}
+
+juce::Colour MixerInput::getInputColour()
+{
+    return inputColour;
+}
+void MixerInput::labelTextChanged(juce::Label* labelThatHasChanged)
+{
+    if (labelThatHasChanged == &inputLabel)
+        name = inputLabel.getText();
+    inputEdited->sendChangeMessage();
+}
 void MixerInput::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == &volumeSlider)
@@ -145,7 +182,7 @@ void MixerInput::setInputIndex(int index)
 {
     inputIndex = index;
     filterProcessor.displaynumber = inputIndex;
-    inputLabel.setText(juce::String("Input " + juce::String(index + 1)), juce::NotificationType::dontSendNotification);
+    inputLabel.setText(juce::String("Input " + juce::String(index + 1)), juce::NotificationType::sendNotification);
     inputLabel.setJustificationType(juce::Justification::centred);
 }
 

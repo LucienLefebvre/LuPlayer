@@ -89,6 +89,17 @@ public:
         gainSlider.setComponentID("GAIN");
         gainSlider.addListener(this);
 
+        addAndMakeVisible(&cButton);
+        cButton.setButtonText("C");
+
+        addAndMakeVisible(&dButton);
+        dButton.setButtonText("D");
+
+        addAndMakeVisible(&gButton);
+        gButton.setButtonText("G");
+
+        addAndMakeVisible(&lButton);
+        lButton.setButtonText("L");
     }
 
     ~CompEditor() override
@@ -107,7 +118,7 @@ public:
         if (reductionRectHeight < 0)
             reductionRectHeight = 0;
         g.setColour(juce::Colour(40, 134, 189));
-        g.fillRoundedRectangle(knobWidth * 2, 0, 20, reductionRectHeight, 4);
+        g.fillRoundedRectangle(knobWidth * 2 + 5, topButtonsHeight, 20, reductionRectHeight, 4);
 
     }
 
@@ -117,11 +128,15 @@ public:
     }
     void resized() override
     {
-        thresholdSlider.setBounds(0, 0, knobWidth, knobWidth);
-        ratioSlider.setBounds(knobWidth, 0, knobWidth, knobWidth);
-        attackSlider.setBounds(0, knobWidth, knobWidth, knobWidth);
-        releaseSlider.setBounds(knobWidth, knobWidth, knobWidth, knobWidth);
-        gainSlider.setBounds(knobWidth / 2, 2 * knobWidth, knobWidth, knobWidth);
+        gButton.setBounds(5, 0, topButtonsWIdth, topButtonsHeight);
+        cButton.setBounds(55, 0, topButtonsWIdth, topButtonsHeight);
+        dButton.setBounds(105, 0, topButtonsWIdth, topButtonsHeight);
+        lButton.setBounds(155, 0, topButtonsWIdth, topButtonsHeight);
+        thresholdSlider.setBounds(0, topButtonsHeight, knobWidth, knobWidth);
+        ratioSlider.setBounds(knobWidth, topButtonsHeight, knobWidth, knobWidth);
+        attackSlider.setBounds(0, knobWidth + topButtonsHeight, knobWidth, knobWidth);
+        releaseSlider.setBounds(knobWidth, knobWidth + topButtonsHeight, knobWidth, knobWidth);
+        gainSlider.setBounds(knobWidth / 2, 2 * knobWidth + topButtonsHeight, knobWidth, knobWidth);
     }
 
     void setEditedCompProcessor(CompProcessor& processor) 
@@ -150,6 +165,14 @@ private:
     }
     CompProcessor* editedCompProcessor = 0;
     CompProcessor::CompParameters compParams;
+
+    int topButtonsHeight = 20;
+    int topButtonsWIdth = 40;
+    juce::TextButton cButton;
+    juce::TextButton gButton;
+    juce::TextButton dButton;
+    juce::TextButton lButton;
+
     juce::Slider thresholdSlider;
     juce::Slider ratioSlider;
     juce::Slider attackSlider;

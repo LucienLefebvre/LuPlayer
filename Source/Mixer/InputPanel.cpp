@@ -33,22 +33,10 @@ InputPanel::~InputPanel()
 
 void InputPanel::paint (juce::Graphics& g)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-
-    g.setColour (juce::Colours::grey);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
-    g.setColour (juce::Colours::white);
-    g.setFont (14.0f);
-    g.drawText ("InputPanel", getLocalBounds(),
-                juce::Justification::centred, true);   // draw some placeholder text
+    g.setColour(juce::Colour(40, 134, 189));
+    g.drawRect(channelEditor.getRight() + 1, 0, 2, getHeight());
+    g.drawRect(filterEditor.getRight(), 0, 2, getHeight());
 }
 
 void InputPanel::resized()
@@ -56,8 +44,8 @@ void InputPanel::resized()
     channelEditor.setBounds(0, 0, 100, getHeight());
     meter.setBounds(getWidth() - 100, 0, 100, getHeight());
     compEditor.setSize(200, getHeight());
-    filterEditor.setBounds(channelEditor.getRight(), 0, getWidth() - meter.getWidth() - compEditor.getWidth() - channelEditor.getWidth(), getHeight());
-    compEditor.setTopLeftPosition(filterEditor.getRight(), 0);
+    filterEditor.setBounds(channelEditor.getRight() + 3, 0, getWidth() - meter.getWidth() - compEditor.getWidth() - channelEditor.getWidth(), getHeight());
+    compEditor.setTopLeftPosition(filterEditor.getRight() + 3, 0);
 }
 
 void InputPanel::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -70,9 +58,15 @@ void InputPanel::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 
     filterEditor.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
+    channelEditor.setEditedEditors(filterEditor);
 }
 
 void InputPanel::getNextAudioBlock(juce::AudioBuffer<float>* buffer)
 {
     meterSource.measureBlock(*buffer);
+}
+
+void InputPanel::updateInputInfo()
+{
+    channelEditor.updateInputInfo();
 }

@@ -28,7 +28,7 @@ public:
     void resized() override;
     void setEditedFilterProcessor(FilterProcessor& processor);
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
-
+    void updateBypassed();
 private:
     void addFilterBand(int i);
 
@@ -49,6 +49,7 @@ private:
     void mouseUp(const juce::MouseEvent& event);
     void mouseMove(const juce::MouseEvent& event);
     void mouseExit(const juce::MouseEvent& event);
+    void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel);
 
     float getFrequencyFromXPosition(int xPosition);
     int getXPositionFromFrequency(float frequency);
@@ -59,6 +60,8 @@ private:
 
     double actualSampleRate;
     int actualSamplesPerBlockExpected;
+
+    bool isFilterBypassed = false;
 
     FilterProcessor* editedFilterProcessor = 0;
     int numFilterBands = 4;
@@ -94,6 +97,7 @@ private:
     bool drawPointInfo = false;
     bool drawBandInfo = false;
     int pointInfoIndex = 0;
+    bool parametersChanged = false;
 
     int fftAverageIndex = 1;
     bool fftPlotReady = false;

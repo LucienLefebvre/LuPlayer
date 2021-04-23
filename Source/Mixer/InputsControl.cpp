@@ -93,7 +93,7 @@ void InputsControl::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juc
 void InputsControl::addInput(MixerInput::Mode inputMode)
 {
     inputs.add(new MixerInput(inputMode));
-    inputs.getLast()->comboboxChanged->addChangeListener(this);
+    inputs.getLast()->inputEdited->addChangeListener(this);
     addAndMakeVisible(inputs.getLast());
     int inputIndex = inputs.size() - 1;
     inputs.getLast()->setInputIndex(inputIndex);
@@ -101,6 +101,7 @@ void InputsControl::addInput(MixerInput::Mode inputMode)
     inputs.getLast()->selectButton.onClick = [this, inputIndex] {setSelectedMixerInput(inputIndex); };
     inputs.getLast()->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     rearrangeInputs();
+    setSelectedMixerInput(inputIndex);
 }
 
 void InputsControl::setDeviceManagerInfos(juce::AudioDeviceManager& devicemanager)
@@ -173,6 +174,8 @@ void InputsControl::rearrangeInputs()
 void InputsControl::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
    // updateInputSelectorsState();
+    if (isSelectedInput)
+    inputPanel->updateInputInfo();
 }
 
 void InputsControl::setSelectedMixerInput(int selectedInput)
@@ -185,8 +188,12 @@ void InputsControl::setSelectedMixerInput(int selectedInput)
         if (i == selectedMixerInput)
         {
             inputs[i]->selectButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(40, 134, 189));
+            isSelectedInput = true;
         }
         else
+        {
             inputs[i]->selectButton.setColour(juce::TextButton::ColourIds::buttonColourId,
                 getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+            isSelectedInput = false;
+        }
 }

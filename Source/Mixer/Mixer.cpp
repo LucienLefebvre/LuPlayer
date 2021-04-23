@@ -17,7 +17,7 @@ Mixer::Mixer() : inputsControl(inputPanel)
     addAndMakeVisible(&inputsControl);
     addAndMakeVisible(&inputPanel);
     addAndMakeVisible(&inputsViewport);
-    inputsViewport.setViewedComponent(&inputsControl);
+    inputsViewport.setViewedComponent(&inputsControl, false);
 
     verticalDividerBar.reset(new juce::StretchableLayoutResizerBar(&myLayout, 1, true));
     addAndMakeVisible(verticalDividerBar.get());
@@ -75,9 +75,9 @@ void Mixer::resized()
     inputsControl.setSize(inputsViewport.getWidth(), inputsViewport.getHeight());
     inputPanel.setSize(getWidth() - 202, getHeight());
     verticalDividerBar.get()->setSize(4, getHeight());
-    /*inputsControl.setBounds(0, 0, 200, getHeight());
-    inputPanel.setBounds(inputsControl.getRight(), 0, getWidth() - inputsControl.getRight(), getHeight());
-    verticalDividerBar.get()->setBounds(getWidth() / 3, 0, 4, getHeight());*/
+    //inputsControl.setBounds(0, 0, 200, getHeight());
+    //inputPanel.setBounds(inputsControl.getRight(), 0, getWidth() - inputsControl.getRight(), getHeight());
+    //verticalDividerBar.get()->setBounds(getWidth() / 3, 0, 4, getHeight());
     Component* comps[] = { &inputsViewport, verticalDividerBar.get(), &inputPanel };
     myLayout.layOutComponents(comps, 3, 0, 0, getWidth(), getHeight(), false, false);
     

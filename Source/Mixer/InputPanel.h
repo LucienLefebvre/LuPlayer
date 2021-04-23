@@ -27,6 +27,7 @@ public:
     void resized() override;
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(juce::AudioBuffer<float>* buffer);
+    void updateInputInfo();
     FilterEditor filterEditor;
     CompEditor compEditor;
     ChannelControlPannel channelEditor;
