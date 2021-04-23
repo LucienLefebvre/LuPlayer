@@ -65,7 +65,10 @@ void MixerInput::paint (juce::Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
     g.setColour(inputColour);
-    g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 15);
+    g.fillRect(0, 0, getWidth(), getHeight());
+    g.setColour(juce::Colours::lightgrey);
+    g.setOpacity(0.8f);
+    g.drawLine(getWidth(), 0, getWidth(), getHeight(), 1);
 }
 
 void MixerInput::resized()
@@ -95,8 +98,8 @@ void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::
         pan.getNextValue();
         panL = juce::jmin(1 - pan.getCurrentValue(), 1.0f);
         panR = juce::jmin(1 + pan.getCurrentValue(), 1.0f);
-        outputBuffer->addFrom(0, 0, *channelBuffer, 0, 0, channelBuffer->getNumSamples(), level.getCurrentValue() * panL);//copy into output buffer * gain 
-        outputBuffer->addFrom(1, 0, *channelBuffer, 1, 0, channelBuffer->getNumSamples(), level.getCurrentValue() * panR);
+        outputBuffer->addFrom(0, 0, *channelBuffer, 0, 0, channelBuffer->getNumSamples(), level.getCurrentValue() * panL * vcaLevel);//copy into output buffer * gain 
+        outputBuffer->addFrom(1, 0, *channelBuffer, 1, 0, channelBuffer->getNumSamples(), level.getCurrentValue() * panR * vcaLevel);
     }
 }
 
@@ -148,6 +151,31 @@ void MixerInput::setTrimLevel(float l)
 float MixerInput::getTrimLevel()
 {
     return trimLevel.getTargetValue();
+}
+
+void MixerInput::setVCAAssigned(bool isAssigned)
+{
+    vcaAssigned = isAssigned;
+    if (!vcaAssigned)
+    {
+        volumeSlider.setColour(juce::Slider::ColourIds::thumbColourId, getLookAndFeel().findColour(juce::Slider::ColourIds::thumbColourId));
+        vcaLevel = 1.0f;
+    }
+    else
+    {
+        volumeSlider.setColour(juce::Slider::ColourIds::thumbColourId, juce::Colours::red);
+    }
+
+}
+
+bool MixerInput::isVCAAssigned()
+{
+    return vcaAssigned;
+}
+
+void MixerInput::setVCALevel(float l)
+{
+    vcaLevel = l;
 }
 
 void MixerInput::setInputColour(juce::Colour c)

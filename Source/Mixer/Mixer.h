@@ -18,6 +18,7 @@
 #include <ff_meters\ff_meters.h>
 #include "InputPanel.h"
 #include "InputsControl.h"
+
 //==============================================================================
 /*
 */
@@ -35,6 +36,7 @@ public:
     void Mixer::setDeviceManagerInfos(juce::AudioDeviceManager* devicemanager);
 
     juce::OwnedArray<MixerInput> inputs;
+
 
     InputPanel inputPanel;
     InputsControl inputsControl;

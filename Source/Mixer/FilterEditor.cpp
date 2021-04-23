@@ -15,6 +15,7 @@ FilterEditor::FilterEditor()
 {
     addMouseListener(this, true);
     juce::Timer::startTimer(50);
+    channelColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
     for (auto i = 0; i < filterBandsNumber; i++)
     {
         addFilterBand(i);
@@ -44,7 +45,9 @@ FilterEditor::~FilterEditor()
 void FilterEditor::paint(juce::Graphics& g)
 {
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-
+    g.setColour(channelColour);
+    g.setOpacity(0.2);
+    g.fillRect(getBounds());
     if (magnitudeArrayCreated)
         plotFilterGraph(g);
 }
@@ -546,3 +549,8 @@ void FilterEditor::timerCallback()
         repaint();*/
 }
 
+void FilterEditor::setColour(juce::Colour colour)
+{
+    channelColour = colour;
+    repaint();
+}

@@ -30,7 +30,7 @@ public:
         addAndMakeVisible(trimSlider);
         trimSlider.setRange(-24, 24, 0.5);
         trimSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-        trimSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 10);
+        trimSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 15);
         trimSlider.addListener(this);
         trimSlider.setDoubleClickReturnValue(true, 0.);
         trimSlider.setPopupDisplayEnabled(true, true, this, 2000);
@@ -46,31 +46,40 @@ public:
         inputNameLabel.addListener(this);
 
         addAndMakeVisible(&eqButton);
-        eqButton.setButtonText("EQ");
+        eqButton.setButtonText("E");
         eqButton.setSize(80, 18);
         eqButton.onClick = [this] {eqButtonClicked(); };
 
         addAndMakeVisible(&gateButton);
-        gateButton.setButtonText("Gate");
+        gateButton.setButtonText("G");
         gateButton.setSize(80, 18);
 
         addAndMakeVisible(&compButton);
-        compButton.setButtonText("Compressor");
+        compButton.setButtonText("C");
         compButton.setSize(80, 18);
 
         addAndMakeVisible(&deesserButton);
-        deesserButton.setButtonText("Deeser");
+        deesserButton.setButtonText("D");
         deesserButton.setSize(80, 18);
 
         addAndMakeVisible(&limiterButton);
-        limiterButton.setButtonText("Limiter");
+        limiterButton.setButtonText("L");
         limiterButton.setSize(80, 18);
         
         addAndMakeVisible(&optionButton);
+        optionButton.setButtonText("Options");
         optionButton.onClick = [this] {optionButtonClicked(); };
 
+        optionMenu.addItem(1, "Save preset", true, false);
+        optionMenu.addItem(2, "Load preset", true, false);
+        optionMenu.addItem(3, "Colour", true, false);
+        optionMenu.addItem(4, "Delete Input", true, false);
         addAndMakeVisible(inputSelector);
         inputSelector.addListener(this);
+
+        addAndMakeVisible(&vcaButton);
+        vcaButton.setButtonText("VCA");
+        vcaButton.onClick = [this] {vcaButtonClicked(); };
     }
 
     ~ChannelControlPannel() override
@@ -88,13 +97,16 @@ public:
     {
         inputNameLabel.setBounds(0, 0, 100, 20);
         inputSelector.setBounds(0, inputNameLabel.getBottom(), 100, 20);
-        trimSlider.setBounds(10, inputSelector.getBottom(), 80, 80);
-        eqButton.setCentrePosition(getWidth() / 2, trimSlider.getBottom() + 10);
-        gateButton.setCentrePosition(getWidth() / 2, eqButton.getBottom() + 11);
-        compButton.setCentrePosition(getWidth() / 2, gateButton.getBottom() + 11);
-        deesserButton.setCentrePosition(getWidth() / 2, compButton.getBottom() + 11);
-        limiterButton.setCentrePosition(getWidth() / 2, deesserButton.getBottom() + 11);
+        trimSlider.setBounds(-10, inputSelector.getBottom(), 80, 80);
+        vcaButton.setBounds(trimSlider.getRight() - 10, trimSlider.getY() + 5, getWidth() - trimSlider.getRight() + 10, 20);
+        eqButton.setBounds(1, trimSlider.getBottom() + 5, bypassButtonsSize, bypassButtonsSize);
+        gateButton.setBounds(21, trimSlider.getBottom() + 5, bypassButtonsSize, bypassButtonsSize);
+        compButton.setBounds(41, trimSlider.getBottom() + 5, bypassButtonsSize, bypassButtonsSize);
+        deesserButton.setBounds(61, trimSlider.getBottom() + 5, bypassButtonsSize, bypassButtonsSize);
+        limiterButton.setBounds(81, trimSlider.getBottom() + 5, bypassButtonsSize, bypassButtonsSize);
+
         optionButton.setBounds(0, getHeight() - 20, getWidth(), 20);
+
     }
 
     void setEditedProcessors(MixerInput& editedInput)
@@ -107,7 +119,7 @@ public:
     void updateInputInfo()
     {
         //Colour
-        channelColour = editedMixerInput->getInputColour();
+        setChannelColour(editedMixerInput->getInputColour());
         //name
         inputNameLabel.setText(editedMixerInput->getName(), juce::NotificationType::dontSendNotification);
         //selector
@@ -119,7 +131,12 @@ public:
             eqButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(40, 134, 189));
         else
             eqButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-        
+        //VCA
+        if (!editedMixerInput->isVCAAssigned())
+            vcaButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        else
+            vcaButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::red);
+
         repaint();
     }
     void setEditedEditors(FilterEditor& f)
@@ -177,6 +194,20 @@ public:
         }
     }
 
+    void vcaButtonClicked()
+    {
+        if (editedMixerInput->isVCAAssigned())
+        {
+            editedMixerInput->setVCAAssigned(false);
+            vcaButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+                getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        }
+        else
+        {
+            editedMixerInput->setVCAAssigned(true);
+            vcaButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::red);
+        }
+    }
     void updateInputSelectorsState()
     {
         //feed an array of the inputs states (selected or not)
@@ -205,25 +236,43 @@ public:
     }
     void optionButtonClicked()
     {
+        int result = optionMenu.show();
+        switch (result)
+        {
+        case 1 :
+            break;
+        case 2 :
+            break;
+        case 3 :
+            colourButtonClicked();
+            break;
+        }
+    }
+
+    void colourButtonClicked()
+    {
         auto cs = std::make_unique<juce::ColourSelector>();
         cs->setName("colour");
         cs->addChangeListener(this);
         cs->setColour(juce::ColourSelector::backgroundColourId, juce::Colours::transparentBlack);
         cs->setCurrentColour(channelColour, juce::NotificationType::dontSendNotification);
         cs->setSize(300, 400);
-        juce::CallOutBox::launchAsynchronously(std::move(cs), optionButton.getScreenBounds(), nullptr);
-
+        juce::CallOutBox::launchAsynchronously(std::move(cs), inputNameLabel.getScreenBounds(), nullptr);
     }
-
     void changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         if (juce::ColourSelector* cs = dynamic_cast <juce::ColourSelector*> (source))
         {
-            channelColour = cs->getCurrentColour();
-            editedMixerInput->setInputColour(channelColour);
-            repaint();
+            setChannelColour(cs->getCurrentColour());
         }
 
+    }
+    void setChannelColour(juce::Colour c)
+    {
+        channelColour = c;
+        editedMixerInput->setInputColour(c);
+        //filterEditor->setColour(c);
+        repaint();
     }
 private:
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
@@ -242,6 +291,7 @@ private:
 
     juce::TextButton optionButton;
     std::unique_ptr<juce::ColourSelector> colourSelector;
+    juce::PopupMenu optionMenu;
 
     juce::ComboBox inputSelector;
     juce::Slider trimSlider;
@@ -249,11 +299,14 @@ private:
 
     juce::Colour channelColour;
 
+    int bypassButtonsSize = 18;
     juce::TextButton eqButton;
     juce::TextButton compButton;
     juce::TextButton gateButton;
     juce::TextButton limiterButton;
     juce::TextButton deesserButton;
+
+    juce::TextButton vcaButton;
 
     int numInputsChannels;
     juce::StringArray inputsChannelsName;

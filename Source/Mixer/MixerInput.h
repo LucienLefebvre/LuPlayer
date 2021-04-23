@@ -54,6 +54,9 @@ public:
     void setTrimLevel(float l);
     float getTrimLevel();
 
+    void setVCAAssigned(bool isAssigned);
+    bool isVCAAssigned();
+    void setVCALevel(float l);
     void setInputColour(juce::Colour c);
     juce::Colour getInputColour();
 
@@ -76,6 +79,7 @@ private:
     juce::Slider volumeSlider;
     juce::Slider panKnob;
 
+    bool vcaAssigned = false;
 
 
     double actualSampleRate;
@@ -86,6 +90,8 @@ private:
     juce::LinearSmoothedValue<float> level;
     juce::LinearSmoothedValue<float> trimLevel;
     juce::LinearSmoothedValue<float> pan;
+    float vcaLevel = 1.0f;
+
     float panL;
     float panR;
 

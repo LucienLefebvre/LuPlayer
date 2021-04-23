@@ -14,13 +14,9 @@
 //==============================================================================
 InputsControl::InputsControl(InputPanel& panel) : inputPanel(&panel)
 {
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
-    //addInput(MixerInput::Mode::Mono);
-
     addAndMakeVisible(&addButton);
     addButton.setButtonText("+");
-    addButton.onClick = [this] {addInput(MixerInput::Mode::Mono); };
+    addButton.onClick = [this] {addButtonClicked(); };
 }
 
 InputsControl::~InputsControl()
@@ -29,13 +25,6 @@ InputsControl::~InputsControl()
 
 void InputsControl::paint (juce::Graphics& g)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
 }
 
@@ -74,9 +63,17 @@ void InputsControl::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juc
 
     //Copy mixer Buffer into Outputs
     outputBuffer->clear();
+    
+    for (auto vca : VCAs)
+        vca->updateLevel();
     for (auto i = 0; i < inputs.size(); i++)
     {
+        //VCA
+        if (!VCAs.isEmpty() && inputs[i]->isVCAAssigned())
+            inputs[i]->setVCALevel(VCAs[0]->getLevel());
+        //send buffer to channel
         inputs[i]->getNextAudioBlock(mixerBuffer.get(), outputBuffer);
+
         if (i == selectedMixerInput && inputs[i]->getSelectedInput() != -1) //send the selected input buffer to the input panel for meter measuring
         {
             selectedInputBuffer->clear();
@@ -90,6 +87,29 @@ void InputsControl::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juc
 
 }
 
+void InputsControl::addButtonClicked()
+{
+    addMenu.clear();
+    addMenu.addItem(1, "Mono Input", true, false);
+    addMenu.addItem(2, "Stereo Input", true, false);
+    if (VCAs.size() < 1)
+        addMenu.addItem(3, "VCA", true, false);
+
+    auto result = addMenu.show();
+
+    switch (result)
+    {
+    case 1 :
+        addInput(MixerInput::Mode::Mono);
+        break;
+    case 2 : 
+        addInput(MixerInput::Mode::Stereo);
+        break;
+    case 3 :
+        addVCA();
+        break;
+    }
+}
 void InputsControl::addInput(MixerInput::Mode inputMode)
 {
     inputs.add(new MixerInput(inputMode));
@@ -102,6 +122,12 @@ void InputsControl::addInput(MixerInput::Mode inputMode)
     inputs.getLast()->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     rearrangeInputs();
     setSelectedMixerInput(inputIndex);
+}
+void InputsControl::addVCA()
+{
+    VCAs.add(new VCA);
+    addAndMakeVisible(VCAs.getLast());
+    rearrangeInputs();
 }
 
 void InputsControl::setDeviceManagerInfos(juce::AudioDeviceManager& devicemanager)
@@ -167,7 +193,14 @@ void InputsControl::rearrangeInputs()
     {
         inputs[i]->setBounds(i * mixerInputWidth, 0, mixerInputWidth, getHeight());
     }
-    addButton.setBounds(inputs.getLast()->getRight(), 0, 20, 20);
+    for (auto i = 0; i < VCAs.size(); i++)
+    {
+        VCAs[i]->setBounds(inputs.getLast()->getRight() + i * mixerInputWidth, 0, mixerInputWidth, getHeight());
+    }
+    if (VCAs.isEmpty())
+        addButton.setBounds(inputs.getLast()->getRight(), 0, 20, 20);
+    else
+        addButton.setBounds(VCAs.getLast()->getRight(), 0, 20, 20);
     setSize(addButton.getRight(), getHeight());
 }
 

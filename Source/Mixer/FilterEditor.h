@@ -29,6 +29,7 @@ public:
     void setEditedFilterProcessor(FilterProcessor& processor);
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void updateBypassed();
+    void setColour(juce::Colour colour);
 private:
     void addFilterBand(int i);
 
@@ -62,6 +63,7 @@ private:
     int actualSamplesPerBlockExpected;
 
     bool isFilterBypassed = false;
+    juce::Colour channelColour;
 
     FilterProcessor* editedFilterProcessor = 0;
     int numFilterBands = 4;

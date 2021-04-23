@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "MixerInput.h"
 #include "InputPanel.h"
+#include "VCA.h"
 //==============================================================================
 /*
 */
@@ -32,9 +33,11 @@ public:
     void changeListenerCallback(juce::ChangeBroadcaster* source);
 
     juce::OwnedArray<MixerInput> inputs;
-
+    juce::OwnedArray<VCA> VCAs;
 private:
+    void addButtonClicked();
     void addInput(MixerInput::Mode inputMode);
+    void addVCA();
     void rearrangeInputs();
     void setSelectedMixerInput(int selectedInput);
 
@@ -59,5 +62,6 @@ private:
     InputPanel* inputPanel = 0;
 
     juce::TextButton addButton;
+    juce::PopupMenu addMenu;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputsControl)
 };
