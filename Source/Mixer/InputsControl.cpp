@@ -213,20 +213,32 @@ void InputsControl::changeListenerCallback(juce::ChangeBroadcaster* source)
 
 void InputsControl::setSelectedMixerInput(int selectedInput)
 {
-    selectedMixerInput = selectedInput;
-    inputPanel->filterEditor.setEditedFilterProcessor(inputs[selectedMixerInput]->filterProcessor);
-    inputPanel->compEditor.setEditedCompProcessor(inputs[selectedMixerInput]->compProcessor);
-    inputPanel->channelEditor.setEditedProcessors(*inputs[selectedMixerInput]);
-    for (auto i = 0; i < inputs.size(); i++)
-        if (i == selectedMixerInput)
-        {
-            inputs[i]->selectButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(40, 134, 189));
-            isSelectedInput = true;
-        }
-        else
-        {
-            inputs[i]->selectButton.setColour(juce::TextButton::ColourIds::buttonColourId,
-                getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-            isSelectedInput = false;
-        }
+    if (selectedInput >= 0)
+    {
+        selectedMixerInput = selectedInput;
+        inputPanel->filterEditor.setEditedFilterProcessor(inputs[selectedMixerInput]->filterProcessor);
+        inputPanel->compEditor.setEditedCompProcessor(inputs[selectedMixerInput]->compProcessor);
+        inputPanel->channelEditor.setEditedProcessors(*inputs[selectedMixerInput]);
+
+        for (auto i = 0; i < inputs.size(); i++)
+            if (i == selectedMixerInput)
+            {
+                inputs[i]->selectButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(40, 134, 189));
+                isSelectedInput = true;
+            }
+            else
+            {
+                inputs[i]->selectButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+                    getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+                isSelectedInput = false;
+            }
+    }
+}
+
+void InputsControl::deleteSelectedInput()
+{
+    setSelectedMixerInput(selectedMixerInput - 1);
+    inputs.remove(selectedMixerInput + 1);
+
+    rearrangeInputs();
 }

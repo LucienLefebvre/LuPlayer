@@ -22,7 +22,7 @@
 //==============================================================================
 /*
 */
-class Mixer  : public juce::Component
+class Mixer : public juce::Component, public juce::ChangeListener
 {
 public:
     Mixer();
@@ -42,6 +42,7 @@ public:
     InputsControl inputsControl;
 
 private:
+    void changeListenerCallback(juce::ChangeBroadcaster* source);
     double actualSampleRate;
     int actualSamplesPerBlockExpected;
 

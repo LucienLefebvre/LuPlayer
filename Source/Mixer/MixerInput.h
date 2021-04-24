@@ -12,6 +12,7 @@
 #include <JuceHeader.h>
 #include "FilterProcessor.h"
 #include "CompProcessor.h"
+#include "Meter.h"
 //==============================================================================
 /*
 */
@@ -69,32 +70,29 @@ private:
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
     void sliderValueChanged(juce::Slider* slider);
     void labelTextChanged(juce::Label* labelThatHasChanged);
+
+    double actualSampleRate;
+    int actualSamplesPerBlockExpected;
+
     std::unique_ptr<juce::AudioBuffer<float>> channelBuffer;
     Mode inputMode;
     int inputIndex;
-
+    int selectedInput = -1;
+    bool vcaAssigned = false;
+    juce::Colour inputColour;
 
     juce::Label inputLabel;
     juce::String name;
     juce::Slider volumeSlider;
     juce::Slider panKnob;
 
-    bool vcaAssigned = false;
-
-
-    double actualSampleRate;
-    int actualSamplesPerBlockExpected;
-
-    int selectedInput = -1;
-
     juce::LinearSmoothedValue<float> level;
     juce::LinearSmoothedValue<float> trimLevel;
     juce::LinearSmoothedValue<float> pan;
     float vcaLevel = 1.0f;
-
     float panL;
     float panR;
 
-    juce::Colour inputColour;
+    Meter meter;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MixerInput)
 };

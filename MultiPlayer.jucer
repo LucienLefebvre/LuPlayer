@@ -26,13 +26,14 @@
         <FILE id="nqPdmK" name="InputsControl.cpp" compile="1" resource="0"
               file="Source/Mixer/InputsControl.cpp"/>
         <FILE id="tmQssh" name="InputsControl.h" compile="0" resource="0" file="Source/Mixer/InputsControl.h"/>
+        <FILE id="cFNzuA" name="Meter.h" compile="0" resource="0" file="Source/Mixer/Meter.h"/>
         <FILE id="NGD6CF" name="Mixer.cpp" compile="1" resource="0" file="Source/Mixer/Mixer.cpp"/>
         <FILE id="kP7ltE" name="Mixer.h" compile="0" resource="0" file="Source/Mixer/Mixer.h"/>
         <FILE id="rRtGhq" name="MixerInput.cpp" compile="1" resource="0" file="Source/Mixer/MixerInput.cpp"/>
         <FILE id="J0Ddjw" name="MixerInput.h" compile="0" resource="0" file="Source/Mixer/MixerInput.h"/>
         <FILE id="M7QcwQ" name="RemoteInput.cpp" compile="1" resource="0" file="Source/Mixer/RemoteInput.cpp"/>
         <FILE id="Ge64LT" name="RemoteInput.h" compile="0" resource="0" file="Source/Mixer/RemoteInput.h"/>
-        <FILE id="CV3WgR" name="VCA.h" compile="0" resource="0" file="Source/VCA.h"/>
+        <FILE id="dhPDv5" name="VCA.h" compile="0" resource="0" file="Source/Mixer/VCA.h"/>
       </GROUP>
       <GROUP id="{B14A7909-DE9B-0519-F1D9-67C76AB4710E}" name="Soundboard">
         <FILE id="TgIwht" name="PlayerEditor.cpp" compile="1" resource="0"

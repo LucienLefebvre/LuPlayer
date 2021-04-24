@@ -22,7 +22,7 @@ class ChannelControlPannel  : public juce::Component, public juce::ComboBox::Lis
     public juce::Slider::Listener, public juce::ChangeListener
 {
 public:
-    ChannelControlPannel()
+    ChannelControlPannel() : deleteBroadcaster()
     {
         channelColour = juce::Colour(juce::uint8(50), 62, 68, 1.0f);
         inputSelector.addListener(this);
@@ -246,6 +246,9 @@ public:
         case 3 :
             colourButtonClicked();
             break;
+        case 4 :
+            deleteInput();
+            break;
         }
     }
 
@@ -259,6 +262,12 @@ public:
         cs->setSize(300, 400);
         juce::CallOutBox::launchAsynchronously(std::move(cs), inputNameLabel.getScreenBounds(), nullptr);
     }
+
+    void deleteInput()
+    {
+        deleteBroadcaster.sendChangeMessage();
+
+    }
     void changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         if (juce::ColourSelector* cs = dynamic_cast <juce::ColourSelector*> (source))
@@ -271,9 +280,10 @@ public:
     {
         channelColour = c;
         editedMixerInput->setInputColour(c);
-        //filterEditor->setColour(c);
         repaint();
     }
+
+    juce::ChangeBroadcaster deleteBroadcaster;
 private:
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
     {

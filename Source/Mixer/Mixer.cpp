@@ -32,7 +32,7 @@ Mixer::Mixer() : inputsControl(inputPanel)
         800, -1.0,
         -0.8);
 
-  
+    inputPanel.channelEditor.deleteBroadcaster.addChangeListener(this);
 }
 
 Mixer::~Mixer()
@@ -53,8 +53,9 @@ void Mixer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     actualSampleRate = sampleRate;
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
 
-    inputsControl.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     inputPanel.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+    inputsControl.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+
 
     //inputPanel.channelEditor.setInputsControl(&inputsControl);
 }
@@ -92,4 +93,12 @@ void Mixer::resized()
 void Mixer::setDeviceManagerInfos(juce::AudioDeviceManager* devicemanager)
 {
     inputsControl.setDeviceManagerInfos(*deviceManager);
+}
+
+void Mixer::changeListenerCallback(juce::ChangeBroadcaster* source)
+{
+    if (source == &inputPanel.channelEditor.deleteBroadcaster)
+    {
+        inputsControl.deleteSelectedInput();
+    }
 }

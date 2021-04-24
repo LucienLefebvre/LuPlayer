@@ -31,6 +31,7 @@ public:
     void updateInputSelectors(int inputId);
     void updateInputSelectorsState();
     void changeListenerCallback(juce::ChangeBroadcaster* source);
+    void deleteSelectedInput();
 
     juce::OwnedArray<MixerInput> inputs;
     juce::OwnedArray<VCA> VCAs;

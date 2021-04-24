@@ -54,6 +54,8 @@ MixerInput::MixerInput(Mode mode)
     inputLabel.addListener(this);
     inputEdited = std::make_unique<juce::ChangeBroadcaster>();
 
+    addAndMakeVisible(&meter);
+
     trimLevel.setValue(1.0);
 }
 
@@ -77,7 +79,8 @@ void MixerInput::resized()
     panKnob.setBounds(0, inputLabel.getBottom(), getWidth(), 25);
     selectButton.setBounds(15, getBottom() - 20, 70, 20);
 
-    volumeSlider.setBounds(0, panKnob.getBottom(), getWidth(), getHeight() - panKnob.getBottom() - inputLabel.getHeight());
+    volumeSlider.setBounds(0, panKnob.getBottom(), getWidth() / 2, getHeight() - panKnob.getBottom() - inputLabel.getHeight());
+    meter.setBounds(getWidth() / 2, panKnob.getBottom() + 5, getWidth() / 2 - 1, getHeight() - panKnob.getBottom() - inputLabel.getHeight() - 10);
     
 }
 
@@ -91,8 +94,12 @@ void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::
         channelBuffer->copyFrom(0, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples(), trimLevel.getCurrentValue());//copy selected input into buffer channel
         channelBuffer->copyFrom(1, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples(), trimLevel.getCurrentValue());
 
+        meter.measureBlock(channelBuffer.get(), 0);
+
         filterProcessor.getNextAudioBlock(channelBuffer.get());
         compProcessor.getNextAudioBlock(channelBuffer.get());
+
+        meter.setReductionGain(compProcessor.getReductionDB());
 
         level.getNextValue();//compute next fader level value
         pan.getNextValue();
@@ -181,6 +188,7 @@ void MixerInput::setVCALevel(float l)
 void MixerInput::setInputColour(juce::Colour c)
 {
     inputColour = c;
+    meter.setColour(c);
     repaint();
 }
 

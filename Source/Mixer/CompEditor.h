@@ -149,6 +149,8 @@ public:
         releaseSlider.setValue(compParams.release);
         ratioSlider.setValue(compParams.ratio);
     }
+
+
 private:
     void sliderValueChanged(juce::Slider* slider)
     {
