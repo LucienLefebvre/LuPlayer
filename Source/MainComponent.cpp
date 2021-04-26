@@ -31,7 +31,7 @@ MainComponent::MainComponent() :
     }
     else
     {
-        setAudioChannels(2, 4);
+        setAudioChannels(8, 4);
     }
 
     //setLookAndFeel(new juce::LookAndFeel_V4((juce::LookAndFeel_V4::getMidnightColourScheme())));
@@ -231,8 +231,10 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
                 else
                     deviceManager.removeMidiInputDeviceCallback(input.identifier, this);
             }
-            bottomComponent.mixerPanel.inputPanel.channelEditor.setDeviceManagerInfos(deviceManager);
+            //bottomComponent.mixerPanel.inputPanel.channelEditor.setDeviceManagerInfos(deviceManager);
+            mixer.prepareToPlay(deviceManager.getAudioDeviceSetup().bufferSize, deviceManager.getAudioDeviceSetup().sampleRate);
             mixer.inputPanel.channelEditor.setDeviceManagerInfos(deviceManager);
+
         }
     }
 

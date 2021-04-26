@@ -14,10 +14,20 @@
 //==============================================================================
 MixerInput::MixerInput(Mode mode)
 {
-    if (mode == Stereo)
+    switch (mode)
     {
-
+    case Mono :
+        inputMode = Mono;
+        inputMeter = std::make_unique<Meter>(Meter::Mode::Mono_ReductionGain);
+        outputMeter = std::make_unique<Meter>(Meter::Mode::Mono_ReductionGain);
+        break;
+    case Stereo:
+        inputMode = Stereo;
+        inputMeter = std::make_unique<Meter>(Meter::Mode::Stereo_ReductionGain);
+        outputMeter = std::make_unique<Meter>(Meter::Mode::Stereo_ReductionGain);
+        break;
     }
+
     inputColour = juce::Colour(juce::uint8(50), 62, 68, 1.0f);
 
     addAndMakeVisible(&volumeSlider);
@@ -54,7 +64,7 @@ MixerInput::MixerInput(Mode mode)
     inputLabel.addListener(this);
     inputEdited = std::make_unique<juce::ChangeBroadcaster>();
 
-    addAndMakeVisible(&meter);
+    addAndMakeVisible(inputMeter.get());
 
     trimLevel.setValue(1.0);
 }
@@ -66,8 +76,8 @@ MixerInput::~MixerInput()
 void MixerInput::paint (juce::Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-    g.setColour(inputColour);
-    g.fillRect(0, 0, getWidth(), getHeight());
+    //g.setColour(inputColour);
+    //g.fillRect(0, 0, getWidth(), getHeight());
     g.setColour(juce::Colours::lightgrey);
     g.setOpacity(0.8f);
     g.drawLine(getWidth(), 0, getWidth(), getHeight(), 1);
@@ -80,7 +90,7 @@ void MixerInput::resized()
     selectButton.setBounds(15, getBottom() - 20, 70, 20);
 
     volumeSlider.setBounds(0, panKnob.getBottom(), getWidth() / 2, getHeight() - panKnob.getBottom() - inputLabel.getHeight());
-    meter.setBounds(getWidth() / 2, panKnob.getBottom() + 5, getWidth() / 2 - 1, getHeight() - panKnob.getBottom() - inputLabel.getHeight() - 10);
+    inputMeter->setBounds(getWidth() / 2, panKnob.getBottom() + 5, getWidth() / 2 - 1, getHeight() - panKnob.getBottom() - inputLabel.getHeight() - 10);
     
 }
 
@@ -91,22 +101,27 @@ void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::
         channelBuffer->clear();//clear buffer channel
 
         trimLevel.getNextValue();
-        channelBuffer->copyFrom(0, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples(), trimLevel.getCurrentValue());//copy selected input into buffer channel
-        channelBuffer->copyFrom(1, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples(), trimLevel.getCurrentValue());
 
-        meter.measureBlock(channelBuffer.get(), 0);
+        channelBuffer->copyFrom(0, 0, inputBuffer->getReadPointer(selectedInput), inputBuffer->getNumSamples(), trimLevel.getCurrentValue());//copy selected input into buffer channel
+        if (inputMode == Stereo)
+            channelBuffer->copyFrom(1, 0, inputBuffer->getReadPointer(selectedInput + 1), inputBuffer->getNumSamples(), trimLevel.getCurrentValue());
+
+        inputMeter->measureBlock(channelBuffer.get());
 
         filterProcessor.getNextAudioBlock(channelBuffer.get());
         compProcessor.getNextAudioBlock(channelBuffer.get());
 
-        meter.setReductionGain(compProcessor.getReductionDB());
-
+        inputMeter->setReductionGain(compProcessor.getReductionDB());
+        outputMeter->measureBlock(channelBuffer.get());
         level.getNextValue();//compute next fader level value
         pan.getNextValue();
         panL = juce::jmin(1 - pan.getCurrentValue(), 1.0f);
         panR = juce::jmin(1 + pan.getCurrentValue(), 1.0f);
         outputBuffer->addFrom(0, 0, *channelBuffer, 0, 0, channelBuffer->getNumSamples(), level.getCurrentValue() * panL * vcaLevel);//copy into output buffer * gain 
-        outputBuffer->addFrom(1, 0, *channelBuffer, 1, 0, channelBuffer->getNumSamples(), level.getCurrentValue() * panR * vcaLevel);
+        if (inputMode == Mono)
+            outputBuffer->addFrom(1, 0, *channelBuffer, 0, 0, channelBuffer->getNumSamples(), level.getCurrentValue() * panR * vcaLevel);
+        else if (inputMode == Stereo)
+            outputBuffer->addFrom(1, 0, *channelBuffer, 1, 0, channelBuffer->getNumSamples(), level.getCurrentValue() * panR * vcaLevel);
     }
 }
 
@@ -114,10 +129,11 @@ void MixerInput::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     actualSampleRate = sampleRate;
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
-
     channelBuffer = std::make_unique<juce::AudioBuffer<float>>(2, actualSamplesPerBlockExpected);
-    channelBuffer->setSize(2, actualSamplesPerBlockExpected);
+    channelBuffer->setSize(2, actualSamplesPerBlockExpected, false, true, false);
 
+    inputMeter->prepareToPlay(samplesPerBlockExpected, sampleRate);
+    outputMeter->prepareToPlay(samplesPerBlockExpected, sampleRate);
     filterProcessor.prepareToPlay(samplesPerBlockExpected, sampleRate);
     compProcessor.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
@@ -132,6 +148,7 @@ void MixerInput::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
 
 void MixerInput::setSelectedInput(int input)
 {
+    DBG("selected input" << input);
     selectedInput = input;
 }
 int MixerInput::getSelectedInput()
@@ -188,7 +205,10 @@ void MixerInput::setVCALevel(float l)
 void MixerInput::setInputColour(juce::Colour c)
 {
     inputColour = c;
-    meter.setColour(c);
+    //inputLabel.setColour(juce::Label::ColourIds::textColourId, inputColour);
+    //volumeSlider.setColour(juce::Slider::ColourIds::trackColourId, inputColour);
+    selectButton.setColour(juce::TextButton::ColourIds::buttonColourId, inputColour);
+    //inputMeter->setColour(c);
     repaint();
 }
 
@@ -227,3 +247,21 @@ int MixerInput::getInputIndex()
     return inputIndex;
 }
 
+MixerInput::Mode MixerInput::getInputMode()
+{
+    return inputMode;
+}
+
+MixerInput::InputParams MixerInput::getInputParams()
+{
+    MixerInput::InputParams params;
+    params.mode = inputMode;
+    params.name = name;
+    params.selectedInput = selectedInput;
+    params.inputIndex = inputIndex;
+    params.level = level.getTargetValue();
+    params.trimLevel = trimLevel.getTargetValue();
+    params.colour = inputColour;
+    params.vcaAssigned = vcaAssigned;
+    return params;
+}

@@ -14,10 +14,11 @@
 #include "FilterEditor.h"
 #include "CompEditor.h"
 #include "ChannelControlPannel.h"
+#include "MixerInput.h"
 //==============================================================================
 /*
 */
-class InputPanel  : public juce::Component
+class InputPanel  : public juce::Component, public juce::Timer
 {
 public:
     InputPanel();
@@ -28,15 +29,19 @@ public:
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(juce::AudioBuffer<float>* buffer);
     void updateInputInfo();
+    void setEditedInput(MixerInput& i);
     FilterEditor filterEditor;
     CompEditor compEditor;
     ChannelControlPannel channelEditor;
 private:
-
+    void timerCallback();
     double actualSampleRate;
     int actualSamplesPerBlockExpected;
 
+    MixerInput* editedMixerInput;
 
+    Meter inputMeter;
+    Meter outputMeter;
 
     foleys::LevelMeterLookAndFeel lnf;
     foleys::LevelMeter meter{ foleys::LevelMeter::Default }; // See foleys::LevelMeter::MeterFlags for options

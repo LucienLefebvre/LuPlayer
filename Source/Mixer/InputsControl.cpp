@@ -50,6 +50,8 @@ void InputsControl::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 
     inputPanel->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     setSelectedMixerInput(0);
+    for (auto input : inputs)
+        input->prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void InputsControl::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::AudioBuffer<float>* outputBuffer)
@@ -74,13 +76,13 @@ void InputsControl::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juc
         //send buffer to channel
         inputs[i]->getNextAudioBlock(mixerBuffer.get(), outputBuffer);
 
-        if (i == selectedMixerInput && inputs[i]->getSelectedInput() != -1) //send the selected input buffer to the input panel for meter measuring
-        {
-            selectedInputBuffer->clear();
-            selectedInputBuffer->copyFrom(0, 0, *inputBuffer, inputs[i]->getSelectedInput(), 0, inputBuffer->getNumSamples());
-            selectedInputBuffer->copyFrom(1, 0, *inputBuffer, inputs[i]->getSelectedInput(), 0, inputBuffer->getNumSamples());
-            inputPanel->getNextAudioBlock(selectedInputBuffer.get());
-        }
+        //if (i == selectedMixerInput && inputs[i]->getSelectedInput() != -1) //send the selected input buffer to the input panel for meter measuring
+        //{
+        //    selectedInputBuffer->clear();
+        //    selectedInputBuffer->copyFrom(0, 0, *inputBuffer, inputs[i]->getSelectedInput(), 0, inputBuffer->getNumSamples());
+        //    selectedInputBuffer->copyFrom(1, 0, *inputBuffer, inputs[i]->getSelectedInput(), 0, inputBuffer->getNumSamples());
+        //    inputPanel->getNextAudioBlock(selectedInputBuffer.get());
+        //}
     }
     //outputBuffer->copyFrom(0, 0, *mixerBuffer, 0, 0, actualSamplesPerBlockExpected);
     //outputBuffer->copyFrom(1, 0, *mixerBuffer, 1, 0, actualSamplesPerBlockExpected);
@@ -219,6 +221,7 @@ void InputsControl::setSelectedMixerInput(int selectedInput)
         inputPanel->filterEditor.setEditedFilterProcessor(inputs[selectedMixerInput]->filterProcessor);
         inputPanel->compEditor.setEditedCompProcessor(inputs[selectedMixerInput]->compProcessor);
         inputPanel->channelEditor.setEditedProcessors(*inputs[selectedMixerInput]);
+        inputPanel->setEditedInput(*inputs[selectedMixerInput]);
 
         for (auto i = 0; i < inputs.size(); i++)
             if (i == selectedMixerInput)

@@ -116,6 +116,11 @@ public:
 
 
     }
+
+    void prepareToPlay()
+    {
+        //updateInputSelectors();
+    }
     void updateInputInfo()
     {
         //Colour
@@ -123,7 +128,9 @@ public:
         //name
         inputNameLabel.setText(editedMixerInput->getName(), juce::NotificationType::dontSendNotification);
         //selector
-        inputSelector.setSelectedId(editedMixerInput->getSelectedInput() + 2, juce::NotificationType::dontSendNotification);
+        
+        updateInputSelectors();
+
         //trim knob
         trimSlider.setValue(juce::Decibels::gainToDecibels(editedMixerInput->getTrimLevel()));
         //eq button
@@ -148,20 +155,42 @@ public:
     void setDeviceManagerInfos(juce::AudioDeviceManager& devicemanager)
     {
         deviceManager = &devicemanager;
-        numInputsChannels = deviceManager->getCurrentAudioDevice()->getActiveInputChannels().getHighestBit() + 1;
-        inputsChannelsName = deviceManager->getCurrentAudioDevice()->getInputChannelNames();
-        
-        updateInputSelectors();
+        if (deviceManager != nullptr)
+        {
+            numActiveInputsChannels = deviceManager->getCurrentAudioDevice()->getActiveInputChannels().countNumberOfSetBits();
+            DBG("num inputs channel " << numActiveInputsChannels);
+            inputsChannelsName = deviceManager->getCurrentAudioDevice()->getInputChannelNames();
+
+            updateInputSelectors();
+        }
     }
 
     void updateInputSelectors()
     {
         inputSelector.clear();
         inputSelector.addItem("None", 1);
-        for (auto g = 0; g < numInputsChannels; g++)
+        if (deviceManager != nullptr)
         {
-            inputSelector.addItem(inputsChannelsName[g], g + 2);
+            numInputsChannels = deviceManager->getCurrentAudioDevice()->getActiveInputChannels().getHighestBit() + 1;
+
+            for (auto g = 0; g < numInputsChannels; g++)
+            {
+                if (deviceManager->getCurrentAudioDevice()->getActiveInputChannels()[g] == 1)
+                {
+                    if (editedMixerInput->getInputParams().mode == MixerInput::Mode::Mono)
+                    {
+                        inputSelector.addItem(inputsChannelsName[g], inputSelector.getNumItems() + 1);
+                    }
+                    else if (editedMixerInput->getInputParams().mode == MixerInput::Mode::Stereo)
+                    {
+                        juce::String nameToAdd = juce::String(inputsChannelsName[g] + " + " + inputsChannelsName[g + 1]);
+                        inputSelector.addItem(nameToAdd, inputSelector.getNumItems() + 1);
+                        g++;
+                    }
+                }
+            }
         }
+        inputSelector.setSelectedId(editedMixerInput->getSelectedInput() + 2, juce::NotificationType::dontSendNotification);
     }
 
     void labelTextChanged(juce::Label* labelThatHasChanged)
@@ -212,7 +241,7 @@ public:
     {
         //feed an array of the inputs states (selected or not)
         //selectedInputs.clear();
-        //selectedInputs.resize(numInputsChannels);
+        //selectedInputs.resize(numActiveInputsChannels);
         //for (auto i = 0; i < selectedInputs.size(); i++)
         //    selectedInputs.set(i, false);
         //for (auto i = 0; i < inputsControl->inputs.size(); i++)
@@ -224,7 +253,7 @@ public:
         ////update input selector
         //for (auto i = 0; i < inputsControl->inputs.size(); i++)
         //{
-        //    for (auto g = 0; g < numInputsChannels; g++)
+        //    for (auto g = 0; g < numActiveInputsChannels; g++)
         //    {
         //        if (selectedInputs[g] && inputSelector.getSelectedId() != g)
         //            inputSelector.setItemEnabled(g + 2, false);
@@ -318,9 +347,10 @@ private:
 
     juce::TextButton vcaButton;
 
-    int numInputsChannels;
+    int numInputsChannels = 0;
+    int numActiveInputsChannels = 0;
     juce::StringArray inputsChannelsName;
-    juce::AudioDeviceManager* deviceManager;
+    juce::AudioDeviceManager* deviceManager = 0;
     juce::Array<bool> selectedInputs;
 
 

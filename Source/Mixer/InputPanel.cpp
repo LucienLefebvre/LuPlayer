@@ -12,14 +12,17 @@
 #include "InputPanel.h"
 
 //==============================================================================
-InputPanel::InputPanel()
+InputPanel::InputPanel() : inputMeter(Meter::Mode::Mono), outputMeter(Meter::Mode::Mono_ReductionGain)
 {
+    juce::Timer::startTimer(50);
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
+    addAndMakeVisible(&inputMeter);
+    addAndMakeVisible(&outputMeter);
     addAndMakeVisible(&filterEditor);
     addAndMakeVisible(&compEditor);
     addAndMakeVisible(&channelEditor);
-    addAndMakeVisible(&meter);
+    //addAndMakeVisible(&meter);
     lnf.setColour(foleys::LevelMeter::lmBackgroundColour, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     lnf.setColour(foleys::LevelMeter::lmMeterGradientLowColour, juce::Colours::green);
     lnf.setColour(foleys::LevelMeter::lmMeterGradientMaxColour, juce::Colours::red);
@@ -42,9 +45,11 @@ void InputPanel::paint (juce::Graphics& g)
 void InputPanel::resized()
 {
     channelEditor.setBounds(0, 0, 100, getHeight());
-    meter.setBounds(getWidth() - 100, 0, 100, getHeight());
+    //inputMeter.setBounds(channelEditor.getRight(), 0, 50, getHeight());
+    outputMeter.setBounds(getWidth() - 50, 0, 50, getHeight());
+    //meter.setBounds(getWidth() - 100, 0, 100, getHeight());
     compEditor.setSize(200, getHeight());
-    filterEditor.setBounds(channelEditor.getRight() + 3, 0, getWidth() - meter.getWidth() - compEditor.getWidth() - channelEditor.getWidth(), getHeight());
+    filterEditor.setBounds(channelEditor.getRight() + 3, 0, getWidth() - outputMeter.getWidth() - compEditor.getWidth() - channelEditor.getWidth() - 6, getHeight());
     compEditor.setTopLeftPosition(filterEditor.getRight() + 3, 0);
 }
 
@@ -59,14 +64,39 @@ void InputPanel::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     filterEditor.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
     channelEditor.setEditedEditors(filterEditor);
+    channelEditor.prepareToPlay();
+    outputMeter.prepareToPlay(samplesPerBlockExpected, sampleRate);
+}
+
+void InputPanel::setEditedInput(MixerInput& i)
+{
+    editedMixerInput = &i;
+    switch (editedMixerInput->getInputMode())
+    {
+    case MixerInput::Mode::Mono :
+        inputMeter.setMeterMode(Meter::Mode::Mono);
+        outputMeter.setMeterMode(Meter::Mode::Mono_ReductionGain);
+        break;
+    case MixerInput::Mode::Stereo : 
+        inputMeter.setMeterMode(Meter::Mode::Stereo);
+        outputMeter.setMeterMode(Meter::Mode::Stereo_ReductionGain);
+    }
 }
 
 void InputPanel::getNextAudioBlock(juce::AudioBuffer<float>* buffer)
 {
-    meterSource.measureBlock(*buffer);
+    //meterSource.measureBlock(*buffer);
+    //inputMeter.measureBlock(buffer);
 }
 
 void InputPanel::updateInputInfo()
 {
     channelEditor.updateInputInfo();
+}
+
+void InputPanel::timerCallback()
+{
+    inputMeter.setMeterData(editedMixerInput->inputMeter->getMeterData());
+    outputMeter.setMeterData(editedMixerInput->outputMeter->getMeterData());
+    outputMeter.setReductionGain(editedMixerInput->compProcessor.getReductionDB());
 }

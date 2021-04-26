@@ -29,6 +29,18 @@ public:
         Stereo
     };
 
+    struct InputParams
+    {
+        Mode mode;
+        juce::String name;
+        int selectedInput;
+        int inputIndex;
+        float level;
+        float trimLevel;
+        bool vcaAssigned;
+        juce::Colour colour;
+    };
+
     MixerInput(Mode mode);
     ~MixerInput() override;
 
@@ -42,6 +54,10 @@ public:
     void clearInputSelector();
     void selectDefaultInput(int defaultInput);
     void updateComboboxItemsState(int itemId, bool isEnabled);
+
+    InputParams getInputParams();
+
+    Mode getInputMode();
 
     void setSelectedInput(int input);
     int getSelectedInput();
@@ -66,6 +82,8 @@ public:
 
     FilterProcessor filterProcessor;
     CompProcessor compProcessor;
+    std::unique_ptr<Meter> inputMeter;
+    std::unique_ptr<Meter> outputMeter;
 private:
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
     void sliderValueChanged(juce::Slider* slider);
@@ -93,6 +111,6 @@ private:
     float panL;
     float panR;
 
-    Meter meter;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MixerInput)
 };
