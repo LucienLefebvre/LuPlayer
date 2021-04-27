@@ -15,6 +15,7 @@
 #include "CompEditor.h"
 #include "ChannelControlPannel.h"
 #include "MixerInput.h"
+#include "DynamicsEditor.h"
 //==============================================================================
 /*
 */
@@ -31,7 +32,7 @@ public:
     void updateInputInfo();
     void setEditedInput(MixerInput& i);
     FilterEditor filterEditor;
-    CompEditor compEditor;
+    DynamicsEditor dynamicsEditor;
     ChannelControlPannel channelEditor;
 private:
     void timerCallback();

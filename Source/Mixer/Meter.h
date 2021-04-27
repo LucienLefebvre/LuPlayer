@@ -13,7 +13,8 @@ public:
         Mono,
         Mono_ReductionGain,
         Stereo,
-        Stereo_ReductionGain
+        Stereo_ReductionGain,
+        ReductionGain
     };
 
     struct MeterData
@@ -43,68 +44,70 @@ public:
 
         int linePosition;
         //CHANNEL 0
+        if (meterMode != ReductionGain)
         {
-            //DRAW RMS
-
-            float limitedRmsLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(rmsL));
-            float rangedRmsLevel = range.convertTo0to1(limitedRmsLevel);
-            int rectHeight = rangedRmsLevel * getHeight();
-            g.setColour(juce::Colours::green);
-            g.fillRect(0, getHeight() - rectHeight, meterWidth - 2, rectHeight);
-            if (limitedRmsLevel > -9.0f)//ORANGE if >-3db
             {
-                int orangeRectYStart = range.convertTo0to1(-9.0f) * getHeight();
-                int orangeRextHeight = rectHeight - orangeRectYStart;
-                g.setColour(juce::Colours::orange);
-                g.fillRect(0, getHeight() - orangeRectYStart - orangeRextHeight - 1,  meterWidth - 2, orangeRextHeight);
+                //DRAW RMS
+
+                float limitedRmsLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(rmsL));
+                float rangedRmsLevel = range.convertTo0to1(limitedRmsLevel);
+                int rectHeight = rangedRmsLevel * getHeight();
+                g.setColour(juce::Colours::green);
+                g.fillRect(0, getHeight() - rectHeight, meterWidth - 2, rectHeight);
+                if (limitedRmsLevel > -9.0f)//ORANGE if >-3db
+                {
+                    int orangeRectYStart = range.convertTo0to1(-9.0f) * getHeight();
+                    int orangeRextHeight = rectHeight - orangeRectYStart;
+                    g.setColour(juce::Colours::orange);
+                    g.fillRect(0, getHeight() - orangeRectYStart - orangeRextHeight - 1, meterWidth - 2, orangeRextHeight);
+                }
+
+
+                //DRAW PEAK L
+                float limitedPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(maxPeakL));
+                float rangedPeakLevel = range.convertTo0to1(limitedPeakLevel);
+                linePosition = getHeight() - rangedPeakLevel * getHeight();
+                juce::jlimit(0, getHeight(), linePosition);
+                g.setColour(juce::Colours::forestgreen);
+                if (limitedPeakLevel > -9.0f)
+                    g.setColour(juce::Colours::orange);
+                if (linePosition == 0)
+                    g.setColour(juce::Colours::red);
+                g.drawLine(0, linePosition, meterWidth, linePosition);
+                g.drawLine(0, linePosition + 1, meterWidth, linePosition + 1);
             }
 
-
-            //DRAW PEAK L
-            float limitedPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(maxPeakL));
-            float rangedPeakLevel = range.convertTo0to1(limitedPeakLevel);
-            linePosition = getHeight() - rangedPeakLevel * getHeight();
-            juce::jlimit(0, getHeight(), linePosition);
-            g.setColour(juce::Colours::forestgreen);
-            if (limitedPeakLevel > -9.0f)
-                g.setColour(juce::Colours::orange);
-            if (linePosition == 0)
-                g.setColour(juce::Colours::red);
-            g.drawLine(0, linePosition, meterWidth, linePosition);
-            g.drawLine(0, linePosition + 1, meterWidth, linePosition + 1);
-        }
-
-        //CHANNEL 1
-        if (meterMode == Stereo || meterMode == Stereo_ReductionGain)
-        {
-
-            //DRAW RMS
-            float limitedRmsLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(rmsR));
-            float rangedRmsLevel = range.convertTo0to1(limitedRmsLevel);
-            int rectHeight = rangedRmsLevel * getHeight();
-            g.setColour(juce::Colours::green);
-            g.fillRect(meterWidth + 1, getHeight() - rectHeight, meterWidth - 1, rectHeight);
-            if (limitedRmsLevel > -9.0f)//ORANGE if >-3db
+            //CHANNEL 1
+            if (meterMode == Stereo || meterMode == Stereo_ReductionGain)
             {
-                int orangeRectYStart = range.convertTo0to1(-9.0f) * getHeight();
-                int orangeRextHeight = rectHeight - orangeRectYStart;
-                g.setColour(juce::Colours::orange);
-                g.fillRect(meterWidth + 1, getHeight() - orangeRectYStart - orangeRextHeight - 1, meterWidth - 1, orangeRextHeight);
-            }
-            //DRAW PEAK L
-            float limitedPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(maxPeakR));
-            float rangedPeakLevel = range.convertTo0to1(limitedPeakLevel);
-            linePosition = getHeight() - rangedPeakLevel * getHeight();
-            juce::jlimit(0, getHeight(), linePosition);
-            g.setColour(juce::Colours::forestgreen);
-            if (limitedPeakLevel > -9.0f)
-                g.setColour(juce::Colours::orange);
-            if (linePosition == 0)
-                g.setColour(juce::Colours::red);
-            g.drawLine(meterWidth + 2, linePosition, 2 * meterWidth, linePosition);
-            g.drawLine(meterWidth + 2, linePosition + 1, 2 * meterWidth, linePosition + 1);
-        }
 
+                //DRAW RMS
+                float limitedRmsLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(rmsR));
+                float rangedRmsLevel = range.convertTo0to1(limitedRmsLevel);
+                int rectHeight = rangedRmsLevel * getHeight();
+                g.setColour(juce::Colours::green);
+                g.fillRect(meterWidth + 1, getHeight() - rectHeight, meterWidth - 1, rectHeight);
+                if (limitedRmsLevel > -9.0f)//ORANGE if >-3db
+                {
+                    int orangeRectYStart = range.convertTo0to1(-9.0f) * getHeight();
+                    int orangeRextHeight = rectHeight - orangeRectYStart;
+                    g.setColour(juce::Colours::orange);
+                    g.fillRect(meterWidth + 1, getHeight() - orangeRectYStart - orangeRextHeight - 1, meterWidth - 1, orangeRextHeight);
+                }
+                //DRAW PEAK L
+                float limitedPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(maxPeakR));
+                float rangedPeakLevel = range.convertTo0to1(limitedPeakLevel);
+                linePosition = getHeight() - rangedPeakLevel * getHeight();
+                juce::jlimit(0, getHeight(), linePosition);
+                g.setColour(juce::Colours::forestgreen);
+                if (limitedPeakLevel > -9.0f)
+                    g.setColour(juce::Colours::orange);
+                if (linePosition == 0)
+                    g.setColour(juce::Colours::red);
+                g.drawLine(meterWidth + 2, linePosition, 2 * meterWidth, linePosition);
+                g.drawLine(meterWidth + 2, linePosition + 1, 2 * meterWidth, linePosition + 1);
+            }
+        }
         //DRAW REDUCTION GAIN
         float limitedReductionLevel = juce::jlimit<float>(-100.0f, 0.0f, - reductionGain.load());
         float rangedReductionLevel = range.convertTo0to1(limitedReductionLevel);
@@ -114,20 +117,24 @@ public:
             g.fillRect(reductionGainXStart, 0, reductionGainWidth, reductionRectHeight);
 
         //DRAW SCALE
+
         for (auto db : dbScale)
         {
             auto yPos = getHeight() - range.convertTo0to1(db) * getHeight();
             if (linePosition == 0 && db == 0.0f)
                 g.setColour(juce::Colours::red);
-            else
+            else if (meterMode != ReductionGain)
                 g.setColour(juce::Colours::black);
-            g.drawLine(0, yPos, reductionGainXStart, yPos);
-            //if ((db != 0.0f) && (db != -6.0f) && (db != -9.0f))
-            //{
-                g.setColour(juce::Colours::lightgrey);
-                g.setOpacity(0.7f);
-                g.drawText(juce::String(db), 0, yPos + 2, getWidth() - reductionGainWidth, 10, juce::Justification::centred);
-            //}
+            else
+            {
+                g.setColour(juce::Colours::darkgrey);
+                g.setOpacity(0.8f);
+            }
+            auto lineEnd = (reductionGainXStart == 0) ? getWidth() : reductionGainXStart;
+            g.drawLine(0, yPos, lineEnd, yPos);
+            g.setColour(juce::Colours::lightgrey);
+            g.setOpacity(0.7f);
+            g.drawText(juce::String(db), 0, yPos + 2, getWidth() - reductionGainWidth, 10, juce::Justification::centred);
         }
     }
 
@@ -210,6 +217,7 @@ public:
         case Mono:
             meterWidth = getWidth();
             reductionGainWidth = 0;
+            reductionGainXStart = 0;
             break;
         case Mono_ReductionGain:
             meterWidth = getWidth() - reductionGainWidth;
@@ -217,11 +225,16 @@ public:
             break;
         case Stereo:
             meterWidth = getWidth() / 2;
+            reductionGainXStart = 0;
             reductionGainWidth = 0;
             break;
         case Stereo_ReductionGain:
             meterWidth = (getWidth() - reductionGainWidth) / 2;
             reductionGainXStart = meterWidth * 2;
+            break;
+        case ReductionGain:
+            meterWidth = 0;
+            reductionGainXStart = 0;
         }
     }
 
@@ -254,8 +267,9 @@ public:
         //}
         //rmsL = sqrt(std::accumulate(rmsLevelsL.begin(), rmsLevelsL.end(), 0.0f) / (float)rmsLevelsL.size());
         //rmsR = sqrt(std::accumulate(rmsLevelsR.begin(), rmsLevelsR.end(), 0.0f) / (float)rmsLevelsR.size());
-        //PEAK
-        // 
+        
+        
+        //********PEAK HOLDING********
         //CHANNEL 0
         auto peakL = peakLevelL.load();
         if (peakL > maxPeakL)
@@ -270,7 +284,6 @@ public:
         }
         else
             ticksL++;
-
         //CHANNEL 1
         auto peakR = peakLevelR.load();
         if (peakR > maxPeakR)

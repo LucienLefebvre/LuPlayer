@@ -111,7 +111,7 @@ void MixerInput::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::
         filterProcessor.getNextAudioBlock(channelBuffer.get());
         compProcessor.getNextAudioBlock(channelBuffer.get());
 
-        inputMeter->setReductionGain(compProcessor.getReductionDB());
+        inputMeter->setReductionGain(compProcessor.getGeneralReductionDB());
         outputMeter->measureBlock(channelBuffer.get());
         level.getNextValue();//compute next fader level value
         pan.getNextValue();
@@ -189,7 +189,6 @@ void MixerInput::setVCAAssigned(bool isAssigned)
     {
         volumeSlider.setColour(juce::Slider::ColourIds::thumbColourId, juce::Colours::red);
     }
-
 }
 
 bool MixerInput::isVCAAssigned()
@@ -205,9 +204,9 @@ void MixerInput::setVCALevel(float l)
 void MixerInput::setInputColour(juce::Colour c)
 {
     inputColour = c;
-    //inputLabel.setColour(juce::Label::ColourIds::textColourId, inputColour);
+    inputLabel.setColour(juce::Label::ColourIds::backgroundColourId, inputColour);
     //volumeSlider.setColour(juce::Slider::ColourIds::trackColourId, inputColour);
-    selectButton.setColour(juce::TextButton::ColourIds::buttonColourId, inputColour);
+    //selectButton.setColour(juce::TextButton::ColourIds::buttonColourId, inputColour);
     //inputMeter->setColour(c);
     repaint();
 }

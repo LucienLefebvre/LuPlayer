@@ -20,7 +20,7 @@ InputPanel::InputPanel() : inputMeter(Meter::Mode::Mono), outputMeter(Meter::Mod
     addAndMakeVisible(&inputMeter);
     addAndMakeVisible(&outputMeter);
     addAndMakeVisible(&filterEditor);
-    addAndMakeVisible(&compEditor);
+    addAndMakeVisible(&dynamicsEditor);
     addAndMakeVisible(&channelEditor);
     //addAndMakeVisible(&meter);
     lnf.setColour(foleys::LevelMeter::lmBackgroundColour, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
@@ -48,9 +48,9 @@ void InputPanel::resized()
     //inputMeter.setBounds(channelEditor.getRight(), 0, 50, getHeight());
     outputMeter.setBounds(getWidth() - 50, 0, 50, getHeight());
     //meter.setBounds(getWidth() - 100, 0, 100, getHeight());
-    compEditor.setSize(200, getHeight());
-    filterEditor.setBounds(channelEditor.getRight() + 3, 0, getWidth() - outputMeter.getWidth() - compEditor.getWidth() - channelEditor.getWidth() - 6, getHeight());
-    compEditor.setTopLeftPosition(filterEditor.getRight() + 3, 0);
+    dynamicsEditor.setSize(190, getHeight());
+    filterEditor.setBounds(channelEditor.getRight() + 3, 0, getWidth() - outputMeter.getWidth() - dynamicsEditor.getWidth() - channelEditor.getWidth() - 6, getHeight());
+    dynamicsEditor.setTopLeftPosition(filterEditor.getRight() + 3, 0);
 }
 
 void InputPanel::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -66,20 +66,25 @@ void InputPanel::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     channelEditor.setEditedEditors(filterEditor);
     channelEditor.prepareToPlay();
     outputMeter.prepareToPlay(samplesPerBlockExpected, sampleRate);
+
+    
 }
 
 void InputPanel::setEditedInput(MixerInput& i)
 {
     editedMixerInput = &i;
+    filterEditor.setEditedFilterProcessor(editedMixerInput->filterProcessor);
+    dynamicsEditor.setEditedCompProcessor(editedMixerInput->compProcessor);
+    channelEditor.setEditedProcessors(*editedMixerInput);
     switch (editedMixerInput->getInputMode())
     {
     case MixerInput::Mode::Mono :
         inputMeter.setMeterMode(Meter::Mode::Mono);
-        outputMeter.setMeterMode(Meter::Mode::Mono_ReductionGain);
+        outputMeter.setMeterMode(Meter::Mode::Mono);
         break;
     case MixerInput::Mode::Stereo : 
         inputMeter.setMeterMode(Meter::Mode::Stereo);
-        outputMeter.setMeterMode(Meter::Mode::Stereo_ReductionGain);
+        outputMeter.setMeterMode(Meter::Mode::Stereo);
     }
 }
 
@@ -98,5 +103,5 @@ void InputPanel::timerCallback()
 {
     inputMeter.setMeterData(editedMixerInput->inputMeter->getMeterData());
     outputMeter.setMeterData(editedMixerInput->outputMeter->getMeterData());
-    outputMeter.setReductionGain(editedMixerInput->compProcessor.getReductionDB());
+    outputMeter.setReductionGain(editedMixerInput->compProcessor.getCompReductionDB());
 }

@@ -9,6 +9,9 @@
               file="Source/Mixer/ChannelControlPannel.h"/>
         <FILE id="XQKsrX" name="CompEditor.h" compile="0" resource="0" file="Source/Mixer/CompEditor.h"/>
         <FILE id="lgJ6Yr" name="CompProcessor.h" compile="0" resource="0" file="Source/Mixer/CompProcessor.h"/>
+        <FILE id="mrrNgY" name="DeesserEditor.h" compile="0" resource="0" file="Source/Mixer/DeesserEditor.h"/>
+        <FILE id="s0WEq3" name="DynamicsEditor.h" compile="0" resource="0"
+              file="Source/Mixer/DynamicsEditor.h"/>
         <FILE id="x6LSsH" name="FFTAnalyser.h" compile="0" resource="0" file="Source/Mixer/FFTAnalyser.h"/>
         <FILE id="hSppaV" name="FilterBandEditor.h" compile="0" resource="0"
               file="Source/Mixer/FilterBandEditor.h"/>
@@ -21,11 +24,13 @@
               file="Source/Mixer/FilterProcessor.cpp"/>
         <FILE id="xLEZIm" name="FilterProcessor.h" compile="0" resource="0"
               file="Source/Mixer/FilterProcessor.h"/>
+        <FILE id="sCMukw" name="GateEditor.h" compile="0" resource="0" file="Source/Mixer/GateEditor.h"/>
         <FILE id="JThrI5" name="InputPanel.cpp" compile="1" resource="0" file="Source/Mixer/InputPanel.cpp"/>
         <FILE id="RC2efn" name="InputPanel.h" compile="0" resource="0" file="Source/Mixer/InputPanel.h"/>
         <FILE id="nqPdmK" name="InputsControl.cpp" compile="1" resource="0"
               file="Source/Mixer/InputsControl.cpp"/>
         <FILE id="tmQssh" name="InputsControl.h" compile="0" resource="0" file="Source/Mixer/InputsControl.h"/>
+        <FILE id="lxP7mJ" name="LimiterEditor.h" compile="0" resource="0" file="Source/Mixer/LimiterEditor.h"/>
         <FILE id="cFNzuA" name="Meter.h" compile="0" resource="0" file="Source/Mixer/Meter.h"/>
         <FILE id="NGD6CF" name="Mixer.cpp" compile="1" resource="0" file="Source/Mixer/Mixer.cpp"/>
         <FILE id="kP7ltE" name="Mixer.h" compile="0" resource="0" file="Source/Mixer/Mixer.h"/>
@@ -141,6 +146,6 @@
     <MODULE id="juce_osc" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
   </MODULES>
   <LIVE_SETTINGS>
-    <WINDOWS/>
+    <WINDOWS buildEnabled="0"/>
   </LIVE_SETTINGS>
 </JUCERPROJECT>

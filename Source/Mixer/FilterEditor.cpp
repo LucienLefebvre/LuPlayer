@@ -48,6 +48,7 @@ void FilterEditor::paint(juce::Graphics& g)
     g.setColour(channelColour);
     g.setOpacity(0.2);
     g.fillRect(getBounds());
+    plotFFT(g);
     if (magnitudeArrayCreated)
         plotFilterGraph(g);
 }
@@ -86,7 +87,7 @@ void FilterEditor::plotFilterGraph(juce::Graphics& g)
                         30, 10, juce::Justification::centredRight);
     }
 
-    //plotFFT(g);
+
 
     //Plot filters responses
     if (drawPointInfo == true && pointInfoIndex == 0)    //Low filter curve
@@ -197,6 +198,7 @@ void FilterEditor::plotFFT(juce::Graphics& g)
     fftArray.clear();
     auto fftBuffer = editedFilterProcessor->analyser.getFFTBuffer();
     float fftSize = editedFilterProcessor->analyser.getFFTSize();
+    //DBG(fftSize);
     for (auto i = 0; i < frequencyArray.size(); i++)
     {
         auto indexToPlot = round((frequencyArray[i] * fftSize) / actualSampleRate);
@@ -205,7 +207,6 @@ void FilterEditor::plotFFT(juce::Graphics& g)
         //DBG(indexToPlot);
     }
     g.setColour(juce::Colours::black);
-    g.setOpacity(0.2);
     plotMagnitudeArray(g, fftArray, 1);
 }
 
@@ -542,11 +543,11 @@ int FilterEditor::geYPositionFromGain(float gain)
 void FilterEditor::timerCallback()
 {
     if (magnitudeChanged)
-    createMagnitudeArray();
+        createMagnitudeArray();
     if (parametersChanged)
         updateFilterGraphPoints();
-    /*if (editedFilterProcessor->analyser.checkForNewData())
-        repaint();*/
+    if (editedFilterProcessor->analyser.checkForNewData())
+        repaint();
 }
 
 void FilterEditor::setColour(juce::Colour colour)

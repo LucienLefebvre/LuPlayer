@@ -2751,6 +2751,12 @@
     <ClInclude Include="Source\Mixer\CompProcessor.h">
       <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Mixer\DeesserEditor.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\DynamicsEditor.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
     <ClInclude Include="Source\Mixer\FFTAnalyser.h">
       <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClInclude>
@@ -2766,10 +2772,16 @@
     <ClInclude Include="Source\Mixer\FilterProcessor.h">
       <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Mixer\GateEditor.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
     <ClInclude Include="Source\Mixer\InputPanel.h">
       <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClInclude>
     <ClInclude Include="Source\Mixer\InputsControl.h">
+      <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mixer\LimiterEditor.h">
       <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClInclude>
     <ClInclude Include="Source\Mixer\Meter.h">

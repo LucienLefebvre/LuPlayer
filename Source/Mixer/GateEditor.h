@@ -1,8 +1,8 @@
 /*
   ==============================================================================
 
-    CompEditor.h
-    Created: 19 Apr 2021 11:23:34pm
+    GateEditor.h
+    Created: 27 Apr 2021 3:35:49pm
     Author:  DPR
 
   ==============================================================================
@@ -12,19 +12,14 @@
 
 #include <JuceHeader.h>
 #include "CompProcessor.h"
-#include "CompProcessor.h"
 //==============================================================================
 /*
 */
-class CompEditor : public juce::Component,
-    public juce::Slider::Listener,
-    public juce::Timer
+class GateEditor  : public juce::Component, juce::Slider::Listener
 {
 public:
-    CompEditor()
+    GateEditor()
     {
-        juce::Timer::startTimer(50);
-
         thresholdSlider.reset(new juce::Slider("thresholdSlider"));
         addAndMakeVisible(thresholdSlider.get());
         thresholdSlider->setRange(-60.0f, 0.0f, 0);
@@ -154,40 +149,9 @@ public:
 
         releaseLabel->setBounds(74, 143, 64, 24);
 
-        gainSlider.reset(new juce::Slider("gainSlider"));
-        addAndMakeVisible(gainSlider.get());
-        gainSlider->setRange(-24.0f, 24.0f, 0);
-        gainSlider->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-        gainSlider->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
-        gainSlider->addListener(this);
-        gainSlider->setDoubleClickReturnValue(true, 0.);
-
-        gainSlider->setBounds(37, 150, 60, 60);
-
-        gainValueLabel.reset(new juce::Label("gainValueLabel",
-            TRANS("1.0\n")));
-        addAndMakeVisible(gainValueLabel.get());
-        gainValueLabel->setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
-        gainValueLabel->setJustificationType(juce::Justification::centred);
-        gainValueLabel->setEditable(false, false, false);
-        gainValueLabel->setColour(juce::TextEditor::textColourId, juce::Colours::black);
-        gainValueLabel->setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
-
-        gainValueLabel->setBounds(34, 197, 64, 24);
-
-        gainLabel.reset(new juce::Label("gainLabel",
-            TRANS("Gain\n")));
-        addAndMakeVisible(gainLabel.get());
-        gainLabel->setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
-        gainLabel->setJustificationType(juce::Justification::centred);
-        gainLabel->setEditable(false, false, false);
-        gainLabel->setColour(juce::TextEditor::textColourId, juce::Colours::black);
-        gainLabel->setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
-
-        gainLabel->setBounds(34, 213, 64, 24);
     }
 
-    ~CompEditor() override
+    ~GateEditor() override
     {
         thresholdSlider = nullptr;
         ratioSlider = nullptr;
@@ -201,34 +165,26 @@ public:
         attackLabel = nullptr;
         releaseValueLabel = nullptr;
         releaseLabel = nullptr;
-        gainLabel = nullptr;
-        gainSlider = nullptr;
-        gainValueLabel = nullptr;
     }
-
 
     void paint (juce::Graphics& g) override
     {
         g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
     }
 
-    void timerCallback()
-    {
-        repaint();
-    }
     void resized() override
     {
+
     }
 
-    void setEditedCompProcessor(CompProcessor& processor) 
+    void setEditedCompProcessor(CompProcessor& processor)
     {
         editedCompProcessor = &processor;
-        auto compParams = editedCompProcessor->getCompParams();
-        thresholdSlider->setValue(compParams.threshold);
-        gainSlider->setValue(compParams.gain);
-        attackSlider->setValue(compParams.attack);
-        releaseSlider->setValue(compParams.release);
-        ratioSlider->setValue(compParams.ratio);
+        auto gateParams = editedCompProcessor->getGateParams();
+        thresholdSlider->setValue(gateParams.threshold);
+        attackSlider->setValue(gateParams.attack);
+        releaseSlider->setValue(gateParams.release);
+        ratioSlider->setValue(gateParams.ratio);
     }
 
 
@@ -239,37 +195,29 @@ private:
         {
             auto value = sliderThatWasMoved->getValue();
             thresholdValueLabel->setText(juce::String(value) + "dB", juce::NotificationType::dontSendNotification);
-            editedCompProcessor->setThreshold(value);
+            editedCompProcessor->setGateThreshold(value);
         }
         else if (sliderThatWasMoved == ratioSlider.get())
         {
             auto value = sliderThatWasMoved->getValue();
             auto roundedValue = std::ceil(value * 10.0) / 10.0;
             ratioValueLabel->setText(juce::String(roundedValue), juce::NotificationType::dontSendNotification);
-            editedCompProcessor->setRatio(value);
+            editedCompProcessor->setGateRatio(value);
         }
         else if (sliderThatWasMoved == attackSlider.get())
         {
             auto value = sliderThatWasMoved->getValue();
             attackValueLabel->setText(juce::String(trunc(value)) + "ms", juce::NotificationType::dontSendNotification);
-            editedCompProcessor->setAttack(value);
+            editedCompProcessor->setGateAttack(value);
         }
         else if (sliderThatWasMoved == releaseSlider.get())
         {
             auto value = sliderThatWasMoved->getValue();
             releaseValueLabel->setText(juce::String(trunc(value)) + "ms", juce::NotificationType::dontSendNotification);
-            editedCompProcessor->setRelease(value);
-        }
-        else if (sliderThatWasMoved == gainSlider.get())
-        {
-            auto value = sliderThatWasMoved->getValue();
-            auto roundedValue = std::ceil(value * 10.0) / 10.0;
-            gainValueLabel->setText(juce::String(roundedValue) + "dB", juce::NotificationType::dontSendNotification);
-            editedCompProcessor->setGain(value);
+            editedCompProcessor->setGateRelease(value);
         }
     }
     CompProcessor* editedCompProcessor = 0;
-    //CompProcessor::CompParameters compParams;
 
     std::unique_ptr<juce::Slider> thresholdSlider;
     std::unique_ptr<juce::Slider> ratioSlider;
@@ -283,10 +231,7 @@ private:
     std::unique_ptr<juce::Label> attackLabel;
     std::unique_ptr<juce::Label> releaseValueLabel;
     std::unique_ptr<juce::Label> releaseLabel;
-    std::unique_ptr<juce::Slider> gainSlider;
-    std::unique_ptr<juce::Label> gainValueLabel;
-    std::unique_ptr<juce::Label> gainLabel;
 
     int knobWidth = 60;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CompEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GateEditor)
 };

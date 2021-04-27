@@ -218,9 +218,9 @@ void InputsControl::setSelectedMixerInput(int selectedInput)
     if (selectedInput >= 0)
     {
         selectedMixerInput = selectedInput;
-        inputPanel->filterEditor.setEditedFilterProcessor(inputs[selectedMixerInput]->filterProcessor);
-        inputPanel->compEditor.setEditedCompProcessor(inputs[selectedMixerInput]->compProcessor);
-        inputPanel->channelEditor.setEditedProcessors(*inputs[selectedMixerInput]);
+        //inputPanel->filterEditor.setEditedFilterProcessor(inputs[selectedMixerInput]->filterProcessor);
+        //inputPanel->dynamicsEditor.setEditedCompProcessor(inputs[selectedMixerInput]->compProcessor);
+        //inputPanel->channelEditor.setEditedProcessors(*inputs[selectedMixerInput]);
         inputPanel->setEditedInput(*inputs[selectedMixerInput]);
 
         for (auto i = 0; i < inputs.size(); i++)

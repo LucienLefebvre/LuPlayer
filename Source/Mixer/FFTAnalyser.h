@@ -21,7 +21,7 @@ public :
 
     ~FFTAnalyser()
     {
-
+        stopThread(1000);
     }
 
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -30,7 +30,9 @@ public :
         actualSamplesPerBlockExpected = samplesPerBlockExpected;
         fifo.setTotalSize(sampleRate);
         fifoBuffer.setSize(1, sampleRate);
+        averagerNumberOfBlocks = (sampleRate * ((float)refreshRateMs / 1000.0f)) / (float)samplesPerBlockExpected;
         //startThread(5);
+
     }
 
     void run() override
@@ -52,16 +54,33 @@ public :
                 window.multiplyWithWindowingTable(fftBuffer.getWritePointer(0), fft.getSize());
                 fft.performFrequencyOnlyForwardTransform(fftBuffer.getWritePointer(0));
 
+                if (averagerTicks == 0)
+                {
+                    fftResult.clear();
+                    fftResult.copyFrom(0, 0, averager.getReadPointer(0), averager.getNumSamples(), 0.5f);
+                    newDataAvailable.store(true);
+
+                    //averager.copyFrom(0, 0, fftBuffer, 0, 0, fftBuffer.getNumSamples());
+                    averager.copyFrom(0, 0, fftBuffer.getReadPointer(0), fftBuffer.getNumSamples(), 1.0f / (float)averagerNumberOfBlocks);
+                    averagerTicks++;
+                }
+                else
+                {
+                    DBG(averagerTicks);
+                    averager.addFrom(0, 0, fftBuffer.getReadPointer(0), fftBuffer.getNumSamples(), 1.0f / (float)averagerNumberOfBlocks);
+                    averagerTicks++;
+                    averagerTicks %= averagerNumberOfBlocks;
+                }
                 //juce::ScopedLock lockedForWriting(pathCreationLock);
-                averager.addFrom(0, 0, averager.getReadPointer(averagerPtr), averager.getNumSamples(), -1.0f);
+                /*averager.addFrom(0, 0, averager.getReadPointer(averagerPtr), averager.getNumSamples(), -1.0f);
                 averager.copyFrom(averagerPtr, 0, fftBuffer.getReadPointer(0), averager.getNumSamples(), 1.0f / (averager.getNumSamples() * (averager.getNumChannels() - 1)));
                 averager.addFrom(0, 0, averager.getReadPointer(averagerPtr), averager.getNumSamples());
-                if (++averagerPtr == averager.getNumChannels()) averagerPtr = 1;
-                newDataAvailable = true;
+                if (++averagerPtr == averager.getNumChannels()) averagerPtr = 1;*/
+
             }
 
             if (fifo.getNumReady() < fft.getSize())
-                waitForData.wait(20);
+                waitForData.wait();
 
         }
     }
@@ -88,7 +107,7 @@ public :
 
     juce::AudioBuffer<float> getFFTBuffer()
     {
-        return fftBuffer;
+        return fftResult;
     }
 
     int getFFTSize()
@@ -104,8 +123,11 @@ private :
     juce::AbstractFifo fifo                     { 48000 };
     juce::AudioBuffer<float> fifoBuffer;
     juce::AudioBuffer<float> fftBuffer          { 1, fft.getSize() * 2 };
-    juce::AudioBuffer<float> averager           { 5, fft.getSize() / 2 };
-    int averagerPtr = 1;
+    juce::AudioBuffer<float> averager           { 1, fft.getSize() * 2 };
+    juce::AudioBuffer<float> fftResult          { 1, fft.getSize() * 2 };
+    int averagerTicks = 0;
+    int averagerNumberOfBlocks = 0;
+    int refreshRateMs = 50;
     std::atomic<bool> newDataAvailable;
     juce::WaitableEvent waitForData;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FFTAnalyser)
