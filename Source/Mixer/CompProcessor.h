@@ -15,10 +15,14 @@
 //==============================================================================
 /*
 */
-class CompProcessor  : public juce::Component,
-    public juce::Timer
+class CompProcessor  :  public juce::Timer
 {
 public:
+    enum Mode
+    {
+        Mono,
+        Stereo
+    };
     struct CompParameters
     {
         float threshold = -0.0f;
@@ -39,7 +43,7 @@ public:
     struct LimitParameters
     {
         float threshold = 0.0f;
-        float release = 50.0f;
+        float release = 200.0f;
         bool bypassed = false;
     };
     struct DeesserParameters
@@ -49,9 +53,11 @@ public:
         float frequency = 8000.0f;
         bool bypassed = false;
     };
-    CompProcessor()
+    CompProcessor(Mode channelMode)
     {
         juce::Timer::startTimer(50);
+
+        mode = channelMode;
 
         compressor.setThreshold(compParams.threshold);
         compressor.setRatio(compParams.ratio);
@@ -63,6 +69,13 @@ public:
         gate.setRatio(gateParams.ratio);
         gate.setAttack(gateParams.attack);
         gate.setRelease(gateParams.release);
+
+        limiter.setThreshold(limitParams.threshold);
+        limiter.setRelease(limitParams.release);
+    }
+
+    ~CompProcessor() override
+    {
     }
 
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -76,6 +89,7 @@ public:
         compressor.prepare(spec);
         gain.prepare(spec);
         gate.prepare(spec);
+        limiter.prepare(spec);
     }
 
     void getNextAudioBlock(juce::AudioBuffer<float>* buffer)
@@ -84,56 +98,67 @@ public:
 
         //INPUT RMS
         inputRMS.store(buffer->getRMSLevel(0, 0, buffer->getNumSamples()));
+        if (mode == Stereo)
+            inputRMS.store(juce::jmax(inputRMS.load(), buffer->getRMSLevel(1, 0, buffer->getNumSamples())));
 
         //GATE
         if (!gateParams.bypassed)
         {
             beforeGateRMS.store(buffer->getRMSLevel(0, 0, buffer->getNumSamples()));
+            if (mode == Stereo)
+                beforeGateRMS.store(juce::jmax(beforeGateRMS.load(), buffer->getRMSLevel(1, 0, buffer->getNumSamples())));
 
             gate.process(juce::dsp::ProcessContextReplacing<float>(block));
 
             afterGateRMS.store(buffer->getRMSLevel(0, 0, buffer->getNumSamples()));
-
-            /*if (reductionMeasured)
-                compReductionsGain.clear();
-            compReductionsGain.add(juce::Decibels::gainToDecibels(beforeCompRMS / afterCompRMS));*/
+            if (mode == Stereo)
+                afterGateRMS.store(juce::jmax(afterGateRMS.load(), buffer->getRMSLevel(1, 0, buffer->getNumSamples())));
         }
 
         //COMPRESSOR
         if (!compParams.bypassed)
         {
             //measure input RMS
-            beforeCompRMS = buffer->getRMSLevel(0, 0, buffer->getNumSamples());
+            beforeCompRMS.store(buffer->getRMSLevel(0, 0, buffer->getNumSamples()));
+            if (mode == Stereo)
+                beforeCompRMS.store(juce::jmax(beforeCompRMS.load(), buffer->getRMSLevel(1, 0, buffer->getNumSamples())));
             //process comp
             compressor.process(juce::dsp::ProcessContextReplacing<float>(block));
             //measure output RMS
-            afterCompRMS = buffer->getRMSLevel(0, 0, buffer->getNumSamples());
+            afterCompRMS.store(buffer->getRMSLevel(0, 0, buffer->getNumSamples()));
+            if (mode == Stereo)
+                afterCompRMS.store(juce::jmax(afterCompRMS.load(), buffer->getRMSLevel(1, 0, buffer->getNumSamples())));
             //makeup gain
             gain.process(juce::dsp::ProcessContextReplacing<float>(block));
-            //add the reduction ratios to an array
-            if (reductionMeasured)
-                compReductionsGain.clear();
-            compReductionsGain.add(juce::Decibels::gainToDecibels(beforeCompRMS / afterCompRMS));
+        }
+
+        //LIMITER
+        if (!limitParams.bypassed)
+        {
+            //measure input RMS
+            beforeLimitRMS.store(buffer->getRMSLevel(0, 0, buffer->getNumSamples()));
+            if (mode == Stereo)
+                beforeLimitRMS.store(juce::jmax(beforeLimitRMS.load(), buffer->getRMSLevel(1, 0, buffer->getNumSamples())));
+            //process comp
+            limiter.process(juce::dsp::ProcessContextReplacing<float>(block));
+            //measure output RMS
+            afterLimitRMS.store(buffer->getRMSLevel(0, 0, buffer->getNumSamples()));
+            if (mode == Stereo)
+                afterLimitRMS.store(juce::jmax(afterLimitRMS.load(), buffer->getRMSLevel(1, 0, buffer->getNumSamples())));
         }
 
         //OUTPUT RMS
         outputRMS.store(buffer->getRMSLevel(0, 0, buffer->getNumSamples()));
-
+        if (mode == Stereo)
+            outputRMS.store(juce::jmax(outputRMS.load(), buffer->getRMSLevel(1, 0, buffer->getNumSamples())));
 
     }
 
     void timerCallback()
     {
-        //COMP
-        auto gains = compReductionsGain;
-        compReductionDB = 1;
-        for (auto i = 0; i < compReductionsGain.size(); i++)
-            compReductionDB = compReductionDB * compReductionsGain[i];
-
-        //GATE
-        reductionMeasured = true;
     }
 
+    //********REDUCTION GAINS********
     float getGeneralReductionDB()
     {
         return juce::Decibels::gainToDecibels(inputRMS.load() / outputRMS.load());
@@ -142,16 +167,23 @@ public:
     float getCompReductionDB()
     {
         if (!compParams.bypassed)
-            return compReductionDB;
+            return juce::Decibels::gainToDecibels(beforeCompRMS.load() / afterCompRMS.load());
         else
             return 0;
     }
 
     float getGateReductionDB()
     {
-
         if (!gateParams.bypassed)
             return juce::Decibels::gainToDecibels(beforeGateRMS.load() / afterGateRMS.load());
+        else
+            return 0;
+    }
+
+    float getLimiterReductionDB()
+    {
+        if (!limitParams.bypassed)
+            return juce::Decibels::gainToDecibels(beforeLimitRMS.load() / afterLimitRMS.load());
         else
             return 0;
     }
@@ -233,27 +265,34 @@ public:
     }
 
 
-    juce::dsp::Compressor<float>& getCompressor()
+    //*************LIMITER*************
+    void setLimitThreshold(float t)
     {
-        return compressor;
+        limitParams.threshold = t;
+        limiter.setThreshold(t);
     }
 
-    juce::dsp::Gain<float>& getGain()
+    void setLimitRelease(float r)
     {
-        return gain;
-    }
-    ~CompProcessor() override
-    {
+        limitParams.release = r;
+        limiter.setRelease(r);
     }
 
-    void paint (juce::Graphics& g) override{}
-    void resized() override{}
+    void setLimitBypass(bool isBypassed)
+    {
+        limitParams.bypassed = isBypassed;
+    }
 
-
+    LimitParameters getLimitParams()
+    {
+        return limitParams;
+    }
 
 private:
     double actualSampleRate;
     double actualSamplesPerBlockExpected;
+
+    Mode mode;
 
     //DYNAMICS RMS
     std::atomic<float> inputRMS;
@@ -263,8 +302,8 @@ private:
     juce::dsp::Compressor<float> compressor;
     juce::dsp::Gain<float> gain;
     CompParameters compParams;
-    float beforeCompRMS = 0.0f;
-    float afterCompRMS = 0.0f;
+    std::atomic<float> beforeCompRMS = 0.0f;
+    std::atomic<float> afterCompRMS = 0.0f;
     juce::Array<float> compReductionsGain;
     float compReductionDB = 0.0f;
 
@@ -276,8 +315,15 @@ private:
     juce::Array<float> gateReductionsGain;
     float gateReductionDB = 0.0f;
 
+    //LIMITER
     juce::dsp::Limiter<float> limiter;
     LimitParameters limitParams;
+    std::atomic<float> beforeLimitRMS = 0.0f;
+    std::atomic<float> afterLimitRMS = 0.0f;
+    juce::Array<float> limitReductionsGain;
+    float limitReductionDB = 0.0f;
+
+
 
     juce::dsp::Compressor<float> deesser;
     DeesserParameters deesserParams;

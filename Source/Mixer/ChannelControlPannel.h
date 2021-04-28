@@ -14,12 +14,16 @@
 #include "MixerInput.h"
 #include "FilterProcessor.h"
 #include "FilterEditor.h"
+#include "DynamicsEditor.h"
 //#include "InputsControl.h"
 //==============================================================================
 /*
 */
-class ChannelControlPannel  : public juce::Component, public juce::ComboBox::Listener, public juce::Label::Listener,
-    public juce::Slider::Listener, public juce::ChangeListener
+class ChannelControlPannel  : public juce::Component,
+    public juce::ComboBox::Listener, 
+    public juce::Label::Listener,
+    public juce::Slider::Listener, 
+    public juce::ChangeListener
 {
 public:
     ChannelControlPannel() : deleteBroadcaster()
@@ -53,10 +57,12 @@ public:
         addAndMakeVisible(&gateButton);
         gateButton.setButtonText("G");
         gateButton.setSize(80, 18);
+        gateButton.onClick = [this] {gateButtonCLicked(); };
 
         addAndMakeVisible(&compButton);
         compButton.setButtonText("C");
         compButton.setSize(80, 18);
+        compButton.onClick = [this] {compButtonCLicked(); };
 
         addAndMakeVisible(&deesserButton);
         deesserButton.setButtonText("D");
@@ -65,7 +71,8 @@ public:
         addAndMakeVisible(&limiterButton);
         limiterButton.setButtonText("L");
         limiterButton.setSize(80, 18);
-        
+        limiterButton.onClick = [this] {limitButtonCLicked(); };
+
         addAndMakeVisible(&optionButton);
         optionButton.setButtonText("Options");
         optionButton.onClick = [this] {optionButtonClicked(); };
@@ -138,6 +145,28 @@ public:
             eqButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(40, 134, 189));
         else
             eqButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        //gate Button
+        if (!editedMixerInput->compProcessor.getGateParams().bypassed)
+            gateButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+                juce::Colour(40, 134, 189));
+        else
+            gateButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+                getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        //comp Button
+        if (!editedMixerInput->compProcessor.getCompParams().bypassed)
+            compButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+                juce::Colour(40, 134, 189));
+        else
+            compButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+                getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        //limit Button
+        if (!editedMixerInput->compProcessor.getLimitParams().bypassed)
+            limiterButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+                juce::Colour(40, 134, 189));
+        else
+            limiterButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+                getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+
         //VCA
         if (!editedMixerInput->isVCAAssigned())
             vcaButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
@@ -146,11 +175,13 @@ public:
 
         repaint();
     }
-    void setEditedEditors(FilterEditor& f)
+
+    void setEditedEditors(FilterEditor& f, DynamicsEditor& d)
     {
         filterEditor = &f;
+        dynmamicsEditor = &d;
+        dynmamicsEditor->enableButtonBroadcaster.addChangeListener(this);
     }
-
 
     void setDeviceManagerInfos(juce::AudioDeviceManager& devicemanager)
     {
@@ -223,6 +254,45 @@ public:
         }
     }
 
+    void gateButtonCLicked()
+    {
+        if (!editedMixerInput->compProcessor.getGateParams().bypassed)
+            editedMixerInput->compProcessor.setGateBypass(true);
+        else
+        {
+            editedMixerInput->compProcessor.setGateBypass(false);
+            dynmamicsEditor->setViewedEditor(1);
+        }
+        updateInputInfo();
+        dynmamicsEditor->updateEnableButton();
+    }
+
+    void compButtonCLicked()
+    {
+        if (!editedMixerInput->compProcessor.getCompParams().bypassed)
+            editedMixerInput->compProcessor.setBypass(true);
+        else
+        {
+            editedMixerInput->compProcessor.setBypass(false);
+            dynmamicsEditor->setViewedEditor(2);
+        }
+        updateInputInfo();
+        dynmamicsEditor->updateEnableButton();
+    }
+
+    void limitButtonCLicked()
+    {
+        if (!editedMixerInput->compProcessor.getLimitParams().bypassed)
+            editedMixerInput->compProcessor.setLimitBypass(true);
+        else
+        {
+            editedMixerInput->compProcessor.setLimitBypass(false);
+            dynmamicsEditor->setViewedEditor(4);
+        }
+        updateInputInfo();
+        dynmamicsEditor->updateEnableButton();
+    }
+
     void vcaButtonClicked()
     {
         if (editedMixerInput->isVCAAssigned())
@@ -237,6 +307,7 @@ public:
             vcaButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::red);
         }
     }
+
     void updateInputSelectorsState()
     {
         //feed an array of the inputs states (selected or not)
@@ -299,7 +370,9 @@ public:
     }
     void changeListenerCallback(juce::ChangeBroadcaster* source)
     {
-        if (juce::ColourSelector* cs = dynamic_cast <juce::ColourSelector*> (source))
+        if (source == &dynmamicsEditor->enableButtonBroadcaster)
+            updateInputInfo();
+        else if (juce::ColourSelector* cs = dynamic_cast <juce::ColourSelector*> (source))
         {
             setChannelColour(cs->getCurrentColour());
         }
@@ -327,6 +400,7 @@ private:
     FilterProcessor* editedFilterProcessor;
     CompProcessor* editedCompProcessor;
     FilterEditor* filterEditor;
+    DynamicsEditor* dynmamicsEditor;
 
     juce::TextButton optionButton;
     std::unique_ptr<juce::ColourSelector> colourSelector;

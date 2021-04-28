@@ -12,9 +12,9 @@
 #include "MixerInput.h"
 
 //==============================================================================
-MixerInput::MixerInput(Mode mode)
+MixerInput::MixerInput(Mode mode) : compProcessor((mode == Mono) ? CompProcessor::Mode::Mono : CompProcessor::Mode::Stereo)
 {
-    switch (mode)
+    switch (mode) 
     {
     case Mono :
         inputMode = Mono;

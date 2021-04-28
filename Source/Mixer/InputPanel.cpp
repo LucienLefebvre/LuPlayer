@@ -63,7 +63,7 @@ void InputPanel::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 
     filterEditor.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
-    channelEditor.setEditedEditors(filterEditor);
+    channelEditor.setEditedEditors(filterEditor, dynamicsEditor);
     channelEditor.prepareToPlay();
     outputMeter.prepareToPlay(samplesPerBlockExpected, sampleRate);
 

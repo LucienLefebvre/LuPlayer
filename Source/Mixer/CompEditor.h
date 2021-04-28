@@ -191,16 +191,16 @@ public:
     {
         thresholdSlider = nullptr;
         ratioSlider = nullptr;
-        attackSlider = nullptr;
+        releaseSlider = nullptr;
         thresholdValueLabel = nullptr;
         thresholdLabel = nullptr;
         ratioValueLabel = nullptr;
         ratioLabel = nullptr;
-        releaseSlider = nullptr;
-        attackValueLabel = nullptr;
-        attackLabel = nullptr;
+        attackSlider = nullptr;
         releaseValueLabel = nullptr;
         releaseLabel = nullptr;
+        attackLabel = nullptr;
+        attackValueLabel = nullptr;
         gainLabel = nullptr;
         gainSlider = nullptr;
         gainValueLabel = nullptr;
@@ -273,16 +273,16 @@ private:
 
     std::unique_ptr<juce::Slider> thresholdSlider;
     std::unique_ptr<juce::Slider> ratioSlider;
-    std::unique_ptr<juce::Slider> attackSlider;
+    std::unique_ptr<juce::Slider> releaseSlider;
     std::unique_ptr<juce::Label> thresholdValueLabel;
     std::unique_ptr<juce::Label> thresholdLabel;
     std::unique_ptr<juce::Label> ratioValueLabel;
     std::unique_ptr<juce::Label> ratioLabel;
-    std::unique_ptr<juce::Slider> releaseSlider;
-    std::unique_ptr<juce::Label> attackValueLabel;
-    std::unique_ptr<juce::Label> attackLabel;
+    std::unique_ptr<juce::Slider> attackSlider;
     std::unique_ptr<juce::Label> releaseValueLabel;
     std::unique_ptr<juce::Label> releaseLabel;
+    std::unique_ptr<juce::Label> attackValueLabel;
+    std::unique_ptr<juce::Label> attackLabel;
     std::unique_ptr<juce::Slider> gainSlider;
     std::unique_ptr<juce::Label> gainValueLabel;
     std::unique_ptr<juce::Label> gainLabel;

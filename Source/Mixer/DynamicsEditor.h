@@ -27,7 +27,8 @@ public:
         compReductionMeter(Meter::Mode::ReductionGain),
         gateReductionMeter(Meter::Mode::ReductionGain),
         deesserReductionMeter(Meter::Mode::ReductionGain),
-        limiterReductionMeter(Meter::Mode::ReductionGain)
+        limiterReductionMeter(Meter::Mode::ReductionGain),
+        enableButtonBroadcaster()
     {
         juce::Timer::startTimer(50);
 
@@ -121,9 +122,17 @@ public:
                     editedCompProcessor->setBypass(false);
                 else
                     editedCompProcessor->setBypass(true);
+                break;
+            case 4:
+                if (editedCompProcessor->getLimitParams().bypassed)
+                    editedCompProcessor->setLimitBypass(false);
+                else
+                    editedCompProcessor->setLimitBypass(true);
+                break;
             }
             updateEnableButton();
         }
+        enableButtonBroadcaster.sendChangeMessage();
     }
 
     void updateEnableButton()
@@ -139,8 +148,10 @@ public:
             case 2:
                 result = editedCompProcessor->getCompParams().bypassed;
                 break;
+            case 4:
+                result = editedCompProcessor->getLimitParams().bypassed;
+                break;
             }
-
             if (result == true)
             {
                 enableButton.setColour(juce::TextButton::ColourIds::buttonColourId,
@@ -197,8 +208,11 @@ public:
     {
         compReductionMeter.setReductionGain(editedCompProcessor->getCompReductionDB());
         gateReductionMeter.setReductionGain(editedCompProcessor->getGateReductionDB());
+        limiterReductionMeter.setReductionGain(editedCompProcessor->getGateReductionDB());
         repaint();
     }
+
+    juce::ChangeBroadcaster enableButtonBroadcaster;
 private:
     int buttonsHeight = 20;
     juce::TextButton dynamicButton;

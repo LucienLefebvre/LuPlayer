@@ -161,10 +161,10 @@ public:
         ratioValueLabel = nullptr;
         ratioLabel = nullptr;
         releaseSlider = nullptr;
-        attackValueLabel = nullptr;
-        attackLabel = nullptr;
         releaseValueLabel = nullptr;
         releaseLabel = nullptr;
+        attackValueLabel = nullptr;
+        attackLabel = nullptr;
     }
 
     void paint (juce::Graphics& g) override
