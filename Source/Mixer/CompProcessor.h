@@ -50,9 +50,13 @@ public:
     struct DeesserParameters
     {
         float threshold = 0.0f;
+        float ratio = 10.0f;
+        float attack = 20.0f;
+        float release = 200.0f;
         float range = 1.0f;
         float frequency = 8000.0f;
         bool bypassed = false;
+
     };
     CompProcessor(Mode channelMode)
     {
@@ -75,6 +79,11 @@ public:
         limiter.setThreshold(limitParams.threshold);
         limiter.setRelease(limitParams.release);
         limiterMakeUpGain.setGainDecibels(-3.0f);
+
+        deesser.setThreshold(deesserParams.threshold);
+        deesser.setRatio(deesserParams.ratio);
+        deesser.setAttack(deesserParams.attack);
+        deesser.setRelease(deesserParams.release);
     }
 
     ~CompProcessor() override
@@ -85,16 +94,26 @@ public:
     {
         actualSampleRate = sampleRate;
         actualSamplesPerBlockExpected = samplesPerBlockExpected;
+
         juce::dsp::ProcessSpec spec;
         spec.sampleRate = actualSampleRate;
         spec.maximumBlockSize = actualSamplesPerBlockExpected;
         spec.numChannels = 2;
+
         compressor.prepare(spec);
         gain.prepare(spec);
+
         gate.prepare(spec);
+
         limiter.prepare(spec);
         limitGain.prepare(spec);
         limiterMakeUpGain.prepare(spec);
+
+
+        deesser.prepare(spec);
+        deesserFilter.prepare(spec);
+        deesserBuffer.reset(new juce::AudioBuffer<float>(1, samplesPerBlockExpected));
+        *deesserFilter.state = *juce::dsp::IIR::Coefficients<float>::makeBandPass(sampleRate, deesserParams.frequency, 5.0f);
     }
 
     void getNextAudioBlock(juce::AudioBuffer<float>* buffer)
@@ -135,6 +154,26 @@ public:
                 afterCompRMS.store(juce::jmax(afterCompRMS.load(), buffer->getRMSLevel(1, 0, buffer->getNumSamples())));
             //makeup gain
             gain.process(juce::dsp::ProcessContextReplacing<float>(block));
+        }
+
+        //DEESSER
+        if (!deesserParams.bypassed)
+        {
+            //make copy of channel buffer, to filter it
+            deesserBuffer->copyFrom(0, 0, *buffer, 0, 0, buffer->getNumSamples());
+            if (mode == Stereo)
+            {
+                deesserBuffer->addFrom(0, 0, *buffer, 0, 0, buffer->getNumSamples());
+                deesserBuffer->applyGain(juce::Decibels::decibelsToGain(-3.0f));
+            }
+            juce::dsp::AudioBlock<float> deesserBlock(*deesserBuffer);
+            deesserFilter.process(juce::dsp::ProcessContextReplacing<float>(deesserBlock));
+            auto dsFilterRMS = juce::Decibels::gainToDecibels(deesserBuffer->getRMSLevel(0, 0, deesserBuffer->getNumSamples()));
+            DBG(dsFilterRMS);
+            auto deesserThreshold = dsFilterRMS;
+            DBG(deesserThreshold);
+            deesser.setThreshold(deesserThreshold);
+            deesser.process(juce::dsp::ProcessContextReplacing<float>(block));
         }
 
         //LIMITER
@@ -340,8 +379,9 @@ private:
     juce::Array<float> limitReductionsGain;
     float limitReductionDB = 0.0f;
 
-
-
+    //DEESSER
+    std::unique_ptr<juce::AudioBuffer<float>> deesserBuffer;
+    juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> deesserFilter;
     juce::dsp::Compressor<float> deesser;
     DeesserParameters deesserParams;
 
