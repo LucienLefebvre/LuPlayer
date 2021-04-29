@@ -28,7 +28,7 @@ public:
     {
         // In your constructor, you should add any child components, and
         // initialise any special settings that your component needs.
-        juce::Timer::startTimer(50);
+        juce::Timer::startTimer(timerRateMs);
         channelColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
         dataAvailable.store(false);
     }
@@ -40,7 +40,7 @@ public:
     void paint (juce::Graphics& g) override
     {
         g.fillAll (channelColour);   // clear the background
-        juce::NormalisableRange<float>range(-100.0f, 0.0f, 0.01, 3);
+        juce::NormalisableRange<float>range(-100.0f, 0.0f, 0.01, meterSkewFactor);
 
         int linePosition;
         //CHANNEL 0
@@ -75,6 +75,20 @@ public:
                     g.setColour(juce::Colours::red);
                 g.drawLine(0, linePosition, meterWidth, linePosition);
                 g.drawLine(0, linePosition + 1, meterWidth, linePosition + 1);
+
+                //FILL BETWEEN RMS AND PEAK
+                float limitedInstantPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(peakLevelL.load()));
+                float rangedInstantPeakLevel = range.convertTo0to1(limitedInstantPeakLevel);
+                int lineInstantPosition = getHeight() - rangedInstantPeakLevel * getHeight();
+                juce::jlimit(0, getHeight(), lineInstantPosition);
+                auto fillRectYStart = lineInstantPosition + 2;
+                auto fillRectHeight = getHeight() - rectHeight - fillRectYStart;
+                if (fillRectHeight > 0 && fillRectYStart > 0)
+                {
+                    g.setColour(juce::Colours::forestgreen);
+                    g.setOpacity(0.5f);
+                    g.fillRect(0, fillRectYStart, meterWidth - 2, fillRectHeight);
+                }
             }
 
             //CHANNEL 1
@@ -91,10 +105,10 @@ public:
                 {
                     int orangeRectYStart = range.convertTo0to1(-9.0f) * getHeight();
                     int orangeRextHeight = rectHeight - orangeRectYStart;
-                    g.setColour(juce::Colours::orange);
-                    g.fillRect(meterWidth + 1, getHeight() - orangeRectYStart - orangeRextHeight - 1, meterWidth - 1, orangeRextHeight);
+                    g.setColour(juce::Colours::blue);
+                    g.fillRect(meterWidth + 1, getHeight() - orangeRectYStart - orangeRextHeight - 1, meterWidth - 1, 2);
                 }
-                //DRAW PEAK L
+                //DRAW PEAK HOLD
                 float limitedPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(maxPeakR));
                 float rangedPeakLevel = range.convertTo0to1(limitedPeakLevel);
                 linePosition = getHeight() - rangedPeakLevel * getHeight();
@@ -106,6 +120,20 @@ public:
                     g.setColour(juce::Colours::red);
                 g.drawLine(meterWidth + 2, linePosition, 2 * meterWidth, linePosition);
                 g.drawLine(meterWidth + 2, linePosition + 1, 2 * meterWidth, linePosition + 1);
+
+                //FILL BETWEEN RMS AND PEAK
+                float limitedInstantPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(peakLevelR.load()));
+                float rangedInstantPeakLevel = range.convertTo0to1(limitedInstantPeakLevel);
+                int lineInstantPosition = getHeight() - rangedInstantPeakLevel * getHeight();
+                juce::jlimit(0, getHeight(), lineInstantPosition);
+                auto fillRectYStart = lineInstantPosition + 2;
+                auto fillRectHeight = getHeight() - rectHeight - fillRectYStart;
+                if (fillRectHeight > 0 && fillRectYStart > 0)
+                {
+                    g.setColour(juce::Colours::forestgreen);
+                    g.setOpacity(0.5f);
+                    g.fillRect(meterWidth + 1, fillRectYStart, meterWidth - 1, fillRectHeight);
+                }
             }
         }
         //DRAW REDUCTION GAIN
@@ -250,23 +278,23 @@ public:
     void timerCallback()
     {
         //RMS
-        rmsL = rmsAverageL.load();
-        rmsR = rmsAverageR.load();
-        //if (rmsIntegrationTick < numberOfTimerCyclePerIntegrationTick)
-        //{
-        //    rmsLevelsL[rmsIntegrationTick] = pow(rmsAverageL.load(), 2);
+        /*rmsL = rmsAverageL.load();
+        rmsR = rmsAverageR.load();*/
+        if (rmsIntegrationTick < numberOfTimerCyclePerIntegrationTick)
+        {
+            rmsLevelsL[rmsIntegrationTick] = pow(rmsAverageL.load(), 2);
 
-        //    if (meterMode == Stereo || meterMode == Stereo_ReductionGain)
-        //        rmsLevelsR[rmsIntegrationTick] = pow(rmsAverageR.load(), 2);
-        //    rmsIntegrationTick++;
-        //}
-        //else if (rmsIntegrationTick == numberOfTimerCyclePerIntegrationTick)
-        //{
-        //    //rmsLevelsL[rmsIntegrationTick] = pow(rmsAverageL.load(), 2);
-        //    rmsIntegrationTick = 0;
-        //}
-        //rmsL = sqrt(std::accumulate(rmsLevelsL.begin(), rmsLevelsL.end(), 0.0f) / (float)rmsLevelsL.size());
-        //rmsR = sqrt(std::accumulate(rmsLevelsR.begin(), rmsLevelsR.end(), 0.0f) / (float)rmsLevelsR.size());
+            if (meterMode == Stereo || meterMode == Stereo_ReductionGain)
+                rmsLevelsR[rmsIntegrationTick] = pow(rmsAverageR.load(), 2);
+            rmsIntegrationTick++;
+        }
+        else if (rmsIntegrationTick == numberOfTimerCyclePerIntegrationTick)
+        {
+            //rmsLevelsL[rmsIntegrationTick] = pow(rmsAverageL.load(), 2);
+            rmsIntegrationTick = 0;
+        }
+        rmsL = sqrt(std::accumulate(rmsLevelsL.begin(), rmsLevelsL.end(), 0.0f) / (float)rmsLevelsL.size());
+        rmsR = sqrt(std::accumulate(rmsLevelsR.begin(), rmsLevelsR.end(), 0.0f) / (float)rmsLevelsR.size());
         
         
         //********PEAK HOLDING********
@@ -317,13 +345,21 @@ public:
     {
         reductionGainWidth = w;
     }
+
+    void setSkewFactor(float s)
+    {
+        meterSkewFactor = s;
+    }
+
     Meter::Mode meterMode;
 private:
     double actualSampleRate;
     int actualSamplesPerBlockExpected;
 
+    float meterSkewFactor = 3.0f;
+
     int timerRateMs = 50;
-    int rmsIntegrationTime = 50;
+    int rmsIntegrationTime = 150;
     
     int numberOfBlocksPerTicks;
     int rmsBufferTick = 0;

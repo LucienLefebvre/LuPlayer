@@ -4,15 +4,16 @@
   <VALUE name="IP Adress" val="..."/>
   <VALUE name="Skew Factor" val="0.5"/>
   <VALUE name="Audio Output Mode" val="2"/>
-  <VALUE name="Audio Device Type" val="ASIO"/>
-  <VALUE name="audioDeviceName" val="ASIO Fireface USB"/>
-  <VALUE name="outputDeviceName" val="ASIO Fireface USB"/>
-  <VALUE name="inputDeviceName" val="ASIO Fireface USB"/>
+  <VALUE name="Audio Device Type" val="Windows Audio"/>
+  <VALUE name="audioDeviceName" val="Analog (11+12) (RME Fireface 802)"/>
+  <VALUE name="outputDeviceName" val="Analog (11+12) (RME Fireface 802)"/>
+  <VALUE name="inputDeviceName" val="Analog (9+10) (RME Fireface 802)"/>
   <VALUE name="sampleRate" val="48000.0"/>
-  <VALUE name="bufferSize" val="128"/>
-  <VALUE name="inputChannels" val="768"/>
-  <VALUE name="useDefaultInputChannels" val="0"/>
+  <VALUE name="bufferSize" val="480"/>
+  <VALUE name="inputChannels" val="3"/>
+  <VALUE name="useDefaultInputChannels" val="1"/>
   <VALUE name="outputChannels" val="3"/>
   <VALUE name="useDefaultOutputsChannels" val="1"/>
   <VALUE name="Converted Sound Path" val="D:\MultiPlayer\Sounds"/>
+  <VALUE name="Midi Shift" val="0"/>
 </PROPERTIES>

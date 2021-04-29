@@ -39,7 +39,6 @@ public:
     Recorder recorderComponent;
     DataBaseBrowser dbBrowser;
     DataBaseImport dbImport;
-    Mixer mixerPanel;
     juce::MixerAudioSource myMixer;
     juce::Label noDbLabel{ "No DataBase Found" };
 

@@ -116,6 +116,10 @@ SoundPlayer::SoundPlayer(bool isEightPlayer)
 
     mouseDragEnd(0);
     mouseDragEnd(1);
+
+    newMeter.reset(new Meter(Meter::Mode::Stereo));
+    addAndMakeVisible(newMeter.get());
+    newMeter->setSkewFactor(1.5f);
 }
 
 SoundPlayer::~SoundPlayer()
@@ -155,7 +159,7 @@ void SoundPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     meterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
     cuemeterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
 
-
+    newMeter->prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void SoundPlayer::paint (juce::Graphics& g)
@@ -221,6 +225,7 @@ void SoundPlayer::resized()
         levelMeterHeight = std::min(getHeight() - playersStartHeightPosition, levelMeterMaximumHeight);
         meter.setBounds(playlistViewport.getWidth(), getHeight() - levelMeterHeight, 80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
         loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7, getHeight() - levelMeterHeight, 25, levelMeterHeight);
+        newMeter->setBounds(meter.getBounds());
     }
 
 

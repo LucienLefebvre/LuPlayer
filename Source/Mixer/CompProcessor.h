@@ -42,6 +42,7 @@ public:
     };
     struct LimitParameters
     {
+        float gain = 0.0f;
         float threshold = 0.0f;
         float release = 200.0f;
         bool bypassed = false;
@@ -70,8 +71,10 @@ public:
         gate.setAttack(gateParams.attack);
         gate.setRelease(gateParams.release);
 
+        limitGain.setGainDecibels(limitParams.gain);
         limiter.setThreshold(limitParams.threshold);
         limiter.setRelease(limitParams.release);
+        limiterMakeUpGain.setGainDecibels(-3.0f);
     }
 
     ~CompProcessor() override
@@ -90,6 +93,8 @@ public:
         gain.prepare(spec);
         gate.prepare(spec);
         limiter.prepare(spec);
+        limitGain.prepare(spec);
+        limiterMakeUpGain.prepare(spec);
     }
 
     void getNextAudioBlock(juce::AudioBuffer<float>* buffer)
@@ -135,6 +140,10 @@ public:
         //LIMITER
         if (!limitParams.bypassed)
         {
+            //this first gain is to mask the +dB induced by the limiter (I don't know why....)
+            limiterMakeUpGain.process(juce::dsp::ProcessContextReplacing<float>(block));
+            //limiter input gain
+            limitGain.process(juce::dsp::ProcessContextReplacing<float>(block));
             //measure input RMS
             beforeLimitRMS.store(buffer->getRMSLevel(0, 0, buffer->getNumSamples()));
             if (mode == Stereo)
@@ -272,6 +281,12 @@ public:
         limiter.setThreshold(t);
     }
 
+    void setLimitGain(float g)
+    {
+        limitParams.gain = g;
+        limitGain.setGainDecibels(g);
+    }
+
     void setLimitRelease(float r)
     {
         limitParams.release = r;
@@ -316,7 +331,9 @@ private:
     float gateReductionDB = 0.0f;
 
     //LIMITER
+    juce::dsp::Gain<float> limitGain;
     juce::dsp::Limiter<float> limiter;
+    juce::dsp::Gain<float> limiterMakeUpGain;
     LimitParameters limitParams;
     std::atomic<float> beforeLimitRMS = 0.0f;
     std::atomic<float> afterLimitRMS = 0.0f;

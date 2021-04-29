@@ -2,8 +2,7 @@
 #define JUCE_ASIO 1
 //#define INFO_BUFFER_SIZE 32767
 //==============================================================================
-//bug si on supprime un lecteur qui est en train de jouer -> empêcher
-//bug affichage barre LU quand on passe de mono à stéreo
+//Channel shift ne shift pas le trim
 bool MainComponent::exitAnswered;
 MainComponent::MainComponent() : 
     juce::AudioAppComponent(deviceManager),
@@ -524,6 +523,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             {
                 soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
                 soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
+                soundPlayers[0]->newMeter->measureBlock(outputBuffer);
             }
             if (bottomComponent.recorderComponent.isEnabled())
             {

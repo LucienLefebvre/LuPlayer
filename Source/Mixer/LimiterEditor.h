@@ -28,7 +28,7 @@ public:
         thresholdSlider->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
         thresholdSlider->addListener(this);
 
-        thresholdSlider->setBounds(40, 0, 60, 60);
+        thresholdSlider->setBounds(0, 96, 60, 60);
 
         thresholdValueLabel.reset(new juce::Label("thresholdValueLabel",
             TRANS("0")));
@@ -39,7 +39,7 @@ public:
         thresholdValueLabel->setColour(juce::TextEditor::textColourId, juce::Colours::black);
         thresholdValueLabel->setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
 
-        thresholdValueLabel->setBounds(40, 48, 60, 24);
+        thresholdValueLabel->setBounds(0, 144, 60, 24);
 
         thresholdLabel.reset(new juce::Label("thresholdLabel",
             TRANS("Threshold")));
@@ -50,7 +50,7 @@ public:
         thresholdLabel->setColour(juce::TextEditor::textColourId, juce::Colours::black);
         thresholdLabel->setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
 
-        thresholdLabel->setBounds(40, 64, 60, 24);
+        thresholdLabel->setBounds(0, 160, 60, 24);
 
         releaseSlider.reset(new juce::Slider("releaseSlider"));
         addAndMakeVisible(releaseSlider.get());
@@ -59,7 +59,7 @@ public:
         releaseSlider->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
         releaseSlider->addListener(this);
         releaseSlider->setSkewFactor(0.3f);
-        releaseSlider->setBounds(40, 96, 60, 60);
+        releaseSlider->setBounds(72, 96, 60, 60);
 
         releaseValueLabel.reset(new juce::Label("releaseValueLabel",
             TRANS("0")));
@@ -70,7 +70,7 @@ public:
         releaseValueLabel->setColour(juce::TextEditor::textColourId, juce::Colours::black);
         releaseValueLabel->setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
 
-        releaseValueLabel->setBounds(41, 143, 60, 24);
+        releaseValueLabel->setBounds(73, 143, 60, 24);
 
         releaseLabel.reset(new juce::Label("releaseLabel",
             TRANS("Release\n")));
@@ -81,8 +81,38 @@ public:
         releaseLabel->setColour(juce::TextEditor::textColourId, juce::Colours::black);
         releaseLabel->setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
 
-        releaseLabel->setBounds(41, 159, 60, 24);
+        releaseLabel->setBounds(73, 159, 60, 24);
 
+        gainSlider.reset(new juce::Slider("gainSlider"));
+        addAndMakeVisible(gainSlider.get());
+        gainSlider->setRange(0.0f, +24.0f, 0.1f);
+        gainSlider->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+        gainSlider->setTextBoxStyle(juce::Slider::NoTextBox, false, 80, 20);
+        gainSlider->addListener(this);
+
+        gainSlider->setBounds(37, 4, 60, 60);
+
+        gainValueLabel.reset(new juce::Label("gainValueLabel",
+            TRANS("0")));
+        addAndMakeVisible(gainValueLabel.get());
+        gainValueLabel->setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        gainValueLabel->setJustificationType(juce::Justification::centred);
+        gainValueLabel->setEditable(false, false, false);
+        gainValueLabel->setColour(juce::TextEditor::textColourId, juce::Colours::black);
+        gainValueLabel->setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
+
+        gainValueLabel->setBounds(37, 52, 60, 24);
+
+        gainLabel.reset(new juce::Label("gainLabel",
+            TRANS("Input Gain")));
+        addAndMakeVisible(gainLabel.get());
+        gainLabel->setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        gainLabel->setJustificationType(juce::Justification::centred);
+        gainLabel->setEditable(false, false, false);
+        gainLabel->setColour(juce::TextEditor::textColourId, juce::Colours::black);
+        gainLabel->setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
+
+        gainLabel->setBounds(37, 68, 60, 24);
     }
 
     ~LimiterEditor() override
@@ -93,6 +123,10 @@ public:
         thresholdLabel = nullptr;
         releaseValueLabel = nullptr;
         releaseLabel = nullptr;
+        gainSlider = nullptr;
+        gainValueLabel = nullptr;
+        gainLabel = nullptr;
+
     }
 
     void paint (juce::Graphics& g) override
@@ -118,6 +152,12 @@ public:
             releaseValueLabel->setText(juce::String(value) + "ms", juce::NotificationType::dontSendNotification);
             editedCompProcessor->setLimitRelease(value);
         }
+        else if (sliderThatWasMoved == gainSlider.get())
+        {
+            auto value = sliderThatWasMoved->getValue();
+            gainValueLabel->setText(juce::String(value) + "dB", juce::NotificationType::dontSendNotification);
+            editedCompProcessor->setLimitGain(value);
+        }
     }
     void setEditedCompProcessor(CompProcessor& processor)
     {
@@ -125,6 +165,7 @@ public:
         auto limitParams = editedCompProcessor->getLimitParams();
         thresholdSlider->setValue(limitParams.threshold);
         releaseSlider->setValue(limitParams.release);
+        gainSlider->setValue(limitParams.gain);
     }
 
 private:
@@ -136,5 +177,8 @@ private:
     std::unique_ptr<juce::Slider> releaseSlider;
     std::unique_ptr<juce::Label> releaseValueLabel;
     std::unique_ptr<juce::Label> releaseLabel;
+    std::unique_ptr<juce::Slider> gainSlider;
+    std::unique_ptr<juce::Label> gainValueLabel;
+    std::unique_ptr<juce::Label> gainLabel;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LimiterEditor)
 };

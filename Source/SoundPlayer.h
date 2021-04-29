@@ -21,7 +21,7 @@
 #include <math.h>
 #include <Ebu128LoudnessMeter.h>
 #include "LoudnessBar.h"
-
+#include "Mixer/Meter.h"
 //==============================================================================
 /*
 */
@@ -71,6 +71,7 @@ public:
     Ebu128LoudnessMeter cueloudnessMeter;
     juce::Viewport playlistViewport;
     juce::Viewport playlistbisViewport;
+    std::unique_ptr<Meter> newMeter;
 
     //WAVEFORM CONTROL
     int draggedPlayer = 0;

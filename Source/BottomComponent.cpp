@@ -39,7 +39,6 @@ BottomComponent::BottomComponent()
         addTab("Netia Database Import", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &noDbLabel, false);
     }
     addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
-    addTab("Mixer", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &mixerPanel, false);
     setTabBarDepth(tabBarHeight);
     setCurrentTabIndex(1);
     getTabbedButtonBar().setWantsKeyboardFocus(false);
@@ -87,7 +86,6 @@ void BottomComponent::resized()
     audioPlaybackDemo.setBounds(0, 0, getWidth(), getHeight() - 25);
     recorderComponent.setBounds(0, 0, getWidth(), getHeight() - 25);
     dbBrowser.setBounds(0, 0, getWidth(), getHeight() - 25);
-    mixerPanel.setBounds(0, 0, getWidth(), getHeight() - 25);
     TabbedComponent::resized();
     getTabbedButtonBar().setBounds(getTabbedButtonBar().getBounds());
 }
@@ -98,7 +96,6 @@ void BottomComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRa
     myMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
     recorderComponent.prepareToPlay(samplesPerBlockExpected, sampleRate);
     dbBrowser.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    mixerPanel.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void BottomComponent::tabSelected()
