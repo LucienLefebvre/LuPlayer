@@ -77,7 +77,7 @@ public:
                 g.drawLine(0, linePosition + 1, meterWidth, linePosition + 1);
 
                 //FILL BETWEEN RMS AND PEAK
-                float limitedInstantPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(peakLevelL.load()));
+                /*float limitedInstantPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(peakLevelL.load()));
                 float rangedInstantPeakLevel = range.convertTo0to1(limitedInstantPeakLevel);
                 int lineInstantPosition = getHeight() - rangedInstantPeakLevel * getHeight();
                 juce::jlimit(0, getHeight(), lineInstantPosition);
@@ -88,7 +88,7 @@ public:
                     g.setColour(juce::Colours::forestgreen);
                     g.setOpacity(0.5f);
                     g.fillRect(0, fillRectYStart, meterWidth - 2, fillRectHeight);
-                }
+                }*/
             }
 
             //CHANNEL 1
@@ -122,7 +122,7 @@ public:
                 g.drawLine(meterWidth + 2, linePosition + 1, 2 * meterWidth, linePosition + 1);
 
                 //FILL BETWEEN RMS AND PEAK
-                float limitedInstantPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(peakLevelR.load()));
+                /*float limitedInstantPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(peakLevelR.load()));
                 float rangedInstantPeakLevel = range.convertTo0to1(limitedInstantPeakLevel);
                 int lineInstantPosition = getHeight() - rangedInstantPeakLevel * getHeight();
                 juce::jlimit(0, getHeight(), lineInstantPosition);
@@ -133,7 +133,7 @@ public:
                     g.setColour(juce::Colours::forestgreen);
                     g.setOpacity(0.5f);
                     g.fillRect(meterWidth + 1, fillRectYStart, meterWidth - 1, fillRectHeight);
-                }
+                }*/
             }
         }
         //DRAW REDUCTION GAIN

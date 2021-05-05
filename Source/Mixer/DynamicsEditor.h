@@ -47,7 +47,7 @@ public:
 
         dynamicsMenu.addItem(1, "Gate");
         dynamicsMenu.addItem(2, "Compressor");
-        dynamicsMenu.addItem(3, "Deesser");
+        //dynamicsMenu.addItem(3, "Deesser");
         dynamicsMenu.addItem(4, "Limiter");
 
         addChildComponent(&compEditor);
@@ -69,7 +69,7 @@ public:
         g.drawLine(compEditor.getRight(), 0, compEditor.getRight(), getHeight(), 2);
         g.drawLine(gateReductionMeter.getRight(), 0, gateReductionMeter.getRight(), getHeight(), 2);
         g.drawLine(compReductionMeter.getRight(), 0, compReductionMeter.getRight(), getHeight(), 2);
-        g.drawLine(deesserReductionMeter.getRight(), 0, deesserReductionMeter.getRight(), getHeight(), 2);
+        //g.drawLine(deesserReductionMeter.getRight(), 0, deesserReductionMeter.getRight(), getHeight(), 2);
         g.drawLine(limiterReductionMeter.getRight(), 0, limiterReductionMeter.getRight(), getHeight(), 2);
     }
 
@@ -84,8 +84,8 @@ public:
         limiterEditor.setBounds(0, 0, 140, getHeight() - buttonsHeight - 2);
         gateReductionMeter.setBounds(compEditor.getRight() + 2, 0, 10, getHeight());
         compReductionMeter.setBounds(gateReductionMeter.getRight() + 2, 0, 10, getHeight());
-        deesserReductionMeter.setBounds(compReductionMeter.getRight() + 2, 0, 10, getHeight());
-        limiterReductionMeter.setBounds(deesserReductionMeter.getRight() + 2, 0, 10, getHeight());
+        //deesserReductionMeter.setBounds(compReductionMeter.getRight() + 2, 0, 10, getHeight());
+        limiterReductionMeter.setBounds(compReductionMeter.getRight() + 2, 0, 10, getHeight());
     }
 
     void setEditedCompProcessor(CompProcessor& processor)

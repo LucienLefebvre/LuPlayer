@@ -48,7 +48,7 @@ void InputPanel::resized()
     //inputMeter.setBounds(channelEditor.getRight(), 0, 50, getHeight());
     outputMeter.setBounds(getWidth() - 50, 0, 50, getHeight());
     //meter.setBounds(getWidth() - 100, 0, 100, getHeight());
-    dynamicsEditor.setSize(190, getHeight());
+    dynamicsEditor.setSize(180, getHeight());
     filterEditor.setBounds(channelEditor.getRight() + 3, 0, getWidth() - outputMeter.getWidth() - dynamicsEditor.getWidth() - channelEditor.getWidth() - 6, getHeight());
     dynamicsEditor.setTopLeftPosition(filterEditor.getRight() + 3, 0);
 }

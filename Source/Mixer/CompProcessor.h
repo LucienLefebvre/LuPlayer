@@ -55,7 +55,7 @@ public:
         float release = 200.0f;
         float range = 1.0f;
         float frequency = 8000.0f;
-        bool bypassed = false;
+        bool bypassed = true;
 
     };
     CompProcessor(Mode channelMode)

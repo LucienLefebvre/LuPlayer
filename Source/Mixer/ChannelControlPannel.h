@@ -50,26 +50,26 @@ public:
         inputNameLabel.addListener(this);
 
         addAndMakeVisible(&eqButton);
-        eqButton.setButtonText("E");
+        eqButton.setButtonText("EQ");
         eqButton.setSize(80, 18);
         eqButton.onClick = [this] {eqButtonClicked(); };
 
         addAndMakeVisible(&gateButton);
-        gateButton.setButtonText("G");
+        gateButton.setButtonText("Gate");
         gateButton.setSize(80, 18);
         gateButton.onClick = [this] {gateButtonCLicked(); };
 
         addAndMakeVisible(&compButton);
-        compButton.setButtonText("C");
+        compButton.setButtonText("Comp");
         compButton.setSize(80, 18);
         compButton.onClick = [this] {compButtonCLicked(); };
 
-        addAndMakeVisible(&deesserButton);
+        /*addAndMakeVisible(&deesserButton);
         deesserButton.setButtonText("D");
-        deesserButton.setSize(80, 18);
+        deesserButton.setSize(80, 18);*/
 
         addAndMakeVisible(&limiterButton);
-        limiterButton.setButtonText("L");
+        limiterButton.setButtonText("Limit");
         limiterButton.setSize(80, 18);
         limiterButton.onClick = [this] {limitButtonCLicked(); };
 
@@ -104,13 +104,15 @@ public:
     {
         inputNameLabel.setBounds(0, 0, 100, 20);
         inputSelector.setBounds(0, inputNameLabel.getBottom(), 100, 20);
-        trimSlider.setBounds(-10, inputSelector.getBottom(), 80, 80);
-        vcaButton.setBounds(trimSlider.getRight() - 10, trimSlider.getY() + 5, getWidth() - trimSlider.getRight() + 10, 20);
-        eqButton.setBounds(1, trimSlider.getBottom() + 5, bypassButtonsSize, bypassButtonsSize);
-        gateButton.setBounds(21, trimSlider.getBottom() + 5, bypassButtonsSize, bypassButtonsSize);
-        compButton.setBounds(41, trimSlider.getBottom() + 5, bypassButtonsSize, bypassButtonsSize);
-        deesserButton.setBounds(61, trimSlider.getBottom() + 5, bypassButtonsSize, bypassButtonsSize);
-        limiterButton.setBounds(81, trimSlider.getBottom() + 5, bypassButtonsSize, bypassButtonsSize);
+        trimSlider.setBounds(10, inputSelector.getBottom(), 80, 80);
+
+        eqButton.setBounds(1, trimSlider.getBottom() + 15, bypassButtonsWidth, bypassButtonsHeight);
+        gateButton.setBounds(51, trimSlider.getBottom() + 15, bypassButtonsWidth, bypassButtonsHeight);
+        compButton.setBounds(1, eqButton.getBottom() + 5, bypassButtonsWidth, bypassButtonsHeight);
+        //deesserButton.setBounds(61, trimSlider.getBottom() + 5, bypassButtonsWidth, bypassButtonsHeight);
+        limiterButton.setBounds(51, eqButton.getBottom() + 5, bypassButtonsWidth, bypassButtonsHeight);
+
+        vcaButton.setBounds(1, compButton.getBottom() + 20 , 98, 20);
 
         optionButton.setBounds(0, getHeight() - 20, getWidth(), 20);
 
@@ -412,7 +414,8 @@ private:
 
     juce::Colour channelColour;
 
-    int bypassButtonsSize = 18;
+    int bypassButtonsWidth = 48;
+    int bypassButtonsHeight = 20;
     juce::TextButton eqButton;
     juce::TextButton compButton;
     juce::TextButton gateButton;
