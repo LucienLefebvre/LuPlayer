@@ -52,6 +52,10 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     table.addComponentListener(this);
     table.getHeader().addListener(this);
 
+    addAndMakeVisible(&timeLabel);
+    timeLabel.setFont(juce::Font(20.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+    timeLabel.setJustificationType(juce::Justification::centred);
+
     addAndMakeVisible(startStopButton);
     startStopButton.setColour(juce::TextButton::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     startStopButton.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
@@ -133,6 +137,7 @@ void DataBaseBrowser::prepareToPlay(int samplesPerBlockExpected, double sampleRa
 
 void DataBaseBrowser::resized()
 {
+
     table.setBounds(5, 30, getWidth() / 2 - 5, getHeight() - 30);
     table.getHeader().setColumnWidth(1, getWidth() * 5/16 - 5);
     table.getHeader().setColumnWidth(2, getWidth() / 16 - 4);
@@ -140,6 +145,7 @@ void DataBaseBrowser::resized()
     thumbnailBounds.setBounds(getWidth() / 2 + 4, 30, getWidth() / 2, getHeight() - 30);
     startStopButton.setBounds(getWidth() / 2 + 4, 0, 100, 25);
     autoPlayButton.setBounds(getWidth() / 2 + 4 + 101, 0, 100, 25);
+    timeLabel.setBounds(autoPlayButton.getRight(), 0, getWidth() - autoPlayButton.getRight(), 25);
     playHead.setSize(1, getHeight() - 30);
 }
 
@@ -160,15 +166,6 @@ void DataBaseBrowser::paintRowBackground(juce::Graphics& g, int rowNumber, int /
 
 void DataBaseBrowser::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool /*rowIsSelected*/)
 {
-    /*g.setColour(getLookAndFeel().findColour(juce::ListBox::textColourId));
-    g.setFont(font);
-
-    if (auto* rowElement = dataList->getChildElement(rowNumber))
-    {
-        auto text = rowElement->getStringAttribute(getAttributeNameForColumnId(columnId));
-
-        g.drawText(text, 2, 0, width - 4, height, Justification::centredLeft, true);
-    }*/
     g.setColour(getLookAndFeel().findColour(juce::ListBox::textColourId));
     if (rowNumber == table.getSelectedRow())
         g.setColour(juce::Colours::black);
@@ -405,6 +402,10 @@ void DataBaseBrowser::timerCallback()
     auto drawPosition = ((audioPosition / currentPosition) * (float)thumbnailBounds.getWidth())
         + (float)thumbnailBounds.getX();
     playHead.setTopLeftPosition(drawPosition, 30);
+
+    auto elapsedTime = secondsToMMSS(transport.getCurrentPosition());
+    auto remainingTime = secondsToMMSS(transport.getLengthInSeconds() - transport.getCurrentPosition());
+    timeLabel.setText(elapsedTime + " // " + remainingTime, juce::NotificationType::dontSendNotification);
 }
 
 void DataBaseBrowser::mouseDown(const juce::MouseEvent& e)

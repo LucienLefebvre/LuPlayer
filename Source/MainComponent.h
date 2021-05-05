@@ -76,7 +76,7 @@ private:
     //==============================================================================
     // Your private member variables go here...
     //juce::Time time;
-
+    bool showMixer = false;
 
     //juce::OwnedArray<Player> players;
     juce::OwnedArray<SoundPlayer> soundPlayers;

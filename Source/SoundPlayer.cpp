@@ -34,6 +34,7 @@ SoundPlayer::SoundPlayer(bool isEightPlayer)
     myPlaylists[0]->draggedPlayer.addListener(this);
     myPlaylists[0]->minimumPlayer.addListener(this);
     myPlaylists[0]->cuePlaylistBroadcaster->addChangeListener(this);
+    myPlaylists[0]->playBroadcaster->addChangeListener(this);
     myPlaylists[0]->cuePlaylistActionBroadcaster->addActionListener(this);
     playlistViewport.setBounds(0, playersStartHeightPosition, 715, (getParentHeight() - playersStartHeightPosition));
     playlistViewport.setViewedComponent(myPlaylists[0], false);
@@ -64,6 +65,7 @@ SoundPlayer::SoundPlayer(bool isEightPlayer)
     myPlaylists[1]->mouseDraggedUp.addListener(this);
     myPlaylists[1]->draggedPlayer.addListener(this);
     myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
+    myPlaylists[1]->playBroadcaster->addChangeListener(this);
     myPlaylists[1]->cuePlaylistActionBroadcaster->addActionListener(this);
     playlistbisViewport.setBounds(getParentWidth() / 2, playersStartHeightPosition, getParentWidth() / 2, (getParentHeight() - playersStartHeightPosition));
     playlistbisViewport.setViewedComponent(myPlaylists[1], false);
@@ -225,7 +227,8 @@ void SoundPlayer::resized()
         levelMeterHeight = std::min(getHeight() - playersStartHeightPosition, levelMeterMaximumHeight);
         meter.setBounds(playlistViewport.getWidth(), getHeight() - levelMeterHeight, 80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
         loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7, getHeight() - levelMeterHeight, 25, levelMeterHeight);
-        newMeter->setBounds(meter.getBounds());
+        
+        //newMeter->setBounds(meter.getBounds());
     }
 
 

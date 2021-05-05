@@ -184,6 +184,7 @@ public:
     PlayHead inMark;
     PlayHead outMark;
 
+    juce::ActionBroadcaster* playBroadcaster;
     juce::ActionBroadcaster* cueBroadcaster;
     juce::ActionBroadcaster* draggedBroadcaster;
 

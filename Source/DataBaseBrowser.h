@@ -86,6 +86,8 @@ private:
     juce::TextButton clearSearchButton;
     juce::ToggleButton autoPlayButton{ "Autoplay" };
 
+    juce::Label timeLabel;
+
     juce::File file;
     double fileSampleRate = 48000;
     Ebu128LoudnessMeter loudnessMeter;

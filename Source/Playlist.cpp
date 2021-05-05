@@ -34,6 +34,7 @@ Playlist::Playlist(int splaylistType)
 
     setSize(getParentWidth(), getParentHeight());
 
+    playBroadcaster = new juce::ChangeBroadcaster();
     cuePlaylistBroadcaster = new juce::ChangeBroadcaster();
     cuePlaylistActionBroadcaster = new juce::ActionBroadcaster();
     //addPlayer(1);
@@ -59,6 +60,7 @@ Playlist::Playlist(int splaylistType)
 
 Playlist::~Playlist()
 {
+    delete playBroadcaster;
     delete cuePlaylistBroadcaster;
     delete cuePlaylistActionBroadcaster;
     removeMouseListener(this);
@@ -854,6 +856,7 @@ void Playlist::addPlayer(int playerID)
     players[idAddedPlayer]->transport.addChangeListener(this);
     players[idAddedPlayer]->cueTransport.addChangeListener(this);
     players[idAddedPlayer]->cueBroadcaster->addActionListener(this);
+    players[idAddedPlayer]->playBroadcaster->addActionListener(this);
     playersPositionLabels.insert(idAddedPlayer, new juce::Label);
     playersPositionLabels[idAddedPlayer]->setText(juce::String(idAddedPlayer + 1), juce::NotificationType::dontSendNotification);
     addAndMakeVisible(playersPositionLabels[idAddedPlayer]);
@@ -1745,16 +1748,20 @@ void Playlist::isEightPlayerMode(bool eightPlayersMode)
 void Playlist::actionListenerCallback(const juce::String& message)
 {
     // NOR on cues
-    DBG("cued player" << message);
-    cuedPlayer = message.getIntValue();
-    /*draggedPlayer = -1;
-    draggedPlayer = cuedPlayer;*/
-    for (auto i = 0; i < players.size(); i++)
+    if (message.compareIgnoreCase("Play") == 0)
     {
-        if (i != cuedPlayer)
-            players[i]->cueTransport.stop(); //stop all other cues on the playlist
+        playBroadcaster->sendChangeMessage();
     }
-    cuePlaylistBroadcaster->sendChangeMessage(); //send message to main component so he can stop cues on all others components
+    else
+    {
+        cuedPlayer = message.getIntValue();
+        for (auto i = 0; i < players.size(); i++)
+        {
+            if (i != cuedPlayer)
+                players[i]->cueTransport.stop(); //stop all other cues on the playlist
+        }
+        cuePlaylistBroadcaster->sendChangeMessage(); //send message to main component so he can stop cues on all others components
+    }
 }
 
 void Playlist::stopCues()

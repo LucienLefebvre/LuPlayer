@@ -35,6 +35,7 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
         waveformThumbnailXStart = leftControlsWidth;
     }
 
+    playBroadcaster = new juce::ActionBroadcaster();
     cueBroadcaster = new juce::ActionBroadcaster();
     draggedBroadcaster = new juce::ActionBroadcaster();
 
@@ -105,7 +106,8 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
     volumeSlider.setNumDecimalPlacesToDisplay(2);
     volumeSlider.setWantsKeyboardFocus(false);
     volumeSlider.setDoubleClickReturnValue(true, 1.);
-    volumeSlider.setScrollWheelEnabled(false);
+    if (! Settings::mouseWheelControlVolume)
+        volumeSlider.setScrollWheelEnabled(false);
     Settings::maxFaderValue.addListener(this);
 
 
@@ -266,6 +268,7 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
 
 Player::~Player()
 {
+    delete playBroadcaster;
     delete cueBroadcaster;
     delete draggedBroadcaster;
     Settings::maxFaderValue.removeListener(this);
@@ -1144,6 +1147,7 @@ void Player::transportStateChanged(TransportState newState)
                 break;
         case Starting:
             //volumeSlider.setValue(1.0);
+            playBroadcaster->sendActionMessage("Play");
             transport.start();
             playButton.setButtonText("Stop");
             break;

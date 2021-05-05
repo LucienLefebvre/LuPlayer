@@ -229,6 +229,7 @@ class AudioPlaybackDemo : public juce::Component,
     public juce::MouseListener,
     public juce::ChangeBroadcaster,
     public juce::Value::Listener,
+    public juce::Timer,
 #if (JUCE_ANDROID || JUCE_IOS)
     private Button::Listener,
 #else
@@ -239,6 +240,7 @@ class AudioPlaybackDemo : public juce::Component,
 public:
     AudioPlaybackDemo() : resamplingSource(&transportSource, false, 2)
     {
+        juce::Timer::startTimer(500);
         setName("browser");
         setWantsKeyboardFocus(false);
         fileFolder = new juce::File(juce::File::getSpecialLocation(juce::File::userDesktopDirectory));
@@ -270,6 +272,10 @@ public:
 
         addAndMakeVisible(followTransportButton);
         followTransportButton.onClick = [this] { updateFollowTransportState(); };
+
+        addAndMakeVisible(&timeLabel);
+        timeLabel.setFont(juce::Font(20.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        timeLabel.setJustificationType(juce::Justification::centred);
 
 #if (JUCE_ANDROID || JUCE_IOS)
         addAndMakeVisible(chooseFileButton);
@@ -378,7 +384,7 @@ public:
         fileBrowser->setBounds(0, 0, getParentWidth() / 2, getParentHeight() - 25);
         autoPlayButton.setBounds(getWidth() / 2 + 4 + 101, 0, 100, 25);
         autoPlayButton.setToggleState(false, juce::NotificationType::dontSendNotification);
-
+        timeLabel.setBounds(autoPlayButton.getRight(), 0, getWidth() - autoPlayButton.getRight(), 25);
         //fileTreeComp.
         auto r = getLocalBounds().reduced(4);
 
@@ -424,7 +430,7 @@ public:
     juce::ChangeBroadcaster* fileDraggedFromBrowser;
     juce::ChangeBroadcaster* fileDroppedFromBrowser;
     juce::ChangeBroadcaster* cuePlay;
-
+    juce::Label timeLabel;
 private:
     // if this PIP is running inside the demo runner, we'll use the shared device manager instead
 #ifndef JUCE_DEMO_RUNNER
@@ -602,5 +608,23 @@ private:
         }
     }
 
+    void timerCallback()
+    {
+        auto elapsedTime = secondsToMMSS(transportSource.getCurrentPosition());
+        auto remainingTime = secondsToMMSS(transportSource.getLengthInSeconds() - transportSource.getCurrentPosition());
+        timeLabel.setText(elapsedTime + " // " + remainingTime, juce::NotificationType::dontSendNotification);
+    }
+
+    juce::String secondsToMMSS(int seconds)
+    {
+        int timeSeconds = seconds % 60;
+        int timeMinuts = trunc(seconds / 60);
+        juce::String timeString;
+        if (timeSeconds < 10)
+            timeString = juce::String(timeMinuts) + ":0" + juce::String(timeSeconds);
+        else
+            timeString = juce::String(timeMinuts) + ":" + juce::String(timeSeconds);
+        return timeString;
+    }
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPlaybackDemo)
 };

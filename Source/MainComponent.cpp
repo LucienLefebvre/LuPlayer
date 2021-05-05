@@ -33,6 +33,9 @@ MainComponent::MainComponent() :
         setAudioChannels(8, 4);
     }
 
+
+    if (!showMixer)
+        mixerHeight = 0;
     //setLookAndFeel(new juce::LookAndFeel_V4((juce::LookAndFeel_V4::getMidnightColourScheme())));
    /* addLookAndFeel(new LookAndFeel_V4(), "LookAndFeel_V4 (Dark)");
     addLookAndFeel(new LookAndFeel_V4(LookAndFeel_V4::getMidnightColourScheme()), "LookAndFeel_V4 (Midnight)");
@@ -60,7 +63,9 @@ MainComponent::MainComponent() :
     myCueMixer.addInputSource(&soundPlayers[0]->myCueMixer, false);
 
     soundPlayers[0]->myPlaylists[0]->cuePlaylistBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[0]->playBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[1]->playBroadcaster->addChangeListener(this);
 
     //ADD MIXER
     addAndMakeVisible(&mixer);
@@ -327,7 +332,16 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     {
     soundPlayers[0]->myPlaylists[0]->stopCues();
     bottomComponent.stopCue();
-    DBG("maincomponent stop cues");
+    }
+    else if (source == soundPlayers[0]->myPlaylists[0]->playBroadcaster
+    || source == soundPlayers[0]->myPlaylists[1]->playBroadcaster)
+    {
+        if (Settings::audioOutputMode == 2)
+        {
+            soundPlayers[0]->myPlaylists[0]->stopCues();
+            soundPlayers[0]->myPlaylists[1]->stopCues();
+            bottomComponent.stopCue();
+        }
     }
     else if (source == bottomComponent.cuePlay)
     {
@@ -496,9 +510,8 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             inputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
 
             //MIXER
-            //juce::AudioBuffer<float>* mixerOutputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
-            //bottomComponent.mixerPanel.getNextAudioBlock(bufferToFill.buffer, mixerOutputBuffer.get());
-            mixer.getNextAudioBlock(bufferToFill.buffer, mixerOutputBuffer.get());
+            if (showMixer)
+                mixer.getNextAudioBlock(bufferToFill.buffer, mixerOutputBuffer.get());
             //
 
             bufferToFill.clearActiveBufferRegion();
@@ -510,15 +523,13 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 
 
             //MIXER
-            bufferToFill.buffer->addFrom(0, 0, *mixerOutputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
-            bufferToFill.buffer->addFrom(1, 0, *mixerOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
+            if (showMixer)
+            {
+                bufferToFill.buffer->addFrom(0, 0, *mixerOutputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
+                bufferToFill.buffer->addFrom(1, 0, *mixerOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
+            }
             //
 
-            //OPUS
-            //bottomComponent.mixerPanel.remoteInput1.sendStream(outputBuffer);
-            //bottomComponent.mixerPanel.remoteInput1.receiveStream(outputBuffer);
-            //bufferToFill.buffer->copyFrom(0, 0, bottomComponent.mixerPanel.remoteInput1.decodedBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
-            //bufferToFill.buffer->copyFrom(1, 0, bottomComponent.mixerPanel.remoteInput1.decodedBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
             if (!bottomComponent.recorderComponent.isEnabled())
             {
                 soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
@@ -579,11 +590,15 @@ void MainComponent::resized()
         soundPlayers[0]->setBounds(0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - bottomHeight);
 
     bottomComponent.setBounds(0, getHeight(), getWidth(), 25);
+    if (showMixer)
     mixer.setBounds(0, getHeight() - mixerHeight, getWidth(), mixerHeight);
     //Layout the window
     horizontalDividerBar.get()->setBounds(0, 200 - bottomHeight, getWidth(), 8);
     Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
-    myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - mixerHeight - 4, true, false);
+    if (showMixer)
+        myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - mixerHeight - 4, true, false);
+    else
+        myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - 4, true, false);
 }
 
 

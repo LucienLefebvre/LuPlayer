@@ -41,6 +41,7 @@ bool Settings::useDefaultInputChannels;
 juce::BigInteger Settings::outputChannels;
 bool Settings::useDefaultOutputsChannels;
 bool Settings::lauchAtZeroDB;
+bool Settings::mouseWheelControlVolume;
 
 int Settings::outputChannelsNumber;
 juce::Value Settings::sampleRateValue;
@@ -106,6 +107,11 @@ Settings::Settings() : settingsFile(options)
         Settings::lauchAtZeroDB = true;
     else
     Settings::lauchAtZeroDB = properties.getUserSettings()->getValue("Launchatzero").getIntValue();
+
+    if (properties.getUserSettings()->getValue("MouseWheelControl").isEmpty())
+        Settings::mouseWheelControlVolume = true;
+    else
+        Settings::mouseWheelControlVolume = properties.getUserSettings()->getValue("MouseWheelControl").getIntValue();
 
     //SAVE & CLOSE BUTTon
     saveButton.setBounds(250, 400, 100, 50);
@@ -271,21 +277,17 @@ Settings::Settings() : settingsFile(options)
     ipAdress4.setJustificationType(juce::Justification::centred);
     ipAdress4.setColour(juce::Label::outlineColourId, juce::Colours::black);
 
-
-    /*addAndMakeVisible(localIpAdressLabel);
-    localIpAdressLabel.setBounds(0, 250, 100, 25);
-    localIpAdressLabel.setText("Local Ip Adress", juce::NotificationType::sendNotification);
-
-    addAndMakeVisible(localIpAdressValue);
-    localIpAdressValue.setBounds(200, 250, 100, 25);
-    juce::IPAddress localIP;
-    localIpAdressValue.setText(localIP.getLocalAddress().toString(), juce::NotificationType::sendNotification);*/
-
     addAndMakeVisible(&launchLevelButton);
     launchLevelButton.setButtonText("Always launch sounds at 0dB");
     launchLevelButton.setBounds(0, 250, 200, 25);
     launchLevelButton.setToggleState(Settings::lauchAtZeroDB, juce::NotificationType::dontSendNotification);
     launchLevelButton.addListener(this);
+
+    addAndMakeVisible(&mouseWheelControlButton);
+    mouseWheelControlButton.setButtonText("Mouse wheel control volume");
+    mouseWheelControlButton.setBounds(200, 250, 200, 25);
+    mouseWheelControlButton.setToggleState(Settings::mouseWheelControlVolume, juce::NotificationType::dontSendNotification);
+    mouseWheelControlButton.addListener(this);
 
     //AUDIO OUTPUT MODE
     addAndMakeVisible(audioOutputModeLabel);
@@ -604,6 +606,13 @@ void Settings::buttonClicked(juce::Button* button)
     {
         Settings::lauchAtZeroDB = button->getToggleState();
         properties.getUserSettings()->setValue("Launchatzero", (int)Settings::lauchAtZeroDB);
+        properties.saveIfNeeded();
+        settingsFile.save();
+    }
+    else if (button == &mouseWheelControlButton)
+    {
+        Settings::mouseWheelControlVolume = button->getToggleState();
+        properties.getUserSettings()->setValue("MouseWheelControl", (int)Settings::mouseWheelControlVolume);
         properties.saveIfNeeded();
         settingsFile.save();
     }

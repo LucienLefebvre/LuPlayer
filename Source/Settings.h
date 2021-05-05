@@ -95,6 +95,7 @@ public:
     static juce::Value Settings::sampleRateValue;
 
     static bool Settings::lauchAtZeroDB;
+    static bool Settings::mouseWheelControlVolume;
 
     static int Settings::draggedPlaylist;
     static int Settings::draggedPlayer;
@@ -146,6 +147,7 @@ private:
     juce::Slider timerSlider;
 
     juce::ToggleButton launchLevelButton;
+    juce::ToggleButton mouseWheelControlButton;
 
 
     void Settings::selectFFmpeg();

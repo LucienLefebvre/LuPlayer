@@ -16,4 +16,5 @@
   <VALUE name="useDefaultOutputsChannels" val="1"/>
   <VALUE name="Converted Sound Path" val="D:\MultiPlayer\Sounds"/>
   <VALUE name="Midi Shift" val="0"/>
+  <VALUE name="MouseWheelControl" val="0"/>
 </PROPERTIES>

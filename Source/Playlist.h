@@ -143,6 +143,7 @@ public:
 
     void Playlist::setTimerTime(int timertime);
 
+    juce::ChangeBroadcaster* playBroadcaster;
     juce::ChangeBroadcaster* cuePlaylistBroadcaster;
     juce::ActionBroadcaster* cuePlaylistActionBroadcaster;
     void Playlist::stopCues();
