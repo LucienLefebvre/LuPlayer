@@ -67,7 +67,8 @@ SoundPlayer::SoundPlayer(bool isEightPlayer)
     myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
     myPlaylists[1]->playBroadcaster->addChangeListener(this);
     myPlaylists[1]->cuePlaylistActionBroadcaster->addActionListener(this);
-    playlistbisViewport.setBounds(getParentWidth() / 2, playersStartHeightPosition, getParentWidth() / 2, (getParentHeight() - playersStartHeightPosition));
+    playlistbisViewport.setBounds(getParentWidth() / 2, playersStartHeightPosition,
+        getParentWidth() / 2, (getParentHeight() - playersStartHeightPosition));
     playlistbisViewport.setViewedComponent(myPlaylists[1], false);
     playlistbisViewport.setWantsKeyboardFocus(false);
     addAndMakeVisible(playlistbisViewport);
@@ -177,17 +178,18 @@ void SoundPlayer::resized()
 {
 
     //setSize(getParentWidth(), getParentHeight());
-    playlistViewport.setBounds(0, playersStartHeightPosition, (getParentWidth() / 2) - 50 - dragZoneWidth, (getHeight() - 60));
+    playlistViewport.setBounds(0, playersStartHeightPosition, 
+        (getParentWidth() / 2) - 50 - dragZoneWidth, (getHeight() - 60));
     if (myPlaylists[0] != nullptr)
     {
         myPlaylists[0]->setSize(playlistViewport.getWidth() - 2, playlistViewport.getHeight() - 2);
-        //playlistViewport.setViewPosition(0, (myPlaylists[0]->minimumPlayer).toString().getIntValue() * 105);
     }
-    // playlistbisViewport.setBounds(800, playersStartHeightPosition, 745, (getParentHeight() - 40 - playersStartHeightPosition));
     if (!isEightPlayerMode)
-        playlistbisViewport.setBounds(getParentWidth() / 2 + 50, playersStartHeightPosition, getParentWidth() / 2 - 50, (getHeight() - 60));
+        playlistbisViewport.setBounds(getParentWidth() / 2 + 50, playersStartHeightPosition, 
+            getParentWidth() / 2 - 50, (getHeight() - 60));
     else
-        playlistbisViewport.setBounds(getParentWidth() / 2 + 50, playersStartHeightPosition, getParentWidth() / 2 - 50, (getHeight() - 60));
+        playlistbisViewport.setBounds(getParentWidth() / 2 + 50, playersStartHeightPosition, 
+            getParentWidth() / 2 - 50, (getHeight() - 60));
     if (myPlaylists[1] != nullptr)
     {
         myPlaylists[1]->setSize(playlistbisViewport.getWidth(), playlistbisViewport.getHeight() - 2);
@@ -201,32 +203,45 @@ void SoundPlayer::resized()
     }
 
 
-    playersResetPosition.setBounds(playlistViewport.getWidth() - 200, 0, upDownButtonsWidth, upDownButtonsHeight);
-    playersPreviousPosition.setBounds(playlistViewport.getWidth() - 300, 0, upDownButtonsWidth, upDownButtonsHeight);
-    playersNextPosition.setBounds(playlistViewport.getWidth() - 100, 0, upDownButtonsWidth, upDownButtonsHeight);
+    playersResetPosition.setBounds(playlistViewport.getWidth() - 200, 
+        0, upDownButtonsWidth, upDownButtonsHeight);
+    playersPreviousPosition.setBounds(playlistViewport.getWidth() - 300, 
+        0, upDownButtonsWidth, upDownButtonsHeight);
+    playersNextPosition.setBounds(playlistViewport.getWidth() - 100, 
+        0, upDownButtonsWidth, upDownButtonsHeight);
 
-    addPlayerPlaylist.setBounds(playlistViewport.getWidth() - 200, playlistViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
-    removePlayerPlaylist.setBounds(playlistViewport.getWidth() - 100, playlistViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
+    addPlayerPlaylist.setBounds(playlistViewport.getWidth() - 200, 
+        playlistViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
+    removePlayerPlaylist.setBounds(playlistViewport.getWidth() - 100, 
+        playlistViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
 
-    addPlayerCart.setBounds(playlistbisViewport.getX(), playlistbisViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
-    removePlayerCart.setBounds(playlistbisViewport.getX() + 100, playlistbisViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
+    addPlayerCart.setBounds(playlistbisViewport.getX(), 
+        playlistbisViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
+    removePlayerCart.setBounds(playlistbisViewport.getX() + 100, 
+        playlistbisViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
 
     int cueMeterXStart = playlistViewport.getWidth();
 
     if (Settings::audioOutputMode == 1 || Settings::audioOutputMode == 3)
     {
-        levelMeterHeight = std::min(getHeight() - playersStartHeightPosition - cuelevelMeterMinimumHeight, levelMeterMaximumHeight);
-        meter.setBounds(cueMeterXStart, getHeight() - levelMeterHeight, 80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
-        loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7, getHeight() - levelMeterHeight, 25, levelMeterHeight);
-        cuelevelMeterHeight = std::min(getHeight() - playersStartHeightPosition - levelMeterHeight, cuelevelMeterMaximumHeight);
+        levelMeterHeight = std::min(getHeight() - playersStartHeightPosition - cuelevelMeterMinimumHeight, 
+            levelMeterMaximumHeight);
+        meter.setBounds(cueMeterXStart, getHeight() - levelMeterHeight, 80, 
+            std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
+        loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7, 
+            getHeight() - levelMeterHeight, 25, levelMeterHeight);
+        cuelevelMeterHeight = std::min(getHeight() - playersStartHeightPosition - levelMeterHeight, 
+            cuelevelMeterMaximumHeight);
         int cueMeterYStart = meter.getPosition().getY() - cuelevelMeterHeight;
         cuemeter.setBounds(cueMeterXStart, cueMeterYStart, 80, cuelevelMeterHeight);
     }
     else if (Settings::audioOutputMode == 2)
     {
         levelMeterHeight = std::min(getHeight() - playersStartHeightPosition, levelMeterMaximumHeight);
-        meter.setBounds(playlistViewport.getWidth(), getHeight() - levelMeterHeight, 80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
-        loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7, getHeight() - levelMeterHeight, 25, levelMeterHeight);
+        meter.setBounds(playlistViewport.getWidth(), getHeight() - levelMeterHeight, 
+            80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
+        loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7, 
+            getHeight() - levelMeterHeight, 25, levelMeterHeight);
         
         //newMeter->setBounds(meter.getBounds());
     }

@@ -5,9 +5,9 @@
   <VALUE name="Skew Factor" val="0.5"/>
   <VALUE name="Audio Output Mode" val="2"/>
   <VALUE name="Audio Device Type" val="Windows Audio"/>
-  <VALUE name="audioDeviceName" val="Analog (11+12) (RME Fireface 802)"/>
-  <VALUE name="outputDeviceName" val="Analog (11+12) (RME Fireface 802)"/>
-  <VALUE name="inputDeviceName" val="Analog (9+10) (RME Fireface 802)"/>
+  <VALUE name="audioDeviceName" val="Speakers (Realtek(R) Audio)"/>
+  <VALUE name="outputDeviceName" val="Speakers (Realtek(R) Audio)"/>
+  <VALUE name="inputDeviceName" val="Microphone Array (Realtek(R) Audio)"/>
   <VALUE name="sampleRate" val="48000.0"/>
   <VALUE name="bufferSize" val="480"/>
   <VALUE name="inputChannels" val="3"/>

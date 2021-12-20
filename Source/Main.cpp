@@ -93,7 +93,7 @@ public:
 
         void setCommandLine(juce::String command)
         {
-            mainComponent.setCommandLine("8p");
+            //mainComponent.setCommandLine("8p");
         }
         void closeButtonPressed() override
         {

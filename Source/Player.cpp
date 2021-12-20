@@ -1430,24 +1430,25 @@ void Player::handleMidiTrimMessage(int midiMessageValue)
 
     juce::NormalisableRange<float>rangedTrimValue(-24, 24);
 
-    //if (isEightPlayerMode)
-    //{
-    //    trimValueToSet = rangedTrimValue.convertFrom0to1(trimValue);
-    //    transport.setGain(juce::Decibels::decibelsToGain(trimValueToSet) * sliderValueToset * monoReductionGain);
-    //}
-    //else
-    //{
-        trimValueInput = rangedTrimValue.convertFrom0to1(trimValue);
-        DBG("trim value" << trimValueInput);
-        if (trimValueInput == trimVolumeSlider.getValue())
-            trimSliderRejoignedValue = true;
-        else if (trimValueInput > trimVolumeSlider.getValue() - 1
-            && trimValueInput < trimVolumeSlider.getValue() + 1)
-            trimSliderRejoignedValue = true;
-        if (trimSliderRejoignedValue)
-            trimValueToSet = trimValueInput;
-        transport.setGain(juce::Decibels::decibelsToGain(trimValueToSet) * sliderValueToset * monoReductionGain);
-    //}
+     trimValueInput = rangedTrimValue.convertFrom0to1(trimValue);
+     DBG("trim value" << trimValueInput);
+     if (trimValueInput == trimVolumeSlider.getValue())
+         trimSliderRejoignedValue = true;
+     else if (trimValueInput > trimVolumeSlider.getValue() - 1
+         && trimValueInput < trimVolumeSlider.getValue() + 1)
+         trimSliderRejoignedValue = true;
+     if (trimSliderRejoignedValue)
+         trimValueToSet = trimValueInput;
+     transport.setGain(juce::Decibels::decibelsToGain(trimValueToSet) * sliderValueToset * monoReductionGain);
+}
+
+void Player::handleMidiTrimMessage(bool upordown)
+{
+    if (upordown)
+        trimValueToSet += 1.;
+    else
+        trimValueToSet -= 1.;
+    transport.setGain(juce::Decibels::decibelsToGain(trimValueToSet) * sliderValueToset * monoReductionGain);
 }
 
 void Player::setNextPlayer(bool trueOrFalse)

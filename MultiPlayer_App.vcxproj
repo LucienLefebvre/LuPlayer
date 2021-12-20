@@ -175,6 +175,7 @@
     <ClCompile Include="Source\SoundPlayer.cpp"/>
     <ClCompile Include="Source\PlayHead.cpp"/>
     <ClCompile Include="Source\LoudnessBar.cpp"/>
+    <ClCompile Include="Source\DistantDataBaseBrowser.cpp"/>
     <ClCompile Include="Source\DataBaseBrowser.cpp"/>
     <ClCompile Include="Source\DataBaseImport.cpp"/>
     <ClCompile Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.cpp">
@@ -2205,6 +2206,7 @@
     <ClCompile Include="..\modules\juce_osc\juce_osc.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="JuceLibraryCode\BinaryData.cpp"/>
     <ClCompile Include="JuceLibraryCode\include_ff_meters.cpp"/>
     <ClCompile Include="JuceLibraryCode\include_juce_audio_basics.cpp"/>
     <ClCompile Include="JuceLibraryCode\include_juce_audio_devices.cpp"/>
@@ -2245,6 +2247,7 @@
     <ClInclude Include="Source\SoundBoard\SoundBoard.h"/>
     <ClInclude Include="Source\nanodbc-master\nanodbc\nanodbc.h"/>
     <ClInclude Include="Source\AudioBrowser.h"/>
+    <ClInclude Include="Source\ODBCManager.h"/>
     <ClInclude Include="Source\BottomComponent.h"/>
     <ClInclude Include="Source\LUFSMeter\Ebu128LoudnessMeter.h"/>
     <ClInclude Include="Source\LUFSMeter\MacrosAndJuceHeaders.h"/>
@@ -2257,6 +2260,7 @@
     <ClInclude Include="Source\SoundPlayer.h"/>
     <ClInclude Include="Source\PlayHead.h"/>
     <ClInclude Include="Source\LoudnessBar.h"/>
+    <ClInclude Include="Source\DistantDataBaseBrowser.h"/>
     <ClInclude Include="Source\DataBaseBrowser.h"/>
     <ClInclude Include="Source\helpers.h"/>
     <ClInclude Include="Source\DataBaseImport.h"/>
@@ -3066,9 +3070,11 @@
     <ClInclude Include="..\modules\juce_osc\osc\juce_OSCTimeTag.h"/>
     <ClInclude Include="..\modules\juce_osc\osc\juce_OSCTypes.h"/>
     <ClInclude Include="..\modules\juce_osc\juce_osc.h"/>
+    <ClInclude Include="JuceLibraryCode\BinaryData.h"/>
     <ClInclude Include="JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Users\DPR\Downloads\logo sens.png"/>
     <None Include="JuceLibraryCode\modules\ff_meters\LICENSE.md"/>
     <None Include="JuceLibraryCode\modules\ff_meters\README.md"/>
     <None Include="..\modules\juce_audio_devices\native\oboe\CMakeLists.txt"/>
@@ -3087,6 +3093,7 @@
     <None Include="..\modules\juce_core\native\java\README.txt"/>
     <None Include="..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt"/>
     <None Include="..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt"/>
+    <None Include=".\icon.ico"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc"/>

@@ -39,6 +39,7 @@ BottomComponent::BottomComponent()
         addTab("Netia Database Import", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &noDbLabel, false);
     }
     addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
+    addTab("Distant DataBase", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &distantDbBrowser, false);
     setTabBarDepth(tabBarHeight);
     setCurrentTabIndex(1);
     getTabbedButtonBar().setWantsKeyboardFocus(false);
@@ -47,6 +48,7 @@ BottomComponent::BottomComponent()
     myMixer.addInputSource(&recorderComponent.cueTransport, false);
     myMixer.addInputSource(&dbBrowser.resampledSource, false);
     myMixer.addInputSource(&dbImport.resampledSource, false);
+    myMixer.addInputSource(&distantDbBrowser.resampledSource, false);
     unfocusAllComponents();
     setWantsKeyboardFocus(false);
     

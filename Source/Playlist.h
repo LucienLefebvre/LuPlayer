@@ -50,6 +50,7 @@ public:
     void Playlist::handleIncomingMidiMessageEightPlayers(int value, int number);
     void Playlist::handleTrimMidiMessage(int value, int number);//8 players mode
     void Playlist::handleMidiTrim(int value, int number); //normal mode
+    void Playlist::handleMidiRelativeTrim(int value, int number);
     bool Playlist::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
     void Playlist::spaceBarPressed();
     void Playlist::playersResetPositionClicked();

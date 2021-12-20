@@ -547,6 +547,9 @@
     <ClCompile Include="Source\LoudnessBar.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\DistantDataBaseBrowser.cpp">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClCompile>
     <ClCompile Include="Source\DataBaseBrowser.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
@@ -2698,6 +2701,9 @@
     <ClCompile Include="..\modules\juce_osc\juce_osc.cpp">
       <Filter>JUCE Modules\juce_osc</Filter>
     </ClCompile>
+    <ClCompile Include="JuceLibraryCode\BinaryData.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="JuceLibraryCode\include_ff_meters.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -2814,6 +2820,9 @@
     <ClInclude Include="Source\AudioBrowser.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ODBCManager.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
     <ClInclude Include="Source\BottomComponent.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
@@ -2848,6 +2857,9 @@
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\LoudnessBar.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DistantDataBaseBrowser.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\DataBaseBrowser.h">
@@ -5277,11 +5289,17 @@
     <ClInclude Include="..\modules\juce_osc\juce_osc.h">
       <Filter>JUCE Modules\juce_osc</Filter>
     </ClInclude>
+    <ClInclude Include="JuceLibraryCode\BinaryData.h">
+      <Filter>JUCE Library Code</Filter>
+    </ClInclude>
     <ClInclude Include="JuceLibraryCode\JuceHeader.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Users\DPR\Downloads\logo sens.png">
+      <Filter>MultiPlayer\Source</Filter>
+    </None>
     <None Include="JuceLibraryCode\modules\ff_meters\LICENSE.md">
       <Filter>JUCE Modules\ff_meters</Filter>
     </None>
@@ -5335,6 +5353,9 @@
     </None>
     <None Include="..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
+    </None>
+    <None Include=".\icon.ico">
+      <Filter>JUCE Library Code</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

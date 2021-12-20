@@ -79,6 +79,7 @@ public:
     void Player::handleMidiMessage(int midiMessageNumber, int midiMessageValue);
     void Player::handleOSCMessage(float faderValue);
     void Player::handleMidiTrimMessage(int midiMessageValue);
+    void Player::handleMidiTrimMessage(bool upordown);
     bool fileLoaded = false;
     bool isPlaying = false;
 

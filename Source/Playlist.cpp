@@ -253,6 +253,10 @@ void Playlist::handleIncomingMidiMessage(juce::MidiInput* source, const juce::Mi
     {
         handleMidiTrim(midiMessageValue, midiMessageNumber);
     }
+    if (midiMessageNumber >= 54 && midiMessageNumber <= 57)
+    {
+        handleMidiRelativeTrim(midiMessageValue, midiMessageNumber);
+    }
     const juce::ScopedValueSetter<bool> scopedInputFlag(isAddingFromMidiInput, true);
 
 }
@@ -284,6 +288,58 @@ void Playlist::handleMidiTrim(int value, int number)
         }
     }
 
+}
+
+void Playlist::handleMidiRelativeTrim(int value, int number)
+{
+    if (playlistType == 0)
+    {
+        switch (number)
+        {
+        case 54:
+            if (players[fader1Player] != nullptr)
+            {
+                if (value == 127)
+                    players[fader1Player]->handleMidiTrimMessage(true);
+                else
+                    players[fader1Player]->handleMidiTrimMessage(false);
+            }
+            break;
+        case 55:
+            if (players[fader2Player] != nullptr)
+            {
+                if (value == 127)
+                    players[fader2Player]->handleMidiTrimMessage(true);
+                else
+                    players[fader2Player]->handleMidiTrimMessage(false);
+            }
+            break;
+        }
+    }
+    if (playlistType == 1)
+    {
+        switch (number)
+        {
+        case 56:
+            if (players[fader1Player] != nullptr)
+            {
+                if (value == 127)
+                    players[fader1Player]->handleMidiTrimMessage(true);
+                else
+                    players[fader1Player]->handleMidiTrimMessage(false);
+            }
+            break;
+        case 57:
+            if (players[fader2Player] != nullptr)
+            {
+                if (value == 127)
+                    players[fader2Player]->handleMidiTrimMessage(true);
+                else
+                    players[fader2Player]->handleMidiTrimMessage(false);
+            }
+            break;
+        }
+    }    
 }
 
 void Playlist::fader1Start()

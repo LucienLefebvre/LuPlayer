@@ -14,6 +14,7 @@
 #include "AudioBrowser.h"
 #include "Recorder.h"
 #include "DataBaseBrowser.h"
+#include "DistantDataBaseBrowser.h"
 #include "DataBaseImport.h"
 #include "Mixer/Mixer.h"
 #include "nanodbc/nanodbc.h"
@@ -39,6 +40,7 @@ public:
     Recorder recorderComponent;
     DataBaseBrowser dbBrowser;
     DataBaseImport dbImport;
+    DistantDataBaseBrowser distantDbBrowser;
     juce::MixerAudioSource myMixer;
     juce::Label noDbLabel{ "No DataBase Found" };
 
