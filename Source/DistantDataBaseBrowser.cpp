@@ -70,11 +70,15 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
     clearSearchButton.onClick = [this] {searchLabel.setText("", juce::NotificationType::sendNotification); };
 
     addAndMakeVisible(&hostLabel);
-    hostLabel.setBounds(0, getHeight() - 27, 300, 25);
+    hostLabel.setBounds(0, getHeight() - 27, 150, 25);
     hostLabel.setText("IP or host name", juce::NotificationType::dontSendNotification);
     hostLabel.setColour(juce::Label::outlineColourId, juce::Colours::lightgrey);
     hostLabel.setEditable(true, true, false);
     hostLabel.addListener(this);
+
+    addAndMakeVisible(&lastServerBox);
+    updateLastServersBox();
+    lastServerBox.addListener(this);
 
     addAndMakeVisible(&connectButton);
     connectButton.setButtonText("Connect");
@@ -90,6 +94,13 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
     cuePlay = new juce::ChangeBroadcaster();
 
     formatManager.registerBasicFormats();
+
+    addChildComponent(&connectionLabel);
+    connectionLabel.setSize(400, 50);
+    connectionLabel.setFont(juce::Font(50.));
+    connectionLabel.setText("Trying to connect...", juce::NotificationType::dontSendNotification);
+
+    thread.addListener(this);
 
     //try
     //{
@@ -122,6 +133,23 @@ DistantDataBaseBrowser::~DistantDataBaseBrowser()
     //transport.releaseResources();
     //resampledSource.releaseResources();
     conn.disconnect();
+    thread.removeListener(this);
+    //UNMAP DRIVE
+    std::string cmdstring = std::string("net use z: /delete");
+    //std::string cmdstring = std::string("net use z: \\\\Laptop-67vrd21a\\sons$");
+    std::wstring w = (utf8_to_utf16(cmdstring));
+    LPWSTR str = const_cast<LPWSTR>(w.c_str());
+    DBG(str);
+    ////////////Launch FFMPEG
+    PROCESS_INFORMATION pi;
+    STARTUPINFOW si;
+    ZeroMemory(&si, sizeof(si));
+    BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+    if (logDone)
+    {
+        WaitForSingleObject(pi.hProcess, INFINITE);
+    }
+
 }
 
 void DistantDataBaseBrowser::paint(juce::Graphics& g)
@@ -157,8 +185,10 @@ void DistantDataBaseBrowser::resized()
     autoPlayButton.setBounds(getWidth() / 2 + 4 + 101, 0, 100, 25);
     timeLabel.setBounds(autoPlayButton.getRight(), 0, getWidth() - autoPlayButton.getRight(), 25);
     playHead.setSize(1, getHeight() - 30);
-    hostLabel.setBounds(0, getHeight() - 27, 300, 25);
+    hostLabel.setBounds(150, getHeight() - 27, 150, 25);
+    lastServerBox.setBounds(0, getHeight() - 27, 150, 25);
     connectButton.setBounds(300, getHeight() - 27, 100, 25);
+    connectionLabel.setCentrePosition(getWidth() / 2, getHeight() / 2);
 }
 
 int DistantDataBaseBrowser::getNumRows()
@@ -344,39 +374,44 @@ void DistantDataBaseBrowser::clearListBox()
 
 void DistantDataBaseBrowser::cellClicked(int rowNumber, int columnID, const juce::MouseEvent& e)
 {
-    if (!files[rowNumber].isEmpty())
+    if (conn.connected())
     {
-        startStopButton.setEnabled(true);
-        transport.stop();
-        std::string filePath = std::string("Z:\\" + files[table.getSelectedRow()].toStdString());
-        juce::File sourceFile(filePath);
-        std::string fileName = sourceFile.getFileNameWithoutExtension().toStdString();
-        juce::String pathToTest = juce::String(Settings::convertedSoundsPath + "\\" + fileName + ".wav");
-        juce::File fileToTest(pathToTest);
-        if (juce::AudioFormatReader* reader = formatManager.createReaderFor(fileToTest))
+        if (!files[rowNumber].isEmpty())
         {
-            loadFile(fileToTest.getFullPathName());
-            delete reader;
+            startStopButton.setEnabled(true);
+            transport.stop();
+            std::string filePath = std::string("Z:\\" + files[table.getSelectedRow()].toStdString());
+            juce::File sourceFile(filePath);
+            std::string fileName = sourceFile.getFileNameWithoutExtension().toStdString();
+            juce::String pathToTest = juce::String(Settings::convertedSoundsPath + "\\" + fileName + ".wav");
+            juce::File fileToTest(pathToTest);
+            if (sourceFile.exists())
+            {
+                if (juce::AudioFormatReader* reader = formatManager.createReaderFor(fileToTest))
+                {
+                    loadFile(fileToTest.getFullPathName());
+                    delete reader;
+                }
+                else
+                    loadFile(juce::String(startFFmpeg(filePath)));
+            }
+            else
+                resetThumbnail();
         }
         else
-            loadFile(juce::String(startFFmpeg(filePath)));
-    }
-    else
-    {
-        thumbnail.setSource(nullptr);
-        transport.setSource(nullptr);
-        startStopButton.setEnabled(false);
-        startStopButton.setColour(juce::TextButton::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-    }
-    if (autoPlayButton.getToggleState())
-    {
-        if (!transport.isPlaying())
-            startOrStop();
-    }
-    if (e.getNumberOfClicks() == 2)
-    {
-        if (!transport.isPlaying())
-            startOrStop();
+        {
+            resetThumbnail();
+        }
+        if (autoPlayButton.getToggleState())
+        {
+            if (!transport.isPlaying())
+                startOrStop();
+        }
+        if (e.getNumberOfClicks() == 2)
+        {
+            if (!transport.isPlaying())
+                startOrStop();
+        }
     }
 }
 
@@ -548,7 +583,7 @@ const juce::String DistantDataBaseBrowser::startFFmpeg(std::string filePath)
     PROCESS_INFORMATION pi;
     STARTUPINFOW si;
     ZeroMemory(&si, sizeof(si));
-    BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+    BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
     if (logDone)
     {
         WaitForSingleObject(pi.hProcess, INFINITE);
@@ -661,44 +696,141 @@ std::wstring DistantDataBaseBrowser::utf8_to_utf16(const std::string& utf8)
 
 void DistantDataBaseBrowser::connectToDB()
 {
-
     /*juce::WindowsRegistry::setValue(juce::String("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\ODBC\\ODBC.INI\\DistantDB\\Database"), "ABC4");
     juce::WindowsRegistry::setValue(juce::String("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\ODBC\\ODBC.INI\\DistantDB\\Driver"), "C:\\Windows\\system32\\SQLSRV32.dll");
     juce::WindowsRegistry::setValue(juce::String("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\ODBC\\ODBC.INI\\DistantDB\\LastUser"), "SYSADM");
     juce::WindowsRegistry::setValue(juce::String("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\ODBC\\ODBC.INI\\DistantDB\\Server"), hostLabel.getText());*/
+    //connectButton.setButtonText("Connecting...");
 
+    //ADD current adress to file
+    clearListBox();
 
-
-
-    std::string cmdstring = std::string("net use z: \\\\" + hostLabel.getText().toStdString() + "\\sons$");
-    //std::string cmdstring = std::string("net use z: \\\\Laptop-67vrd21a\\sons$");
-    std::wstring w = (utf8_to_utf16(cmdstring));
-    LPWSTR str = const_cast<LPWSTR>(w.c_str());
-    DBG(str);
-    ////////////Launch FFMPEG
-    PROCESS_INFORMATION pi;
-    STARTUPINFOW si;
-    si.wShowWindow = SW_SHOW;
-    si.dwFlags = STARTF_USESHOWWINDOW;
-    ZeroMemory(&si, sizeof(si));
-    BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
-    if (logDone)
+    juce::String serverFilePath = juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\LastsServers.txt";
+    juce::File serverFile(serverFilePath);
+    if (!serverFile.exists())
     {
-        WaitForSingleObject(pi.hProcess, INFINITE);
+       serverFile.create();
     }
+    if (!checkIfHostExistInList(hostLabel.getText()))
+    {
+        serverFile.appendText(hostLabel.getText() + "\n");
+    }
+
+    //serverFile.appendText("\n");
+
+    updateLastServersBox();
 
 
     juce::String connectionString = "Driver=ODBC Driver 17 for SQL Server;Server=" + hostLabel.getText() + ";Database=ABC4;Uid=SYSADM;Pwd=SYSADM;";
-    auto const connection_string = NANODBC_TEXT(connectionString.toStdString());
-    try
+
+    thread.setString(connectionString);
+    thread.setHost(hostLabel.getText());
+    thread.setConnection(conn);
+    thread.launchThread();
+
+    if (thread.isConnected == true)
     {
-        conn.connect(connection_string, 1000);
-        //nanodbc::connection conn(connection_string);
-        conn.dbms_name();
         initialize();
     }
-    catch (std::runtime_error const& e)
-    {
-        std::cerr << e.what() << std::endl;
+    //auto const connection_string = NANODBC_TEXT(connectionString.toStdString());
+    //try
+    //{
+    //    conn.connect(connection_string, 2);
+    //    //nanodbc::connection conn(connection_string);
+    //    //conn.dbms_name();
+    //}
+    //catch (std::runtime_error const& e)
+    //{
+    //    std::cerr << e.what() << std::endl;
+    //}
+
+    //if (conn.connected())
+    //{
+    //    juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon,
+    //        "Distant Database Found",
+    //        "");
+
+    //    //DISK MAPPING
+    //    std::string cmdstring = std::string("net use z: \\\\" + hostLabel.getText().toStdString() + "\\sons$");
+    //    std::wstring w = (utf8_to_utf16(cmdstring));
+    //    LPWSTR str = const_cast<LPWSTR>(w.c_str());
+    //    DBG(str);
+    //    PROCESS_INFORMATION pi;
+    //    STARTUPINFOW si;
+    //    si.wShowWindow = SW_SHOW;
+    //    si.dwFlags = STARTF_USESHOWWINDOW;
+    //    ZeroMemory(&si, sizeof(si));
+    //    BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
+    //    if (logDone)
+    //    {
+    //        WaitForSingleObject(pi.hProcess, INFINITE);
+    //    }
+
+
+        /*initialize();
     }
+    else
+    {
+        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
+            "Connection Error",
+            "");
+    }
+    connectionLabel.setVisible(false);*/
+}
+
+void DistantDataBaseBrowser::exitSignalSent()
+{
+    DBG("thread fini");
+    const juce::MessageManagerLock mmLock;
+    if (thread.isConnected)
+    {
+        initialize();
+    }
+}
+
+void DistantDataBaseBrowser::updateLastServersBox()
+{
+    lastServerBox.clear(juce::NotificationType::dontSendNotification);
+    juce::String serverFilePath = juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\LastsServers.txt";
+    juce::File serverFile(serverFilePath);
+    if (serverFile.exists())
+    {
+        juce::StringArray lastServers;
+        serverFile.readLines(lastServers);
+        int numServers = lastServers.size();
+        lastServerBox.addItemList(lastServers, 1);
+    }
+}
+
+bool DistantDataBaseBrowser::checkIfHostExistInList(juce::String host)
+{
+    juce::String serverFilePath = juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\LastsServers.txt";
+    juce::File serverFile(serverFilePath);
+    if (serverFile.exists())
+    {
+        juce::StringArray lastServers;
+        serverFile.readLines(lastServers);
+        if (lastServers.contains(host))
+            return true;
+        else
+            return false;
+    }
+    else
+        return false;
+}
+
+void DistantDataBaseBrowser::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
+{
+    if (comboBoxThatHasChanged == &lastServerBox)
+    {
+        hostLabel.setText(lastServerBox.getText(), juce::NotificationType::sendNotification);
+    }
+}
+
+void DistantDataBaseBrowser::resetThumbnail()
+{
+    thumbnail.setSource(nullptr);
+    transport.setSource(nullptr);
+    startStopButton.setEnabled(false);
+    startStopButton.setColour(juce::TextButton::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 }
