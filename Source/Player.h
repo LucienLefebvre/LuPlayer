@@ -15,6 +15,7 @@
 #include <iostream>
 #include <regex>
 //#include "Settings.h"
+
 #include <cstdio>
 #include <memory>
 #include <stdexcept>
@@ -25,7 +26,7 @@
 #include "Windows.h"
 #include "PlayHead.h"
 #include "nanodbc/nanodbc.h"
-
+//#include "R128IntegratedThread.h"
 typedef char* LPSTR;
 
 
@@ -92,6 +93,8 @@ public:
 
 
     void Player::setPlayerIndex(int i);
+
+    double CalculateR128Integrated(std::string filePath);
 
     juce::Slider volumeSlider;
     juce::Label volumeLabel;
@@ -368,7 +371,7 @@ private:
 
     std::string Player::extactName(std::string Filepath);
 
-
+    //R128IntegratedThread luThread{ "Thread" };
 
     inline bool exists_test(const std::string& name) {
         if (FILE* file = fopen(name.c_str(), "r")) {

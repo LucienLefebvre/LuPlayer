@@ -7,12 +7,17 @@
 
   ==============================================================================
 */
-
+#pragma once
 #include <JuceHeader.h>
 #include "Player.h"
 #include "Windows.h"
 
 #include "Settings.h"
+#ifdef UNICODE
+typedef LPWSTR LPTSTR;
+#else
+typedef LPSTR LPTSTR;
+#endif
 //#include <string>
 
 //==============================================================================
@@ -1539,7 +1544,6 @@ bool Player::loadFile(const juce::String& path)
     //deleteFile();
     if (juce::AudioFormatReader* reader = formatManager.createReaderFor(file))
     {
-        DBG(Settings::sampleRate);
         //transport
         std::unique_ptr<juce::AudioFormatReaderSource> tempSource(new juce::AudioFormatReaderSource(reader, true));
         transport.setSource(tempSource.get());
@@ -1552,6 +1556,8 @@ bool Player::loadFile(const juce::String& path)
         playSource.reset(tempSource.release());
 
         setChannelsMapping();
+
+        //calcul Integrated loudness
 
 
         fileName = file.getFileName();
@@ -1576,6 +1582,8 @@ bool Player::loadFile(const juce::String& path)
         fileLoaded = true;
         
     }
+    //R128
+    CalculateR128Integrated(loadedFilePath);
     //cue transport
     if (juce::AudioFormatReader* cuereader = formatManager.createReaderFor(file))
     {
@@ -1996,4 +2004,91 @@ void Player::setActivePlayer(bool isActive)
 void Player::setPlayerIndex(int i)
 {
     playerIndex = i;
+}
+
+double Player::CalculateR128Integrated(std::string filePath)
+{
+    std::string USES_CONVERSION_EX;
+    std::string ffmpegpath = juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\ffmpeg.exe").toStdString();
+    //FFmpegPath = Settings::FFmpegPath.toStdString();
+    convertedFilesPath = Settings::convertedSoundsPath.toStdString();
+    //////////*****************Create FFMPEG command Line
+    //add double slash to path
+    std::string newFilePath = std::regex_replace(filePath, std::regex(R"(\\)"), R"(\\)");
+    std::string newFFmpegPath = std::regex_replace(ffmpegpath, std::regex(R"(\\)"), R"(\\)");
+    std::string newConvertedFilesPath = std::regex_replace(convertedFilesPath, std::regex(R"(\\)"), R"(\\)");
+    //give Output Directory
+    std::size_t botDirPos = filePath.find_last_of("\\");
+    std::string outputFileDirectory = filePath.substr(0, botDirPos);
+    //give file name with extension
+    std::string fileOutputName = filePath.substr(botDirPos, filePath.length());
+    std::string newFileOutputDir = std::regex_replace(outputFileDirectory, std::regex(R"(\\)"), R"(\\)");
+    size_t lastindex = fileOutputName.find_last_of(".");
+    //give file name without extension and add double dash before
+    std::string rawname = fileOutputName.substr(0, lastindex);
+    std::string rawnamedoubleslash = std::regex_replace(rawname, std::regex(R"(\\)"), R"(\\)");
+    //create entire command string
+    //std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -nostats -i \"" + newFilePath + "\" -filter_complex ebur128 -f null - > \"" + newConvertedFilesPath + rawnamedoubleslash + ".txt\" 2>&1");
+    std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -nostats -i \"" + newFilePath + "\" -filter_complex ebur128 -f null -");
+    std::wstring w = (utf8_to_utf16(cmdstring));
+    LPSTR str = const_cast<LPSTR>(cmdstring.c_str());
+    //LPSTR s = const_cast<char*>(w.c_str());
+    DBG(str);
+    ////////////Launch FFMPEG
+    SECURITY_ATTRIBUTES sa;
+    sa.nLength = sizeof(sa);
+    sa.lpSecurityDescriptor = NULL;
+    sa.bInheritHandle = TRUE;
+
+    HANDLE h = CreateFile(("out.txt"),
+        FILE_APPEND_DATA,
+        FILE_SHARE_WRITE | FILE_SHARE_READ,
+        &sa,
+        OPEN_ALWAYS,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL);
+
+    PROCESS_INFORMATION pi;
+    STARTUPINFO si;
+    BOOL ret = FALSE;
+    DWORD flags = CREATE_NO_WINDOW;
+
+    ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+    ZeroMemory(&si, sizeof(STARTUPINFO));
+    si.cb = sizeof(STARTUPINFO);
+    si.dwFlags |= STARTF_USESTDHANDLES;
+    si.hStdInput = NULL;
+    si.hStdError = h;
+    si.hStdOutput = h;
+
+    TCHAR cmd[] = TEXT("Test.exe 30");
+    ret = CreateProcess(NULL, str, NULL, NULL, TRUE, flags, NULL, NULL, &si, &pi);
+
+    if (ret)
+    {
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+        CloseHandle(h);
+    }
+    juce::Time::waitForMillisecondCounter(juce::Time::getMillisecondCounter() + 2000);
+    juce::File progressFile("C:\\JUCE\\Projects\\out.txt");
+    if (progressFile.exists())
+    {
+
+        juce::StringArray progressInfo;
+        progressFile.readLines(progressInfo);
+        DBG("progress file exist" << progressInfo.size());
+        int currentProgressLine = progressInfo.size() - 9; //récupère la ligne out_time_ms
+        juce::String progressLine = progressInfo[currentProgressLine];//enlève le début
+        DBG("integrated : " << progressLine);
+    }
+    return -1;
+
+    /////////////////////return created file path
+    std::string returnFilePath = std::string(newConvertedFilesPath + "\\" + rawname + ".wav");
+    //DBG(returnFilePath);
+    std::string returnFilePathBackslah = std::regex_replace(returnFilePath, std::regex(R"(\\)"), R"(\\)");
+    juce::String returnedFile = juce::String(returnFilePath);
+    Settings::tempFiles.add(returnedFile);
+    return 0.;
 }

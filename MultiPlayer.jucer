@@ -4,6 +4,12 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="xbXPa2" name="MultiPlayer">
     <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
+      <FILE id="TV1izO" name="batchConvertThread.h" compile="0" resource="0"
+            file="Source/batchConvertThread.h"/>
+      <FILE id="fcnpvs" name="convertObject.cpp" compile="1" resource="0"
+            file="Source/convertObject.cpp"/>
+      <FILE id="nsyiKm" name="convertObject.h" compile="0" resource="0" file="Source/convertObject.h"/>
+      <FILE id="Od2CAb" name="ffmpegConvert.h" compile="0" resource="0" file="Source/ffmpegConvert.h"/>
       <GROUP id="{A6A32EBC-A6BD-89D1-EE96-B627C086893D}" name="Mixer">
         <FILE id="QoCKHM" name="ChannelControlPannel.h" compile="0" resource="0"
               file="Source/Mixer/ChannelControlPannel.h"/>
@@ -105,6 +111,8 @@
             file="Source/DataBaseImport.cpp"/>
       <FILE id="hNkghM" name="DataBaseImport.h" compile="0" resource="0"
             file="Source/DataBaseImport.h"/>
+      <FILE id="pCSuVZ" name="R128IntegratedThread.h" compile="0" resource="0"
+            file="Source/R128IntegratedThread.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK="0"

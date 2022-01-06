@@ -16,6 +16,9 @@
 #include "PlayHead.h"
 #include <Ebu128LoudnessMeter.h>
 #include "LoudnessBar.h"
+#include "ffmpegConvert.h"
+#include "convertObject.h"
+#include "batchConvertThread.h"
 //==============================================================================
 /*
 */
@@ -85,6 +88,10 @@ private:
     juce::TextButton startStopButton{ "Play/Stop" };
     juce::TextButton clearSearchButton;
     juce::ToggleButton autoPlayButton{ "Autoplay" };
+    juce::ToggleButton todayButton;
+
+    juce::TextButton batchConvertButton;
+
 
     juce::Label timeLabel;
 
@@ -92,6 +99,14 @@ private:
     double fileSampleRate = 48000;
     Ebu128LoudnessMeter loudnessMeter;
     LoudnessBar loudnessBarComponent;
+
+    juce::OwnedArray<convertObject> myConvertObjects;
+    int convertObjectIndex = 0;
+    juce::ProgressBar convertProgress;
+    double progression = -1.;
+    bool isConverting = false;
+    bool isBatchConverting = false;
+    int batchConvertIndex = 0;
 
     PlayHead playHead;
     juce::Rectangle<int> thumbnailBounds;
@@ -103,7 +118,15 @@ private:
     std::unique_ptr<juce::AudioFormatReaderSource> playSource;
     bool DataBaseBrowser::loadFile(const juce::String& path);
     std::wstring DataBaseBrowser::utf8_to_utf16(const std::string& utf8);
+    void convertAllSounds();
+    void todayButtonClicked();
+    bool checkAndConvert(int rowNumber);
+    void batchConvertButtonClicked();
+    void batchConvert();
     juce::String DataBaseBrowser::secondsToMMSS(int seconds);
     const juce::String DataBaseBrowser::startFFmpeg(std::string filePath);
+
+
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DataBaseBrowser)
 };

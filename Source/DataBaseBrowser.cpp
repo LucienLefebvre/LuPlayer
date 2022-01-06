@@ -20,7 +20,7 @@ using namespace std;
 using namespace nanodbc;
 
 //==============================================================================
-DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatManager, thumbnailCache), resampledSource(&transport, false, 2)
+DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatManager, thumbnailCache), resampledSource(&transport, false, 2), convertProgress(progression)
 {
     auto const connection_string = NANODBC_TEXT("Driver=ODBC Driver 17 for SQL Server;Server=localhost\\NETIA;Database=ABC4;Uid=SYSADM;Pwd=SYSADM;");
     Settings::sampleRateValue.addListener(this);
@@ -43,7 +43,8 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     table.setBounds(0, 30, 100, getHeight() - 30);
     table.getHeader().addColumn("Name", 1, 400);
     table.getHeader().addColumn("Duration", 2, 100);
-    table.getHeader().addColumn("Date", 3, 200);
+    table.getHeader().addColumn("Date", 3, 150);
+    table.getHeader().addColumn("File", 4, 50, juce::TableHeaderComponent::ColumnPropertyFlags::notResizableOrSortable);
 
     //table.getHeader().addColumn("File", 4, 200);
     table.addMouseListener(this, true);
@@ -70,6 +71,17 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     clearSearchButton.setBounds(401, 1, 24, 25);
     clearSearchButton.onClick = [this] {searchLabel.setText("", juce::NotificationType::sendNotification); };
 
+    addAndMakeVisible(&todayButton);
+    todayButton.setButtonText("Today");
+    todayButton.setBounds(426, 1, 59, 25);
+    todayButton.onClick = [this] {todayButtonClicked(); };
+    todayButton.setToggleState(true, juce::NotificationType::dontSendNotification);
+
+    addAndMakeVisible(&batchConvertButton);
+    batchConvertButton.onClick = [this] { batchConvertButtonClicked(); };
+    batchConvertButton.setBounds(489, 3, 64, 21);
+    batchConvertButton.setButtonText("Convert");
+
     thumbnail.addChangeListener(this);
     addAndMakeVisible(&playHead);
 
@@ -80,6 +92,9 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     cuePlay = new juce::ChangeBroadcaster();
 
     formatManager.registerBasicFormats();
+
+    addChildComponent(convertProgress);
+    convertProgress.setColour(juce::ProgressBar::ColourIds::foregroundColourId, juce::Colour(40, 134, 189));
 
     try
     {
@@ -93,9 +108,6 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     {
         std::cerr << e.what() << std::endl;
     }
-    
-
-
 }
 
 DataBaseBrowser::~DataBaseBrowser()
@@ -139,14 +151,20 @@ void DataBaseBrowser::resized()
 {
 
     table.setBounds(5, 30, getWidth() / 2 - 5, getHeight() - 30);
-    table.getHeader().setColumnWidth(1, getWidth() * 5/16 - 5);
+    table.getHeader().setColumnWidth(1, getWidth() * 5/16 - 50);
     table.getHeader().setColumnWidth(2, getWidth() / 16 - 4);
     table.getHeader().setColumnWidth(3, getWidth()* 2 / 16 - 4);
+    table.getHeader().setColumnWidth(4, 45);
+
     thumbnailBounds.setBounds(getWidth() / 2 + 4, 30, getWidth() / 2, getHeight() - 30);
     startStopButton.setBounds(getWidth() / 2 + 4, 0, 100, 25);
     autoPlayButton.setBounds(getWidth() / 2 + 4 + 101, 0, 100, 25);
     timeLabel.setBounds(autoPlayButton.getRight(), 0, getWidth() - autoPlayButton.getRight(), 25);
     playHead.setSize(1, getHeight() - 30);
+
+    convertProgress.setBounds(getWidth() / 2 - 204, 5, 200, 20);
+
+
 }
 
 int DataBaseBrowser::getNumRows()
@@ -183,10 +201,40 @@ void DataBaseBrowser::paintCell(juce::Graphics& g, int rowNumber, int columnId, 
     {
         g.drawText(dates[rowNumber], 2, 0, width - 4, height, juce::Justification::centredLeft, true);
     }
-    /*else if (columnId == 4)
+    else if (columnId == 4)
     {
-        g.drawText(files[rowNumber], 2, 0, width - 4, height, juce::Justification::centredLeft, true);
-    }*/
+        std::string filePath = std::string("D:\\SONS\\ADMIN\\" + files[rowNumber].toStdString());
+        juce::File sourceFile(filePath);
+        std::string fileName = sourceFile.getFileNameWithoutExtension().toStdString();
+        juce::String pathToTest = juce::String(Settings::convertedSoundsPath + "\\" + fileName + ".wav");
+        juce::File fileToTest(pathToTest);
+        if (juce::AudioFormatReader* reader = formatManager.createReaderFor(fileToTest))
+        {
+            g.setColour(juce::Colours::green);
+            g.drawText("Yes", 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+            delete reader;
+        }
+        else
+        {
+            g.setColour(juce::Colours::red);
+            g.drawText("No", 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+            delete reader;
+        }
+        if (isConverting)
+        {
+            for (int i = 0; i < myConvertObjects.size(); i++)
+            {
+                if (myConvertObjects[i]->getId() == rowNumber)
+                {
+                    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+                    g.setColour(juce::Colours::orange);
+                    juce::String progression = juce::String(juce::roundToInt(myConvertObjects[i]->getProgression() * 100)) + "%";
+                    g.drawText(progression, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+                }
+            }
+        }
+
+    }
 
     if (rowNumber == table.getSelectedRow())
     {
@@ -204,6 +252,7 @@ void DataBaseBrowser::initialize()
 {
     //sqlQuery("", 3, 1);
     table.getHeader().setSortColumnId(3, false);
+
 }
 
 void DataBaseBrowser::sqlQuery(std::string search, int sortColum, int sortDirection)
@@ -214,8 +263,11 @@ void DataBaseBrowser::sqlQuery(std::string search, int sortColum, int sortDirect
         conn.connect(connection_string, 1000);
 
     std::string searchString;
+    std::string todayString = "";
+    if (todayButton.getToggleState())
+        todayString = "AND CAST(ABC4.SYSADM.T_ITEM.DATE_BEG_ITEM AS DATE) LIKE CAST(GETDATE() AS DATE)";
     if (sortColum == 0)
-    searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL");
+        searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL " + todayString);
     else
     {
         std::string columnToSort;
@@ -232,12 +284,12 @@ void DataBaseBrowser::sqlQuery(std::string search, int sortColum, int sortDirect
             columnToSort = "DATE_BEG_ITEM";
         }
         std::string direction;
+
+
         if (sortDirection == 0)
-            searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL ORDER BY " + columnToSort + " ASC");
+            searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL " + todayString + " ORDER BY " + columnToSort + " ASC");
         else if (sortDirection == 1)
-            searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL ORDER BY " + columnToSort + " DESC");
-
-
+            searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL " + todayString + " ORDER BY " + columnToSort + " DESC");
     }
 
 
@@ -302,7 +354,6 @@ void DataBaseBrowser::sqlQuery(std::string search, int sortColum, int sortDirect
         numRows = names.size();
     }
     table.updateContent();
-
 }
 
 void DataBaseBrowser::labelTextChanged(juce::Label* labelThatHasChanged)
@@ -327,20 +378,7 @@ void DataBaseBrowser::cellClicked(int rowNumber, int columnID, const juce::Mouse
 {
     if (!files[rowNumber].isEmpty())
     {
-        startStopButton.setEnabled(true);
-        transport.stop();
-        std::string filePath = std::string("D:\\SONS\\ADMIN\\" + files[table.getSelectedRow()].toStdString());
-        juce::File sourceFile(filePath);
-        std::string fileName = sourceFile.getFileNameWithoutExtension().toStdString();
-        juce::String pathToTest = juce::String(Settings::convertedSoundsPath + "\\" + fileName + ".wav");
-        juce::File fileToTest(pathToTest);
-        if (juce::AudioFormatReader* reader = formatManager.createReaderFor(fileToTest))
-        {
-            loadFile(fileToTest.getFullPathName());
-            delete reader;
-        }
-        else
-            loadFile(juce::String(startFFmpeg(filePath)));
+        checkAndConvert(rowNumber);
     }
     else
     {
@@ -374,6 +412,31 @@ void DataBaseBrowser::changeListenerCallback(juce::ChangeBroadcaster* source)
             startStopButton.setColour(juce::TextButton::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         }
     }
+
+    //delete conversion object
+    for (int i = 0; i < myConvertObjects.size(); i++)
+    {
+        if (source == myConvertObjects[i]->finishedBroadcaster)
+        {
+            //load file and delete object
+            if (!isBatchConverting)
+                loadFile(myConvertObjects[i]->getReturnedFile());
+            myConvertObjects[i]->setVisible(false);
+            myConvertObjects.remove(i);
+            //remove progress bar
+            if (myConvertObjects.size() == 0)
+            {
+                convertProgress.setVisible(false);
+                isConverting = false;
+            }
+        }
+    }
+    //else if (source == myConvertObjects.getLast()->finishedBroadcaster)
+    //{
+    //    loadFile(myConvertObjects.getLast()->getReturnedFile());
+    //    myConvertObjects.getLast()->setVisible(false);
+    //    //myConvertObjects.rel;
+    //}
 }
 
 void DataBaseBrowser::startOrStop()
@@ -406,6 +469,15 @@ void DataBaseBrowser::timerCallback()
     auto elapsedTime = secondsToMMSS(transport.getCurrentPosition());
     auto remainingTime = secondsToMMSS(transport.getLengthInSeconds() - transport.getCurrentPosition());
     timeLabel.setText(elapsedTime + " // " + remainingTime, juce::NotificationType::dontSendNotification);
+
+
+    if (isConverting)
+        repaint();
+    if (isBatchConverting)
+    {
+        batchConvert();
+        repaint();
+    }
 }
 
 void DataBaseBrowser::mouseDown(const juce::MouseEvent& e)
@@ -458,8 +530,8 @@ juce::String DataBaseBrowser::getSelectedSoundName()
 
 void DataBaseBrowser::tableSortOrderChanged(juce::TableHeaderComponent*)
 {
-    //if (table.getHeader().getSortColumnId() != 4)
-    sqlQuery(searchLabel.getText().toStdString(), table.getHeader().getSortColumnId(), !table.getHeader().isSortedForwards());
+    if (table.getHeader().getSortColumnId() != 4)
+        sqlQuery(searchLabel.getText().toStdString(), table.getHeader().getSortColumnId(), !table.getHeader().isSortedForwards());
 }
 void DataBaseBrowser::tableColumnsChanged(juce::TableHeaderComponent* tableHeader)
 {
@@ -638,3 +710,83 @@ std::wstring DataBaseBrowser::utf8_to_utf16(const std::string& utf8)
     return utf16;
 }
 
+void DataBaseBrowser::convertAllSounds()
+{
+
+}
+
+void DataBaseBrowser::todayButtonClicked()
+{
+    //todayButton.setToggleState(!todayButton.getToggleState(), juce::NotificationType::dontSendNotification);
+    sqlQuery(searchLabel.getText().toStdString(), table.getHeader().getSortColumnId(), !table.getHeader().isSortedForwards());
+}
+
+bool DataBaseBrowser::checkAndConvert(int rowNumber)
+{
+    startStopButton.setEnabled(true);
+    transport.stop();
+    std::string filePath = std::string("D:\\SONS\\ADMIN\\" + files[rowNumber].toStdString());
+    juce::File sourceFile(filePath);
+    std::string fileName = sourceFile.getFileNameWithoutExtension().toStdString();
+    juce::String pathToTest = juce::String(Settings::convertedSoundsPath + "\\" + fileName + ".wav");
+    juce::File fileToTest(pathToTest);
+    if (juce::AudioFormatReader* reader = formatManager.createReaderFor(fileToTest))
+    {
+        if (!isBatchConverting)
+            loadFile(fileToTest.getFullPathName());
+        delete reader;
+        return true;
+    }
+    else
+    {
+        int soundDuration = durations[rowNumber].getIntValue() / 1000;
+        myConvertObjects.add(new convertObject(filePath, soundDuration, rowNumber));
+        convertObjectIndex++;
+        addAndMakeVisible(myConvertObjects.getLast());
+        convertProgress.setVisible(true);
+        isConverting = true;
+        myConvertObjects.getLast()->finishedBroadcaster->addChangeListener(this);
+        return false;
+    }
+}
+
+void DataBaseBrowser::batchConvertButtonClicked()
+{
+    if (isBatchConverting == false)
+    {
+        batchConvertButton.setButtonText("Stop");
+        isConverting = true;
+        isBatchConverting = true;
+    }
+    else if (isBatchConverting == true)
+    {
+        batchConvertButton.setButtonText("Convert");
+        isBatchConverting = false;
+        progression = -1.;
+    }
+}
+
+void DataBaseBrowser::batchConvert()
+{
+    if (numRows > 0)
+    {
+    progression = ((double)batchConvertIndex - myConvertObjects.size() )/ (double)numRows;
+    if (myConvertObjects.size() < 3)
+    {
+        isConverting = true;
+        if (batchConvertIndex < numRows)
+        {
+            checkAndConvert(batchConvertIndex);
+            batchConvertIndex++;
+        }
+    }
+    if (batchConvertIndex == numRows)
+    {
+        isConverting = false;
+        isBatchConverting = false;
+        batchConvertIndex = 0;
+        progression = -1.;
+        batchConvertButton.setButtonText("Convert");
+    }
+    }
+}

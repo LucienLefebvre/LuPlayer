@@ -151,6 +151,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\convertObject.cpp"/>
     <ClCompile Include="Source\Mixer\FilterEditor.cpp"/>
     <ClCompile Include="Source\Mixer\FilterProcessor.cpp"/>
     <ClCompile Include="Source\Mixer\InputPanel.cpp"/>
@@ -2223,6 +2224,9 @@
     <ClCompile Include="JuceLibraryCode\include_juce_osc.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\batchConvertThread.h"/>
+    <ClInclude Include="Source\convertObject.h"/>
+    <ClInclude Include="Source\ffmpegConvert.h"/>
     <ClInclude Include="Source\Mixer\ChannelControlPannel.h"/>
     <ClInclude Include="Source\Mixer\CompEditor.h"/>
     <ClInclude Include="Source\Mixer\CompProcessor.h"/>
@@ -2264,6 +2268,7 @@
     <ClInclude Include="Source\DataBaseBrowser.h"/>
     <ClInclude Include="Source\helpers.h"/>
     <ClInclude Include="Source\DataBaseImport.h"/>
+    <ClInclude Include="Source\R128IntegratedThread.h"/>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.h"/>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeterSource.h"/>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LookAndFeel\LevelMeterLookAndFeel.h"/>

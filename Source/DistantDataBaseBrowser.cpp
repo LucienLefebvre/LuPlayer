@@ -703,7 +703,7 @@ void DistantDataBaseBrowser::connectToDB()
     //connectButton.setButtonText("Connecting...");
 
     //ADD current adress to file
-    clearListBox();
+
 
     juce::String serverFilePath = juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\LastsServers.txt";
     juce::File serverFile(serverFilePath);
@@ -732,6 +732,8 @@ void DistantDataBaseBrowser::connectToDB()
     {
         initialize();
     }
+    else
+        clearListBox();
     //auto const connection_string = NANODBC_TEXT(connectionString.toStdString());
     //try
     //{
@@ -785,6 +787,11 @@ void DistantDataBaseBrowser::exitSignalSent()
     if (thread.isConnected)
     {
         initialize();
+    }
+    else
+    {
+        clearListBox();
+        resetThumbnail();
     }
 }
 

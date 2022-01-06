@@ -13,6 +13,7 @@
 #include <math.h>
 #include <Ebu128LoudnessMeter.h>
 #include "Mixer/Mixer.h"
+#include "R128IntegratedThread.h"
 //#include <MacrosAndJuceHeaders.h>
 //#include <SecondOrderIIRFilter.h>
 //==============================================================================
