@@ -11,7 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "Playlist.h"
+//#include "Playlist.h"
 
 //==============================================================================
 /*
@@ -96,6 +96,7 @@ public:
 
     static bool Settings::lauchAtZeroDB;
     static bool Settings::mouseWheelControlVolume;
+    static bool Settings::autoNormalize;
 
     static int Settings::draggedPlaylist;
     static int Settings::draggedPlayer;
@@ -140,6 +141,9 @@ private:
     juce::Label oscOutPort;
     juce::Label oscInPortLabel;
     juce::Label oscInPort;
+
+    juce::Label normalizeLabel;
+    juce::ToggleButton normalizeButton;
 
     juce::Label audioOutputModeLabel;
     juce::ComboBox audioOutputModeListbox;

@@ -20,7 +20,7 @@ using namespace std;
 using namespace nanodbc;
 
 //==============================================================================
-DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatManager, thumbnailCache), resampledSource(&transport, false, 2)
+DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatManager, thumbnailCache), resampledSource(&transport, false, 2), convertProgress(progression)
 {
     //auto const connection_string = NANODBC_TEXT("Driver=ODBC Driver 17 for SQL Server;Server=192.168.8.107;Database=ABC4;Uid=SYSADM;Pwd=SYSADM;");
     Settings::sampleRateValue.addListener(this);
@@ -44,6 +44,7 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
     table.getHeader().addColumn("Name", 1, 400);
     table.getHeader().addColumn("Duration", 2, 100);
     table.getHeader().addColumn("Date", 3, 200);
+    table.getHeader().addColumn("File", 4, 50, juce::TableHeaderComponent::ColumnPropertyFlags::notResizableOrSortable);
 
 
     table.addMouseListener(this, true);
@@ -69,6 +70,17 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
     clearSearchButton.setBounds(401, 1, 24, 25);
     clearSearchButton.onClick = [this] {searchLabel.setText("", juce::NotificationType::sendNotification); };
 
+    addAndMakeVisible(&todayButton);
+    todayButton.setButtonText("Today");
+    todayButton.setBounds(426, 1, 59, 25);
+    todayButton.onClick = [this] {todayButtonClicked(); };
+    todayButton.setToggleState(true, juce::NotificationType::dontSendNotification);
+
+    addAndMakeVisible(&batchConvertButton);
+    batchConvertButton.onClick = [this] { batchConvertButtonClicked(); };
+    batchConvertButton.setBounds(489, 3, 64, 21);
+    batchConvertButton.setButtonText("Convert");
+
     addAndMakeVisible(&hostLabel);
     hostLabel.setBounds(0, getHeight() - 27, 150, 25);
     hostLabel.setText("IP or host name", juce::NotificationType::dontSendNotification);
@@ -82,7 +94,7 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
 
     addAndMakeVisible(&connectButton);
     connectButton.setButtonText("Connect");
-    connectButton.onClick = [this] { connectToDB(); };
+    connectButton.onClick = [this] { connectButtonClicked(); };
 
     thumbnail.addChangeListener(this);
     addAndMakeVisible(&playHead);
@@ -102,6 +114,8 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
 
     thread.addListener(this);
 
+    addChildComponent(convertProgress);
+    convertProgress.setColour(juce::ProgressBar::ColourIds::foregroundColourId, juce::Colour(40, 134, 189));
     //try
     //{
 
@@ -139,7 +153,6 @@ DistantDataBaseBrowser::~DistantDataBaseBrowser()
     //std::string cmdstring = std::string("net use z: \\\\Laptop-67vrd21a\\sons$");
     std::wstring w = (utf8_to_utf16(cmdstring));
     LPWSTR str = const_cast<LPWSTR>(w.c_str());
-    DBG(str);
     ////////////Launch FFMPEG
     PROCESS_INFORMATION pi;
     STARTUPINFOW si;
@@ -176,10 +189,12 @@ void DistantDataBaseBrowser::prepareToPlay(int samplesPerBlockExpected, double s
 void DistantDataBaseBrowser::resized()
 {
 
-    table.setBounds(5, 30, getWidth() / 2 - 5, getHeight() - 30 - 30);
-    table.getHeader().setColumnWidth(1, getWidth() * 5 / 16 - 5);
+    table.setBounds(5, 30, getWidth() / 2 - 5, getHeight() - 60);
+    table.getHeader().setColumnWidth(1, getWidth() * 5 / 16 - 50);
     table.getHeader().setColumnWidth(2, getWidth() / 16 - 4);
     table.getHeader().setColumnWidth(3, getWidth() * 2 / 16 - 4);
+    table.getHeader().setColumnWidth(4, 45);
+
     thumbnailBounds.setBounds(getWidth() / 2 + 4, 30, getWidth() / 2, getHeight() - 30);
     startStopButton.setBounds(getWidth() / 2 + 4, 0, 100, 25);
     autoPlayButton.setBounds(getWidth() / 2 + 4 + 101, 0, 100, 25);
@@ -189,6 +204,7 @@ void DistantDataBaseBrowser::resized()
     lastServerBox.setBounds(0, getHeight() - 27, 150, 25);
     connectButton.setBounds(300, getHeight() - 27, 100, 25);
     connectionLabel.setCentrePosition(getWidth() / 2, getHeight() / 2);
+    convertProgress.setBounds(getWidth() / 2 - 204, 5, 200, 20);
 }
 
 int DistantDataBaseBrowser::getNumRows()
@@ -225,10 +241,40 @@ void DistantDataBaseBrowser::paintCell(juce::Graphics& g, int rowNumber, int col
     {
         g.drawText(dates[rowNumber], 2, 0, width - 4, height, juce::Justification::centredLeft, true);
     }
-    /*else if (columnId == 4)
+    else if (columnId == 4)
     {
-        g.drawText(files[rowNumber], 2, 0, width - 4, height, juce::Justification::centredLeft, true);
-    }*/
+        std::string filePath = std::string("D:\\SONS\\ADMIN\\" + files[rowNumber].toStdString());
+        juce::File sourceFile(filePath);
+        std::string fileName = sourceFile.getFileNameWithoutExtension().toStdString();
+        juce::String pathToTest = juce::String(Settings::convertedSoundsPath + "\\" + fileName + ".wav");
+        juce::File fileToTest(pathToTest);
+        if (juce::AudioFormatReader* reader = formatManager.createReaderFor(fileToTest))
+        {
+            g.setColour(juce::Colours::green);
+            g.drawText("Yes", 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+            delete reader;
+        }
+        else
+        {
+            g.setColour(juce::Colours::red);
+            g.drawText("No", 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+            delete reader;
+        }
+        if (isConverting)
+        {
+            for (int i = 0; i < myConvertObjects.size(); i++)
+            {
+                if (myConvertObjects[i]->getId() == rowNumber)
+                {
+                    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+                    g.setColour(juce::Colours::orange);
+                    juce::String progression = juce::String(juce::roundToInt(myConvertObjects[i]->getProgression() * 100)) + "%";
+                    g.drawText(progression, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+                }
+            }
+        }
+    }
+
 
     if (rowNumber == table.getSelectedRow())
     {
@@ -256,8 +302,11 @@ void DistantDataBaseBrowser::sqlQuery(std::string search, int sortColum, int sor
         //conn.connect(connection_string, 1000);
 
     std::string searchString;
+    std::string todayString = "";
+    if (todayButton.getToggleState())
+        todayString = "AND CAST(ABC4.SYSADM.T_ITEM.DATE_BEG_ITEM AS DATE) LIKE CAST(GETDATE() AS DATE)";
     if (sortColum == 0)
-        searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL");
+        searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL " + todayString);
     else
     {
         std::string columnToSort;
@@ -275,9 +324,9 @@ void DistantDataBaseBrowser::sqlQuery(std::string search, int sortColum, int sor
         }
         std::string direction;
         if (sortDirection == 0)
-            searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL ORDER BY " + columnToSort + " ASC");
+            searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL " + todayString + " ORDER BY " + columnToSort + " ASC");
         else if (sortDirection == 1)
-            searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL ORDER BY " + columnToSort + " DESC");
+            searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.STRING_2 LIKE '%" + search + "%' AND STATION_DELETE IS NULL " + todayString + " ORDER BY " + columnToSort + " DESC");
 
 
     }
@@ -356,7 +405,7 @@ void DistantDataBaseBrowser::labelTextChanged(juce::Label* labelThatHasChanged)
     }
     else if (labelThatHasChanged == &hostLabel)
     {
-        connectToDB();
+        connectButtonClicked();
     }
 }
 
@@ -376,7 +425,8 @@ void DistantDataBaseBrowser::cellClicked(int rowNumber, int columnID, const juce
 {
     if (conn.connected())
     {
-        if (!files[rowNumber].isEmpty())
+        checkAndConvert(rowNumber);
+        /*if (!files[rowNumber].isEmpty())
         {
             startStopButton.setEnabled(true);
             transport.stop();
@@ -411,7 +461,7 @@ void DistantDataBaseBrowser::cellClicked(int rowNumber, int columnID, const juce
         {
             if (!transport.isPlaying())
                 startOrStop();
-        }
+        }*/
     }
 }
 
@@ -426,6 +476,24 @@ void DistantDataBaseBrowser::changeListenerCallback(juce::ChangeBroadcaster* sou
             transport.stop();
             transport.setPosition(0);
             startStopButton.setColour(juce::TextButton::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        }
+    }
+    //delete conversion object
+    for (int i = 0; i < myConvertObjects.size(); i++)
+    {
+        if (source == myConvertObjects[i]->finishedBroadcaster)
+        {
+            //load file and delete object
+            if (!isBatchConverting)
+                loadFile(myConvertObjects[i]->getReturnedFile());
+            myConvertObjects[i]->setVisible(false);
+            myConvertObjects.remove(i);
+            //remove progress bar
+            if (myConvertObjects.size() == 0)
+            {
+                convertProgress.setVisible(false);
+                isConverting = false;
+            }
         }
     }
 }
@@ -460,6 +528,14 @@ void DistantDataBaseBrowser::timerCallback()
     auto elapsedTime = secondsToMMSS(transport.getCurrentPosition());
     auto remainingTime = secondsToMMSS(transport.getLengthInSeconds() - transport.getCurrentPosition());
     timeLabel.setText(elapsedTime + " // " + remainingTime, juce::NotificationType::dontSendNotification);
+
+    if (isConverting)
+        repaint();
+    if (isBatchConverting)
+    {
+        batchConvert();
+        repaint();
+    }
 }
 
 void DistantDataBaseBrowser::mouseDown(const juce::MouseEvent& e)
@@ -696,15 +772,6 @@ std::wstring DistantDataBaseBrowser::utf8_to_utf16(const std::string& utf8)
 
 void DistantDataBaseBrowser::connectToDB()
 {
-    /*juce::WindowsRegistry::setValue(juce::String("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\ODBC\\ODBC.INI\\DistantDB\\Database"), "ABC4");
-    juce::WindowsRegistry::setValue(juce::String("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\ODBC\\ODBC.INI\\DistantDB\\Driver"), "C:\\Windows\\system32\\SQLSRV32.dll");
-    juce::WindowsRegistry::setValue(juce::String("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\ODBC\\ODBC.INI\\DistantDB\\LastUser"), "SYSADM");
-    juce::WindowsRegistry::setValue(juce::String("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\ODBC\\ODBC.INI\\DistantDB\\Server"), hostLabel.getText());*/
-    //connectButton.setButtonText("Connecting...");
-
-    //ADD current adress to file
-
-
     juce::String serverFilePath = juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\LastsServers.txt";
     juce::File serverFile(serverFilePath);
     if (!serverFile.exists())
@@ -726,63 +793,23 @@ void DistantDataBaseBrowser::connectToDB()
     thread.setString(connectionString);
     thread.setHost(hostLabel.getText());
     thread.setConnection(conn);
-    thread.launchThread();
+    thread.startThread();
 
     if (thread.isConnected == true)
     {
         initialize();
-    }
-    else
-        clearListBox();
-    //auto const connection_string = NANODBC_TEXT(connectionString.toStdString());
-    //try
-    //{
-    //    conn.connect(connection_string, 2);
-    //    //nanodbc::connection conn(connection_string);
-    //    //conn.dbms_name();
-    //}
-    //catch (std::runtime_error const& e)
-    //{
-    //    std::cerr << e.what() << std::endl;
-    //}
-
-    //if (conn.connected())
-    //{
-    //    juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon,
-    //        "Distant Database Found",
-    //        "");
-
-    //    //DISK MAPPING
-    //    std::string cmdstring = std::string("net use z: \\\\" + hostLabel.getText().toStdString() + "\\sons$");
-    //    std::wstring w = (utf8_to_utf16(cmdstring));
-    //    LPWSTR str = const_cast<LPWSTR>(w.c_str());
-    //    DBG(str);
-    //    PROCESS_INFORMATION pi;
-    //    STARTUPINFOW si;
-    //    si.wShowWindow = SW_SHOW;
-    //    si.dwFlags = STARTF_USESHOWWINDOW;
-    //    ZeroMemory(&si, sizeof(si));
-    //    BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
-    //    if (logDone)
-    //    {
-    //        WaitForSingleObject(pi.hProcess, INFINITE);
-    //    }
-
-
-        /*initialize();
+        isConnecting = false;
+        connectButton.setButtonText("Connect");
     }
     else
     {
-        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
-            "Connection Error",
-            "");
+        isConnecting = false;
+        clearListBox();
     }
-    connectionLabel.setVisible(false);*/
 }
 
 void DistantDataBaseBrowser::exitSignalSent()
 {
-    DBG("thread fini");
     const juce::MessageManagerLock mmLock;
     if (thread.isConnected)
     {
@@ -793,6 +820,7 @@ void DistantDataBaseBrowser::exitSignalSent()
         clearListBox();
         resetThumbnail();
     }
+    isConnecting = false;
 }
 
 void DistantDataBaseBrowser::updateLastServersBox()
@@ -840,4 +868,97 @@ void DistantDataBaseBrowser::resetThumbnail()
     transport.setSource(nullptr);
     startStopButton.setEnabled(false);
     startStopButton.setColour(juce::TextButton::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+}
+
+bool DistantDataBaseBrowser::checkAndConvert(int rowNumber)
+{
+    startStopButton.setEnabled(true);
+    transport.stop();
+    std::string filePath = std::string("Z:\\" + files[rowNumber].toStdString());
+    juce::File sourceFile(filePath);
+    std::string fileName = sourceFile.getFileNameWithoutExtension().toStdString();
+    juce::String pathToTest = juce::String(Settings::convertedSoundsPath + "\\" + fileName + ".wav");
+    juce::File fileToTest(pathToTest);
+    if (juce::AudioFormatReader* reader = formatManager.createReaderFor(fileToTest))
+    {
+        if (!isBatchConverting)
+            loadFile(fileToTest.getFullPathName());
+        delete reader;
+        return true;
+    }
+    else
+    {
+        int soundDuration = durations[rowNumber].getIntValue() / 1000;
+        myConvertObjects.add(new convertObject(filePath, soundDuration, rowNumber));
+        convertObjectIndex++;
+        addAndMakeVisible(myConvertObjects.getLast());
+        convertProgress.setVisible(true);
+        isConverting = true;
+        myConvertObjects.getLast()->finishedBroadcaster->addChangeListener(this);
+        return false;
+    }
+}
+
+void DistantDataBaseBrowser::batchConvert()
+{
+    if (numRows > 0)
+    {
+        progression = ((double)batchConvertIndex - myConvertObjects.size()) / (double)numRows;
+        if (myConvertObjects.size() < 3)
+        {
+            isConverting = true;
+            if (batchConvertIndex < numRows)
+            {
+                checkAndConvert(batchConvertIndex);
+                batchConvertIndex++;
+            }
+        }
+        if (batchConvertIndex == numRows)
+        {
+            isConverting = false;
+            isBatchConverting = false;
+            batchConvertIndex = 0;
+            progression = -1.;
+            batchConvertButton.setButtonText("Convert");
+        }
+    }
+}
+
+void DistantDataBaseBrowser::batchConvertButtonClicked()
+{
+    if (isBatchConverting == false)
+    {
+        batchConvertButton.setButtonText("Stop");
+        isConverting = true;
+        isBatchConverting = true;
+    }
+    else if (isBatchConverting == true)
+    {
+        batchConvertButton.setButtonText("Convert");
+        isBatchConverting = false;
+        progression = -1.;
+    }
+}
+
+void DistantDataBaseBrowser::todayButtonClicked()
+{
+    //todayButton.setToggleState(!todayButton.getToggleState(), juce::NotificationType::dontSendNotification);
+    sqlQuery(searchLabel.getText().toStdString(), table.getHeader().getSortColumnId(), !table.getHeader().isSortedForwards());
+}
+
+void DistantDataBaseBrowser::connectButtonClicked()
+{
+    if (isConnecting == false)
+    {
+        clearListBox();
+        connectToDB();
+        connectButton.setButtonText("Cancel");
+        isConnecting = true;
+    }
+    else if (isConnecting == true)
+    {
+        thread.stopThread(1000);
+        connectButton.setButtonText("Connect");
+        isConnecting = false;
+    }
 }

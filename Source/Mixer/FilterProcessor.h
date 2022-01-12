@@ -10,7 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "FFTAnalyser.h"
+//#include "FFTAnalyser.h"
 //#include "filterHelpers.h"
 //#include "FilterEditor.h"
 
@@ -36,7 +36,7 @@ public:
 
     FilterProcessor();
     ~FilterProcessor() override;
-    FFTAnalyser analyser;
+    //FFTAnalyser analyser;
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void getNextAudioBlock(juce::AudioBuffer<float>* buffer);
 

@@ -42,6 +42,8 @@ public:
     SoundPlayer(bool isEightPlayer = false);
     ~SoundPlayer() override;
 
+    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
+
     void SoundPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
 
     void paint (juce::Graphics&) override;
@@ -81,6 +83,7 @@ public:
     void SoundPlayer::setTimerTime(int timertime);
     void SoundPlayer::setEightPlayersMode(bool isEightPlayers);
 
+    juce::ChangeBroadcaster* playerSelectionChanged;
 
 private:
     void SoundPlayer::timerCallback();

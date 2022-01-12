@@ -233,7 +233,6 @@ void DataBaseBrowser::paintCell(juce::Graphics& g, int rowNumber, int columnId, 
                 }
             }
         }
-
     }
 
     if (rowNumber == table.getSelectedRow())
@@ -520,7 +519,20 @@ void DataBaseBrowser::mouseUp(const juce::MouseEvent& e)
 
 juce::File DataBaseBrowser::getSelectedFile()
 {
-    return file;
+    std::string filePath = std::string(Settings::convertedSoundsPath.toStdString() + "\\" + files[table.getSelectedRow()].trimCharactersAtEnd(".BWF").toStdString() + ".wav");
+    juce::File sourceFile(filePath);
+    DBG("chemin fichier" << filePath);
+    if (juce::AudioFormatReader* reader = formatManager.createReaderFor(sourceFile))
+    {
+        DBG("fichier converti");
+        delete reader;
+        return filePath;
+    }
+    else
+    {
+        delete reader;
+        return juce::File("D:\\SONS\\ADMIN\\" + files[table.getSelectedRow()].toStdString());
+    }
 }
 
 juce::String DataBaseBrowser::getSelectedSoundName()

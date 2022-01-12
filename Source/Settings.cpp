@@ -42,6 +42,7 @@ juce::BigInteger Settings::outputChannels;
 bool Settings::useDefaultOutputsChannels;
 bool Settings::lauchAtZeroDB;
 bool Settings::mouseWheelControlVolume;
+bool Settings::autoNormalize;
 
 int Settings::outputChannelsNumber;
 juce::Value Settings::sampleRateValue;
@@ -112,6 +113,11 @@ Settings::Settings() : settingsFile(options)
         Settings::mouseWheelControlVolume = true;
     else
         Settings::mouseWheelControlVolume = properties.getUserSettings()->getValue("MouseWheelControl").getIntValue();
+
+    if (properties.getUserSettings()->getValue("AutoNormalize").isEmpty())
+        Settings::autoNormalize = true;
+    else
+        Settings::autoNormalize = properties.getUserSettings()->getValue("AutoNormalize").getIntValue();
 
     //SAVE & CLOSE BUTTon
     saveButton.setBounds(250, 400, 100, 50);
@@ -214,17 +220,17 @@ Settings::Settings() : settingsFile(options)
 
     //OSC Ports
     addAndMakeVisible(oscPorts);
-    oscPorts.setText("OSC Ports", juce::NotificationType::dontSendNotification);
+    oscPorts.setText("OSC", juce::NotificationType::dontSendNotification);
     oscPorts.setBounds(0, 150, 100, 25);
 
     //OUT
     addAndMakeVisible(oscOutPortLabel);
     oscOutPortLabel.setText("Outgoing", juce::NotificationType::dontSendNotification);
-    oscOutPortLabel.setBounds(200, 150, 100, 25);
+    oscOutPortLabel.setBounds(50, 150, 100, 25);
 
     addAndMakeVisible(oscOutPort);
     oscOutPort.setText(juce::String(Settings::outOscPort), juce::NotificationType::dontSendNotification);
-    oscOutPort.setBounds(300, 150, 50, 25);
+    oscOutPort.setBounds(125, 150, 50, 25);
     oscOutPort.setEditable(true, true, false);
     oscOutPort.addListener(this);
     oscOutPort.setJustificationType(juce::Justification::centred);
@@ -233,11 +239,11 @@ Settings::Settings() : settingsFile(options)
     //IN
     addAndMakeVisible(oscInPortLabel);
     oscInPortLabel.setText("Incoming", juce::NotificationType::dontSendNotification);
-    oscInPortLabel.setBounds(400, 150, 100, 25);
+    oscInPortLabel.setBounds(175, 150, 100, 25);
 
     addAndMakeVisible(oscInPort);
     oscInPort.setText(juce::String(Settings::inOscPort), juce::NotificationType::dontSendNotification);
-    oscInPort.setBounds(500, 150, 50, 25);
+    oscInPort.setBounds(250, 150, 50, 25);
     oscInPort.setEditable(true, true, false);
     oscInPort.addListener(this);
     oscInPort.setJustificationType(juce::Justification::centred);
@@ -245,37 +251,43 @@ Settings::Settings() : settingsFile(options)
 
     //OSC IP Adress Destination
     addAndMakeVisible(ipAdressLabel);
-    ipAdressLabel.setBounds(0, 200, 200, 25);
-    ipAdressLabel.setText("OSC device Ip Adress", juce::NotificationType::dontSendNotification);
+    ipAdressLabel.setBounds(300, 150, 50, 25);
+    ipAdressLabel.setText("Ip", juce::NotificationType::dontSendNotification);
 
     addAndMakeVisible(ipAdress1);
-    ipAdress1.setBounds(200, 200, 50, 25);
+    ipAdress1.setBounds(350, 150, 50, 25);
     ipAdress1.setText(Settings::adress1, juce::NotificationType::sendNotification);
     ipAdress1.setEditable(true, true, false);
     ipAdress1.addListener(this);
     ipAdress1.setJustificationType(juce::Justification::centred);
     ipAdress1.setColour(juce::Label::outlineColourId, juce::Colours::black);
     addAndMakeVisible(ipAdress2);
-    ipAdress2.setBounds(250, 200, 50, 25);
+    ipAdress2.setBounds(400, 150, 50, 25);
     ipAdress2.setText(Settings::adress2, juce::NotificationType::sendNotification);
     ipAdress2.setEditable(true, true, false);
     ipAdress2.addListener(this);
     ipAdress2.setJustificationType(juce::Justification::centred);
     ipAdress2.setColour(juce::Label::outlineColourId, juce::Colours::black);
     addAndMakeVisible(ipAdress3);
-    ipAdress3.setBounds(300, 200, 50, 25);
+    ipAdress3.setBounds(450, 150, 50, 25);
     ipAdress3.setText(Settings::adress3, juce::NotificationType::sendNotification);
     ipAdress3.setEditable(true, true, false);
     ipAdress3.addListener(this);
     ipAdress3.setJustificationType(juce::Justification::centred);
     ipAdress3.setColour(juce::Label::outlineColourId, juce::Colours::black);
     addAndMakeVisible(ipAdress4);
-    ipAdress4.setBounds(350, 200, 50, 25);
+    ipAdress4.setBounds(500, 150, 50, 25);
     ipAdress4.setText(Settings::adress4, juce::NotificationType::sendNotification);
     ipAdress4.setEditable(true, true, false);
     ipAdress4.addListener(this);
     ipAdress4.setJustificationType(juce::Justification::centred);
     ipAdress4.setColour(juce::Label::outlineColourId, juce::Colours::black);
+
+    addAndMakeVisible(&normalizeButton);
+    normalizeButton.setButtonText("Auto normalize sounds at 0 LU");
+    normalizeButton.setBounds(0, 200, 300, 25);
+    normalizeButton.setToggleState(Settings::autoNormalize, juce::NotificationType::dontSendNotification);
+    normalizeButton.addListener(this);
 
     addAndMakeVisible(&launchLevelButton);
     launchLevelButton.setButtonText("Always launch sounds at 0dB");
@@ -613,6 +625,13 @@ void Settings::buttonClicked(juce::Button* button)
     {
         Settings::mouseWheelControlVolume = button->getToggleState();
         properties.getUserSettings()->setValue("MouseWheelControl", (int)Settings::mouseWheelControlVolume);
+        properties.saveIfNeeded();
+        settingsFile.save();
+    }
+    if (button == &normalizeButton)
+    {
+        Settings::autoNormalize = button->getToggleState();
+        properties.getUserSettings()->setValue("AutoNormalize", (int)Settings::autoNormalize);
         properties.saveIfNeeded();
         settingsFile.save();
     }

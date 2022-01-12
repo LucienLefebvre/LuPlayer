@@ -271,6 +271,11 @@ public:
         reductionGain.store(r);
     }
 
+    float getReductionGain()
+    {
+        return reductionGain.load();
+    }
+
     float getRMSLevel(int channel)
     {
 

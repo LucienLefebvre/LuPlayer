@@ -18,6 +18,8 @@
 #include <stdio.h>
 #include <string>
 #include "Windows.h"
+#include <regex>
+#include "convertObject.h"
 //==============================================================================
 /*
 */
@@ -80,6 +82,16 @@ private:
 
     void resetThumbnail();
 
+    bool checkAndConvert(int rowNumber);
+
+    void batchConvert();
+
+    void batchConvertButtonClicked();
+
+    void todayButtonClicked();
+
+    void connectButtonClicked();
+
     bool mouseDragged = false;
     bool startDrag = false;
     nanodbc::connection conn;
@@ -108,13 +120,25 @@ private:
 
     juce::Label connectionLabel;
 
+    juce::ToggleButton todayButton;
+
+    juce::TextButton batchConvertButton;
+
     juce::File file;
     double fileSampleRate = 48000;
     Ebu128LoudnessMeter loudnessMeter;
     LoudnessBar loudnessBarComponent;
 
-    //juce::WindowsRegistry registry;
+    bool isConnecting = false;
 
+    //juce::WindowsRegistry registry;
+    juce::OwnedArray<convertObject> myConvertObjects;
+    int convertObjectIndex = 0;
+    juce::ProgressBar convertProgress;
+    double progression = -1.;
+    bool isConverting = false;
+    bool isBatchConverting = false;
+    int batchConvertIndex = 0;
 
     PlayHead playHead;
     juce::Rectangle<int> thumbnailBounds;
@@ -131,12 +155,12 @@ private:
 
 
 
-    class connectThread : public juce::ThreadWithProgressWindow
+    class connectThread : public juce::Thread
     {
     public:
-        connectThread::connectThread() : juce::ThreadWithProgressWindow("Distant Database", true, true)
+        connectThread::connectThread() : juce::Thread("Distant Database")
         {
-            setStatusMessage("Connecting to database......");
+            //setStatusMessage("Connecting to database......");
         }
 
         connectThread::~connectThread()
@@ -149,7 +173,7 @@ private:
             auto const connection_string = NANODBC_TEXT(connectionString.toStdString());
             try
             {
-                connection.connect(connection_string, 2);
+                connection.connect(connection_string);
 
                 //nanodbc::connection conn(connection_string);
                 //conn.dbms_name();
@@ -163,8 +187,8 @@ private:
             {
 
 
-                setStatusMessage("Mapping distant drive......");
-                setProgress(0.5);
+                //setStatusMessage("Mapping distant drive......");
+                //setProgress(0.5);
                 //DISK MAPPING
                 std::string USES_CONVERSION_EX;
                 std::string cmdstring = std::string("net use z: \\\\" + hostAdress.toStdString() + "\\sons$");
@@ -179,7 +203,7 @@ private:
                 BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
                 if (logDone)
                 {
-                    WaitForSingleObject(pi.hProcess, INFINITE);
+                    WaitForSingleObject(pi.hProcess, 2);
                 }
                 isConnected = true;
                 signalThreadShouldExit();
@@ -196,7 +220,9 @@ private:
                     "");
             }
             if (threadShouldExit())
+            {
                 return;
+            }
         }
 
         void connectThread::setString(juce::String s)

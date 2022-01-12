@@ -46,6 +46,7 @@ BottomComponent::BottomComponent()
     {
         addTab("Netia Database Import", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &noDbLabel, false);
     }
+    addTab("Clip Effect", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &clipEffect, false);
     setTabBarDepth(tabBarHeight);
     setCurrentTabIndex(1);
     getTabbedButtonBar().setWantsKeyboardFocus(false);
@@ -100,7 +101,7 @@ void BottomComponent::resized()
 
 void BottomComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
-
+    clipEffect.prepareToPlay(samplesPerBlockExpected, sampleRate);
     myMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
     recorderComponent.prepareToPlay(samplesPerBlockExpected, sampleRate);
     dbBrowser.prepareToPlay(samplesPerBlockExpected, sampleRate);

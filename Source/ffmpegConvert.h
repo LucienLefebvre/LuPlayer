@@ -35,8 +35,6 @@ public:
 
     void run()
     {
-        DBG("thread run");
-
         std::string USES_CONVERSION_EX;
 
         std::string ffmpegpath = juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\ffmpeg.exe").toStdString();
@@ -61,7 +59,6 @@ public:
         std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -i \"" + newFilePath + "\" -ar 48000 -y \"" + newConvertedFilesPath + rawnamedoubleslash + ".wav\" -progress " + newConvertedFilesPath + rawnamedoubleslash + ".txt\"");
         std::wstring w = (utf8_to_utf16(cmdstring));
         LPWSTR str = const_cast<LPWSTR>(w.c_str());
-        DBG(str);
         ////////////Launch FFMPEG
         PROCESS_INFORMATION pi;
         STARTUPINFOW si;
@@ -123,7 +120,6 @@ public:
     {
         filePath = p.toStdString();
         //filePath = std::regex_replace(p.toStdString(), std::regex(R"(\\)"), R"(\\)");;
-        DBG("filepath" << filePath);
     }
 
     juce::String getFile()

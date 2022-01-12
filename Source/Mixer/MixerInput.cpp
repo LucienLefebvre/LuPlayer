@@ -148,7 +148,6 @@ void MixerInput::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
 
 void MixerInput::setSelectedInput(int input)
 {
-    DBG("selected input" << input);
     selectedInput = input;
 }
 int MixerInput::getSelectedInput()

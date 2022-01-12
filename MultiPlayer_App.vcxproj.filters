@@ -559,6 +559,9 @@
     <ClCompile Include="Source\DataBaseImport.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ClipEffect.cpp">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClCompile>
     <ClCompile Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.cpp">
       <Filter>JUCE Modules\ff_meters\LevelMeter</Filter>
     </ClCompile>
@@ -2881,6 +2884,9 @@
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\DataBaseImport.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ClipEffect.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\R128IntegratedThread.h">

@@ -13,6 +13,7 @@
 #include <cstdlib>
 FilterEditor::FilterEditor()
 {
+    editedFilterProcessor = &filterProcessor;
     addMouseListener(this, true);
     juce::Timer::startTimer(50);
     channelColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
@@ -195,19 +196,19 @@ void FilterEditor::plotMagnitudeArray(juce::Graphics& g, juce::Array<double> arr
 
 void FilterEditor::plotFFT(juce::Graphics& g)
 {
-    fftArray.clear();
-    auto fftBuffer = editedFilterProcessor->analyser.getFFTBuffer();
-    float fftSize = editedFilterProcessor->analyser.getFFTSize();
-    //DBG(fftSize);
-    for (auto i = 0; i < frequencyArray.size(); i++)
-    {
-        auto indexToPlot = round((frequencyArray[i] * fftSize) / actualSampleRate);
-        fftArray.set(i, juce::Decibels::gainToDecibels(fftBuffer.getSample(0, indexToPlot)*0.2));
+    //fftArray.clear();
+    //auto fftBuffer = editedFilterProcessor->analyser.getFFTBuffer();
+    //float fftSize = editedFilterProcessor->analyser.getFFTSize();
+    ////DBG(fftSize);
+    //for (auto i = 0; i < frequencyArray.size(); i++)
+    //{
+    //    auto indexToPlot = round((frequencyArray[i] * fftSize) / actualSampleRate);
+    //    fftArray.set(i, juce::Decibels::gainToDecibels(fftBuffer.getSample(0, indexToPlot)*0.2));
 
-        //DBG(indexToPlot);
-    }
-    g.setColour(juce::Colours::black);
-    plotMagnitudeArray(g, fftArray, 1);
+    //    //DBG(indexToPlot);
+    //}
+    //g.setColour(juce::Colours::black);
+    //plotMagnitudeArray(g, fftArray, 1);
 }
 
 void FilterEditor::resized()
@@ -267,6 +268,7 @@ void FilterEditor::setEditedFilterProcessor(FilterProcessor& processor)
     updateBypassed();
     createMagnitudeArray();
     updateFilterGraphPoints();
+    DBG("sample rate " << actualSampleRate);
 }
 
 void FilterEditor::createMagnitudeArray()
@@ -480,8 +482,6 @@ void FilterEditor::changeListenerCallback(juce::ChangeBroadcaster* source)
 void FilterEditor::updateBypassed()
 {
     isFilterBypassed = editedFilterProcessor->isBypassed();
-
-        DBG("bypassed");
     for (auto i = 0; i < filterBands.size(); i++)
     {
         filterBands[i]->enableControl(!isFilterBypassed);
@@ -546,8 +546,8 @@ void FilterEditor::timerCallback()
         createMagnitudeArray();
     if (parametersChanged)
         updateFilterGraphPoints();
-    if (editedFilterProcessor->analyser.checkForNewData())
-        repaint();
+    /*if (editedFilterProcessor->analyser.checkForNewData())
+        repaint();*/
 }
 
 void FilterEditor::setColour(juce::Colour colour)

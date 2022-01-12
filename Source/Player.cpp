@@ -24,7 +24,8 @@ typedef LPSTR LPTSTR;
 Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("Stop"), cueStopButton("6s"), deleteButton("Delete"), cueButton("Cue"),thumbnailCache(5), 
                             thumbnail(521, formatManager, thumbnailCache), resampledSource(&transport, false, 2), cueResampledSource(&cueTransport, false, 2),
                             filterSource(&resampledSource, false), cuefilterSource(&cueResampledSource, false),
-                            channelRemappingSource(&filterSource, false), cuechannelRemappingSource(&cuefilterSource, false)
+                            channelRemappingSource(&filterSource, false), cuechannelRemappingSource(&cuefilterSource, false),
+                            inputMeter(Meter::Mode::Stereo), outputMeter(Meter::Mode::Stereo), compMeter(Meter::Mode::Stereo_ReductionGain)
 
 {
    //std::unique_ptr<Settings> settings = std::make_unique<Settings>();
@@ -268,6 +269,10 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
     Settings::sampleRateValue.addListener(this);
     setChannelsMapping();
 
+
+
+
+
     repaint();
     }
 
@@ -481,6 +486,8 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
         //g.fillRoundedRectangle(startTimeButton.getX() - 2, startTimeButton.getY() - 1, 46, 17, 5);
         g.fillEllipse(trimVolumeSlider.getX() + 26, trimVolumeSlider.getY() + 23, 12, 12);
     }
+
+
 
 }
 
@@ -848,13 +855,43 @@ void Player::playerPrepareToPlay(int samplesPerBlockExpected, double sampleRate)
     cuefilterSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
     mixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
     cueMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-
-
     
+
+    playerBuffer = std::make_unique<juce::AudioBuffer<float>>(2, actualSamplesPerBlockExpected);
+    outputSource = std::make_unique <juce::MemoryAudioSource>(*playerBuffer, false);
+    outputSource->prepareToPlay(samplesPerBlockExpected, sampleRate);
+    playerBuffer->setSize(2, actualSamplesPerBlockExpected, false, true, false);
+    filterProcessor.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+    compProcessor.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+    compProcessor.setGateBypass(true);
+    compProcessor.setLimitBypass(true);
+    inputMeter.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+    outputMeter.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+    compMeter.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+    /*FilterProcessor::FilterParameters params;
+    params.frequency = 1000;
+    params.type = FilterProcessor::FilterTypes::LPF;
+    params.gain = 1.0;
+    params.Q = 1.0;
+    filterProcessor.setFilterParameters(0, params);
+    filterProcessor.setFilterParameters(1, params);
+    filterProcessor.setFilterParameters(2, params);
+    filterProcessor.setFilterParameters(3, params);*/
+
 }
 
 void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
+    juce::AudioSourceChannelInfo* playerSource = new juce::AudioSourceChannelInfo(*playerBuffer);
+    playerBuffer->clear();
+    mixer.getNextAudioBlock(*playerSource);
+    inputMeter.measureBlock(playerBuffer.get());
+    filterProcessor.getNextAudioBlock(playerBuffer.get());
+    compProcessor.getNextAudioBlock(playerBuffer.get());
+    compMeter.setReductionGain(compProcessor.getCompReductionDB());
+    outputMeter.measureBlock(playerBuffer.get());
+
+
     //bufferToFill.clearActiveBufferRegion();
     //filterSource.getNextAudioBlock(bufferToFill);
     //resampledSource.getNextAudioBlock(bufferToFill);
@@ -1134,6 +1171,14 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         }
 
     }
+
+    if (source == luThread.loudnessCalculatedBroadcaster)
+    {
+        integratedLoudness = luThread.getILU();
+        double loudnessDifference = -23. - integratedLoudness;
+        trimValueToSet = loudnessDifference;
+        luThread.deleteProgressFile();
+    }
 }
 
 void Player::transportStateChanged(TransportState newState)
@@ -1212,7 +1257,6 @@ void Player::sliderValueChanged(juce::Slider* slider)
     if (slider == &filterFrequencySlider)
     {
         filterFrequency = filterFrequencySlider.getValue();
-        DBG(filterFrequency);
         if (hpfEnabled)
         {
             filterSource.setCoefficients(filterCoefficients.makeHighPass(actualSampleRate, filterFrequency, 0.4));
@@ -1257,7 +1301,6 @@ void Player::mouseDown(const juce::MouseEvent& event)
 
 void Player::mouseUp(const juce::MouseEvent& event)
 {
-    DBG("mouse up");
     draggedPlayer.setValue(-1);
     oldThumbnailOffset = thumbnailOffset;
     thumbnailDragStart = 0;
@@ -1436,7 +1479,6 @@ void Player::handleMidiTrimMessage(int midiMessageValue)
     juce::NormalisableRange<float>rangedTrimValue(-24, 24);
 
      trimValueInput = rangedTrimValue.convertFrom0to1(trimValue);
-     DBG("trim value" << trimValueInput);
      if (trimValueInput == trimVolumeSlider.getValue())
          trimSliderRejoignedValue = true;
      else if (trimValueInput > trimVolumeSlider.getValue() - 1
@@ -1583,7 +1625,8 @@ bool Player::loadFile(const juce::String& path)
         
     }
     //R128
-    CalculateR128Integrated(loadedFilePath);
+    if (Settings::autoNormalize)
+        CalculateR128Integrated(loadedFilePath);
     //cue transport
     if (juce::AudioFormatReader* cuereader = formatManager.createReaderFor(file))
     {
@@ -1606,7 +1649,6 @@ bool Player::loadFile(const juce::String& path)
 const juce::String Player::startFFmpeg(std::string filePath)
 {
     std::string USES_CONVERSION_EX;
-    DBG(filePath);
     std::string ffmpegpath = juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\ffmpeg.exe").toStdString();
     //FFmpegPath = Settings::FFmpegPath.toStdString();
     convertedFilesPath = Settings::convertedSoundsPath.toStdString();
@@ -1666,7 +1708,6 @@ std::string Player::extactName(std::string Filepath)
         juce::File bwfFile(Filepath);
         std::string fileName = bwfFile.getFileNameWithoutExtension().toStdString();
         std::string searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.[FILE] LIKE '%" + fileName + "%'");
-        DBG(searchString);
         row = execute(
             conn,
             searchString);
@@ -1976,6 +2017,8 @@ void Player::setTimerTime(int timertime)
     juce::Timer::startTimer(timertime);
 }
 
+
+
 void Player::setEightPlayerMode(bool isEight)
 {
     isEightPlayerMode = isEight;
@@ -2008,87 +2051,34 @@ void Player::setPlayerIndex(int i)
 
 double Player::CalculateR128Integrated(std::string filePath)
 {
-    std::string USES_CONVERSION_EX;
-    std::string ffmpegpath = juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\ffmpeg.exe").toStdString();
-    //FFmpegPath = Settings::FFmpegPath.toStdString();
-    convertedFilesPath = Settings::convertedSoundsPath.toStdString();
-    //////////*****************Create FFMPEG command Line
-    //add double slash to path
-    std::string newFilePath = std::regex_replace(filePath, std::regex(R"(\\)"), R"(\\)");
-    std::string newFFmpegPath = std::regex_replace(ffmpegpath, std::regex(R"(\\)"), R"(\\)");
-    std::string newConvertedFilesPath = std::regex_replace(convertedFilesPath, std::regex(R"(\\)"), R"(\\)");
-    //give Output Directory
-    std::size_t botDirPos = filePath.find_last_of("\\");
-    std::string outputFileDirectory = filePath.substr(0, botDirPos);
-    //give file name with extension
-    std::string fileOutputName = filePath.substr(botDirPos, filePath.length());
-    std::string newFileOutputDir = std::regex_replace(outputFileDirectory, std::regex(R"(\\)"), R"(\\)");
-    size_t lastindex = fileOutputName.find_last_of(".");
-    //give file name without extension and add double dash before
-    std::string rawname = fileOutputName.substr(0, lastindex);
-    std::string rawnamedoubleslash = std::regex_replace(rawname, std::regex(R"(\\)"), R"(\\)");
-    //create entire command string
-    //std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -nostats -i \"" + newFilePath + "\" -filter_complex ebur128 -f null - > \"" + newConvertedFilesPath + rawnamedoubleslash + ".txt\" 2>&1");
-    std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -nostats -i \"" + newFilePath + "\" -filter_complex ebur128 -f null -");
-    std::wstring w = (utf8_to_utf16(cmdstring));
-    LPSTR str = const_cast<LPSTR>(cmdstring.c_str());
-    //LPSTR s = const_cast<char*>(w.c_str());
-    DBG(str);
-    ////////////Launch FFMPEG
-    SECURITY_ATTRIBUTES sa;
-    sa.nLength = sizeof(sa);
-    sa.lpSecurityDescriptor = NULL;
-    sa.bInheritHandle = TRUE;
+    luThread.loudnessCalculatedBroadcaster->addChangeListener(this);
+    luThread.setFilePath(filePath);
+    luThread.startThread();
 
-    HANDLE h = CreateFile(("out.txt"),
-        FILE_APPEND_DATA,
-        FILE_SHARE_WRITE | FILE_SHARE_READ,
-        &sa,
-        OPEN_ALWAYS,
-        FILE_ATTRIBUTE_NORMAL,
-        NULL);
+    return -1.;
+}
 
-    PROCESS_INFORMATION pi;
-    STARTUPINFO si;
-    BOOL ret = FALSE;
-    DWORD flags = CREATE_NO_WINDOW;
+FilterProcessor& Player::getFilterProcessor()
+{
+    return filterProcessor;
+}
 
-    ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
-    ZeroMemory(&si, sizeof(STARTUPINFO));
-    si.cb = sizeof(STARTUPINFO);
-    si.dwFlags |= STARTF_USESTDHANDLES;
-    si.hStdInput = NULL;
-    si.hStdError = h;
-    si.hStdOutput = h;
+std::unique_ptr<juce::AudioBuffer<float>>& Player::getBuffer()
+{
+    return playerBuffer;
+}
 
-    TCHAR cmd[] = TEXT("Test.exe 30");
-    ret = CreateProcess(NULL, str, NULL, NULL, TRUE, flags, NULL, NULL, &si, &pi);
+Meter& Player::getInputMeter()
+{
+    return inputMeter;
+}
 
-    if (ret)
-    {
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
-        CloseHandle(h);
-    }
-    juce::Time::waitForMillisecondCounter(juce::Time::getMillisecondCounter() + 2000);
-    juce::File progressFile("C:\\JUCE\\Projects\\out.txt");
-    if (progressFile.exists())
-    {
+Meter& Player::getOutputMeter()
+{
+    return outputMeter;
+}
 
-        juce::StringArray progressInfo;
-        progressFile.readLines(progressInfo);
-        DBG("progress file exist" << progressInfo.size());
-        int currentProgressLine = progressInfo.size() - 9; //récupère la ligne out_time_ms
-        juce::String progressLine = progressInfo[currentProgressLine];//enlève le début
-        DBG("integrated : " << progressLine);
-    }
-    return -1;
-
-    /////////////////////return created file path
-    std::string returnFilePath = std::string(newConvertedFilesPath + "\\" + rawname + ".wav");
-    //DBG(returnFilePath);
-    std::string returnFilePathBackslah = std::regex_replace(returnFilePath, std::regex(R"(\\)"), R"(\\)");
-    juce::String returnedFile = juce::String(returnFilePath);
-    Settings::tempFiles.add(returnedFile);
-    return 0.;
+Meter& Player::getCompMeter()
+{
+    return compMeter;
 }

@@ -18,7 +18,7 @@
 #include "DataBaseImport.h"
 #include "Mixer/Mixer.h"
 #include "nanodbc/nanodbc.h"
-
+#include "ClipEffect.h"
 //==============================================================================
 /*
 */
@@ -41,6 +41,7 @@ public:
     DataBaseBrowser dbBrowser;
     DataBaseImport dbImport;
     DistantDataBaseBrowser distantDbBrowser;
+    ClipEffect clipEffect;
     juce::MixerAudioSource myMixer;
     juce::Label noDbLabel{ "No DataBase Found" };
 

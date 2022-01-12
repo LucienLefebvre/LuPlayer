@@ -26,7 +26,10 @@
 #include "Windows.h"
 #include "PlayHead.h"
 #include "nanodbc/nanodbc.h"
-//#include "R128IntegratedThread.h"
+#include "R128IntegratedThread.h"
+#include "Mixer/FilterProcessor.h"
+#include "Mixer/CompProcessor.h"
+#include "Mixer/Meter.h"
 typedef char* LPSTR;
 
 
@@ -191,6 +194,18 @@ public:
     juce::ActionBroadcaster* playBroadcaster;
     juce::ActionBroadcaster* cueBroadcaster;
     juce::ActionBroadcaster* draggedBroadcaster;
+
+    std::unique_ptr<juce::MemoryAudioSource> outputSource;
+
+    FilterProcessor& Player::getFilterProcessor();
+    std::unique_ptr<juce::AudioBuffer<float>>& getBuffer();
+    Meter& getInputMeter();
+    Meter& getOutputMeter();
+    Meter& getCompMeter();
+
+    FilterProcessor filterProcessor;
+    CompProcessor compProcessor{CompProcessor::Mode::Stereo};
+
 
 private:
     enum TransportState
@@ -371,7 +386,7 @@ private:
 
     std::string Player::extactName(std::string Filepath);
 
-    //R128IntegratedThread luThread{ "Thread" };
+    R128IntegratedThread luThread{"Thread"};
 
     inline bool exists_test(const std::string& name) {
         if (FILE* file = fopen(name.c_str(), "r")) {
@@ -487,6 +502,15 @@ private:
     bool playButtonHasBeenClicked = false;
 
     bool trimSliderRejoignedValue = false;
+
+
+    double integratedLoudness = 0.0;
+
+
+    std::unique_ptr<juce::AudioBuffer<float>> playerBuffer;
+    Meter inputMeter;
+    Meter outputMeter;
+    Meter compMeter;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };

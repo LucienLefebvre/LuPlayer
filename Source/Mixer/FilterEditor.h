@@ -66,6 +66,7 @@ private:
     juce::Colour channelColour;
 
     FilterProcessor* editedFilterProcessor = 0;
+    FilterProcessor filterProcessor;
     int numFilterBands = 4;
     int knobWidth = 66;
     int knobHeight = 80;

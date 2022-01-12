@@ -55,7 +55,7 @@ MainComponent::MainComponent() :
     //soundPlayers[0]->setBounds(0, 30, getWidth(), getHeight() - playersStartHeightPosition);
     myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
     myCueMixer.addInputSource(&soundPlayers[0]->myCueMixer, false);
-
+    soundPlayers[0]->playerSelectionChanged->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->cuePlaylistBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->playBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
@@ -83,6 +83,8 @@ MainComponent::MainComponent() :
     bottomComponent.getTabbedButtonBar().getTabButton(1)->addMouseListener(this, false);
     bottomComponent.getTabbedButtonBar().getTabButton(2)->addMouseListener(this, false);
     bottomComponent.getTabbedButtonBar().getTabButton(3)->addMouseListener(this, false);
+
+
     //bottomComponent.setBounds(0, getHeight() - bottomHeight, getWidth(), bottomHeight);
     //addMouseListener(this, true);
 
@@ -383,14 +385,23 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     soundPlayers[0]->myPlaylists[0]->stopCues();
     soundPlayers[0]->myPlaylists[1]->stopCues();
     }
-
+    else if (source == soundPlayers[0]->playerSelectionChanged)
+    {
+    //Send processing components to bottom clip effect panel
+    bottomComponent.clipEffect.setEditedFilterProcessor(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->filterProcessor);
+    bottomComponent.clipEffect.setEditedCompProcessor(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->compProcessor);
+    bottomComponent.clipEffect.setEditedBuffer(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getBuffer());
+    bottomComponent.clipEffect.setMeters(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getInputMeter(),
+                            soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getOutputMeter(),
+                            soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getCompMeter());
+    }
 }
 MainComponent::~MainComponent()
 {
     removeMouseListener(this);
     myMixer.removeAllInputs();
     myCueMixer.removeAllInputs();
-
+    soundPlayers[0]->playerSelectionChanged->removeChangeListener(this);
     deviceManager.removeChangeListener(this);
     bottomComponent.recorderComponent.mouseDragInRecorder->removeChangeListener(this);
     Settings::audioOutputModeValue.removeListener(this);
@@ -425,6 +436,8 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
     actualSampleRate = sampleRate;
 
+    //bottomComponent.clipEffect.setEditedFilterProcessor(soundPlayers[0]->myPlaylists[0]->players[0]->filterProcessor);
+
   /*  loudnessMeter.prepareToPlay(actualSampleRate, 2, actualSamplesPerBlockExpected, 20);
     cueloudnessMeter.prepareToPlay(actualSampleRate, 2, actualSamplesPerBlockExpected, 20);
     meterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
@@ -442,6 +455,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 {
     if (soundPlayers[0] != nullptr)
     {
+        soundPlayers[0]->getNextAudioBlock(bufferToFill);
         if (Settings::audioOutputMode == 3 && (bufferToFill.buffer->getNumChannels() > 3))
         {
             juce::AudioBuffer<float>* inputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
@@ -634,6 +648,7 @@ void MainComponent::resized()
         myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - mixerHeight - 4, true, false);
     else
         myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - 4, true, false);
+
 }
 
 
@@ -757,7 +772,6 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
 
 bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* originatingComponent)
 {
-    DBG(key.getKeyCode());
     if (key == 73 || key == 75 || key == 79 || key == 76 || key == 67 || key == 88 || key == 86)
     {
         if (soundPlayers[0]->draggedPlaylist != -1)
@@ -1115,7 +1129,6 @@ void MainComponent::setCommandLine(juce::String commandLine)
 {
     if (!commandLine.compare("8p"))
     {
-        DBG("command line : " << commandLine);
         isEightPlayerMode = true;
         launchEightPlayerMode();
     }

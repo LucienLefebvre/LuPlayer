@@ -120,6 +120,8 @@ SoundPlayer::SoundPlayer(bool isEightPlayer)
     mouseDragEnd(0);
     mouseDragEnd(1);
 
+    playerSelectionChanged = new juce::ChangeBroadcaster();
+
     newMeter.reset(new Meter(Meter::Mode::Stereo));
     addAndMakeVisible(newMeter.get());
     newMeter->setSkewFactor(1.5f);
@@ -133,8 +135,16 @@ SoundPlayer::~SoundPlayer()
     myCueMixer.removeAllInputs();
 
     myPlaylists.clear(true);
-
+    delete playerSelectionChanged;
     Settings::audioOutputModeValue.removeListener(this);
+}
+
+void SoundPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
+{
+    for (int i = 0; i < myPlaylists.size(); i++)
+    {
+        myPlaylists[i]->getNextAudioBlock(bufferToFill);
+    }
 }
 
 void SoundPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -1829,12 +1839,10 @@ void SoundPlayer::updateDraggedPlayerDisplay(int playerDragged, int playlistDrag
             myPlaylists[1]->players[i]->setActivePlayer(false);
         }
         //set dragged player display on dragged player
-        DBG("playlist dragged " << playlistDragged);
-        DBG("player dragged " << playerDragged);
         if (myPlaylists[playlistDragged]->players[Settings::draggedPlayer] != nullptr)
             myPlaylists[playlistDragged]->players[Settings::draggedPlayer]->setActivePlayer(true);
+        playerSelectionChanged->sendChangeMessage();
     }
-
 }
 
 void SoundPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)

@@ -191,7 +191,6 @@ public:
         if (deviceManager != nullptr)
         {
             numActiveInputsChannels = deviceManager->getCurrentAudioDevice()->getActiveInputChannels().countNumberOfSetBits();
-            DBG("num inputs channel " << numActiveInputsChannels);
             inputsChannelsName = deviceManager->getCurrentAudioDevice()->getInputChannelNames();
 
             updateInputSelectors();

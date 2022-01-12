@@ -24,21 +24,18 @@ class R128IntegratedThread : public juce::Thread
 public:
     R128IntegratedThread(const juce::String& threadName, size_t threadStackSize = 0) : Thread("R128 Integrated")
     {
-        conversionEndedBroadcaster = new juce::ChangeBroadcaster();
+        loudnessCalculatedBroadcaster = new juce::ChangeBroadcaster();
     }
 
     ~R128IntegratedThread() override
     {
-        delete conversionEndedBroadcaster;
+        delete loudnessCalculatedBroadcaster;
         stopThread(1000);
     }
 
     void run()
     {
-        DBG("thread run");
-
         std::string USES_CONVERSION_EX;
-
         std::string ffmpegpath = juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\ffmpeg.exe").toStdString();
         //FFmpegPath = Settings::FFmpegPath.toStdString();
         std::string convertedFilesPath = Settings::convertedSoundsPath.toStdString();
@@ -58,38 +55,68 @@ public:
         std::string rawname = fileOutputName.substr(0, lastindex);
         std::string rawnamedoubleslash = std::regex_replace(rawname, std::regex(R"(\\)"), R"(\\)");
         //create entire command string
-        std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -i \"" + newFilePath + "\" -ar 48000 -y \"" + newConvertedFilesPath + rawnamedoubleslash + ".wav\" -progress " + newConvertedFilesPath + rawnamedoubleslash + ".txt\"");
+        std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -nostats -i \"" + newFilePath + "\" -filter_complex ebur128 -f null -");
         std::wstring w = (utf8_to_utf16(cmdstring));
-        LPWSTR str = const_cast<LPWSTR>(w.c_str());
-        DBG(str);
+        LPSTR str = const_cast<LPSTR>(cmdstring.c_str());
+        //LPSTR s = const_cast<char*>(w.c_str());
         ////////////Launch FFMPEG
+        SECURITY_ATTRIBUTES sa;
+        sa.nLength = sizeof(sa);
+        sa.lpSecurityDescriptor = NULL;
+        sa.bInheritHandle = TRUE;
+
+        std::string outFileString = fileName + ".txt";
+        LPCSTR outFile = outFileString.c_str();
+        HANDLE h = CreateFile((outFile),
+            FILE_APPEND_DATA,
+            FILE_SHARE_WRITE | FILE_SHARE_READ,
+            &sa,
+            OPEN_ALWAYS,
+            FILE_ATTRIBUTE_NORMAL,
+            NULL);
+
         PROCESS_INFORMATION pi;
-        STARTUPINFOW si;
-        ZeroMemory(&si, sizeof(si));
-        BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
-        if (logDone)
+        STARTUPINFO si;
+        BOOL ret = FALSE;
+        DWORD flags = CREATE_NO_WINDOW;
+
+        ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+        ZeroMemory(&si, sizeof(STARTUPINFO));
+        si.cb = sizeof(STARTUPINFO);
+        si.dwFlags |= STARTF_USESTDHANDLES;
+        si.hStdInput = NULL;
+        si.hStdError = h;
+        si.hStdOutput = h;
+
+        TCHAR cmd[] = TEXT("Test.exe 30");
+        ret = CreateProcess(NULL, str, NULL, NULL, TRUE, flags, NULL, NULL, &si, &pi);
+        WaitForSingleObject(pi.hProcess, INFINITE);
+        if (ret)
         {
-            WaitForSingleObject(pi.hProcess, INFINITE);
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
+            CloseHandle(h);
         }
 
+        progressFilePath = (juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\" + fileName + ".txt").toStdString();
+        juce::File progressFile(progressFilePath);
+        if (progressFile.exists())
+        {
 
-
-        /////////////////////return created file path
-        std::string returnFilePath = std::string(newConvertedFilesPath + "\\" + rawname + ".wav");
-        //DBG(returnFilePath);
-        std::string returnFilePathBackslah = std::regex_replace(returnFilePath, std::regex(R"(\\)"), R"(\\)");
-        returnedFile = juce::String(returnFilePath);
-        Settings::tempFiles.add(returnedFile);
-
-        conversionEndedBroadcaster->sendChangeMessage();
-        signalThreadShouldExit();
+            juce::StringArray progressInfo;
+            progressFile.readLines(progressInfo);
+            int currentProgressLine = progressInfo.size() - 9; //récupère la ligne out_time_ms
+            juce::String progressLine = progressInfo[currentProgressLine].trimCharactersAtStart("    I:         ").trimCharactersAtEnd(" LUFS");//enlève le début
+            integratedLoudness = progressLine.getDoubleValue();
+            double loudnessDifference = -23. - integratedLoudness;
+            loudnessCalculatedBroadcaster->sendChangeMessage();
+        }
     }
 
     void setFilePath(juce::String p)
     {
         filePath = p.toStdString();
-        //filePath = std::regex_replace(p.toStdString(), std::regex(R"(\\)"), R"(\\)");;
-        DBG("filepath" << filePath);
+        fileName = juce::File(p).getFileNameWithoutExtension().toStdString();
     }
 
     juce::String getFile()
@@ -97,9 +124,24 @@ public:
         return returnedFile;
     }
 
+    double getILU()
+    {
+        return integratedLoudness;
+    }
+
+    void deleteProgressFile()
+    {
+        juce::File progressFile(progressFilePath);
+        if (progressFile.exists())
+            progressFile.deleteFile();
+    }
+
+    std::string progressFilePath;
     std::string filePath;
+    std::string fileName;
     juce::String returnedFile;
-    juce::ChangeBroadcaster* conversionEndedBroadcaster;
+    juce::ChangeBroadcaster* loudnessCalculatedBroadcaster;
+    double integratedLoudness = 0;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(R128IntegratedThread)

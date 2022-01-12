@@ -97,6 +97,10 @@ void Playlist::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 
 void Playlist::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
+    for (int i = 0; i < players.size(); i++)
+    {
+        players[i]->getNextAudioBlock(bufferToFill);
+    }
     //bufferToFill.clearActiveBufferRegion();
 
     //playlistMixer.getNextAudioBlock(bufferToFill);
@@ -903,7 +907,8 @@ void Playlist::addPlayer(int playerID)
     if (eightPlayerMode)
         players.getLast()->setEightPlayerMode(true);
     players[idAddedPlayer]->playerPrepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
-    playlistMixer.addInputSource(&players[idAddedPlayer]->mixer, false);
+    //playlistMixer.addInputSource(&players[idAddedPlayer]->mixer, false);
+    playlistMixer.addInputSource(players[idAddedPlayer]->outputSource.get(), false);
     playlistCueMixer.addInputSource(&players[idAddedPlayer]->cueMixer, false);
     players[idAddedPlayer]->fileName.addListener(this);
     players[idAddedPlayer]->playerPositionLabel.addListener(this);
@@ -972,6 +977,7 @@ void Playlist::removePlayer(int playerID)
                 {
                     players[playerID]->stopButtonClicked();
                     playlistMixer.removeInputSource(&players[playerID]->mixer);
+                    playlistMixer.removeInputSource(players[playerID]->outputSource.get());
                     playlistCueMixer.removeInputSource(&players[playerID]->cueMixer);
                     players[playerID]->fileName.removeListener(this);
                     players[playerID]->playerPositionLabel.addListener(this);
@@ -998,6 +1004,7 @@ void Playlist::removePlayer(int playerID)
                     players[playerID]->stopButtonClicked();
                     playlistMixer.removeInputSource(&players[playerID]->mixer);
                     playlistCueMixer.removeInputSource(&players[playerID]->cueMixer);
+                    playlistMixer.removeInputSource(players[playerID]->outputSource.get());
                     players[playerID]->fileName.removeListener(this);
                     players[playerID]->playerPositionLabel.addListener(this);
                     players[playerID]->cueStopped.addListener(this);
