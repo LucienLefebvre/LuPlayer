@@ -52,8 +52,9 @@ public:
                 float limitedRmsLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(rmsL));
                 float rangedRmsLevel = range.convertTo0to1(limitedRmsLevel);
                 int rectHeight = rangedRmsLevel * getHeight();
-                g.setColour(juce::Colours::green);
-                g.fillRect(0, getHeight() - rectHeight, meterWidth - 2, rectHeight);
+                g.setColour(meterColour);
+                if (rectHeight > 1)
+                    g.fillRect(0, getHeight() - rectHeight, meterWidth - 2, rectHeight);
                 if (limitedRmsLevel > -9.0f)//ORANGE if >-3db
                 {
                     int orangeRectYStart = range.convertTo0to1(-9.0f) * getHeight();
@@ -68,13 +69,16 @@ public:
                 float rangedPeakLevel = range.convertTo0to1(limitedPeakLevel);
                 linePosition = getHeight() - rangedPeakLevel * getHeight();
                 juce::jlimit(0, getHeight(), linePosition);
-                g.setColour(juce::Colours::forestgreen);
+                g.setColour(meterColour);
                 if (limitedPeakLevel > -9.0f)
-                    g.setColour(juce::Colours::orange);
+                    g.setColour(peakColour);
                 if (linePosition == 0)
                     g.setColour(juce::Colours::red);
+                if (linePosition != getHeight())
+                {
                 g.drawLine(0, linePosition, meterWidth, linePosition);
                 g.drawLine(0, linePosition + 1, meterWidth, linePosition + 1);
+                }
 
                 //FILL BETWEEN RMS AND PEAK
                 /*float limitedInstantPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(peakLevelL.load()));
@@ -99,8 +103,9 @@ public:
                 float limitedRmsLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(rmsR));
                 float rangedRmsLevel = range.convertTo0to1(limitedRmsLevel);
                 int rectHeight = rangedRmsLevel * getHeight();
-                g.setColour(juce::Colours::green);
-                g.fillRect(meterWidth + 1, getHeight() - rectHeight, meterWidth - 1, rectHeight);
+                g.setColour(meterColour);
+                if (rectHeight > 1)
+                    g.fillRect(meterWidth + 1, getHeight() - rectHeight, meterWidth - 1, rectHeight);
                 if (limitedRmsLevel > -9.0f)//ORANGE if >-3db
                 {
                     int orangeRectYStart = range.convertTo0to1(-9.0f) * getHeight();
@@ -113,14 +118,16 @@ public:
                 float rangedPeakLevel = range.convertTo0to1(limitedPeakLevel);
                 linePosition = getHeight() - rangedPeakLevel * getHeight();
                 juce::jlimit(0, getHeight(), linePosition);
-                g.setColour(juce::Colours::forestgreen);
+                g.setColour(meterColour);
                 if (limitedPeakLevel > -9.0f)
-                    g.setColour(juce::Colours::orange);
+                    g.setColour(peakColour);
                 if (linePosition == 0)
                     g.setColour(juce::Colours::red);
-                g.drawLine(meterWidth + 2, linePosition, 2 * meterWidth, linePosition);
-                g.drawLine(meterWidth + 2, linePosition + 1, 2 * meterWidth, linePosition + 1);
-
+                if (linePosition != getHeight())
+                {
+                    g.drawLine(meterWidth + 2, linePosition, 2 * meterWidth, linePosition);
+                    g.drawLine(meterWidth + 2, linePosition + 1, 2 * meterWidth, linePosition + 1);
+                }
                 //FILL BETWEEN RMS AND PEAK
                 /*float limitedInstantPeakLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(peakLevelR.load()));
                 float rangedInstantPeakLevel = range.convertTo0to1(limitedInstantPeakLevel);
@@ -130,7 +137,7 @@ public:
                 auto fillRectHeight = getHeight() - rectHeight - fillRectYStart;
                 if (fillRectHeight > 0 && fillRectYStart > 0)
                 {
-                    g.setColour(juce::Colours::forestgreen);
+                    g.setColour(meterColour);
                     g.setOpacity(0.5f);
                     g.fillRect(meterWidth + 1, fillRectYStart, meterWidth - 1, fillRectHeight);
                 }*/
@@ -145,24 +152,38 @@ public:
             g.fillRect(reductionGainXStart, 0, reductionGainWidth, reductionRectHeight);
 
         //DRAW SCALE
-
-        for (auto db : dbScale)
+        if (drawScale)
         {
-            auto yPos = getHeight() - range.convertTo0to1(db) * getHeight();
-            if (linePosition == 0 && db == 0.0f)
-                g.setColour(juce::Colours::red);
-            else if (meterMode != ReductionGain)
-                g.setColour(juce::Colours::black);
-            else
+            for (auto db : dbScale)
             {
-                g.setColour(juce::Colours::darkgrey);
-                g.setOpacity(0.8f);
+                auto yPos = getHeight() - range.convertTo0to1(db) * getHeight();
+                if (linePosition == 0 && db == 0.0f)
+                    g.setColour(juce::Colours::red);
+                else if (db == -9.0f)
+                    g.setColour(juce::Colours::orange);
+                else if (db == 0.0f)
+                    g.setColour(juce::Colours::red);
+                else if (meterMode != ReductionGain)
+                    g.setColour(juce::Colours::black);
+                else
+                {
+                    g.setColour(juce::Colours::darkgrey);
+                    g.setOpacity(0.8f);
+                }
+                auto lineEnd = (reductionGainXStart == 0) ? getWidth() : reductionGainXStart;
+                g.drawLine(0, yPos, lineEnd, yPos);
+                g.setColour(juce::Colours::lightgrey);
+                g.setOpacity(0.7f);
+                if (drawScaleNumbers)
+                    g.drawText(juce::String(db), 0, yPos + 2, getWidth() - reductionGainWidth, 10, juce::Justification::centred);
             }
-            auto lineEnd = (reductionGainXStart == 0) ? getWidth() : reductionGainXStart;
-            g.drawLine(0, yPos, lineEnd, yPos);
-            g.setColour(juce::Colours::lightgrey);
-            g.setOpacity(0.7f);
-            g.drawText(juce::String(db), 0, yPos + 2, getWidth() - reductionGainWidth, 10, juce::Justification::centred);
+        }
+
+        if (drawExteriorLine)
+        {
+            g.setColour(juce::Colours::black);
+            g.drawLine(0, 0, 0, getHeight());
+            g.drawLine(getWidth(), 0, getWidth(), getHeight());
         }
     }
 
@@ -356,6 +377,31 @@ public:
         meterSkewFactor = s;
     }
 
+    void shouldDrawScale(bool draw)
+    {
+        drawScale = draw;
+    }
+
+    void shouldDrawScaleNumbers(bool draw)
+    {
+        drawScaleNumbers = draw;
+    }
+
+    void shouldDrawExteriorLines(bool draw)
+    {
+        drawExteriorLine = draw;
+    }
+
+    void setMeterColour(juce::Colour c)
+    {
+        meterColour = c;
+    }
+
+    void setPeakColour(juce::Colour c)
+    {
+        peakColour = c;
+    }
+
     Meter::Mode meterMode;
 private:
     double actualSampleRate;
@@ -364,7 +410,7 @@ private:
     float meterSkewFactor = 3.0f;
 
     int timerRateMs = 50;
-    int rmsIntegrationTime = 150;
+    int rmsIntegrationTime = 50;
     
     int numberOfBlocksPerTicks;
     int rmsBufferTick = 0;
@@ -374,11 +420,13 @@ private:
 
     std::atomic<bool> dataAvailable = false;
     MeterData data;
-    juce::Colour channelColour;
+
 
     float lowLevel = -100.0f;
 
-    
+    bool drawScale = true;
+    bool drawScaleNumbers = true;
+    bool drawExteriorLine = false;
 
     float rmsL;
     float rmsR;
@@ -404,6 +452,11 @@ private:
     int meterWidth;
     int reductionGainWidth = 10;
     int reductionGainXStart;
+
+    juce::Colour meterColour = juce::Colours::green;
+    juce::Colour backgroundColour;
+    juce::Colour channelColour;
+    juce::Colour peakColour = juce::Colours::orange;
 
     float dbScale[8] = { -40.0f, -30.0f, -20.0f, -12.0f, -9.0f, -6.0f, -3.0f, 0.0f };
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Meter)

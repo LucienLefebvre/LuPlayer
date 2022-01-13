@@ -14,7 +14,7 @@
 #include <string>
 #include <iostream>
 #include "Player.h"
-
+#include "Mixer/Meter.h"
 
 //==============================================================================
 /*
@@ -180,6 +180,7 @@ private:
     juce::OwnedArray<juce::TextButton> assignLeftFaderButtons;
     juce::OwnedArray<juce::TextButton> assignRightFaderButtons;
     juce::OwnedArray<juce::Label> playersPositionLabels;
+    juce::OwnedArray<Meter> meters;
 
     //GRAPHICS
     int playersStartHeightPosition = 2;
@@ -199,7 +200,7 @@ private:
     int totalPlayerWidthWithButtons = totalPlayerWidth + controlButtonWidth;
 
     int playerNumber;
-
+    int meterWidth = 20;
 
 
     int assignFaderButtonWidth = 30;

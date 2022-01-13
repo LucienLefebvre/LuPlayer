@@ -56,7 +56,11 @@ public:
         std::string rawname = fileOutputName.substr(0, lastindex);
         std::string rawnamedoubleslash = std::regex_replace(rawname, std::regex(R"(\\)"), R"(\\)");
         //create entire command string
-        std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -i \"" + newFilePath + "\" -ar 48000 -y \"" + newConvertedFilesPath + rawnamedoubleslash + ".wav\" -progress " + newConvertedFilesPath + rawnamedoubleslash + ".txt\"");
+        std::string cmdstring;
+        if (makeProgressFile)
+            cmdstring = std::string("\"" + newFFmpegPath + "\" -i \"" + newFilePath + "\" -ar 48000 -y \"" + newConvertedFilesPath + rawnamedoubleslash + ".wav\" -progress " + newConvertedFilesPath + rawnamedoubleslash + ".txt\"");
+        else
+            cmdstring = std::string("\"" + newFFmpegPath + "\" -i \"" + newFilePath + "\" -ar 48000 -y \"" + newConvertedFilesPath + rawnamedoubleslash + ".wav\"");
         std::wstring w = (utf8_to_utf16(cmdstring));
         LPWSTR str = const_cast<LPWSTR>(w.c_str());
         ////////////Launch FFMPEG
@@ -127,6 +131,12 @@ public:
         return returnedFile;
     }
 
+    void shouldMakeProgressFile(bool makeFile)
+    {
+        makeProgressFile = makeFile;
+    }
+
+    bool makeProgressFile = true;
     std::string filePath;
     juce::String returnedFile;
     juce::ChangeBroadcaster* conversionEndedBroadcaster;

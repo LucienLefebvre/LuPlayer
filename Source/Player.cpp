@@ -171,8 +171,14 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
     soundName.setEditable(false, true, false);
 
 
+    addChildComponent(&normalizingLabel);
+    normalizingLabel.setText("Normalizing...", juce::NotificationType::dontSendNotification);
+    normalizingLabel.setFont(juce::Font(20.00f, juce::Font::bold).withTypefaceStyle("Regular"));
+    normalizingLabel.setJustificationType(juce::Justification::centred);
+    normalizingLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(40, 134, 189));
+    normalizingLabel.setColour(juce::Label::ColourIds::backgroundColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    normalizingLabel.setAlpha(0.7);
 
-    
     Settings::audioOutputModeValue.addListener(this);
 
     addAndMakeVisible(optionButton);
@@ -195,6 +201,11 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
     filterFrequencySlider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colours::lightblue);
     filterFrequencySlider.setTextValueSuffix("Hz");
     
+    //addAndMakeVisible(&outputMeter);
+    outputMeter.setMeterColour(juce::Colour(229, 149, 0));
+    outputMeter.shouldDrawScaleNumbers(false);
+    outputMeter.shouldDrawExteriorLines(false);
+
     filterSource.makeInactive();
     cuefilterSource.makeInactive();
 
@@ -269,8 +280,10 @@ Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("S
     Settings::sampleRateValue.addListener(this);
     setChannelsMapping();
 
-
-
+    convertingBar.reset(new juce::ProgressBar(progress));
+    addChildComponent(*convertingBar);
+    //convertingBar->setColour(juce::ProgressBar::ColourIds::foregroundColourId, juce::Colour(40, 134, 189));
+    convertingBar->setTextToDisplay("Converting...");
 
 
     repaint();
@@ -304,12 +317,19 @@ void Player::paint (juce::Graphics& g)
         borderRectangleWidth = 0;
     g.setOpacity(1.0);
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
+    outputMeter.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     if (state == Playing)
     {
         if (stopTime - transport.getCurrentPosition() < 6)
+        {
             g.setColour(juce::Colours::red);
+            outputMeter.setColour(juce::Colours::red);
+        }
         else
+        {
             g.setColour(juce::Colours::green);
+            outputMeter.setColour(juce::Colours::green);
+        }
 
     }
     else
@@ -317,16 +337,21 @@ void Player::paint (juce::Graphics& g)
         if (isNextPlayer == true)
         {
             g.setColour(juce::Colour(229, 149, 0));
+            outputMeter.setColour(juce::Colour(229, 149, 0));
             soundName.setColour(soundName.textColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         }
         else
         {
             g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
             soundName.setColour(soundName.textColourId, juce::Colours::white);
+            outputMeter.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         }
     }
     if (!fileLoaded)
+    {
         g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        outputMeter.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    }
     g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 4);   // clear the background
     float x = 0.0f, y = 0.0f, width = 650.0f, height = 100.0f;
     juce::Colour fillColour = juce::Colour(0x23000000);
@@ -604,9 +629,9 @@ void Player::resized()
     if (isCart == true)
     {
         if (!isEightPlayerMode)
-            waveformThumbnailXSize = getParentWidth() - leftControlsWidth - rightControlsWidth - volumeSliderWidth - 2*cartButtonsControlWidth - dragZoneWidth - 20;
+            waveformThumbnailXSize = getWidth() - leftControlsWidth - rightControlsWidth - volumeSliderWidth;
         else
-            waveformThumbnailXSize = getParentWidth() - leftControlsWidth - rightControlsWidth - volumeSliderWidth - dragZoneWidth;
+            waveformThumbnailXSize = getWidth() - leftControlsWidth - rightControlsWidth - volumeSliderWidth;
         waveformThumbnailXEnd = waveformThumbnailXStart + waveformThumbnailXSize;
         trimVolumeSlider.setBounds(0 - 8, 40, 64, 56);
        /* playerPositionLabel.setBounds(0 + 5, 5, 35, 35);*/
@@ -616,12 +641,14 @@ void Player::resized()
     }
     else if (isCart == false)
     {
-        waveformThumbnailXSize = getParentWidth() - leftControlsWidth - rightControlsWidth - borderRectangleWidth * 2 - volumeSliderWidth - playlistButtonsControlWidth - dragZoneWidth;
+        //waveformThumbnailXSize = getParentWidth() - leftControlsWidth - rightControlsWidth - borderRectangleWidth * 2 - volumeSliderWidth - playlistButtonsControlWidth - dragZoneWidth - 20;
+        waveformThumbnailXSize = getWidth() - leftControlsWidth - rightControlsWidth - borderRectangleWidth * 2 - volumeSliderWidth;
         waveformThumbnailXEnd = waveformThumbnailXStart + waveformThumbnailXSize;
         soundName.setBounds(leftControlsWidth + borderRectangleWidth, 80, waveformThumbnailXSize, 20);
         trimLabel.setBounds(borderRectangleWidth, 81, 50, 24);
     }
     thumbnailBounds.setBounds(leftControlsWidth + borderRectangleWidth, 0, waveformThumbnailXSize, 80);
+    normalizingLabel.setBounds(leftControlsWidth + borderRectangleWidth, 0, 150, 30);
     rightControlsStart = leftControlsWidth + borderRectangleWidth + waveformThumbnailXSize;
     volumeLabelStart = rightControlsStart + rightControlsWidth;
     playButton.setBounds(rightControlsStart, 0, playStopButtonWidth, 39);
@@ -631,7 +658,8 @@ void Player::resized()
     cueStopButton.setBounds(rightControlsStart + 2 * playStopButtonWidth, 0, playStopButtonWidth, 39);
     deleteButton.setBounds(rightControlsStart + openDeleteButtonWidth, 80, openDeleteButtonWidth, 20);
     remainingTimeLabel.setBounds(rightControlsStart, 40, 150, 39);
-    volumeSlider.setBounds(volumeLabelStart, -5, volumeSliderWidth, 100);
+    volumeSlider.setBounds(volumeLabelStart + 5, -5, volumeSliderWidth, 100);
+    outputMeter.setBounds(volumeLabelStart + 3, 0, 17, 100);
     volumeLabel.setBounds(volumeLabelStart, 90, volumeSliderWidth, 10);
 
     loopButton.setBounds(leftControlsWidth + borderRectangleWidth + waveformThumbnailXSize - 50, 80, 50, 20);
@@ -639,6 +667,8 @@ void Player::resized()
     stopTimeButton.setBounds(borderRectangleWidth + 4 + cueStopButtonsSize + 8, 26, cueStopButtonsSize + 4, cueStopButtonsSize);
     optionButton.setBounds(borderRectangleWidth + 4, 2, 42, 20);
 
+    convertingBar->setCentrePosition(thumbnailBounds.getCentre());
+    convertingBar->setSize(200, 25);
     calculThumbnailBounds();
     //repaint();
 }
@@ -1154,13 +1184,11 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
             endRepainted = false;
         }
     }
-
-    if (source == &thumbnail)
+    else if (source == &thumbnail)
     {
         thumbnailChanged();
     }
-
-    if (source == &cueTransport)
+    else if (source == &cueTransport)
     {
         if (!cueTransport.isPlaying())
         {
@@ -1169,15 +1197,23 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
             cueButton.setButtonText("Cue");
             cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         }
-
     }
-
-    if (source == luThread.loudnessCalculatedBroadcaster)
+    else if (source == luThread.loudnessCalculatedBroadcaster)
     {
         integratedLoudness = luThread.getILU();
         double loudnessDifference = -23. - integratedLoudness;
         trimValueToSet = loudnessDifference;
         luThread.deleteProgressFile();
+        normalizingLabel.setVisible(false);
+        convertingBar->setVisible(false);
+        convertingBar->setTextToDisplay("Converting...");
+    }
+    else if (source == ffmpegThread.conversionEndedBroadcaster)
+    {
+        juce::String convertedFilePath = ffmpegThread.getFile();
+        convertingBar->setVisible(false);
+        loadFile(convertedFilePath);
+        extactName(convertedFilePath.toStdString());
     }
 }
 
@@ -1320,9 +1356,7 @@ void Player::mouseDrag(const juce::MouseEvent& event)
                 mouseDragRelativeXPosition = getMouseXYRelative().getX() - thumbnailBounds.getPosition().getX();
                 mouseDragInSeconds = (((float)mouseDragRelativeXPosition* cueTransport.getLengthInSeconds()) / (float)thumbnailBounds.getWidth());
                 cueTransport.setPosition(mouseDragInSeconds);
-                Settings::draggedPlayer = playerIndex;
-                draggedPlayer.setValue(-1);
-                draggedPlayer.setValue(playerIndex);
+                setDraggedPlayer();
 
                 //draggedBroadcaster->sendActionMessage(juce::String(playerIndex));
                 //cueBroadcaster->sendActionMessage(juce::String(playerIndex));
@@ -1501,6 +1535,8 @@ void Player::handleMidiTrimMessage(bool upordown)
 void Player::setNextPlayer(bool trueOrFalse)
 {
     isNextPlayer = trueOrFalse;
+    if (trueOrFalse)
+        setDraggedPlayer();
 }
 
 void Player::setLeftFaderAssigned(bool isFaderLeftAssigned)
@@ -1552,7 +1588,13 @@ void Player::verifyAudioFileFormat(const juce::String& path)
     else
     {
         juce::String correctedPath;
-        correctedPath = startFFmpeg(path.toStdString());
+        ffmpegThread.conversionEndedBroadcaster->addChangeListener(this);
+        ffmpegThread.setFilePath(path);
+        ffmpegThread.shouldMakeProgressFile(false);
+        ffmpegThread.startThread();
+        convertingBar->setVisible(true);
+        convertingBar->setTextToDisplay("Converting...");
+        /*correctedPath = startFFmpeg(path.toStdString());
         if (loadFile(correctedPath) == true)
         {
             extactName(correctedPath.toStdString());
@@ -1574,7 +1616,7 @@ void Player::verifyAudioFileFormat(const juce::String& path)
             correctedPath = (startFFmpeg(newPath));
             loadFile(correctedPath);
             extactName(correctedPath.toStdString());
-        }
+        }*/
     }
 }
 
@@ -1622,11 +1664,16 @@ bool Player::loadFile(const juce::String& path)
         thumbnail.setSource(new juce::FileInputSource(file));
         waveformPainted = false;
         fileLoaded = true;
-        
+        setDraggedPlayer();
     }
     //R128
     if (Settings::autoNormalize)
+    {
         CalculateR128Integrated(loadedFilePath);
+        //normalizingLabel.setVisible(true);
+        convertingBar->setTextToDisplay("Normalizing...");
+        convertingBar->setVisible(true);
+    }
     //cue transport
     if (juce::AudioFormatReader* cuereader = formatManager.createReaderFor(file))
     {
@@ -1637,7 +1684,7 @@ bool Player::loadFile(const juce::String& path)
         cueResampledSource.setResamplingRatio(cuereader->sampleRate / Settings::sampleRate);
         cuePlaySource.reset(cuetempSource.release());
         cueButton.setEnabled(true);
-
+        setDraggedPlayer();
     }
 
     else
@@ -2081,4 +2128,11 @@ Meter& Player::getOutputMeter()
 Meter& Player::getCompMeter()
 {
     return compMeter;
+}
+
+void Player::setDraggedPlayer()
+{
+    Settings::draggedPlayer = playerIndex;
+    draggedPlayer.setValue(-1);
+    draggedPlayer.setValue(playerIndex);
 }

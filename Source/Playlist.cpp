@@ -910,6 +910,7 @@ void Playlist::addPlayer(int playerID)
     //playlistMixer.addInputSource(&players[idAddedPlayer]->mixer, false);
     playlistMixer.addInputSource(players[idAddedPlayer]->outputSource.get(), false);
     playlistCueMixer.addInputSource(&players[idAddedPlayer]->cueMixer, false);
+
     players[idAddedPlayer]->fileName.addListener(this);
     players[idAddedPlayer]->playerPositionLabel.addListener(this);
     players[idAddedPlayer]->draggedPlayer.addListener(this);
@@ -918,7 +919,16 @@ void Playlist::addPlayer(int playerID)
     players[idAddedPlayer]->cueTransport.addChangeListener(this);
     players[idAddedPlayer]->cueBroadcaster->addActionListener(this);
     players[idAddedPlayer]->playBroadcaster->addActionListener(this);
+
     playersPositionLabels.insert(idAddedPlayer, new juce::Label);
+
+    meters.insert(idAddedPlayer, new Meter(Meter::Mode::Stereo));
+    meters[idAddedPlayer]->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+    meters[idAddedPlayer]->shouldDrawScaleNumbers(false);
+    meters[idAddedPlayer]->setMeterColour(juce::Colour(229, 149, 0));
+    meters[idAddedPlayer]->setPeakColour(juce::Colours::red);
+    meters[idAddedPlayer]->shouldDrawScale(true);
+
     playersPositionLabels[idAddedPlayer]->setText(juce::String(idAddedPlayer + 1), juce::NotificationType::dontSendNotification);
     addAndMakeVisible(playersPositionLabels[idAddedPlayer]);
     playersPositionLabels[idAddedPlayer]->setInterceptsMouseClicks(false, false);
@@ -989,7 +999,7 @@ void Playlist::removePlayer(int playerID)
                     removePlayersButtons.remove(playerID);
                     addPlayersButtons.remove(playerID);
                     playerNumber = players.size();
-
+                    meters.remove(playerID);
                     updateNextPlayer();
                     rearrangePlayers();
                 }
@@ -1013,7 +1023,7 @@ void Playlist::removePlayer(int playerID)
                     playersPositionLabels.remove(playerID);
                     assignLeftFaderButtons.remove(playerID);
                     assignRightFaderButtons.remove(playerID);
-
+                    meters.remove(playerID);
                     playerNumber = players.size();
                     updateNextPlayer();
                     rearrangePlayers();
@@ -1140,6 +1150,7 @@ void Playlist::rearrangePlayers()
 
             // Player
             addAndMakeVisible(players[i]);
+            addAndMakeVisible(meters[i]);
             if (playlistType == 1)
             {
                 if (eightPlayerMode)
@@ -1155,12 +1166,19 @@ void Playlist::rearrangePlayers()
                     playersPositionLabels[i]->setBounds(getParentWidth() - 41, (105 * i) + 30, 40, 40);
 
                 if (!eightPlayerMode)
-                    players[i]->setBounds(assignFaderButtonWidth, playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), getParentWidth() - (assignFaderButtonWidth*2) - dragZoneWidth - controlButtonWidth - 3, playerHeight);
+                {
+                    players[i]->setBounds(assignFaderButtonWidth, playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), getParentWidth() - (assignFaderButtonWidth * 2) - dragZoneWidth - controlButtonWidth - 3 - meterWidth, playerHeight);
+                    meters[i]->setBounds(players[i]->getRight(), playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), meterWidth, playerHeight);
+                }
                 else
                 {
-                    players[i]->setBounds(0, playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), getParentWidth() - dragZoneWidth - 3, playerHeight);
+                    players[i]->setBounds(0, playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), getWidth() - dragZoneWidth - 3 - meterWidth, playerHeight);
+                    meters[i]->setBounds(players[i]->getRight(), playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), meterWidth, playerHeight);
                     if (!isEightPlayerSecondCart)
-                        players[i]->setBounds(3 + dragZoneWidth, playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), getParentWidth() - 3, playerHeight);
+                    {
+                        players[i]->setBounds(3 + dragZoneWidth + meterWidth, playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), getWidth() - 3 - meterWidth - dragZoneWidth, playerHeight);
+                        meters[i]->setBounds(dragZoneWidth, playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), meterWidth, playerHeight);
+                    }
                 }
                 players[i]->isCart = true;
                 players[i]->resized();
@@ -1178,12 +1196,12 @@ void Playlist::rearrangePlayers()
                     assignRightFaderButtons[i]->onClick = [i, this] { assignRightFader(i); };
 
                     addAndMakeVisible(removePlayersButtons[i]);
-                    removePlayersButtons[i]->setBounds(players[i]->getRight(), 16 + playersStartHeightPosition + ((i * (playerHeight + spaceBetweenPlayer))), controlButtonWidth - 3, controlButtonHeight);
+                    removePlayersButtons[i]->setBounds(players[i]->getRight() + meterWidth, 16 + playersStartHeightPosition + ((i * (playerHeight + spaceBetweenPlayer))), controlButtonWidth - 3, controlButtonHeight);
                     removePlayersButtons[i]->onClick = [i, this] { removePlayer(i); };
 
                     // Add Buttons
                     addAndMakeVisible(addPlayersButtons[i]);
-                    addPlayersButtons[i]->setBounds(players[i]->getRight(), 16 + playersStartHeightPosition + ((i * (playerHeight + spaceBetweenPlayer))) + controlButtonHeight, controlButtonWidth - 3, controlButtonHeight);
+                    addPlayersButtons[i]->setBounds(players[i]->getRight() + meterWidth, 16 + playersStartHeightPosition + ((i * (playerHeight + spaceBetweenPlayer))) + controlButtonHeight, controlButtonWidth - 3, controlButtonHeight);
                     addPlayersButtons[i]->onClick = [i, this] { addPlayer(i); };
                 }
 
@@ -1202,7 +1220,8 @@ void Playlist::rearrangePlayers()
                 if (i > 8)
                     playersPositionLabels[i]->setBounds(-3, (105 * i) + 30, 40, 40);
                 controlButtonXStart = getParentWidth() - controlButtonWidth;
-                players[i]->setBounds(dragZoneWidth, playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), controlButtonXStart - dragZoneWidth, playerHeight);
+                players[i]->setBounds(dragZoneWidth + meterWidth, playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), controlButtonXStart - dragZoneWidth - meterWidth, playerHeight);
+                meters[i]->setBounds(dragZoneWidth - 2, playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), meterWidth - 2, playerHeight);
                 players[i]->loopButton.setVisible(false);
                 if (i < (playerNumber - 1))
                 {
@@ -1716,6 +1735,17 @@ void Playlist::mouseUp(const juce::MouseEvent& event)
             assignLeftFader(player);
         else if (!fader2IsPlaying)
             assignRightFader(player);
+        if (players[player] != nullptr)
+        {
+            players[player]->setDraggedPlayer();
+        }
+    }
+    else if (playlistType == 1 && getMouseXYRelative().getX() < dragZoneWidth)
+    {
+        if (players[player] != nullptr)
+        {
+            players[player]->setDraggedPlayer();
+        }
     }
     //fileDragPlayerSource = -1;
     mouseDraggedUp = 1;
@@ -1742,6 +1772,10 @@ void Playlist::removeButtonClicked()
 
 void Playlist::timerCallback()
 {
+    for (auto i = 0; i < players.size(); i++)
+    {
+        meters[i]->setMeterData(players[i]->getOutputMeter().getMeterData());
+    }
     if (playlistType == 1)
     {
         for (auto i = 0; i < players.size(); i++)

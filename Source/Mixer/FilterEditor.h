@@ -30,6 +30,8 @@ public:
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void updateBypassed();
     void setColour(juce::Colour colour);
+    int getFilterGraphXStart();
+
 private:
     void addFilterBand(int i);
 

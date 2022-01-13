@@ -394,6 +394,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     bottomComponent.clipEffect.setMeters(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getInputMeter(),
                             soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getOutputMeter(),
                             soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getCompMeter());
+    bottomComponent.clipEffect.setName(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getName());
     }
 }
 MainComponent::~MainComponent()
@@ -1150,10 +1151,10 @@ void MainComponent::launchEightPlayerMode()
     soundPlayers[0]->myPlaylists[1]->isEightPlayerMode(true);
     for (auto i = -1; i < 3; ++i)
     {
-
         soundPlayers[0]->myPlaylists[0]->addPlayer(i);
         soundPlayers[0]->myPlaylists[1]->addPlayer(i);
     }
+    soundPlayers[0]->playerSelectionChanged->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->cuePlaylistBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->isEightPlayerMode(true);

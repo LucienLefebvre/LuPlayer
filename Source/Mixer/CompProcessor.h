@@ -26,7 +26,7 @@ public:
     struct CompParameters
     {
         float threshold = -0.0f;
-        float ratio = 1.0f;
+        float ratio = 2.5f;
         float attack = 20.0f;
         float release = 200.0f;
         float gain = 0.0f;

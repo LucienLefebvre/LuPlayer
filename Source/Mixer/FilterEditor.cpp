@@ -555,3 +555,8 @@ void FilterEditor::setColour(juce::Colour colour)
     channelColour = colour;
     repaint();
 }
+
+int FilterEditor::getFilterGraphXStart()
+{
+    return frequencyPlotXStart;
+}

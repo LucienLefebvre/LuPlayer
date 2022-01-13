@@ -25,16 +25,13 @@ public:
     ~ClipEffect() override;
 
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
-
     void paint (juce::Graphics&) override;
     void resized() override;
-
     void setEditedFilterProcessor(FilterProcessor& fp);
     void setEditedCompProcessor(CompProcessor& cp);
     void setEditedBuffer(std::unique_ptr<juce::AudioBuffer<float>>& buffer);
-
     void setMeters(Meter& inputMeter, Meter& outputBuffer, Meter& compMeter);
-
+    void setName(std::string n);
     void timerCallback();
 
 private:
@@ -49,8 +46,11 @@ private:
     Meter displayCompMeter{ Meter::Mode::Stereo_ReductionGain };
     Meter initializationMeter{ Meter::Mode::Stereo };
 
+    juce::String name;
+    juce::Label nameLabel;
+
     int spaceBetweenComponents = 10;
     int meterSize = 50;
-    int compWidth = 180;
+    int compWidth = 130;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipEffect)
 };

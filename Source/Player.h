@@ -30,6 +30,8 @@
 #include "Mixer/FilterProcessor.h"
 #include "Mixer/CompProcessor.h"
 #include "Mixer/Meter.h"
+#include "ffmpegConvert.h"
+#include "convertObject.h"
 typedef char* LPSTR;
 
 
@@ -202,6 +204,8 @@ public:
     Meter& getInputMeter();
     Meter& getOutputMeter();
     Meter& getCompMeter();
+
+    void setDraggedPlayer();
 
     FilterProcessor filterProcessor;
     CompProcessor compProcessor{CompProcessor::Mode::Stereo};
@@ -505,12 +509,16 @@ private:
 
 
     double integratedLoudness = 0.0;
-
+    juce::Label normalizingLabel;
 
     std::unique_ptr<juce::AudioBuffer<float>> playerBuffer;
     Meter inputMeter;
     Meter outputMeter;
     Meter compMeter;
+
+    ffmpegConvert ffmpegThread{ "convertThread" };
+    std::unique_ptr<juce::ProgressBar> convertingBar;
+    double progress = -1.0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };
