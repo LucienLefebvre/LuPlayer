@@ -106,6 +106,8 @@ public:
 
     void Player::setLabelPlayerPosition(int playerPosition);
 
+    void setCuePlayHeadVisible(bool isVisible);
+
     //FILE
     void Player::verifyAudioFileFormat(const juce::String& path);
     bool Player::loadFile(const juce::String& path);
@@ -126,6 +128,8 @@ public:
     bool Player::getIsLooping();
     void Player::setIsLooping(bool isLooping);
     std::string Player::getName();
+    bool getHasBeenNormalized();
+    void setHasBeenNormalized(bool b);
     void Player::setName(std::string Name);
     void Player::enableHPF(bool shouldBeEnabled);
     bool Player::isHpfEnabled();
@@ -196,16 +200,29 @@ public:
     juce::ActionBroadcaster* playBroadcaster;
     juce::ActionBroadcaster* cueBroadcaster;
     juce::ActionBroadcaster* draggedBroadcaster;
+    juce::ChangeBroadcaster* fxButtonBroadcaster;
 
     std::unique_ptr<juce::MemoryAudioSource> outputSource;
 
     FilterProcessor& Player::getFilterProcessor();
     std::unique_ptr<juce::AudioBuffer<float>>& getBuffer();
+    FilterProcessor::GlobalParameters getFilterParameters();
+    void setFilterParameters(FilterProcessor::GlobalParameters g);
     Meter& getInputMeter();
     Meter& getOutputMeter();
     Meter& getCompMeter();
 
     void setDraggedPlayer();
+
+    void fxButtonClicked();
+
+    void bypassFX(bool isBypassed);
+
+    bool getBypassed();
+
+    void normButtonClicked();
+
+    void normalize(std::string p);
 
     FilterProcessor filterProcessor;
     CompProcessor compProcessor{CompProcessor::Mode::Stereo};
@@ -249,7 +266,8 @@ private:
     int waveformThumbnailXEnd = waveformThumbnailXStart + waveformThumbnailXSize;
     float thumbnailZoomValue = 1.0;
     int optionButtonWidth = 20;
-    
+    int fxButtonSize = 30;
+    int normButtonSize = 40;
     int rightControlsStart = leftControlsWidth + borderRectangleWidth + waveformThumbnailXSize;
     int volumeLabelStart = rightControlsStart + rightControlsWidth;
 
@@ -265,6 +283,7 @@ private:
     juce::Point<int>componentMousePositionXY;
     int componentMousePositionX;  
     int mouseDragXPosition;
+    int mouseDragYPosition;
     int mouseDragRelativeXPosition;
     float mouseDragInSeconds;
     bool waveformPainted = false;
@@ -291,7 +310,8 @@ private:
     bool stopCueTransportOut = false;
     //GUI
 
-
+    juce::TextButton fxButton;
+    juce::TextButton normButton;
     juce::TextButton openButton;
     juce::TextButton playButton;
     juce::TextButton stopButton;
@@ -510,6 +530,7 @@ private:
 
     double integratedLoudness = 0.0;
     juce::Label normalizingLabel;
+    bool hasBeenNormalized = false;
 
     std::unique_ptr<juce::AudioBuffer<float>> playerBuffer;
     Meter inputMeter;
@@ -519,6 +540,8 @@ private:
     ffmpegConvert ffmpegThread{ "convertThread" };
     std::unique_ptr<juce::ProgressBar> convertingBar;
     double progress = -1.0;
+
+    bool fxEnabled = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };

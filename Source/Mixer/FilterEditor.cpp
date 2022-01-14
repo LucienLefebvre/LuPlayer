@@ -268,7 +268,6 @@ void FilterEditor::setEditedFilterProcessor(FilterProcessor& processor)
     updateBypassed();
     createMagnitudeArray();
     updateFilterGraphPoints();
-    DBG("sample rate " << actualSampleRate);
 }
 
 void FilterEditor::createMagnitudeArray()
@@ -325,12 +324,15 @@ void FilterEditor::sliderValueChanged(juce::Slider* slider)
 
 void FilterEditor::updateFilterGraphPoints()
 {
-    int zeroDbYPosition = frequencyPlotBounds.getHeight() / 2;
-    for (auto i = 0; i < filterPoints.size(); i++)
+    if (editedFilterProcessor != nullptr)
     {
-        float pointXposition = juce::mapFromLog10<float>(editedFilterProcessor->getFilterParameters(i).frequency, frequencyPlotHzStart, 20000) * frequencyPlotBounds.getWidth();
-        filterPoints[i]->setTopLeftPosition(frequencyPlotBounds.getTopLeft().getX() + pointXposition - 6,
-            zeroDbY - 6 - (int)(juce::Decibels::gainToDecibels(editedFilterProcessor->getFilterParameters(i).gain) * ((float)zeroDbY / 12.0f)));
+        int zeroDbYPosition = frequencyPlotBounds.getHeight() / 2;
+        for (auto i = 0; i < filterPoints.size(); i++)
+        {
+            float pointXposition = juce::mapFromLog10<float>(editedFilterProcessor->getFilterParameters(i).frequency, frequencyPlotHzStart, 20000) * frequencyPlotBounds.getWidth();
+            filterPoints[i]->setTopLeftPosition(frequencyPlotBounds.getTopLeft().getX() + pointXposition - 6,
+                zeroDbY - 6 - (int)(juce::Decibels::gainToDecibels(editedFilterProcessor->getFilterParameters(i).gain) * ((float)zeroDbY / 12.0f)));
+        }
     }
 }
 
@@ -352,7 +354,6 @@ void FilterEditor::mouseDrag(const juce::MouseEvent& event)
     {
         auto x = getMouseXYRelative().getX();
         auto y = getMouseXYRelative().getY();
-        DBG(x);
         filterBands[draggedPoint]->frequencySlider.setValue(getFrequencyFromXPosition(x));
         filterBands[draggedPoint]->gainSlider.setValue(getGainFromYPosition(y));
     }
@@ -417,7 +418,6 @@ void FilterEditor::mouseUp(const juce::MouseEvent& event)
 
 void FilterEditor::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
 {
-    DBG(wheel.deltaY);
     for (auto i = 0; i < filterPoints.size(); i++)
     {
         auto x = event.getEventRelativeTo(filterPoints[i]).getPosition().getX();
@@ -531,7 +531,6 @@ float FilterEditor::getGainFromYPosition(int yPosition)
     //float gain = (float)((float)zeroDbY - (float)yPosition) / 12.0f;
     float gain = ((zeroDbY - yPosition) * 12) / zeroDbY;
     //(yPosition * 12.0f) / 2*zeroDbY / 2;
-    DBG(gain);
     return gain;
 }
 

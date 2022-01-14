@@ -385,8 +385,6 @@ void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source,
 {
     midiMessageValue = message.getControllerValue();
     midiMessageNumber = message.getControllerNumber();
-    DBG("canal : " << midiMessageNumber);
-    DBG("value : " << midiMessageValue);
     if (myPlaylists[0] != nullptr && midiMessageNumber < 4 && midiMessageNumber >= 0)
     {
         myPlaylists[0]->handleIncomingMidiMessageEightPlayers(midiMessageValue, midiMessageNumber);
@@ -407,9 +405,6 @@ void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source,
 
 bool SoundPlayer::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
 {
-
-    DBG("dragged playlist key pressed" << draggedPlaylist);
-    DBG("dragged player key pressed" << draggedPlayer);
     if (myPlaylists[draggedPlaylist] != nullptr)
     {
         if (key == 73)
@@ -984,6 +979,8 @@ void SoundPlayer::mouseDragGetInfos(int playlistSource, int playerID)
 {
     if (myPlaylists[playlistSource]->players[playerID] != nullptr)
     {
+        draggedFilterParameters = myPlaylists[playlistSource]->players[playerID]->getFilterProcessor().getGlobalFilterParameters();
+        draggedNormalized = myPlaylists[playlistSource]->players[playerID]->getHasBeenNormalized();
         draggedPath = myPlaylists[playlistSource]->players[playerID]->getFilePath();
         draggedTrim = myPlaylists[playlistSource]->players[playerID]->getTrimVolume();
         draggedName = myPlaylists[playlistSource]->players[playerID]->getName();
@@ -992,7 +989,6 @@ void SoundPlayer::mouseDragGetInfos(int playlistSource, int playerID)
         draggedStopTimeSet = myPlaylists[playlistSource]->players[playerID]->stopTimeSet;
         draggedStartTime = myPlaylists[playlistSource]->players[playerID]->getStart();
         draggedStopTime = myPlaylists[playlistSource]->players[playerID]->getStop();
-
         mouseDragged = true;
     }
 }
@@ -1204,7 +1200,7 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
                     playerIdDestination++;
                     setSoundInfos(playlistDestination, playerIdDestination);
                 }
-                clearDragInfos();
+                //clearDragInfos();
             }
         }
         if (myPlaylists[playlistDestination]->players[playerIdDestination] != myPlaylists[playlistDragSource]->players[playerDragSource])
@@ -1235,28 +1231,6 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
                             }
                             else if (playlistDestination == 1)
                             {
-
-                                /* if (playerIdDestination > playerDragSource)
-                                 {
-                                     if (playerDragSource < myPlaylists[1]->fader1Player)
-                                         myPlaylists[1]->fader1Player--;
-                                     if (playerDragSource < myPlaylists[1]->fader2Player)
-                                         myPlaylists[1]->fader2Player--;
-                                     myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
-                                     checkAndRemovePlayer(playlistDestination, playerDragSource);
-                                 }
-                                 if (playerIdDestination < playerDragSource)
-                                 {
-                                     if (playerIdDestination < myPlaylists[1]->fader1Player)
-                                         myPlaylists[1]->fader1Player++;
-                                     if (playerIdDestination < myPlaylists[1]->fader2Player)
-                                         myPlaylists[1]->fader2Player++;
-
-                                     myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
-                                     checkAndRemovePlayer(playlistDestination, playerDragSource + 1);
-                                     playerIdDestination++;
-                                 }*/
-
                                 reassignFaders(playerIdDestination, playerDragSource, playlistDestination);
                                 if (playerIdDestination > playerDragSource)
                                 {
@@ -1314,7 +1288,7 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
                             //myPlaylists[playlistDragSource]->removePlayer(playerDragSource);
                             checkAndRemovePlayer(playlistDragSource, playerDragSource);
                     }
-                    clearDragInfos();
+                    //clearDragInfos();
                 }
             }
         }
@@ -1324,6 +1298,8 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
 
 void SoundPlayer::setSoundInfos(int playlistDestination, int playerIdDestination)
 {
+    playerSelectionChanged->sendChangeMessage();
+    myPlaylists[playlistDestination]->players[playerIdDestination]->setHasBeenNormalized(draggedNormalized);
     myPlaylists[playlistDestination]->players[playerIdDestination]->loadFile(draggedPath);
     myPlaylists[playlistDestination]->players[playerIdDestination]->setTrimVolume(draggedTrim);
     myPlaylists[playlistDestination]->players[playerIdDestination]->setName(draggedName);
@@ -1332,6 +1308,8 @@ void SoundPlayer::setSoundInfos(int playlistDestination, int playerIdDestination
         myPlaylists[playlistDestination]->players[playerIdDestination]->setStartTime(draggedStartTime);
     if (draggedStopTimeSet)
         myPlaylists[playlistDestination]->players[playerIdDestination]->setStopTime(draggedStopTime);
+    myPlaylists[playlistDestination]->players[playerIdDestination]->setFilterParameters(draggedFilterParameters);
+    clearDragInfos();
 }
 
 void SoundPlayer::clearDragInfos()
@@ -1344,7 +1322,9 @@ void SoundPlayer::clearDragInfos()
     draggedStopTimeSet = false;
     draggedStartTime = 0.0;
     draggedStopTime = 0.0;
+    draggedNormalized = false;
     mouseDragged = false;
+    draggedFilterParameters = FilterProcessor::makeDefaultFilter();
     myPlaylists[playlistDragSource]->mouseDragSource.setValue(-1);
 }
 
@@ -1575,6 +1555,14 @@ void SoundPlayer::savePlaylist()
             player->setAttribute("isStopTimeSet", isStopTimeSet);
             if (isStopTimeSet)
                 player->setAttribute("stopTime", myPlaylists[0]->players[i]->getStop());
+            juce::StringArray params = myPlaylists[0]->players[i]->getFilterProcessor().getFilterParametersAsArray();
+            for (int i = 0; i < params.size(); i++)
+            {
+                juce::String identifier = "filterParams" + juce::String(i);
+                if (!params[i].isEmpty())
+                    player->setAttribute(identifier, params[i]);
+            }
+            player->setAttribute("isBypassed", myPlaylists[0]->players[i]->getBypassed());
             playlist->addChildElement(player);
         }
     }
@@ -1600,6 +1588,14 @@ void SoundPlayer::savePlaylist()
             player->setAttribute("isStopTimeSet", isStopTimeSet);
             if (isStopTimeSet)
                 player->setAttribute("stopTime", myPlaylists[1]->players[i]->getStop());
+            juce::StringArray params = myPlaylists[1]->players[i]->getFilterProcessor().getFilterParametersAsArray();
+            for (int i = 0; i < params.size(); i++)
+            {
+                juce::String identifier = "filterParams" + juce::String(i);
+                if (!params[i].isEmpty())
+                    player->setAttribute(identifier, params[i]);
+            }
+            player->setAttribute("isBypassed", myPlaylists[1]->players[i]->getBypassed());
             cart->addChildElement(player);
         }
     }
@@ -1622,6 +1618,8 @@ void SoundPlayer::savePlaylist()
         multiPlayer.writeTo(myPlaylistSave);
     }
 }
+
+
 
 void SoundPlayer::loadPlaylist()
 {
@@ -1740,12 +1738,21 @@ void SoundPlayer::loadPlaylist()
                                         myPlaylists[0]->players[iLoadedPlayer]->setStartTime(startTime);
                                     if (isStopTimeSet)
                                         myPlaylists[0]->players[iLoadedPlayer]->setStopTime(stopTime);
+
+                                    //EQ
+                                    juce::StringArray filterParams;
+                                    for (int i = 0; i < 16; i++)
+                                    {
+                                        filterParams.add(e->getStringAttribute("filterParams" + juce::String(i)));
+                                    }
+                                    myPlaylists[0]->players[iLoadedPlayer]->getFilterProcessor().setFilterParametersAsArray(filterParams);
+                                    myPlaylists[0]->players[iLoadedPlayer]->bypassFX(e->getBoolAttribute("isBypassed"));
+
                                     iLoadedPlayer++;
                                     loaddedPlayers++;
                                     loadingProgress = loaddedPlayers / numberOfPlayersToLoad;
 
                                     progressLabel->setText(juce::String(loadingProgress), juce::NotificationType::dontSendNotification);
-                                    DBG(loadingProgress);
                                 }
                             }
                         }
@@ -1779,13 +1786,19 @@ void SoundPlayer::loadPlaylist()
                                         myPlaylists[1]->players[iLoadedPlayer]->setStartTime(startTime);
                                     if (isStopTimeSet)
                                         myPlaylists[1]->players[iLoadedPlayer]->setStopTime(stopTime);
+                                    juce::StringArray filterParams;
+                                    for (int i = 0; i < 16; i++)
+                                    {
+                                        filterParams.add(e->getStringAttribute("filterParams" + juce::String(i)));
+                                    }
+                                    myPlaylists[1]->players[iLoadedPlayer]->getFilterProcessor().setFilterParametersAsArray(filterParams);
+                                    myPlaylists[1]->players[iLoadedPlayer]->bypassFX(e->getBoolAttribute("isBypassed"));
 
                                     iLoadedPlayer++;
                                     myPlaylists[1]->assignLeftFader(0);
                                     myPlaylists[1]->assignRightFader(1);
                                     loaddedPlayers++;
                                     loadingProgress = loaddedPlayers / numberOfPlayersToLoad;
-                                    DBG(loadingProgress);
                                 }
                             }
                         }
@@ -1840,14 +1853,14 @@ void SoundPlayer::updateDraggedPlayerDisplay(int playerDragged, int playlistDrag
         }
         //set dragged player display on dragged player
         if (myPlaylists[playlistDragged]->players[Settings::draggedPlayer] != nullptr)
+        {
             myPlaylists[playlistDragged]->players[Settings::draggedPlayer]->setActivePlayer(true);
-        playerSelectionChanged->sendChangeMessage();
+        }
     }
 }
 
 void SoundPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
-    DBG("change message received");
     if (source == myPlaylists[0]->cuePlaylistBroadcaster)
     {
         draggedPlaylist = -1;
@@ -1861,8 +1874,6 @@ void SoundPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
         draggedPlaylist = 1;
         draggedPlayer = Settings::draggedPlayer;
     }
-    DBG(draggedPlaylist << "draggedplaylist");
-    DBG(draggedPlayer << "draggedplayer");
 }
 
 void SoundPlayer::actionListenerCallback(const juce::String& message)

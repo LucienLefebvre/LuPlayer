@@ -43,6 +43,7 @@ bool Settings::useDefaultOutputsChannels;
 bool Settings::lauchAtZeroDB;
 bool Settings::mouseWheelControlVolume;
 bool Settings::autoNormalize;
+bool Settings::showMeter;
 
 int Settings::outputChannelsNumber;
 juce::Value Settings::sampleRateValue;
@@ -51,6 +52,8 @@ juce::StringArray Settings::tempFiles;
 
 int Settings::draggedPlaylist;
 int Settings::draggedPlayer;
+int Settings::fxEditedPlayer;
+int Settings::fxEditedPlaylist;
 //==============================================================================
 Settings::Settings() : settingsFile(options)
 {
@@ -118,6 +121,11 @@ Settings::Settings() : settingsFile(options)
         Settings::autoNormalize = true;
     else
         Settings::autoNormalize = properties.getUserSettings()->getValue("AutoNormalize").getIntValue();
+
+    if (properties.getUserSettings()->getValue("ShowMeter").isEmpty())
+        Settings::showMeter = true;
+    else
+        Settings::showMeter = properties.getUserSettings()->getValue("ShowMeter").getIntValue();
 
     //SAVE & CLOSE BUTTon
     saveButton.setBounds(250, 400, 100, 50);
@@ -283,18 +291,28 @@ Settings::Settings() : settingsFile(options)
     ipAdress4.setJustificationType(juce::Justification::centred);
     ipAdress4.setColour(juce::Label::outlineColourId, juce::Colours::black);
 
+    //AUTO NORMALIZE
     addAndMakeVisible(&normalizeButton);
     normalizeButton.setButtonText("Auto normalize sounds at 0 LU");
-    normalizeButton.setBounds(0, 200, 300, 25);
+    normalizeButton.setBounds(0, 200, 200, 25);
     normalizeButton.setToggleState(Settings::autoNormalize, juce::NotificationType::dontSendNotification);
     normalizeButton.addListener(this);
 
+    //SHOW METER
+    addAndMakeVisible(&meterButton);
+    meterButton.setButtonText("Show individual meter");
+    meterButton.setBounds(200, 200, 200, 25);
+    meterButton.setToggleState(Settings::showMeter, juce::NotificationType::dontSendNotification);
+    meterButton.addListener(this);
+
+    //LAUNCHE LEVEL
     addAndMakeVisible(&launchLevelButton);
     launchLevelButton.setButtonText("Always launch sounds at 0dB");
     launchLevelButton.setBounds(0, 250, 200, 25);
     launchLevelButton.setToggleState(Settings::lauchAtZeroDB, juce::NotificationType::dontSendNotification);
     launchLevelButton.addListener(this);
 
+    //MOUSE WHEEL CONTROL
     addAndMakeVisible(&mouseWheelControlButton);
     mouseWheelControlButton.setButtonText("Mouse wheel control volume");
     mouseWheelControlButton.setBounds(200, 250, 200, 25);
@@ -533,7 +551,6 @@ void Settings::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
 {
     if (comboBoxThatHasChanged == &audioOutputModeListbox)
     {
-
         Settings::audioOutputMode = audioOutputModeListbox.getSelectedId();
         Settings::audioOutputModeValue = audioOutputModeListbox.getSelectedId();
         properties.getUserSettings()->setValue("Audio Output Mode", Settings::audioOutputMode);
@@ -628,10 +645,17 @@ void Settings::buttonClicked(juce::Button* button)
         properties.saveIfNeeded();
         settingsFile.save();
     }
-    if (button == &normalizeButton)
+    else if (button == &normalizeButton)
     {
         Settings::autoNormalize = button->getToggleState();
         properties.getUserSettings()->setValue("AutoNormalize", (int)Settings::autoNormalize);
+        properties.saveIfNeeded();
+        settingsFile.save();
+    }
+    else if (button == &meterButton)
+    {
+        Settings::showMeter = button->getToggleState();
+        properties.getUserSettings()->setValue("ShowMeter", (int)Settings::showMeter);
         properties.saveIfNeeded();
         settingsFile.save();
     }

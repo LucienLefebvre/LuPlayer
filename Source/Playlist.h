@@ -147,6 +147,8 @@ public:
     juce::ChangeBroadcaster* playBroadcaster;
     juce::ChangeBroadcaster* cuePlaylistBroadcaster;
     juce::ActionBroadcaster* cuePlaylistActionBroadcaster;
+    juce::ChangeBroadcaster* fxButtonBroadcaster;
+
     void Playlist::stopCues();
     int cuedPlayer = 0;
 

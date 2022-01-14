@@ -37,6 +37,7 @@ Playlist::Playlist(int splaylistType)
     playBroadcaster = new juce::ChangeBroadcaster();
     cuePlaylistBroadcaster = new juce::ChangeBroadcaster();
     cuePlaylistActionBroadcaster = new juce::ActionBroadcaster();
+    fxButtonBroadcaster = new juce::ChangeBroadcaster();
     //addPlayer(1);
 
     //addKeyListener(this);
@@ -55,6 +56,8 @@ Playlist::Playlist(int splaylistType)
     assignRightFader(-1);
     assignRightFader(1);
 
+    if (Settings::showMeter == false)
+        meterWidth = 0;
     //DBG(players[1]->importFromNetia("\\WMDRTSV00147742\SONS$\TECHNIQUE\cf68d5d4 - 98c1 - 4502 - adcc - f137d8cb4c62.BWF"));
 }
 
@@ -63,6 +66,7 @@ Playlist::~Playlist()
     delete playBroadcaster;
     delete cuePlaylistBroadcaster;
     delete cuePlaylistActionBroadcaster;
+    delete fxButtonBroadcaster;
     removeMouseListener(this);
     playlistMixer.removeAllInputs();
     playlistCueMixer.removeAllInputs();
@@ -474,7 +478,6 @@ void Playlist::handleTrimMidiMessage(int value, int number)
 {
     int midiMessageValue = value;
     int midiMessageNumber = number;
-    DBG("midi message number : " << midiMessageNumber);
     players[midiMessageNumber]->handleMidiTrimMessage(midiMessageValue);
 }
 
@@ -919,6 +922,7 @@ void Playlist::addPlayer(int playerID)
     players[idAddedPlayer]->cueTransport.addChangeListener(this);
     players[idAddedPlayer]->cueBroadcaster->addActionListener(this);
     players[idAddedPlayer]->playBroadcaster->addActionListener(this);
+    players[idAddedPlayer]->fxButtonBroadcaster->addChangeListener(this);
 
     playersPositionLabels.insert(idAddedPlayer, new juce::Label);
 
@@ -928,6 +932,7 @@ void Playlist::addPlayer(int playerID)
     meters[idAddedPlayer]->setMeterColour(juce::Colour(229, 149, 0));
     meters[idAddedPlayer]->setPeakColour(juce::Colours::red);
     meters[idAddedPlayer]->shouldDrawScale(true);
+    meters[idAddedPlayer]->setRectangleRoundSize(2);
 
     playersPositionLabels[idAddedPlayer]->setText(juce::String(idAddedPlayer + 1), juce::NotificationType::dontSendNotification);
     addAndMakeVisible(playersPositionLabels[idAddedPlayer]);
@@ -993,6 +998,7 @@ void Playlist::removePlayer(int playerID)
                     players[playerID]->playerPositionLabel.addListener(this);
                     players[playerID]->cueStopped.addListener(this);
                     players[playerID]->cueBroadcaster->removeActionListener(this);
+                    players[playerID]->fxButtonBroadcaster->removeChangeListener(this);
                     players.remove(playerID);
                     playersPositionLabels.remove(playerID);
                     //swapNextButtons.remove(playerID);
@@ -1307,7 +1313,6 @@ void Playlist::changeListenerCallback(juce::ChangeBroadcaster* source)
                 }
                 else
                 {
-                    DBG("stop");
                     playerStoppedID = i;
                     players[i]->keyIsPlaying = false;
                     if (playlistType == 0)
@@ -1347,6 +1352,20 @@ void Playlist::changeListenerCallback(juce::ChangeBroadcaster* source)
                         updateNextPlayer();
                     }
                 }
+            }
+            else if (source == players[i]->fxButtonBroadcaster)
+            {
+                if (playlistType == 0)
+                {
+                    Settings::fxEditedPlaylist = 0;
+                    Settings::fxEditedPlayer = i;
+                }
+                else if (playlistType == 1)
+                {
+                    Settings::fxEditedPlaylist = 1;
+                    Settings::fxEditedPlayer = i;
+                }
+                fxButtonBroadcaster->sendChangeMessage();
             }
         }
     }
@@ -1568,7 +1587,6 @@ void Playlist::fileDragMove(const juce::StringArray& files, int x, int y)
     }
     else if (x > playerWidth)
     {
-        DBG("au dessus");
         fileDragPaintRectangle = false;
         fileDragPaintLine = false;
     }
@@ -1577,7 +1595,6 @@ void Playlist::fileDragMove(const juce::StringArray& files, int x, int y)
 
 void Playlist::fileDragExit(const juce::StringArray& files)
 {
-    DBG("exit");
     fileDragPaintRectangle = false;
     fileDragPaintLine = false;
 
@@ -1634,7 +1651,6 @@ void Playlist::valueChanged(juce::Value& value)
         {
             draggedPlayer.setValue(-1);
             draggedPlayer.setValue(i);
-            DBG("dragged player" << i);
             //draggedPlayer = players[i]->draggedPlayer.toString().getIntValue();
         }
 

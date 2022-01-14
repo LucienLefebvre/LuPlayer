@@ -54,7 +54,7 @@ public:
                 int rectHeight = rangedRmsLevel * getHeight();
                 g.setColour(meterColour);
                 if (rectHeight > 1)
-                    g.fillRect(0, getHeight() - rectHeight, meterWidth - 2, rectHeight);
+                    g.fillRoundedRectangle(0, getHeight() - rectHeight, meterWidth - 2, rectHeight, rectangleRoundSize);
                 if (limitedRmsLevel > -9.0f)//ORANGE if >-3db
                 {
                     int orangeRectYStart = range.convertTo0to1(-9.0f) * getHeight();
@@ -105,7 +105,7 @@ public:
                 int rectHeight = rangedRmsLevel * getHeight();
                 g.setColour(meterColour);
                 if (rectHeight > 1)
-                    g.fillRect(meterWidth + 1, getHeight() - rectHeight, meterWidth - 1, rectHeight);
+                    g.fillRoundedRectangle(meterWidth + 1, getHeight() - rectHeight, meterWidth - 1, rectHeight, rectangleRoundSize);
                 if (limitedRmsLevel > -9.0f)//ORANGE if >-3db
                 {
                     int orangeRectYStart = range.convertTo0to1(-9.0f) * getHeight();
@@ -401,6 +401,11 @@ public:
     {
         peakColour = c;
     }
+    void setRectangleRoundSize(int s)
+    {
+        rectangleRoundSize = s;
+    }
+
 
     Meter::Mode meterMode;
 private:
@@ -452,6 +457,7 @@ private:
     int meterWidth;
     int reductionGainWidth = 10;
     int reductionGainXStart;
+    int rectangleRoundSize = 5;
 
     juce::Colour meterColour = juce::Colours::green;
     juce::Colour backgroundColour;

@@ -34,6 +34,14 @@ public:
         FilterTypes type = FilterTypes::Bell;
     };
 
+    struct GlobalParameters
+    {
+        FilterParameters lowBand;
+        FilterParameters lowMidBand;
+        FilterParameters highMidBand;
+        FilterParameters highBand;
+    };
+
     FilterProcessor();
     ~FilterProcessor() override;
     //FFTAnalyser analyser;
@@ -48,6 +56,11 @@ public:
     juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> getFilterCoefs(int band);
     void setBypassed(bool bypassed);
     bool isBypassed();
+    FilterProcessor::GlobalParameters& getGlobalFilterParameters();
+    void setGlobalFilterParameters(FilterProcessor::GlobalParameters p);
+    static FilterProcessor::GlobalParameters makeDefaultFilter();
+    juce::StringArray getFilterParametersAsArray();
+    void setFilterParametersAsArray(juce::StringArray p);
     int displaynumber = 0;
 
 private:
@@ -63,3 +76,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FilterProcessor)
 };
+
+FilterProcessor::GlobalParameters makeDefaultFilter();

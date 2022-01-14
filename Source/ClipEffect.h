@@ -15,6 +15,7 @@
 #include "Mixer/FilterEditor.h"
 #include "Mixer/Meter.h"
 #include "Mixer/CompEditor.h"
+#include "Player.h"
 //==============================================================================
 /*
 */
@@ -34,10 +35,15 @@ public:
     void setName(std::string n);
     void timerCallback();
 
+    void setPlayer(Player* p);
+
+    void setDummyPlayer();
+
 private:
     FilterEditor filterEditor;
     CompEditor compEditor;
     std::unique_ptr<juce::AudioBuffer<float>>* editedBuffer;
+    Player* editedPlayer = nullptr;
     Meter* inputMeter;
     Meter* outputMeter;
     Meter* compMeter;
@@ -45,6 +51,9 @@ private:
     Meter displayOutputMeter{ Meter::Mode::Stereo };
     Meter displayCompMeter{ Meter::Mode::Stereo_ReductionGain };
     Meter initializationMeter{ Meter::Mode::Stereo };
+
+    FilterProcessor dummyFilterProcessor;
+    Player dummyPlayer{ 0 };
 
     juce::String name;
     juce::Label nameLabel;

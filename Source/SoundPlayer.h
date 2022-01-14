@@ -201,6 +201,8 @@ private:
     float draggedStopTime;
     int playerSourceLatch;
     int playlistSourceLatch;
+    bool draggedNormalized;
+    FilterProcessor::GlobalParameters draggedFilterParameters{FilterProcessor::makeDefaultFilter()};
 
     LoudnessBar loudnessBarComponent;
 

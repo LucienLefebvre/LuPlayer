@@ -31,7 +31,6 @@ FilterProcessor::~FilterProcessor()
 
 void FilterProcessor::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
-    DBG("filter processor prepare to play");
     actualSampleRate = sampleRate;
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
     filterBuffer = std::make_unique<juce::AudioBuffer<float>>(2, actualSamplesPerBlockExpected);
@@ -102,9 +101,15 @@ juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Co
 
 FilterProcessor::FilterParameters& FilterProcessor::getFilterParameters(int filterBand)
 {
-    
-    return *filtersParams[filterBand];
+    FilterParameters fp;
+    if (filtersParams[filterBand] != nullptr)
+    {
+        if (filterBand >= 0)
+            fp = *filtersParams[filterBand];
+    }
+    return fp;
 }
+
 
 FilterProcessor::FilterTypes FilterProcessor::getFilterTypes(int filterBand)
 {
@@ -131,4 +136,92 @@ void FilterProcessor::setBypassed(bool bypassed)
 bool FilterProcessor::isBypassed()
 {
     return isFilterBypassed;
+}
+
+FilterProcessor::GlobalParameters& FilterProcessor::getGlobalFilterParameters()
+{
+    FilterProcessor::GlobalParameters globalParams;
+    globalParams.lowBand = getFilterParameters(0);
+    globalParams.lowMidBand = getFilterParameters(1);
+    globalParams.highMidBand = getFilterParameters(2);
+    globalParams.highBand = getFilterParameters(3);
+    return globalParams;
+}
+
+void FilterProcessor::setGlobalFilterParameters(FilterProcessor::GlobalParameters p)
+{
+    setFilterParameters(0, p.lowBand);
+    setFilterParameters(1, p.lowMidBand);
+    setFilterParameters(2, p.highMidBand);
+    setFilterParameters(3, p.highBand);
+}
+
+
+FilterProcessor::GlobalParameters FilterProcessor::makeDefaultFilter()
+{
+    FilterProcessor::GlobalParameters defaultParams;
+
+    defaultParams.lowBand.frequency = 100.0f;
+    defaultParams.lowBand.gain = 1.0f;
+    defaultParams.lowBand.Q = 1.0f;
+    defaultParams.lowBand.type = FilterProcessor::FilterTypes::Bell;
+
+    defaultParams.lowMidBand.frequency = 400.0f;
+    defaultParams.lowMidBand.gain = 1.0f;
+    defaultParams.lowMidBand.Q = 1.0f;
+    defaultParams.lowMidBand.type = FilterProcessor::FilterTypes::Bell;
+
+    defaultParams.lowBand.frequency = 2000.0f;
+    defaultParams.lowBand.gain = 1.0f;
+    defaultParams.lowBand.Q = 1.0f;
+    defaultParams.lowBand.type = FilterProcessor::FilterTypes::Bell;
+
+    defaultParams.lowBand.frequency = 5000.0f;
+    defaultParams.lowBand.gain = 1.0f;
+    defaultParams.lowBand.Q = 1.0f;
+    defaultParams.lowBand.type = FilterProcessor::FilterTypes::Bell;
+
+    return defaultParams;
+}
+
+juce::StringArray FilterProcessor::getFilterParametersAsArray()
+{
+    juce::StringArray params;
+    for (auto* par : filtersParams)
+    {
+        params.add(juce::String(par->frequency));
+        params.add(juce::String(par->gain));
+        params.add(juce::String(par->Q));
+        params.add(juce::String(par->type));
+    }
+    return params;
+}
+
+void FilterProcessor::setFilterParametersAsArray(juce::StringArray p)
+{
+    for (int i = 0; i < filtersParams.size(); i++)
+    {
+        filtersParams[i]->frequency = p[i * 4].getFloatValue();
+        filtersParams[i]->gain = p[(i * 4) + 1].getFloatValue();
+        filtersParams[i]->Q = p[(i * 4) + 2].getFloatValue();
+        switch (p[(i * 4) + 3].getIntValue())
+        {
+        case 0:
+            filtersParams[i]->type = FilterProcessor::FilterTypes::Bell;
+            break;
+        case 1:
+            filtersParams[i]->type = FilterProcessor::FilterTypes::LowShelf;
+            break;
+        case 2:
+            filtersParams[i]->type = FilterProcessor::FilterTypes::HighShelf;
+            break;
+        case 3:
+            filtersParams[i]->type = FilterProcessor::FilterTypes::HPF;
+            break;
+        case 4:
+            filtersParams[i]->type = FilterProcessor::FilterTypes::LPF;
+            break;
+        }
+    }
+
 }

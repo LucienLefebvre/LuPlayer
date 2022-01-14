@@ -97,9 +97,13 @@ public:
     static bool Settings::lauchAtZeroDB;
     static bool Settings::mouseWheelControlVolume;
     static bool Settings::autoNormalize;
+    static bool Settings::showMeter;
 
     static int Settings::draggedPlaylist;
     static int Settings::draggedPlayer;
+    static int Settings::fxEditedPlayer;
+    static int Settings::fxEditedPlaylist;
+
 private:
 
     
@@ -144,6 +148,9 @@ private:
 
     juce::Label normalizeLabel;
     juce::ToggleButton normalizeButton;
+
+    juce::Label meterLabel;
+    juce::ToggleButton meterButton;
 
     juce::Label audioOutputModeLabel;
     juce::ComboBox audioOutputModeListbox;

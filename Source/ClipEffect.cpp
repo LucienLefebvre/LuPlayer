@@ -46,6 +46,8 @@ void ClipEffect::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     displayInputMeter.prepareToPlay(samplesPerBlockExpected, sampleRate);
     displayOutputMeter.prepareToPlay(samplesPerBlockExpected, sampleRate);
     displayCompMeter.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    dummyFilterProcessor.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    dummyPlayer.playerPrepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void ClipEffect::paint (juce::Graphics& g)
@@ -55,13 +57,16 @@ void ClipEffect::paint (juce::Graphics& g)
 
 void ClipEffect::resized()
 {
-    displayInputMeter.setBounds(0, 0, meterSize, getHeight());
-    displayOutputMeter.setBounds(getWidth() - meterSize, 0, meterSize, getHeight());
-    compEditor.setBounds(displayOutputMeter.getX() - spaceBetweenComponents - compWidth - 10, 0, compWidth, getHeight());
-    displayCompMeter.setReductionGainWidth(10);
-    displayCompMeter.setBounds(displayOutputMeter.getX() - 20, 0, 20, getHeight());
-    filterEditor.setBounds(displayInputMeter.getRight() + spaceBetweenComponents, 0, getWidth() - ((2 * meterSize) + (3 * spaceBetweenComponents) + compWidth), getHeight());
-    nameLabel.setBounds(filterEditor.getFilterGraphXStart(), 2, filterEditor.getRight() - filterEditor.getFilterGraphXStart(), 30);
+    if (editedPlayer != nullptr)
+    {
+        displayInputMeter.setBounds(0, 0, meterSize, getHeight());
+        displayOutputMeter.setBounds(getWidth() - meterSize, 0, meterSize, getHeight());
+        compEditor.setBounds(displayOutputMeter.getX() - spaceBetweenComponents - compWidth - 10, 0, compWidth, getHeight());
+        displayCompMeter.setReductionGainWidth(10);
+        displayCompMeter.setBounds(displayOutputMeter.getX() - 20, 0, 20, getHeight());
+        filterEditor.setBounds(displayInputMeter.getRight() + spaceBetweenComponents, 0, getWidth() - ((2 * meterSize) + (3 * spaceBetweenComponents) + compWidth), getHeight());
+        nameLabel.setBounds(filterEditor.getFilterGraphXStart(), 2, filterEditor.getRight() - filterEditor.getFilterGraphXStart(), 30);
+    }
 }
 
 void ClipEffect::setEditedFilterProcessor(FilterProcessor& fp)
@@ -96,4 +101,25 @@ void ClipEffect::timerCallback()
     displayInputMeter.setMeterData(inputMeter->getMeterData());
     displayOutputMeter.setMeterData(outputMeter->getMeterData());
     displayCompMeter.setReductionGain(compMeter->getReductionGain());
+}
+
+void ClipEffect::setPlayer(Player* p)
+{
+    editedPlayer = p;
+    if (editedPlayer != nullptr)
+    {
+        setEditedFilterProcessor(editedPlayer->filterProcessor);
+        setEditedCompProcessor(editedPlayer->compProcessor);
+        setEditedBuffer(editedPlayer->getBuffer());
+        setMeters(editedPlayer->getInputMeter(), editedPlayer->getOutputMeter(), editedPlayer->getCompMeter());
+        setName(editedPlayer->getName());
+    }
+    else
+        setEditedFilterProcessor(dummyFilterProcessor);
+    resized();
+}
+
+void ClipEffect::setDummyPlayer()
+{
+    setPlayer(&dummyPlayer);
 }

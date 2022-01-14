@@ -60,6 +60,8 @@ MainComponent::MainComponent() :
     soundPlayers[0]->myPlaylists[0]->playBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->playBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[0]->fxButtonBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[1]->fxButtonBroadcaster->addChangeListener(this);
 
     //ADD MIXER
     addAndMakeVisible(&mixer);
@@ -387,16 +389,25 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
     else if (source == soundPlayers[0]->playerSelectionChanged)
     {
+    bottomComponent.clipEffect.setDummyPlayer();
+    DBG("set dummy");
     //Send processing components to bottom clip effect panel
-    bottomComponent.clipEffect.setEditedFilterProcessor(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->filterProcessor);
-    bottomComponent.clipEffect.setEditedCompProcessor(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->compProcessor);
-    bottomComponent.clipEffect.setEditedBuffer(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getBuffer());
-    bottomComponent.clipEffect.setMeters(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getInputMeter(),
-                            soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getOutputMeter(),
-                            soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getCompMeter());
-    bottomComponent.clipEffect.setName(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getName());
+    //bottomComponent.clipEffect.setEditedFilterProcessor(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->filterProcessor);
+    //bottomComponent.clipEffect.setEditedCompProcessor(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->compProcessor);
+    //bottomComponent.clipEffect.setEditedBuffer(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getBuffer());
+    //bottomComponent.clipEffect.setMeters(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getInputMeter(),
+    //                        soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getOutputMeter(),
+    //                        soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getCompMeter());
+    //bottomComponent.clipEffect.setName(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getName());
+    }
+    else if (source == soundPlayers[0]->myPlaylists[0]->fxButtonBroadcaster || source == soundPlayers[0]->myPlaylists[1]->fxButtonBroadcaster)
+    {
+        auto* player = soundPlayers[0]->myPlaylists[Settings::fxEditedPlaylist]->players[Settings::fxEditedPlayer];
+        bottomComponent.clipEffect.setPlayer(player);
+        bottomComponent.setCurrentTabIndex(5);
     }
 }
+
 MainComponent::~MainComponent()
 {
     removeMouseListener(this);
@@ -1157,6 +1168,8 @@ void MainComponent::launchEightPlayerMode()
     soundPlayers[0]->playerSelectionChanged->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->cuePlaylistBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[0]->fxButtonBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[1]->fxButtonBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->isEightPlayerMode(true);
     soundPlayers[0]->myPlaylists[1]->isEightPlayerMode(true);
     soundPlayers[0]->myPlaylists[1]->setEightPlayersSecondCart(true);
