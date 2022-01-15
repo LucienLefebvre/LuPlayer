@@ -562,6 +562,9 @@
     <ClCompile Include="Source\ClipEffect.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Denoiser.cpp">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClCompile>
     <ClCompile Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.cpp">
       <Filter>JUCE Modules\ff_meters\LevelMeter</Filter>
     </ClCompile>
@@ -2754,6 +2757,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\DenoiseThread.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
     <ClInclude Include="Source\batchConvertThread.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
@@ -2887,6 +2893,9 @@
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\ClipEffect.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Denoiser.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\R128IntegratedThread.h">

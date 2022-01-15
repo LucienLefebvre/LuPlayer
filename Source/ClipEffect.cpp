@@ -28,6 +28,7 @@ ClipEffect::ClipEffect()
     nameLabel.setJustificationType(juce::Justification::centred);
     nameLabel.setFont(juce::Font(25.0f, juce::Font::bold).withTypefaceStyle("Regular"));
     nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(229, 149, 0));
+    nameLabel.setInterceptsMouseClicks(false, true);
     //nameLabel.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colour(40, 134, 189));
     //nameLabel.setAlpha(0.7);
 
@@ -65,7 +66,7 @@ void ClipEffect::resized()
         displayCompMeter.setReductionGainWidth(10);
         displayCompMeter.setBounds(displayOutputMeter.getX() - 20, 0, 20, getHeight());
         filterEditor.setBounds(displayInputMeter.getRight() + spaceBetweenComponents, 0, getWidth() - ((2 * meterSize) + (3 * spaceBetweenComponents) + compWidth), getHeight());
-        nameLabel.setBounds(filterEditor.getFilterGraphXStart(), 2, filterEditor.getRight() - filterEditor.getFilterGraphXStart(), 30);
+        nameLabel.setBounds(filterEditor.getFilterGraphXStart() + 100, 2, filterEditor.getRight() - filterEditor.getFilterGraphXStart() - 100, 30);
     }
 }
 
@@ -105,6 +106,9 @@ void ClipEffect::timerCallback()
 
 void ClipEffect::setPlayer(Player* p)
 {
+    if (editedPlayer != nullptr)
+        editedPlayer->setFxEditedPlayer(false);
+
     editedPlayer = p;
     if (editedPlayer != nullptr)
     {
@@ -112,7 +116,9 @@ void ClipEffect::setPlayer(Player* p)
         setEditedCompProcessor(editedPlayer->compProcessor);
         setEditedBuffer(editedPlayer->getBuffer());
         setMeters(editedPlayer->getInputMeter(), editedPlayer->getOutputMeter(), editedPlayer->getCompMeter());
+        editedPlayer->setFxEditedPlayer(true);
         setName(editedPlayer->getName());
+        editedPlayer->fxButtonBroadcaster->addChangeListener(this);
     }
     else
         setEditedFilterProcessor(dummyFilterProcessor);
@@ -122,4 +128,20 @@ void ClipEffect::setPlayer(Player* p)
 void ClipEffect::setDummyPlayer()
 {
     setPlayer(&dummyPlayer);
+}
+
+void ClipEffect::changeListenerCallback(juce::ChangeBroadcaster* source)
+{
+    if (editedPlayer != nullptr)
+    {
+        if (source == editedPlayer->fxButtonBroadcaster)
+        {
+            filterEditor.updateBypassed();
+            compEditor.updateBypassedSliders();
+            if (editedPlayer->getFilterProcessor().isBypassed())
+                nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+            else
+                nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(229, 149, 0));
+        }
+    }
 }

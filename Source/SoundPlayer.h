@@ -203,6 +203,7 @@ private:
     int playlistSourceLatch;
     bool draggedNormalized;
     FilterProcessor::GlobalParameters draggedFilterParameters{FilterProcessor::makeDefaultFilter()};
+    bool draggedFxBypassed;
 
     LoudnessBar loudnessBarComponent;
 

@@ -485,6 +485,7 @@ void FilterEditor::updateBypassed()
     for (auto i = 0; i < filterBands.size(); i++)
     {
         filterBands[i]->enableControl(!isFilterBypassed);
+        setBypassedSliderColours(isFilterBypassed);
         if (isFilterBypassed)
             filterPoints[i]->setColour(4);
         else
@@ -558,4 +559,22 @@ void FilterEditor::setColour(juce::Colour colour)
 int FilterEditor::getFilterGraphXStart()
 {
     return frequencyPlotXStart;
+}
+
+void FilterEditor::setBypassedSliderColours(bool isBypassed)
+{
+    if (!isBypassed)
+    {
+        filterBands[0]->setSlidersThumbColours(juce::Colours::red);
+        filterBands[1]->setSlidersThumbColours(juce::Colours::green);
+        filterBands[2]->setSlidersThumbColours(juce::Colours::blue);
+        filterBands[3]->setSlidersThumbColours(juce::Colours::yellow);
+    }
+    else
+    {
+        for (auto* band : filterBands)
+        {
+            band->setSlidersThumbColours(juce::Colours::grey);
+        }
+    }
 }

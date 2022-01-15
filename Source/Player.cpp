@@ -21,285 +21,300 @@ typedef LPSTR LPTSTR;
 //#include <string>
 
 //==============================================================================
-Player::Player(int index): openButton("Open"), playButton("Play"), stopButton("Stop"), cueStopButton("6s"), deleteButton("Delete"), cueButton("Cue"),thumbnailCache(5), 
+Player::Player(int index)/*: thumbnailCache(5), 
                             thumbnail(521, formatManager, thumbnailCache), resampledSource(&transport, false, 2), cueResampledSource(&cueTransport, false, 2),
                             filterSource(&resampledSource, false), cuefilterSource(&cueResampledSource, false),
                             channelRemappingSource(&filterSource, false), cuechannelRemappingSource(&cuefilterSource, false),
-                            inputMeter(Meter::Mode::Stereo), outputMeter(Meter::Mode::Stereo), compMeter(Meter::Mode::Stereo_ReductionGain)
+                            inputMeter(Meter::Mode::Stereo), outputMeter(Meter::Mode::Stereo), compMeter(Meter::Mode::Stereo_ReductionGain)*/
 
 {
-   //std::unique_ptr<Settings> settings = std::make_unique<Settings>();
-    playerIndex = index;
-    juce::Timer::startTimer(50);
-    state = Stopped;
-
-    if (!isCart)
-        waveformThumbnailXStart = leftControlsWidth + borderRectangleWidth;
-    else if (isCart)
-    {
-        borderRectangleWidth = 0;
-        waveformThumbnailXStart = leftControlsWidth;
-    }
-
-    playBroadcaster = new juce::ActionBroadcaster();
-    cueBroadcaster = new juce::ActionBroadcaster();
-    draggedBroadcaster = new juce::ActionBroadcaster();
-    fxButtonBroadcaster = new juce::ChangeBroadcaster();
-   /* int playerPosition = playerIndex + 1;
-    addAndMakeVisible(playerPositionLabel);
-    playerPositionLabel.setButtonText(juce::String(playerPosition));
-    playerPositionLabel.setBounds(borderRectangleWidth + 5, 5, 35, 35);
-    playerPositionLabel.onClick = [this]{ assignNextPlayer(); };*/
-
-    addMouseListener(this, true);
-    addAndMakeVisible(&openButton);
-    openButton.onClick = [this] { openButtonClicked(); };
-    openButton.setBounds(rightControlsStart, 80, openDeleteButtonWidth, 20);
-    openButton.setWantsKeyboardFocus(false);
-
-
-    addAndMakeVisible(&deleteButton);
-    deleteButton.onClick = [this] { deleteFile(); };
-    deleteButton.setBounds(rightControlsStart + openDeleteButtonWidth, 80, openDeleteButtonWidth, 20);
-    deleteButton.setWantsKeyboardFocus(false);
-
-    addAndMakeVisible(&playButton);
-    playButton.onClick = [this] { playButtonClicked(); };
-    playButton.setBounds(rightControlsStart, 0, playStopButtonWidth, 39);
-    playButton.setEnabled(false);
-    playButton.setWantsKeyboardFocus(false);
-
-    addAndMakeVisible(&fxButton);
-    fxButton.setButtonText("FX");
-    fxButton.onClick = [this] {fxButtonClicked(); };
-    fxButton.addListener(this);
-
-    addAndMakeVisible(&normButton);
-    normButton.setButtonText("Norm");
-    normButton.onClick = [this] {normButtonClicked(); };
-    normButton.addListener(this);
-
-    //addAndMakeVisible(&stopButton);
-    stopButton.onClick = [this] { stopButtonClicked(); };
-    stopButton.setBounds(rightControlsStart + playStopButtonWidth, 0, playStopButtonWidth, 39);
-    stopButton.setEnabled(false);
-    stopButton.setWantsKeyboardFocus(false);
-
-    addAndMakeVisible(&cueButton);
-    cueButton.onClick = [this] { cueButtonClicked(); };
-    cueButton.setBounds(rightControlsStart + playStopButtonWidth, 0, playStopButtonWidth, 39);
-    cueButton.setEnabled(false);
-    cueButton.setWantsKeyboardFocus(false);
-    cueButton.addListener(this);
-
-    /*addAndMakeVisible(&cueStopButton);
-    cueStopButton.onClick = [this] { cueStopButtonClicked(); };
-    cueStopButton.setBounds(rightControlsStart + 2*playStopButtonWidth, 0, playStopButtonWidth, 39);
-    cueStopButton.setEnabled(false);
-    cueStopButton.setWantsKeyboardFocus(false);*/
-
-
-    addAndMakeVisible(&loopButton);
-    loopButton.setBounds(380, 80, 70, 20);
-    loopButton.setButtonText("loop");
-    loopButton.setEnabled(true);
-    loopButton.onClick = [this]{ updateLoopButton(&loopButton, "loop");; };
-    loopButton.setToggleState(false, true);
-    loopButton.setWantsKeyboardFocus(false);
-
-    addAndMakeVisible(volumeSlider);
-    volumeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);    
-    volumeSlider.setBounds(rightControlsStart + rightControlsWidth, -5, volumeSliderWidth, 100);
-    volumeSlider.setRange(0., 1., 0.01);
-    volumeSlider.setValue(1.0);
-    volumeSlider.addListener(this);
-    //volumeSlider.setValue(0.);
-    sliderValueToset = 1.0;
-    formatManager.registerBasicFormats();
-    volumeSlider.setSkewFactor(0.5, false);
-    volumeSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 15);
-    volumeSlider.setNumDecimalPlacesToDisplay(2);
-    volumeSlider.setWantsKeyboardFocus(false);
-    volumeSlider.setDoubleClickReturnValue(true, 1.);
-    if (! Settings::mouseWheelControlVolume)
-        volumeSlider.setScrollWheelEnabled(false);
-    Settings::maxFaderValue.addListener(this);
-
-
-    addAndMakeVisible(volumeLabel);
-    volumeLabel.setFont(juce::Font(10.00f, juce::Font::plain).withTypefaceStyle("Regular"));
-    volumeLabel.setJustificationType(juce::Justification::centred);
-    volumeLabel.setEditable(false, false, false);
-    volumeLabel.setBounds(rightControlsStart + rightControlsWidth, 90, volumeSliderWidth, 10);
-    volumeLabel.setText(juce::String(juce::Decibels::gainToDecibels(volumeSlider.getValue())), juce::NotificationType::dontSendNotification);
-    volumeLabel.setWantsKeyboardFocus(false);
-
-
-    addAndMakeVisible(trimVolumeSlider);
-    trimVolumeSlider.setRange(-24, 24, 0.5);
-    trimVolumeSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    trimVolumeSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 10);
-    trimVolumeSlider.addListener(this);
-    if (isCart)
-    trimVolumeSlider.setBounds(0 -8, 40, 64, 56);
-    else
-        trimVolumeSlider.setBounds(borderRectangleWidth - 8, 40, 64, 56);
-    trimVolumeSlider.setDoubleClickReturnValue(true, 0.);
-    trimVolumeSlider.setPopupDisplayEnabled(true, true, this, 2000);
-    trimVolumeSlider.setScrollWheelEnabled(false);
-    trimVolumeSlider.setWantsKeyboardFocus(false);
-    trimVolumeSlider.setTextValueSuffix("dB");
-
-    addAndMakeVisible(trimLabel);
-    trimLabel.setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
-    trimLabel.setJustificationType(juce::Justification::centred);
-    trimLabel.setEditable(false, false, false);
-    trimLabel.setText(TRANS("Trim"), juce::NotificationType::dontSendNotification);
-    if (isCart)
-        trimLabel.setBounds(-8, 81, 50, 24);
-        else
-        trimLabel.setBounds(borderRectangleWidth, 81, 50, 24);
-    trimLabel.setWantsKeyboardFocus(false);
-
-
-
-    addAndMakeVisible(remainingTimeLabel);
-    remainingTimeLabel.setBounds(450, 40, 150, 39);
-    remainingTimeLabel.setText(TRANS("0"), juce::NotificationType::dontSendNotification);
-    remainingTimeLabel.setJustificationType(juce::Justification::centred);
-    remainingTimeLabel.setFont(juce::Font(35.00f, juce::Font::plain).withTypefaceStyle("Regular"));
-    remainingTimeLabel.setWantsKeyboardFocus(false);
-
-
-    addAndMakeVisible(soundName);
-    soundName.setBounds(leftControlsWidth + borderRectangleWidth, 80, 330, 20);
-    soundName.setJustificationType(juce::Justification::centred);
-    soundName.setFont(juce::Font(19.0f, juce::Font::bold).withTypefaceStyle("Regular"));
-    soundName.setText(juce::String(""), juce::NotificationType::dontSendNotification);
-    soundName.setWantsKeyboardFocus(false);
-    soundName.setEditable(false, true, false);
-
-
-    addChildComponent(&normalizingLabel);
-    normalizingLabel.setText("Normalizing...", juce::NotificationType::dontSendNotification);
-    normalizingLabel.setFont(juce::Font(20.00f, juce::Font::bold).withTypefaceStyle("Regular"));
-    normalizingLabel.setJustificationType(juce::Justification::centred);
-    normalizingLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(40, 134, 189));
-    normalizingLabel.setColour(juce::Label::ColourIds::backgroundColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-    normalizingLabel.setAlpha(0.7);
-
-    Settings::audioOutputModeValue.addListener(this);
-
-    addAndMakeVisible(optionButton);
-    optionButton.onClick = [this] {optionButtonClicked(); };
-    optionButton.setButtonText("HPF");
-    optionButton.addListener(this);
-
-    addChildComponent(&filterFrequencySlider);
-    filterFrequencySlider.setRange(20, 200);
-    filterFrequencySlider.setValue(filterFrequency, juce::NotificationType::dontSendNotification);
-    filterFrequencySlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    filterFrequencySlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 10);
-    filterFrequencySlider.setDoubleClickReturnValue(true, 0.);
-    filterFrequencySlider.setPopupDisplayEnabled(true, true, this, 2000);
-    filterFrequencySlider.setScrollWheelEnabled(false);
-    filterFrequencySlider.setWantsKeyboardFocus(false);
-    filterFrequencySlider.setNumDecimalPlacesToDisplay(0);
-    filterFrequencySlider.addListener(this);
-    filterFrequencySlider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colours::lightblue);
-    filterFrequencySlider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colours::lightblue);
-    filterFrequencySlider.setTextValueSuffix("Hz");
+ //std::unique_ptr<Settings> settings = std::make_unique<Settings>();
+     playerIndex = index;
+     juce::Timer::startTimer(50);
+     state = Stopped;
     
-    //addAndMakeVisible(&outputMeter);
-    outputMeter.setMeterColour(juce::Colour(229, 149, 0));
-    outputMeter.shouldDrawScaleNumbers(false);
-    outputMeter.shouldDrawExteriorLines(false);
-
-    filterSource.makeInactive();
-    cuefilterSource.makeInactive();
-
-    addAndMakeVisible(startTimeButton);
-    startTimeButton.onClick = [this] {  setTimeClicked(); };
-    startTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(0, 115, 150));
-    startTimeButton.addListener(this);
-
-    addAndMakeVisible(stopTimeButton);
-    stopTimeButton.onClick = [this] { stopTimeClicked(); };
-    stopTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(141, 150, 0));
-    stopTimeButton.addListener(this);
-
-
-    //TODO régler bug accents dans string
-
-    addAndMakeVisible(playerIDLabel);
-    //playerIDLabel.setBounds(400, 80, 50, 20);
-    playerIDLabel.setText(juce::String(playerIndex), juce::NotificationType::dontSendNotification);
-        
-    draggedPlayer.setValue(-1);
-
-    thumbnail.addChangeListener(this);
-    thumbnailBounds.setBounds(leftControlsWidth + borderRectangleWidth, 0, waveformThumbnailXSize, 80);
-
-
-    if (isCart == true)
-    {
-        waveformThumbnailXSize = getParentWidth() - leftControlsWidth - rightControlsWidth - borderRectangleWidth * 2 - volumeSliderWidth - 2 * cartButtonsControlWidth - 20 - dragZoneWidth - 30;
-        waveformThumbnailXEnd = waveformThumbnailXStart + waveformThumbnailXSize;
-    }
-    else if (isCart == false)
-    {
-        waveformThumbnailXSize = getParentWidth() - leftControlsWidth - rightControlsWidth - borderRectangleWidth * 2 - volumeSliderWidth - playlistButtonsControlWidth - dragZoneWidth;
-        waveformThumbnailXEnd = waveformThumbnailXStart + waveformThumbnailXSize;
-    }
-    thumbnailBounds.setBounds(leftControlsWidth + borderRectangleWidth, 0, waveformThumbnailXSize, 80);
-    rightControlsStart = leftControlsWidth + borderRectangleWidth + waveformThumbnailXSize;
-    volumeLabelStart = rightControlsStart + rightControlsWidth;
-    playButton.setBounds(rightControlsStart, 0, playStopButtonWidth, 39);
-    openButton.setBounds(rightControlsStart, 80, openDeleteButtonWidth, 20);
-    stopButton.setBounds(rightControlsStart + playStopButtonWidth, 0, playStopButtonWidth, 39);
-    cueStopButton.setBounds(rightControlsStart + 2 * playStopButtonWidth, 0, playStopButtonWidth, 39);
-    deleteButton.setBounds(rightControlsStart + openDeleteButtonWidth, 80, openDeleteButtonWidth, 20);
-    remainingTimeLabel.setBounds(rightControlsStart, 40, 150, 39);
-    volumeSlider.setBounds(volumeLabelStart, -5, volumeSliderWidth, 100);
-    volumeLabel.setBounds(volumeLabelStart, 90, volumeSliderWidth, 10);
-    soundName.setBounds(leftControlsWidth + borderRectangleWidth + optionButtonWidth, 80, waveformThumbnailXSize - 50 - optionButtonWidth, 20);
-    loopButton.setBounds(leftControlsWidth + borderRectangleWidth + waveformThumbnailXSize - 50, 80, 50, 20);
-
-    /*auto preloadedFile = juce::File("D:\Sons\paris 22k.wav");
-    loadFile(preloadedFile);*/
-
-    //DBG(totalPlayerWidth);
-    addChildComponent(playPlayHead);
-    addChildComponent(cuePlayHead);
-    addChildComponent(inMark);
-    addChildComponent(outMark);
-    playPlayHead.setSize(2, 80);
-    cuePlayHead.setSize(2, 80);
-    inMark.setSize(2, 80);
-    outMark.setSize(2, 80);
-    playPlayHead.setColour(juce::Colours::white);
-    cuePlayHead.setColour(juce::Colours::black);
-    inMark.setColour(juce::Colour(0, 196, 255));
-    outMark.setColour(juce::Colour(238, 255, 0));
-
+     if (!isCart)
+         waveformThumbnailXStart = leftControlsWidth + borderRectangleWidth;
+     else if (isCart)
+     {
+         borderRectangleWidth = 0;
+         waveformThumbnailXStart = leftControlsWidth;
+     }
     
+     playBroadcaster = new juce::ActionBroadcaster();
+     cueBroadcaster = new juce::ActionBroadcaster();
+     draggedBroadcaster = new juce::ActionBroadcaster();
+     fxButtonBroadcaster = new juce::ChangeBroadcaster();
+     /* int playerPosition = playerIndex + 1;
+     addAndMakeVisible(playerPositionLabel);
+     playerPositionLabel.setButtonText(juce::String(playerPosition));
+     playerPositionLabel.setBounds(borderRectangleWidth + 5, 5, 35, 35);
+     playerPositionLabel.onClick = [this]{ assignNextPlayer(); };*/
+    
+     addMouseListener(this, true);
+     addAndMakeVisible(&openButton);
+     openButton.onClick = [this] { openButtonClicked(); };
+     openButton.setBounds(rightControlsStart, 80, openDeleteButtonWidth, 20);
+     openButton.setWantsKeyboardFocus(false);
+    
+    
+     addAndMakeVisible(&deleteButton);
+     deleteButton.onClick = [this] { deleteFile(); };
+     deleteButton.setBounds(rightControlsStart + openDeleteButtonWidth, 80, openDeleteButtonWidth, 20);
+     deleteButton.setWantsKeyboardFocus(false);
+    
+     addAndMakeVisible(&playButton);
+     playButton.onClick = [this] { playButtonClicked(); };
+     playButton.setBounds(rightControlsStart, 0, playStopButtonWidth, 39);
+     playButton.setEnabled(false);
+     playButton.setWantsKeyboardFocus(false);
+    
+     addAndMakeVisible(&fxButton);
+     fxButton.setButtonText("FX");
+     fxButton.onClick = [this] {fxButtonClicked(); };
+     fxButton.addListener(this);
+    
+     addAndMakeVisible(&normButton);
+     normButton.setButtonText("Norm");
+     normButton.onClick = [this] {normButtonClicked(); };
+     normButton.addListener(this);
+    
+     addAndMakeVisible(&denoiseButton);
+     denoiseButton.setButtonText("DNS");
+     denoiseButton.onClick = [this] {denoiseButtonClicked(); };
+     denoiseButton.addListener(this);
+     denoiser.denoiseDoneBroadcaster->addChangeListener(this);
+     denoiser.processStartedBroadcaster->addChangeListener(this);
+    
+     //addAndMakeVisible(&stopButton);
+     stopButton.onClick = [this] { stopButtonClicked(); };
+     stopButton.setBounds(rightControlsStart + playStopButtonWidth, 0, playStopButtonWidth, 39);
+     stopButton.setEnabled(false);
+     stopButton.setWantsKeyboardFocus(false);
+    
+     addAndMakeVisible(&cueButton);
+     cueButton.onClick = [this] { cueButtonClicked(); };
+     cueButton.setBounds(rightControlsStart + playStopButtonWidth, 0, playStopButtonWidth, 39);
+     cueButton.setEnabled(false);
+     cueButton.setWantsKeyboardFocus(false);
+     cueButton.addListener(this);
+    
+     /*addAndMakeVisible(&cueStopButton);
+     cueStopButton.onClick = [this] { cueStopButtonClicked(); };
+     cueStopButton.setBounds(rightControlsStart + 2*playStopButtonWidth, 0, playStopButtonWidth, 39);
+     cueStopButton.setEnabled(false);
+     cueStopButton.setWantsKeyboardFocus(false);*/
+    
+    
+     addAndMakeVisible(&loopButton);
+     loopButton.setBounds(380, 80, 70, 20);
+     loopButton.setButtonText("loop");
+     loopButton.setEnabled(true);
+     loopButton.onClick = [this]{ updateLoopButton(&loopButton, "loop");; };
+     loopButton.setToggleState(false, true);
+     loopButton.setWantsKeyboardFocus(false);
+    
+     addAndMakeVisible(volumeSlider);
+     volumeSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);    
+     volumeSlider.setBounds(rightControlsStart + rightControlsWidth, -5, volumeSliderWidth, 100);
+     volumeSlider.setRange(0., 1., 0.01);
+     volumeSlider.setValue(1.0);
+     volumeSlider.addListener(this);
+     //volumeSlider.setValue(0.);
+     sliderValueToset = 1.0;
+     formatManager.registerBasicFormats();
+     volumeSlider.setSkewFactor(0.5, false);
+     volumeSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 15);
+     volumeSlider.setNumDecimalPlacesToDisplay(2);
+     volumeSlider.setWantsKeyboardFocus(false);
+     volumeSlider.setDoubleClickReturnValue(true, 1.);
+     if (! Settings::mouseWheelControlVolume)
+         volumeSlider.setScrollWheelEnabled(false);
+     Settings::maxFaderValue.addListener(this);
+    
+    
+     addAndMakeVisible(volumeLabel);
+     volumeLabel.setFont(juce::Font(10.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+     volumeLabel.setJustificationType(juce::Justification::centred);
+     volumeLabel.setEditable(false, false, false);
+     volumeLabel.setBounds(rightControlsStart + rightControlsWidth, 90, volumeSliderWidth, 10);
+     volumeLabel.setText(juce::String(juce::Decibels::gainToDecibels(volumeSlider.getValue())), juce::NotificationType::dontSendNotification);
+     volumeLabel.setWantsKeyboardFocus(false);
+    
+    
+     addAndMakeVisible(trimVolumeSlider);
+     trimVolumeSlider.setRange(-24, 24, 0.5);
+     trimVolumeSlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+     trimVolumeSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 10);
+     trimVolumeSlider.addListener(this);
+     if (isCart)
+     trimVolumeSlider.setBounds(0 -8, 40, 64, 56);
+     else
+         trimVolumeSlider.setBounds(borderRectangleWidth - 8, 40, 64, 56);
+     trimVolumeSlider.setDoubleClickReturnValue(true, 0.);
+     trimVolumeSlider.setPopupDisplayEnabled(true, true, this, 2000);
+     trimVolumeSlider.setScrollWheelEnabled(false);
+     trimVolumeSlider.setWantsKeyboardFocus(false);
+     trimVolumeSlider.setTextValueSuffix("dB");
+    
+     addAndMakeVisible(trimLabel);
+     trimLabel.setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+     trimLabel.setJustificationType(juce::Justification::centred);
+     trimLabel.setEditable(false, false, false);
+     trimLabel.setText(TRANS("Trim"), juce::NotificationType::dontSendNotification);
+     if (isCart)
+         trimLabel.setBounds(-8, 81, 50, 24);
+         else
+         trimLabel.setBounds(borderRectangleWidth, 81, 50, 24);
+     trimLabel.setWantsKeyboardFocus(false);
+    
+    
+    
+     addAndMakeVisible(remainingTimeLabel);
+     remainingTimeLabel.setBounds(450, 40, 150, 39);
+     remainingTimeLabel.setText(TRANS("0"), juce::NotificationType::dontSendNotification);
+     remainingTimeLabel.setJustificationType(juce::Justification::centred);
+     remainingTimeLabel.setFont(juce::Font(35.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+     remainingTimeLabel.setWantsKeyboardFocus(false);
+    
+    
+     addAndMakeVisible(soundName);
+     soundName.setBounds(leftControlsWidth + borderRectangleWidth, 80, 330, 20);
+     soundName.setJustificationType(juce::Justification::centred);
+     soundName.setFont(juce::Font(19.0f, juce::Font::bold).withTypefaceStyle("Regular"));
+     soundName.setText(juce::String(""), juce::NotificationType::dontSendNotification);
+     soundName.setWantsKeyboardFocus(false);
+     soundName.setEditable(false, true, false);
+    
+    
+     addChildComponent(&normalizingLabel);
+     normalizingLabel.setText("Normalizing...", juce::NotificationType::dontSendNotification);
+     normalizingLabel.setFont(juce::Font(20.00f, juce::Font::bold).withTypefaceStyle("Regular"));
+     normalizingLabel.setJustificationType(juce::Justification::centred);
+     normalizingLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(40, 134, 189));
+     normalizingLabel.setColour(juce::Label::ColourIds::backgroundColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+     normalizingLabel.setAlpha(0.7);
+    
+     Settings::audioOutputModeValue.addListener(this);
+    
+     addAndMakeVisible(optionButton);
+     optionButton.onClick = [this] {optionButtonClicked(); };
+     optionButton.setButtonText("HPF");
+     optionButton.addListener(this);
+    
+     addChildComponent(&filterFrequencySlider);
+     filterFrequencySlider.setRange(20, 200);
+     filterFrequencySlider.setValue(filterFrequency, juce::NotificationType::dontSendNotification);
+     filterFrequencySlider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+     filterFrequencySlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 10);
+     filterFrequencySlider.setDoubleClickReturnValue(true, 0.);
+     filterFrequencySlider.setPopupDisplayEnabled(true, true, this, 2000);
+     filterFrequencySlider.setScrollWheelEnabled(false);
+     filterFrequencySlider.setWantsKeyboardFocus(false);
+     filterFrequencySlider.setNumDecimalPlacesToDisplay(0);
+     filterFrequencySlider.addListener(this);
+     filterFrequencySlider.setColour(juce::Slider::ColourIds::rotarySliderFillColourId, juce::Colours::lightblue);
+     filterFrequencySlider.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId, juce::Colours::lightblue);
+     filterFrequencySlider.setTextValueSuffix("Hz");
+     
+     //addAndMakeVisible(&outputMeter);
+     outputMeter.setMeterColour(juce::Colour(229, 149, 0));
+     outputMeter.shouldDrawScaleNumbers(false);
+     outputMeter.shouldDrawExteriorLines(false);
+    
+     filterSource.makeInactive();
+     cuefilterSource.makeInactive();
+    
+     addAndMakeVisible(startTimeButton);
+     startTimeButton.onClick = [this] {  setTimeClicked(); };
+     startTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(0, 115, 150));
+     startTimeButton.addListener(this);
+    
+     addAndMakeVisible(stopTimeButton);
+     stopTimeButton.onClick = [this] { stopTimeClicked(); };
+     stopTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(141, 150, 0));
+     stopTimeButton.addListener(this);
+    
+    
+     //TODO régler bug accents dans string
+    
+     addAndMakeVisible(playerIDLabel);
+     //playerIDLabel.setBounds(400, 80, 50, 20);
+     playerIDLabel.setText(juce::String(playerIndex), juce::NotificationType::dontSendNotification);
+         
+     draggedPlayer.setValue(-1);
+    
+     thumbnail.addChangeListener(this);
+     thumbnailBounds.setBounds(leftControlsWidth + borderRectangleWidth, 0, waveformThumbnailXSize, 80);
+    
+    
+     if (isCart == true)
+     {
+         waveformThumbnailXSize = getParentWidth() - leftControlsWidth - rightControlsWidth - borderRectangleWidth * 2 - volumeSliderWidth - 2 * cartButtonsControlWidth - 20 - dragZoneWidth - 30;
+         waveformThumbnailXEnd = waveformThumbnailXStart + waveformThumbnailXSize;
+     }
+     else if (isCart == false)
+     {
+         waveformThumbnailXSize = getParentWidth() - leftControlsWidth - rightControlsWidth - borderRectangleWidth * 2 - volumeSliderWidth - playlistButtonsControlWidth - dragZoneWidth;
+         waveformThumbnailXEnd = waveformThumbnailXStart + waveformThumbnailXSize;
+     }
+     thumbnailBounds.setBounds(leftControlsWidth + borderRectangleWidth, 0, waveformThumbnailXSize, 80);
+     rightControlsStart = leftControlsWidth + borderRectangleWidth + waveformThumbnailXSize;
+     volumeLabelStart = rightControlsStart + rightControlsWidth;
+     playButton.setBounds(rightControlsStart, 0, playStopButtonWidth, 39);
+     openButton.setBounds(rightControlsStart, 80, openDeleteButtonWidth, 20);
+     stopButton.setBounds(rightControlsStart + playStopButtonWidth, 0, playStopButtonWidth, 39);
+     cueStopButton.setBounds(rightControlsStart + 2 * playStopButtonWidth, 0, playStopButtonWidth, 39);
+     deleteButton.setBounds(rightControlsStart + openDeleteButtonWidth, 80, openDeleteButtonWidth, 20);
+     remainingTimeLabel.setBounds(rightControlsStart, 40, 150, 39);
+     volumeSlider.setBounds(volumeLabelStart, -5, volumeSliderWidth, 100);
+     volumeLabel.setBounds(volumeLabelStart, 90, volumeSliderWidth, 10);
+     soundName.setBounds(leftControlsWidth + borderRectangleWidth + optionButtonWidth, 80, waveformThumbnailXSize - 50 - optionButtonWidth, 20);
+     loopButton.setBounds(leftControlsWidth + borderRectangleWidth + waveformThumbnailXSize - 50, 80, 50, 20);
+    
+     /*auto preloadedFile = juce::File("D:\Sons\paris 22k.wav");
+     loadFile(preloadedFile);*/
+    
+     //DBG(totalPlayerWidth);
+     addChildComponent(playPlayHead);
+     addChildComponent(cuePlayHead);
+     addChildComponent(inMark);
+     addChildComponent(outMark);
+     playPlayHead.setSize(2, 80);
+     cuePlayHead.setSize(2, 80);
+     inMark.setSize(2, 80);
+     outMark.setSize(2, 80);
+     playPlayHead.setColour(juce::Colours::white);
+     cuePlayHead.setColour(juce::Colours::black);
+     inMark.setColour(juce::Colour(0, 196, 255));
+     outMark.setColour(juce::Colour(238, 255, 0));
+    
+     
+    
+     mixer.addInputSource(&channelRemappingSource, false);
+     cueMixer.addInputSource(&cuechannelRemappingSource, false);
+     cueMixer.addInputSource(&denoiser.resampledSource, false);
+     Settings::sampleRateValue.addListener(this);
+     setChannelsMapping();
+    
+     convertingBar.reset(new juce::ProgressBar(progress));
+     addChildComponent(*convertingBar);
+     //convertingBar->setColour(juce::ProgressBar::ColourIds::backgroundColourId, BLUE);
+     convertingBar->setTextToDisplay("Converting...");
+    
+    
+     repaint();
+}
 
-    mixer.addInputSource(&channelRemappingSource, false);
-    cueMixer.addInputSource(&cuechannelRemappingSource, false);
-    Settings::sampleRateValue.addListener(this);
-    setChannelsMapping();
-
-    convertingBar.reset(new juce::ProgressBar(progress));
-    addChildComponent(*convertingBar);
-    //convertingBar->setColour(juce::ProgressBar::ColourIds::foregroundColourId, juce::Colour(40, 134, 189));
-    convertingBar->setTextToDisplay("Converting...");
-
-
-    repaint();
-    }
+//Player::Player& operator=(Player&& a)
+//{
+//
+//}
 
 Player::~Player()
 {
+    denoiser.denoiseDoneBroadcaster->removeChangeListener(this);
+    denoiser.processStartedBroadcaster->removeChangeListener(this);
     delete playBroadcaster;
     delete cueBroadcaster;
     delete draggedBroadcaster;
@@ -636,8 +651,9 @@ void Player::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    fxButton.setBounds(leftControlsWidth + borderRectangleWidth, 81, fxButtonSize, 18);
-    normButton.setBounds(fxButton.getRight(), 81, normButtonSize, 18);
+    fxButton.setBounds(leftControlsWidth + borderRectangleWidth + 1, 81, fxButtonSize, 16);
+    normButton.setBounds(fxButton.getRight() + 2, 81, normButtonSize, 16);
+    denoiseButton.setBounds(normButton.getRight() + 2, 81, normButtonSize, 16);
     if (isCart == true)
     {
         if (!isEightPlayerMode)
@@ -648,7 +664,7 @@ void Player::resized()
         trimVolumeSlider.setBounds(0 - 8, 40, 64, 56);
        /* playerPositionLabel.setBounds(0 + 5, 5, 35, 35);*/
         borderRectangleWidth = 0;
-        soundName.setBounds(normButton.getRight(), 80, waveformThumbnailXSize - 50 - fxButtonSize - normButtonSize, 20);
+        soundName.setBounds(denoiseButton.getRight() + 1, 80, waveformThumbnailXSize - 50 - fxButtonSize - normButtonSize, 20);
         trimLabel.setBounds(0, 81, 50, 24);
     }
     else if (isCart == false)
@@ -656,7 +672,7 @@ void Player::resized()
         //waveformThumbnailXSize = getParentWidth() - leftControlsWidth - rightControlsWidth - borderRectangleWidth * 2 - volumeSliderWidth - playlistButtonsControlWidth - dragZoneWidth - 20;
         waveformThumbnailXSize = getWidth() - leftControlsWidth - rightControlsWidth - borderRectangleWidth * 2 - volumeSliderWidth;
         waveformThumbnailXEnd = waveformThumbnailXStart + waveformThumbnailXSize;
-        soundName.setBounds(leftControlsWidth + borderRectangleWidth + fxButtonSize + normButtonSize, 80, waveformThumbnailXSize - fxButtonSize - normButtonSize, 20);
+        soundName.setBounds(denoiseButton.getRight() + 1, 80, waveformThumbnailXSize - fxButtonSize - 2*normButtonSize, 20);
         trimLabel.setBounds(borderRectangleWidth, 81, 50, 24);
     }
     thumbnailBounds.setBounds(leftControlsWidth + borderRectangleWidth, 0, waveformThumbnailXSize, 80);
@@ -713,6 +729,7 @@ void Player::timerCallback()
 
     volumeSlider.setValue(sliderValueToset);
     trimVolumeSlider.setValue(trimValueToSet);
+
     if ((float)transport.getCurrentPosition() > stopTime)
     {
         if (looping == true)
@@ -734,22 +751,22 @@ void Player::timerCallback()
     updateRemainingTime();
 
     //Cue PlayHead
-
-    auto cueaudioPosition = (float)cueTransport.getCurrentPosition();
-    auto cuecurrentPosition = cueTransport.getLengthInSeconds();
-    auto cuedrawPosition = ((cueaudioPosition / cuecurrentPosition) * (float)thumbnailBounds.getWidth())
-        + (float)thumbnailBounds.getX();
-
-    if (cuedrawPosition > (leftControlsWidth + borderRectangleWidth) && cuedrawPosition < rightControlsStart)
+        auto cueaudioPosition = (float)cueTransport.getCurrentPosition();
+        auto cuecurrentPosition = cueTransport.getLengthInSeconds();
+        auto cuedrawPosition = ((cueaudioPosition / cuecurrentPosition) * (float)thumbnailBounds.getWidth())
+            + (float)thumbnailBounds.getX();
+    if (cueTransport.isPlaying() || mouseIsDragged)
     {
-        cuePlayHead.setVisible(true);
-        cuePlayHead.setTopLeftPosition(cuedrawPosition, 0);
+        if (cuedrawPosition > (leftControlsWidth + borderRectangleWidth) && cuedrawPosition < rightControlsStart)
+        {
+            cuePlayHead.setVisible(true);
+            cuePlayHead.setTopLeftPosition(cuedrawPosition, 0);
+        }
+        else
+            cuePlayHead.setVisible(false);
     }
-    else
-        cuePlayHead.setVisible(false);
 
-
-    if (cueTransport.isPlaying() || drawCue == true)
+    if (cueTransport.isPlaying() || mouseIsDragged)
     {
         //CUE TIME LABEL
         int remainingSeconds = juce::int16(trunc((float)cueTransport.getLengthInSeconds() - (float)cueTransport.getCurrentPosition()));
@@ -1226,6 +1243,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         convertingBar->setVisible(false);
         convertingBar->setTextToDisplay("Converting...");
         hasBeenNormalized = true;
+        //normButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
     }
     else if (source == ffmpegThread.conversionEndedBroadcaster)
     {
@@ -1233,6 +1251,28 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         convertingBar->setVisible(false);
         loadFile(convertedFilePath);
         extactName(convertedFilePath.toStdString());
+    }
+    else if (source == denoiser.denoiseDoneBroadcaster)
+    {
+        std::string n = newName;
+        std::string oldFilePath = loadedFilePath;
+        denoisedFile = denoiser.getDenoisedFile();
+        denoisedFileLoaded = true;
+        loadFile(denoisedFile);
+        setName(n);
+        loadedFilePath = oldFilePath;
+        convertingBar->setVisible(false);
+        denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
+    }
+    else if (source == denoiser.processStartedBroadcaster)
+    {
+        if (denoiseWindow != nullptr)
+        {
+            if (juce::DialogWindow* dw = denoiser.findParentComponentOfClass<juce::DialogWindow>())
+                dw->exitModalState(1234);
+            convertingBar->setTextToDisplay("Denoising...");
+            convertingBar->setVisible(true);
+        }
     }
 }
 
@@ -1348,6 +1388,7 @@ void Player::mouseDown(const juce::MouseEvent& event)
                 thumbnailDrawEnd = thumbnailMiddle + (thumbnailMiddle * thumbnailHorizontalZoom);
                 thumbnailDrawSize = thumbnailDrawEnd - thumbnailDrawStart;
                 drawCue = true;
+                mouseIsDragged = true;
                 repaintThumbnail();
                 //cueBroadcaster->sendActionMessage(juce::String(playerIndex));
             }
@@ -1362,6 +1403,7 @@ void Player::mouseUp(const juce::MouseEvent& event)
     thumbnailDragStart = 0;
     setMouseCursor(juce::MouseCursor::NormalCursor);
     drawCue = false;
+    mouseIsDragged = false;
 }
 
 void Player::mouseDrag(const juce::MouseEvent& event)
@@ -1378,10 +1420,10 @@ void Player::mouseDrag(const juce::MouseEvent& event)
                 mouseDragInSeconds = (((float)mouseDragRelativeXPosition* cueTransport.getLengthInSeconds()) / (float)thumbnailBounds.getWidth());
                 cueTransport.setPosition(mouseDragInSeconds);
                 setDraggedPlayer();
-
+                mouseIsDragged = true;
                 //draggedBroadcaster->sendActionMessage(juce::String(playerIndex));
                 //cueBroadcaster->sendActionMessage(juce::String(playerIndex));
-                drawCue = true;
+                //drawCue = true;
 
             }
     }
@@ -2175,16 +2217,17 @@ void Player::setDraggedPlayer()
 
 void Player::fxButtonClicked()
 {
+    fxButtonBroadcaster->sendChangeMessage();
     if (rightClickDown)
     {
-        fxEnabled = false;
+        fxEnabled = !fxEnabled;
         bypassFX(!fxEnabled);
         fxButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         rightClickDown = false;
     }
     else
     {
-        fxButtonBroadcaster->sendChangeMessage();
+       //fxButtonBroadcaster->sendChangeMessage();
         if (!fxEnabled)
         {
             fxEnabled = true;
@@ -2203,6 +2246,7 @@ void Player::bypassFX(bool isBypassed)
         fxButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     else
         fxButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
+
 }
 
 bool Player::getBypassed()
@@ -2220,4 +2264,59 @@ void Player::normalize(std::string p)
     CalculateR128Integrated(p);
     convertingBar->setTextToDisplay("Normalizing...");
     convertingBar->setVisible(true);
+}
+
+void Player::setFxEditedPlayer(bool isEdited)
+{
+    if (isEdited)
+        fxButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::red);
+    else
+    {
+        if (fxEnabled)
+            fxButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
+        else
+            fxButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    }
+
+}
+
+juce::TextButton* Player::getfxButton()
+{
+    return &fxButton;
+}
+
+void Player::denoiseButtonClicked()
+{
+    if (rightClickDown)
+    {
+        if (denoisedFileLoaded)
+        {
+            std::string n = newName;
+            loadFile(loadedFilePath);
+            denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+            denoisedFileLoaded = false;
+            setName(n);
+        }
+        else
+        {
+            if (!denoisedFile.empty())
+            {
+                std::string n = newName;
+                std::string oldFilePath = loadedFilePath;
+                loadFile(denoisedFile);
+                denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
+                denoisedFileLoaded = true;
+                setName(n);
+                loadedFilePath = oldFilePath;
+            }
+        }
+        rightClickDown = false;
+    }
+    else
+    {
+        denoiseWindow = std::make_unique<juce::DialogWindow>("Denoiser" + soundName.getText(), getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true);
+        denoiseWindow->showDialog("Denoiser - " + soundName.getText(), &denoiser, this, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true);
+        denoiser.setFilePath(loadedFilePath);
+        denoiser.setTransportGain(trimVolumeSlider.getValue());
+    }
 }

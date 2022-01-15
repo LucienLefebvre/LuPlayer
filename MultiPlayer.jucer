@@ -4,6 +4,7 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="xbXPa2" name="MultiPlayer">
     <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
+      <FILE id="cif9Kn" name="DenoiseThread.h" compile="0" resource="0" file="Source/DenoiseThread.h"/>
       <FILE id="TV1izO" name="batchConvertThread.h" compile="0" resource="0"
             file="Source/batchConvertThread.h"/>
       <FILE id="fcnpvs" name="convertObject.cpp" compile="1" resource="0"
@@ -113,6 +114,8 @@
             file="Source/DataBaseImport.h"/>
       <FILE id="e0lFg9" name="ClipEffect.cpp" compile="1" resource="0" file="Source/ClipEffect.cpp"/>
       <FILE id="xsAOp3" name="ClipEffect.h" compile="0" resource="0" file="Source/ClipEffect.h"/>
+      <FILE id="BERWeG" name="Denoiser.cpp" compile="1" resource="0" file="Source/Denoiser.cpp"/>
+      <FILE id="PeXVTX" name="Denoiser.h" compile="0" resource="0" file="Source/Denoiser.h"/>
       <FILE id="pCSuVZ" name="R128IntegratedThread.h" compile="0" resource="0"
             file="Source/R128IntegratedThread.h"/>
     </GROUP>

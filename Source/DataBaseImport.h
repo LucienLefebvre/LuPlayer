@@ -217,7 +217,7 @@ private:
 
 
                 std::string fileNameWithoutExtension = createdFile.getFileNameWithoutExtension().toStdString();
-                juce::File destinationFile = juce::File(std::string(createdFile.getParentDirectory().getFullPathName().toStdString() + "\\" + fileNameWithoutExtension + "\.BWF"));
+                juce::File destinationFile = juce::File(std::string(createdFile.getParentDirectory().getFullPathName().toStdString() + "\\" + fileNameWithoutExtension + "\.bwf"));
                 createdFile.moveFileTo(destinationFile);
                 std::string injectionString = "UPDATE ABC4.SYSADM.T_ITEM "
                     "SET DATE_BEG_ITEM = GETDATE(), DATE_END_ITEM = GETDATE(), "

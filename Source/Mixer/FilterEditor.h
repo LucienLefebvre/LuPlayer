@@ -32,6 +32,7 @@ public:
     void setColour(juce::Colour colour);
     int getFilterGraphXStart();
 
+
 private:
     void addFilterBand(int i);
 
@@ -60,6 +61,8 @@ private:
     int geYPositionFromGain(float gain);
 
     void sendParameters(int filterBand);
+
+    void setBypassedSliderColours(bool isBypassed);
 
     double actualSampleRate;
     int actualSamplesPerBlockExpected;

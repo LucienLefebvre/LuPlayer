@@ -1144,7 +1144,7 @@ void Playlist::rearrangePlayers()
     for (auto i = 0; i < players.size() + 1; i++)
     {
 
-        if (players[i] != nullptr)
+        if (players[i] != nullptr && playersPositionLabels[i] != nullptr)
         {
             players[i]->setPlayerIndex(i);
             //addAndMakeVisible(playersPositionLabels[i]);
@@ -1275,8 +1275,11 @@ void Playlist::updateButtonsStates()
                 || fader2IsPlaying == true
                 || spaceBarIsPlaying == true)
             {
-                addPlayersButtons[i]->setEnabled(false);
-                removePlayersButtons[i]->setEnabled(false);
+                if (addPlayersButtons[i] != nullptr && removePlayersButtons[i] != nullptr)
+                {
+                    addPlayersButtons[i]->setEnabled(false);
+                    removePlayersButtons[i]->setEnabled(false);
+                }
                 //if (fader1Player == i || fader2Player == i)
                 //{
                 //    swapNextButtons[i]->setEnabled(false);
@@ -1286,9 +1289,12 @@ void Playlist::updateButtonsStates()
             }
             else
             {
-                //swapNextButtons[i]->setEnabled(true);
-                removePlayersButtons[i]->setEnabled(true);
-                addPlayersButtons[i]->setEnabled(true);
+                if (addPlayersButtons[i] != nullptr && removePlayersButtons[i] != nullptr)
+                {
+                    //swapNextButtons[i]->setEnabled(true);
+                    removePlayersButtons[i]->setEnabled(true);
+                    addPlayersButtons[i]->setEnabled(true);
+                }
             }
 
             //if (i == (players.size() - 1))
@@ -1747,10 +1753,10 @@ void Playlist::mouseUp(const juce::MouseEvent& event)
     }
     else if (playlistType == 1 && getMouseXYRelative().getX() > getWidth() - dragZoneWidth)
     {
-        if (!fader1IsPlaying)
+        /*if (!fader1IsPlaying)
             assignLeftFader(player);
         else if (!fader2IsPlaying)
-            assignRightFader(player);
+            assignRightFader(player);*/
         if (players[player] != nullptr)
         {
             players[player]->setDraggedPlayer();
@@ -1790,7 +1796,8 @@ void Playlist::timerCallback()
 {
     for (auto i = 0; i < players.size(); i++)
     {
-        meters[i]->setMeterData(players[i]->getOutputMeter().getMeterData());
+        if (players[i] != nullptr && meters[i] != nullptr)
+            meters[i]->setMeterData(players[i]->getOutputMeter().getMeterData());
     }
     if (playlistType == 1)
     {

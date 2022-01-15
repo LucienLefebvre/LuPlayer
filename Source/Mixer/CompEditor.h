@@ -220,6 +220,16 @@ public:
     {
     }
 
+    void updateBypassedSliders()
+    {
+        bool isBypassed = editedCompProcessor->getBypass();
+        thresholdSlider->setEnabled(!isBypassed);
+        attackSlider->setEnabled(!isBypassed);
+        releaseSlider->setEnabled(!isBypassed);
+        gainSlider->setEnabled(!isBypassed);
+        ratioSlider->setEnabled(!isBypassed);
+    }
+
     void setEditedCompProcessor(CompProcessor& processor) 
     {
         editedCompProcessor = &processor;

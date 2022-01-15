@@ -977,18 +977,20 @@ void SoundPlayer::OSCsend(int destination, juce::String string)
 
 void SoundPlayer::mouseDragGetInfos(int playlistSource, int playerID)
 {
-    if (myPlaylists[playlistSource]->players[playerID] != nullptr)
+    auto* player = myPlaylists[playlistSource]->players[playerID];
+    if (player != nullptr)
     {
-        draggedFilterParameters = myPlaylists[playlistSource]->players[playerID]->getFilterProcessor().getGlobalFilterParameters();
-        draggedNormalized = myPlaylists[playlistSource]->players[playerID]->getHasBeenNormalized();
-        draggedPath = myPlaylists[playlistSource]->players[playerID]->getFilePath();
-        draggedTrim = myPlaylists[playlistSource]->players[playerID]->getTrimVolume();
-        draggedName = myPlaylists[playlistSource]->players[playerID]->getName();
-        draggedHpfEnabled = myPlaylists[playlistSource]->players[playerID]->isHpfEnabled();
-        draggedStartTimeSet = myPlaylists[playlistSource]->players[playerID]->startTimeSet;
-        draggedStopTimeSet = myPlaylists[playlistSource]->players[playerID]->stopTimeSet;
-        draggedStartTime = myPlaylists[playlistSource]->players[playerID]->getStart();
-        draggedStopTime = myPlaylists[playlistSource]->players[playerID]->getStop();
+        draggedFilterParameters = player->getFilterProcessor().getGlobalFilterParameters();
+        draggedFxBypassed = player->getBypassed();
+        draggedNormalized = player->getHasBeenNormalized();
+        draggedPath = player->getFilePath();
+        draggedTrim = player->getTrimVolume();
+        draggedName = player->getName();
+        draggedHpfEnabled = player->isHpfEnabled();
+        draggedStartTimeSet = player->startTimeSet;
+        draggedStopTimeSet = player->stopTimeSet;
+        draggedStartTime = player->getStart();
+        draggedStopTime = player->getStop();
         mouseDragged = true;
     }
 }
@@ -1175,64 +1177,73 @@ bool SoundPlayer::isDraggable(int playlistSource, int playerSource, int playlist
 
 void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestination)
 {
-    if (myPlaylists[playlistDestination] != nullptr
+    auto* destinationPlaylist = myPlaylists[playlistDestination];
+    auto* sourcePlaylist = myPlaylists[playlistDragSource];
+    auto sourcePlayer = myPlaylists[playlistDragSource]->players[playerDragSource];
+    if (destinationPlaylist != nullptr
         && myPlaylists[playlistDragSource] != nullptr)
     {
-        if (insertTop == true)
+        //if (insertTop == true)
+        //{
+        //    if (isDraggable(playlistDragSource, playerDragSource, playlistDestination, playerIdDestination))
+        //    {
+        //        if (myPlaylists[playlistDestination] == myPlaylists[playlistDragSource])
+        //        {
+        //            reassignFaders(playerIdDestination, playerDragSource, playlistDestination);
+        //            myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
+        //            checkAndRemovePlayer(playlistDestination, playerDragSource + 1);
+        //            playerIdDestination++;
+        //            setSoundInfos(playlistDestination, playerIdDestination);
+        //        }
+        //        else
+        //        {
+
+        //            myPlaylists[playlistDestination]->fader1Player++;
+        //            myPlaylists[playlistDestination]->fader2Player++;
+
+        //            myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
+        //            playerIdDestination++;
+        //            setSoundInfos(playlistDestination, playerIdDestination);
+        //        }
+        //        //clearDragInfos();
+        //    }
+        //}
+        if (destinationPlaylist->players[playerIdDestination] != myPlaylists[playlistDragSource]->players[playerDragSource])
         {
             if (isDraggable(playlistDragSource, playerDragSource, playlistDestination, playerIdDestination))
             {
-                if (myPlaylists[playlistDestination] == myPlaylists[playlistDragSource])
+                if (destinationPlaylist->players[playerIdDestination] != nullptr && mouseDragged)
                 {
-                    reassignFaders(playerIdDestination, playerDragSource, playlistDestination);
-                    myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
-                    checkAndRemovePlayer(playlistDestination, playerDragSource + 1);
-                    playerIdDestination++;
-                    setSoundInfos(playlistDestination, playerIdDestination);
-                }
-                else
-                {
-
-                    myPlaylists[playlistDestination]->fader1Player++;
-                    myPlaylists[playlistDestination]->fader2Player++;
-
-                    myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
-                    playerIdDestination++;
-                    setSoundInfos(playlistDestination, playerIdDestination);
-                }
-                //clearDragInfos();
-            }
-        }
-        if (myPlaylists[playlistDestination]->players[playerIdDestination] != myPlaylists[playlistDragSource]->players[playerDragSource])
-        {
-            if (isDraggable(playlistDragSource, playerDragSource, playlistDestination, playerIdDestination))
-            {
-                if (myPlaylists[playlistDestination]->players[playerIdDestination] != nullptr && mouseDragged)
-                {
-                    if (myPlaylists[playlistDestination] == myPlaylists[playlistDragSource]) //IF BOTH PLAYERS ARE ON THE SAME PLAYLIST
+                    if (destinationPlaylist == myPlaylists[playlistDragSource]) //IF BOTH PLAYERS ARE ON THE SAME PLAYLIST
                     {
-                        if (myPlaylists[playlistDestination]->fileDragPaintLine)
+                        if (destinationPlaylist->fileDragPaintLine)
                         {
                             if (playlistDestination == 0)
                             {
                                 reassignFaders(playerIdDestination, playerDragSource, playlistDestination);
-                                if (playerIdDestination > playerDragSource)
-                                {
-                                    myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
-                                    checkAndRemovePlayer(playlistDestination, playerDragSource);
-                                }
-                                if (playerIdDestination < playerDragSource)
-                                {
-                                    myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
+                                //if (playerIdDestination > playerDragSource)
+                                //{
+                                //    myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
+                                //    checkAndRemovePlayer(playlistDestination, playerDragSource);
+                                //}
+                                //if (playerIdDestination < playerDragSource)
+                                //{
+                                    destinationPlaylist->players.move(playerDragSource, playerIdDestination + 1);
+                                    destinationPlaylist->rearrangePlayers();
+                                    /*myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
                                     checkAndRemovePlayer(playlistDestination, playerDragSource + 1);
-                                    playerIdDestination++;
-                                }
-                                setSoundInfos(playlistDestination, playerIdDestination);
+                                    playerIdDestination++;*/
+                                //}
+                                //setSoundInfos(playlistDestination, playerIdDestination);
                             }
                             else if (playlistDestination == 1)
                             {
-                                reassignFaders(playerIdDestination, playerDragSource, playlistDestination);
-                                if (playerIdDestination > playerDragSource)
+                                //reassignFaders(playerIdDestination, playerDragSource, playlistDestination);
+                                myPlaylists[playlistDestination]->players.move(playerDragSource, playerIdDestination + 1);
+                                destinationPlaylist->assignLeftFaderButtons.move(playerDragSource, playerIdDestination + 1);
+                                destinationPlaylist->assignRightFaderButtons.move(playerDragSource, playerIdDestination + 1);
+                                myPlaylists[playlistDestination]->rearrangePlayers();
+                               /* if (playerIdDestination > playerDragSource)
                                 {
                                     myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
                                     checkAndRemovePlayer(playlistDestination, playerDragSource);
@@ -1243,7 +1254,7 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
                                     checkAndRemovePlayer(playlistDestination, playerDragSource + 1);
                                     playerIdDestination++;
                                 }
-                                setSoundInfos(playlistDestination, playerIdDestination);
+                                setSoundInfos(playlistDestination, playerIdDestination);*/
                             }
 
                         }
@@ -1267,6 +1278,15 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
                                     myPlaylists[0]->fader2Player++;
                                 if (myPlaylists[0]->fader1Player == myPlaylists[0]->fader2Player && !myPlaylists[0]->fader1IsPlaying && myPlaylists[0]->fader2IsPlaying)
                                     myPlaylists[0]->fader1Player++;
+
+                                /*Player aPlayer(1);
+                                Player* newPlayer = sourcePlayer;
+
+                                destinationPlaylist->players.insert(playerIdDestination + 1, newPlayer);
+                                sourcePlaylist->players.removeObject(sourcePlayer, false);
+                                sourcePlaylist->rearrangePlayers();
+                                destinationPlaylist->rearrangePlayers();*/
+
                                 myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
                                 playerIdDestination++;
                                 setSoundInfos(playlistDestination, playerIdDestination);
@@ -1299,16 +1319,18 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
 void SoundPlayer::setSoundInfos(int playlistDestination, int playerIdDestination)
 {
     playerSelectionChanged->sendChangeMessage();
-    myPlaylists[playlistDestination]->players[playerIdDestination]->setHasBeenNormalized(draggedNormalized);
-    myPlaylists[playlistDestination]->players[playerIdDestination]->loadFile(draggedPath);
-    myPlaylists[playlistDestination]->players[playerIdDestination]->setTrimVolume(draggedTrim);
-    myPlaylists[playlistDestination]->players[playerIdDestination]->setName(draggedName);
-    myPlaylists[playlistDestination]->players[playerIdDestination]->enableHPF(draggedHpfEnabled);
+    auto* player = myPlaylists[playlistDestination]->players[playerIdDestination];
+    player->setHasBeenNormalized(draggedNormalized);
+    player->loadFile(draggedPath);
+    player->setTrimVolume(draggedTrim);
+    player->setName(draggedName);
+    player->enableHPF(draggedHpfEnabled);
     if (draggedStartTimeSet)
-        myPlaylists[playlistDestination]->players[playerIdDestination]->setStartTime(draggedStartTime);
+        player->setStartTime(draggedStartTime);
     if (draggedStopTimeSet)
-        myPlaylists[playlistDestination]->players[playerIdDestination]->setStopTime(draggedStopTime);
-    myPlaylists[playlistDestination]->players[playerIdDestination]->setFilterParameters(draggedFilterParameters);
+        player->setStopTime(draggedStopTime);
+    player->setFilterParameters(draggedFilterParameters);
+    player->bypassFX(draggedFxBypassed);
     clearDragInfos();
 }
 
@@ -1324,6 +1346,7 @@ void SoundPlayer::clearDragInfos()
     draggedStopTime = 0.0;
     draggedNormalized = false;
     mouseDragged = false;
+    draggedFxBypassed = false;
     draggedFilterParameters = FilterProcessor::makeDefaultFilter();
     myPlaylists[playlistDragSource]->mouseDragSource.setValue(-1);
 }
@@ -1361,61 +1384,50 @@ void SoundPlayer::checkAndRemovePlayer(int playlist, int player)
 
 void SoundPlayer::reassignFaders(int playerIdDestination, int playerDragSource, int playlistDestination)
 {
+    auto* destinationPlaylist = myPlaylists[playlistDestination];
     if (playerIdDestination > playerDragSource)
     {
-        if (playerDragSource < myPlaylists[playlistDestination]->fader1Player
-            && playerIdDestination >= myPlaylists[playlistDestination]->fader1Player)
-            myPlaylists[playlistDestination]->fader1Player--;
-        if (playerDragSource < myPlaylists[playlistDestination]->fader2Player
-            && playerIdDestination >= myPlaylists[playlistDestination]->fader2Player)
-            myPlaylists[playlistDestination]->fader2Player--;
-        /*  if (playerIdDestination > std::min(myPlaylists[playlistDestination]->fader1Player, myPlaylists[playlistDestination]->fader2Player)
-              && playerDragSource < std::min(myPlaylists[playlistDestination]->fader1Player, myPlaylists[playlistDestination]->fader2Player))
-          {
-              myPlaylists[playlistDestination]->fader1Player--;
-              myPlaylists[playlistDestination]->fader2Player--;
-              myPlaylists[playlistDestination]->spaceBarPlayerId--;
-          }*/
+        if (playerDragSource < destinationPlaylist->fader1Player
+            && playerIdDestination >= destinationPlaylist->fader1Player)
+            destinationPlaylist->fader1Player--;
+        if (playerDragSource < destinationPlaylist->fader2Player
+            && playerIdDestination >= destinationPlaylist->fader2Player)
+            destinationPlaylist->fader2Player--;
     }
     else if (playerIdDestination < playerDragSource)
     {
 
-        if (playerDragSource == myPlaylists[playlistDestination]->fader1Player
-            && myPlaylists[playlistDestination]->fader1IsPlaying)
+        if (playerDragSource == destinationPlaylist->fader1Player
+            && destinationPlaylist->fader1IsPlaying)
         {
-            myPlaylists[playlistDestination]->fader1Player = playerIdDestination + 1;
+            destinationPlaylist->fader1Player = playerIdDestination + 1;
         }
-        else if (playerDragSource == myPlaylists[playlistDestination]->fader2Player
-            && myPlaylists[playlistDestination]->fader2IsPlaying)
+        else if (playerDragSource == destinationPlaylist->fader2Player
+            && destinationPlaylist->fader2IsPlaying)
         {
-            myPlaylists[playlistDestination]->fader2Player = playerIdDestination + 1;
-        }
-        else if (playerIdDestination < std::min(myPlaylists[playlistDestination]->fader1Player, myPlaylists[playlistDestination]->fader2Player)
-            && playerDragSource < std::min(myPlaylists[playlistDestination]->fader1Player, myPlaylists[playlistDestination]->fader2Player))
-        {
-
+            destinationPlaylist->fader2Player = playerIdDestination + 1;
         }
 
-        if (playerIdDestination < myPlaylists[playlistDestination]->fader1Player
-            && playerDragSource < myPlaylists[playlistDestination]->fader1Player)
+        if (playerIdDestination < destinationPlaylist->fader1Player
+            && playerDragSource < destinationPlaylist->fader1Player)
         {
         }
-        else if (playerIdDestination < myPlaylists[playlistDestination]->fader1Player)
+        else if (playerIdDestination < destinationPlaylist->fader1Player)
         {
-            myPlaylists[playlistDestination]->fader1Player++;
-            if (!myPlaylists[playlistDestination]->fader1IsPlaying && playerIdDestination >= myPlaylists[playlistDestination]->fader2Player)
-                myPlaylists[playlistDestination]->fader1Player--;
+            destinationPlaylist->fader1Player++;
+            if (!destinationPlaylist->fader1IsPlaying && playerIdDestination >= destinationPlaylist->fader2Player)
+                destinationPlaylist->fader1Player--;
 
         }
-        if (playerIdDestination < myPlaylists[playlistDestination]->fader2Player
-            && playerDragSource < myPlaylists[playlistDestination]->fader2Player)
+        if (playerIdDestination < destinationPlaylist->fader2Player
+            && playerDragSource < destinationPlaylist->fader2Player)
         {
         }
-        else if (playerIdDestination < myPlaylists[playlistDestination]->fader2Player)
+        else if (playerIdDestination < destinationPlaylist->fader2Player)
         {
-            myPlaylists[playlistDestination]->fader2Player++;
-            if (!myPlaylists[playlistDestination]->fader2IsPlaying && playerIdDestination >= myPlaylists[playlistDestination]->fader1Player)
-                myPlaylists[playlistDestination]->fader2Player--;
+            destinationPlaylist->fader2Player++;
+            if (!destinationPlaylist->fader2IsPlaying && playerIdDestination >= destinationPlaylist->fader1Player)
+                destinationPlaylist->fader2Player--;
         }
     }
 

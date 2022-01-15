@@ -32,6 +32,7 @@
 #include "Mixer/Meter.h"
 #include "ffmpegConvert.h"
 #include "convertObject.h"
+#include "Denoiser.h"
 typedef char* LPSTR;
 
 
@@ -52,6 +53,12 @@ class Player : public juce::Component,
 {
 public:
     Player(int index);
+    Player(Player& source) : Player{ source.actualMidiLevel } {};
+    Player& operator=(Player& other)
+    {
+        return *this;
+    }
+    //Player(const Player& p);
     ~Player() override;
 
     void paint (juce::Graphics&) override;
@@ -65,16 +72,16 @@ public:
 
     std::unique_ptr<juce::AudioFormatReaderSource> playSource;
     juce::AudioTransportSource transport;
-    juce::ResamplingAudioSource resampledSource;
-    juce::ChannelRemappingAudioSource channelRemappingSource;
-    juce::IIRFilterAudioSource filterSource;
+    juce::ResamplingAudioSource resampledSource                     { &transport, false, 2 };
+    juce::ChannelRemappingAudioSource channelRemappingSource        { &filterSource, false };
+    juce::IIRFilterAudioSource filterSource                         { &resampledSource, false };
 
     std::unique_ptr<juce::AudioFormatReaderSource> cuePlaySource;
     juce::AudioTransportSource cueTransport;
-    juce::ResamplingAudioSource cueResampledSource;
-    juce::ChannelRemappingAudioSource cuechannelRemappingSource;
+    juce::ResamplingAudioSource cueResampledSource                  { &cueTransport, false, 2 };
+    juce::ChannelRemappingAudioSource cuechannelRemappingSource     { &cuefilterSource, false };
 
-    juce::IIRFilterAudioSource cuefilterSource;
+    juce::IIRFilterAudioSource cuefilterSource                      { &cueResampledSource, false };
 
     juce::MixerAudioSource mixer;
     juce::MixerAudioSource cueMixer;
@@ -224,6 +231,12 @@ public:
 
     void normalize(std::string p);
 
+    void setFxEditedPlayer(bool isEdited);
+
+    juce::TextButton* getfxButton();
+
+    void denoiseButtonClicked();
+
     FilterProcessor filterProcessor;
     CompProcessor compProcessor{CompProcessor::Mode::Stereo};
 
@@ -250,8 +263,8 @@ private:
     int playerIndex;
  
     //WAVEFORM
-    juce::AudioThumbnailCache thumbnailCache;
-    juce::AudioThumbnail thumbnail;
+    juce::AudioThumbnailCache thumbnailCache{ 5 };
+    juce::AudioThumbnail thumbnail          {521, formatManager, thumbnailCache};
     bool endRepainted = false;
 
     int leftControlsWidth = 50;
@@ -290,6 +303,7 @@ private:
     float thumbnailHorizontalZoom = 1;
     float thumbnailOffset = 0;
     int  thumbnailDragStart = 0;
+    bool mouseIsDragged = false;
 
     float thumbnailDrawStart;
     float thumbnailDrawEnd;
@@ -312,13 +326,15 @@ private:
 
     juce::TextButton fxButton;
     juce::TextButton normButton;
-    juce::TextButton openButton;
-    juce::TextButton playButton;
-    juce::TextButton stopButton;
-    juce::TextButton cueButton;
-    juce::TextButton cueStopButton;
+    juce::TextButton denoiseButton;
+
+    juce::TextButton openButton     { "open" };
+    juce::TextButton playButton     { "Play" };
+    juce::TextButton stopButton     { "Stop" };
+    juce::TextButton cueButton      { "cue" };
+    juce::TextButton cueStopButton  { "6s" };
     double fileSampleRate;
-    juce::TextButton deleteButton;
+    juce::TextButton deleteButton   { "Delete" };
 
     juce::TextButton startTimeButton;
     juce::TextButton stopTimeButton;
@@ -533,9 +549,9 @@ private:
     bool hasBeenNormalized = false;
 
     std::unique_ptr<juce::AudioBuffer<float>> playerBuffer;
-    Meter inputMeter;
-    Meter outputMeter;
-    Meter compMeter;
+    Meter inputMeter                                        { Meter::Mode::Stereo };
+    Meter outputMeter                                       { Meter::Mode::Stereo };
+    Meter compMeter                                         { Meter::Mode::Stereo_ReductionGain };
 
     ffmpegConvert ffmpegThread{ "convertThread" };
     std::unique_ptr<juce::ProgressBar> convertingBar;
@@ -543,6 +559,10 @@ private:
 
     bool fxEnabled = false;
 
+    Denoiser denoiser;
+    std::string denoisedFile;
+    std::unique_ptr<juce::DialogWindow> denoiseWindow;
+    bool denoisedFileLoaded = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };
 

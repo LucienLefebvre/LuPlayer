@@ -19,7 +19,7 @@
 //==============================================================================
 /*
 */
-class ClipEffect : public juce::Component, public juce::Timer
+class ClipEffect : public juce::Component, public juce::Timer, public juce::ChangeListener
 {
 public:
     ClipEffect();
@@ -38,6 +38,9 @@ public:
     void setPlayer(Player* p);
 
     void setDummyPlayer();
+
+    void changeListenerCallback(juce::ChangeBroadcaster* source);
+
 
 private:
     FilterEditor filterEditor;

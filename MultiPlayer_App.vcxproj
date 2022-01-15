@@ -180,6 +180,7 @@
     <ClCompile Include="Source\DataBaseBrowser.cpp"/>
     <ClCompile Include="Source\DataBaseImport.cpp"/>
     <ClCompile Include="Source\ClipEffect.cpp"/>
+    <ClCompile Include="Source\Denoiser.cpp"/>
     <ClCompile Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2225,6 +2226,7 @@
     <ClCompile Include="JuceLibraryCode\include_juce_osc.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\DenoiseThread.h"/>
     <ClInclude Include="Source\batchConvertThread.h"/>
     <ClInclude Include="Source\convertObject.h"/>
     <ClInclude Include="Source\ffmpegConvert.h"/>
@@ -2270,6 +2272,7 @@
     <ClInclude Include="Source\helpers.h"/>
     <ClInclude Include="Source\DataBaseImport.h"/>
     <ClInclude Include="Source\ClipEffect.h"/>
+    <ClInclude Include="Source\Denoiser.h"/>
     <ClInclude Include="Source\R128IntegratedThread.h"/>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.h"/>
     <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeterSource.h"/>

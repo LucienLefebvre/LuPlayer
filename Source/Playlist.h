@@ -74,6 +74,8 @@ public:
     bool isEightPlayerSecondCart = false;
 
     juce::OwnedArray<Player> players;
+    juce::OwnedArray<juce::TextButton> assignLeftFaderButtons;
+    juce::OwnedArray<juce::TextButton> assignRightFaderButtons;
     juce::MixerAudioSource playlistMixer;
     juce::MixerAudioSource playlistCueMixer;
     
@@ -179,8 +181,7 @@ private:
     juce::OwnedArray<juce::TextButton> swapNextButtons;
     juce::OwnedArray<juce::TextButton> removePlayersButtons;
     juce::OwnedArray<juce::TextButton> addPlayersButtons;
-    juce::OwnedArray<juce::TextButton> assignLeftFaderButtons;
-    juce::OwnedArray<juce::TextButton> assignRightFaderButtons;
+
     juce::OwnedArray<juce::Label> playersPositionLabels;
     juce::OwnedArray<Meter> meters;
 

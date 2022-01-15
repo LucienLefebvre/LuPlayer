@@ -272,6 +272,11 @@ public:
         compParams.bypassed = isBypassed;
     }
 
+    bool getBypass()
+    {
+        return compParams.bypassed;
+    }
+
     CompParameters getCompParams()
     {
         return compParams;

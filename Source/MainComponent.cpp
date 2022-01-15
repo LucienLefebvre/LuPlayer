@@ -390,15 +390,6 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     else if (source == soundPlayers[0]->playerSelectionChanged)
     {
     bottomComponent.clipEffect.setDummyPlayer();
-    DBG("set dummy");
-    //Send processing components to bottom clip effect panel
-    //bottomComponent.clipEffect.setEditedFilterProcessor(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->filterProcessor);
-    //bottomComponent.clipEffect.setEditedCompProcessor(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->compProcessor);
-    //bottomComponent.clipEffect.setEditedBuffer(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getBuffer());
-    //bottomComponent.clipEffect.setMeters(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getInputMeter(),
-    //                        soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getOutputMeter(),
-    //                        soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getCompMeter());
-    //bottomComponent.clipEffect.setName(soundPlayers[0]->myPlaylists[soundPlayers[0]->draggedPlaylist]->players[Settings::draggedPlayer]->getName());
     }
     else if (source == soundPlayers[0]->myPlaylists[0]->fxButtonBroadcaster || source == soundPlayers[0]->myPlaylists[1]->fxButtonBroadcaster)
     {
