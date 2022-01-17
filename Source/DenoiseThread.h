@@ -92,7 +92,7 @@ public:
         //    WaitForSingleObject(pi.hProcess, INFINITE);
         //}
 
-        juce::ChildProcess process;
+
         process.start(cmdstring);
         process.waitForProcessToFinish(30000);
         /////////////////////return created file path
@@ -130,6 +130,12 @@ public:
         params = p;
     }
 
+    void killThread()
+    {
+        process.kill();
+    }
+
+    juce::ChildProcess process;
     bool makeProgressFile = true;
     DenoiseParameters params;
     juce::String returnedFile;

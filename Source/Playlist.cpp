@@ -893,7 +893,6 @@ void Playlist::playersNextPositionClicked()
 
 void Playlist::addPlayer(int playerID)
 {
-
     if (playlistType == 0)
     {
 

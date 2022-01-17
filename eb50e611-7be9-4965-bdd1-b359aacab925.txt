@@ -1,0 +1,55 @@
+ffmpeg version 2020-10-17-git-62073cfa97-full_build-www.gyan.dev Copyright (c) 2000-2020 the FFmpeg developers
+  built with gcc 10.2.0 (Rev3, Built by MSYS2 project)
+  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-lzma --enable-libsnappy --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-libbluray --enable-libcaca --enable-sdl2 --enable-libdav1d --enable-libzvbi --enable-librav1e --enable-libsvtav1 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-libass --enable-frei0r --enable-libfreetype --enable-libfribidi --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-ffnvcodec --enable-nvdec --enable-nvenc --enable-d3d11va --enable-dxva2 --enable-libmfx --enable-libglslang --enable-vulkan --enable-libcdio --enable-libgme --enable-libmodplug --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libshine --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libilbc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-ladspa --enable-libbs2b --enable-libflite --enable-libmysofa --enable-librubberband --enable-libsoxr --enable-chromaprint
+  libavutil      56. 60.100 / 56. 60.100
+  libavcodec     58.111.101 / 58.111.101
+  libavformat    58. 62.100 / 58. 62.100
+  libavdevice    58. 11.102 / 58. 11.102
+  libavfilter     7. 87.100 /  7. 87.100
+  libswscale      5.  8.100 /  5.  8.100
+  libswresample   3.  8.100 /  3.  8.100
+  libpostproc    55.  8.100 / 55.  8.100
+Guessed Channel Layout for Input Stream #0.0 : stereo
+Input #0, wav, from 'D:\\MultiPlayer\\Sounds\\eb50e611-7be9-4965-bdd1-b359aacab925.wav':
+  Metadata:
+    comment         : Comme sur un playground
+    date            : 2022:01:15
+    encoder         : Lavf58.62.100
+  Duration: 00:03:46.22, bitrate: 1536 kb/s
+    Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 48000 Hz, stereo, s16, 1536 kb/s
+[Parsed_ebur128_0 @ 0000029288816000] Summary:
+
+  Integrated loudness:
+    I:         -70.0 LUFS
+    Threshold:   0.0 LUFS
+
+  Loudness range:
+    LRA:         0.0 LU
+    Threshold:   0.0 LUFS
+    LRA low:     0.0 LUFS
+    LRA high:    0.0 LUFS
+Stream mapping:
+  Stream #0:0 (pcm_s16le) -> ebur128
+  ebur128 -> Stream #0:0 (pcm_s16le)
+Press [q] to stop, [?] for help
+Output #0, null, to 'pipe:':
+  Metadata:
+    comment         : Comme sur un playground
+    date            : 2022:01:15
+    encoder         : Lavf58.62.100
+    Stream #0:0: Audio: pcm_s16le, 48000 Hz, stereo, s16, 1536 kb/s
+    Metadata:
+      encoder         : Lavc58.111.101 pcm_s16le
+size=N/A time=00:03:46.22 bitrate=N/A speed= 547x    
+video:0kB audio:42417kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: unknown
+[Parsed_ebur128_0 @ 000002928883a740] Summary:
+
+  Integrated loudness:
+    I:         -22.4 LUFS
+    Threshold: -32.6 LUFS
+
+  Loudness range:
+    LRA:         3.5 LU
+    Threshold: -42.6 LUFS
+    LRA low:   -24.9 LUFS
+    LRA high:  -21.4 LUFS

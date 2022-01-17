@@ -14,6 +14,7 @@
 #include <Ebu128LoudnessMeter.h>
 #include "Mixer/Mixer.h"
 #include "R128IntegratedThread.h"
+#include "SoundBoard/KeyboardMappedSoundboard.h"
 //#include <MacrosAndJuceHeaders.h>
 //#include <SecondOrderIIRFilter.h>
 //==============================================================================
@@ -27,14 +28,11 @@ class MainComponent :   public juce::AudioAppComponent,
                         private juce::KeyListener,
                         public juce::MultiTimer,
                         public juce::Value::Listener,
-                        /*private juce::OSCReceiver,
-                        private juce::OSCReceiver::ListenerWithOSCAddress<juce::OSCReceiver::MessageLoopCallback>,
-                        private juce::OSCReceiver::Listener<juce::OSCReceiver::MessageLoopCallback>,*/
                         private juce::Button::Listener,
-                        //public juce::DragAndDropContainer
                         public juce::MouseListener,
-    public juce::Slider::Listener,
-    public juce::ChangeBroadcaster
+                        public juce::Slider::Listener,
+                        public juce::ChangeBroadcaster,
+                        public juce::ComboBox::Listener
 {
 public:
     //==============================================================================
@@ -181,6 +179,7 @@ private:
 
     juce::TextButton audioSetupButton;
     juce::TextButton settingsButton;
+    juce::ComboBox soundPlayerTypeSelector;
     juce::TextButton saveButton;
     juce::TextButton loadButton;
 
@@ -189,6 +188,7 @@ private:
 
     juce::TextButton addPlayerCart;
     juce::TextButton removePlayerCart;
+
 
     juce::TextButton connectOSCButton;
     juce::Label oscStatusLabel;
@@ -390,7 +390,8 @@ private:
     static void  MainComponent::alertBoxResultChosen(int result, MainComponent*);
 
     bool isEightPlayerMode = false;
-    void MainComponent::launchEightPlayerMode();
+    void MainComponent::launchSoundPlayer(SoundPlayer::Mode m);
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
     bool eightPlayersLaunched = false;
 
     //MIXER
@@ -398,8 +399,9 @@ private:
     Mixer mixer;
     int mixerHeight = 260;
 
+    bool playerSwitching = false;
 
-
+    std::unique_ptr<KeyboardMappedSoundboard> keymapSoundboard;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

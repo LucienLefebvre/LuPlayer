@@ -35,6 +35,8 @@ public:
 
     void run()
     {
+        hasBeenKilled = false;
+
         std::string USES_CONVERSION_EX;
 
         std::string ffmpegpath = juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\ffmpeg.exe").toStdString();
@@ -64,14 +66,16 @@ public:
         std::wstring w = (utf8_to_utf16(cmdstring));
         LPWSTR str = const_cast<LPWSTR>(w.c_str());
         ////////////Launch FFMPEG
-        PROCESS_INFORMATION pi;
+        process.start(cmdstring);
+        bool result = process.waitForProcessToFinish(30000);
+        /*PROCESS_INFORMATION pi;
         STARTUPINFOW si;
         ZeroMemory(&si, sizeof(si));
         BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
         if (logDone)
         {
             WaitForSingleObject(pi.hProcess, INFINITE);
-        }
+        }*/
 
 
 
@@ -81,8 +85,12 @@ public:
         std::string returnFilePathBackslah = std::regex_replace(returnFilePath, std::regex(R"(\\)"), R"(\\)");
         returnedFile = juce::String(returnFilePath);
         Settings::tempFiles.add(returnedFile);
-
+        if (!hasBeenKilled)
+        {
         conversionEndedBroadcaster->sendChangeMessage();
+        }
+
+        int i = 3;
         signalThreadShouldExit();
     }
 
@@ -102,11 +110,19 @@ public:
         makeProgressFile = makeFile;
     }
 
+    void killThread()
+    {
+        hasBeenKilled = true;
+        process.kill();
+        //stopThread(0);
+    }
+
+    bool hasBeenKilled = false;
     bool makeProgressFile = true;
     std::string filePath;
     juce::String returnedFile;
     juce::ChangeBroadcaster* conversionEndedBroadcaster;
-
+    juce::ChildProcess process;
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ffmpegConvert)
 };

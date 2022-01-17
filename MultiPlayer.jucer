@@ -48,6 +48,14 @@
         <FILE id="dhPDv5" name="VCA.h" compile="0" resource="0" file="Source/Mixer/VCA.h"/>
       </GROUP>
       <GROUP id="{B14A7909-DE9B-0519-F1D9-67C76AB4710E}" name="Soundboard">
+        <FILE id="Biewi1" name="KeyboardMappedSoundboard.cpp" compile="1" resource="0"
+              file="Source/SoundBoard/KeyboardMappedSoundboard.cpp"/>
+        <FILE id="U9z1S3" name="KeyboardMappedSoundboard.h" compile="0" resource="0"
+              file="Source/SoundBoard/KeyboardMappedSoundboard.h"/>
+        <FILE id="UBfEL8" name="KeyMappedPlayer.cpp" compile="1" resource="0"
+              file="Source/SoundBoard/KeyMappedPlayer.cpp"/>
+        <FILE id="EhQJ6c" name="KeyMappedPlayer.h" compile="0" resource="0"
+              file="Source/SoundBoard/KeyMappedPlayer.h"/>
         <FILE id="TgIwht" name="PlayerEditor.cpp" compile="1" resource="0"
               file="Source/Soundboard/PlayerEditor.cpp"/>
         <FILE id="QAphEq" name="PlayerEditor.h" compile="0" resource="0" file="Source/Soundboard/PlayerEditor.h"/>

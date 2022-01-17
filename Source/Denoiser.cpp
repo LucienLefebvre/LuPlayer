@@ -288,3 +288,10 @@ void Denoiser::setTransportGain(float g)
 {
     transport.setGain(juce::Decibels::decibelsToGain(g));
 }
+
+void Denoiser::killThread()
+{
+    thread.denoiseEndedBroadcaster->removeChangeListener(this);
+    thread.previewEndedBroadcaster->removeChangeListener(this);
+    thread.killThread();
+}

@@ -55,62 +55,71 @@ public:
         std::string rawname = fileOutputName.substr(0, lastindex);
         std::string rawnamedoubleslash = std::regex_replace(rawname, std::regex(R"(\\)"), R"(\\)");
         //create entire command string
-        std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -nostats -i \"" + newFilePath + "\" -filter_complex ebur128 -f null -");
+        std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -nostats -i \"" + newFilePath + "\" -filter_complex ebur128=framelog=verbose -f null -");
         std::wstring w = (utf8_to_utf16(cmdstring));
         LPSTR str = const_cast<LPSTR>(cmdstring.c_str());
+        //DBG(cmdstring);
         //LPSTR s = const_cast<char*>(w.c_str());
         ////////////Launch FFMPEG
-        SECURITY_ATTRIBUTES sa;
-        sa.nLength = sizeof(sa);
-        sa.lpSecurityDescriptor = NULL;
-        sa.bInheritHandle = TRUE;
+        process.start(cmdstring);
+        juce::String output = process.readAllProcessOutput();
+        int nullLuIndex = output.indexOfWholeWord("I:");
+        int  iLuIndex = output.indexOfAnyOf("I:", output.length() - 200);
+        juce::String luString = output.substring(iLuIndex + 19, iLuIndex + 21);
+        integratedLoudness = -(luString.getFloatValue());
 
-        std::string outFileString = fileName + ".txt";
-        LPCSTR outFile = outFileString.c_str();
-        HANDLE h = CreateFile((outFile),
-            FILE_APPEND_DATA,
-            FILE_SHARE_WRITE | FILE_SHARE_READ,
-            &sa,
-            OPEN_ALWAYS,
-            FILE_ATTRIBUTE_NORMAL,
-            NULL);
+        //SECURITY_ATTRIBUTES sa;
+        //sa.nLength = sizeof(sa);
+        //sa.lpSecurityDescriptor = NULL;
+        //sa.bInheritHandle = TRUE;
 
-        PROCESS_INFORMATION pi;
-        STARTUPINFO si;
-        BOOL ret = FALSE;
-        DWORD flags = CREATE_NO_WINDOW;
+        //std::string outFileString = fileName + ".txt";
+        //LPCSTR outFile = outFileString.c_str();
+        //HANDLE h = CreateFile((outFile),
+        //    FILE_APPEND_DATA,
+        //    FILE_SHARE_WRITE | FILE_SHARE_READ,
+        //    &sa,
+        //    OPEN_ALWAYS,
+        //    FILE_ATTRIBUTE_NORMAL,
+        //    NULL);
 
-        ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
-        ZeroMemory(&si, sizeof(STARTUPINFO));
-        si.cb = sizeof(STARTUPINFO);
-        si.dwFlags |= STARTF_USESTDHANDLES;
-        si.hStdInput = NULL;
-        si.hStdError = h;
-        si.hStdOutput = h;
+        //PROCESS_INFORMATION pi;
+        //STARTUPINFO si;
+        //BOOL ret = FALSE;
+        //DWORD flags = CREATE_NO_WINDOW;
 
-        TCHAR cmd[] = TEXT("Test.exe 30");
-        ret = CreateProcess(NULL, str, NULL, NULL, TRUE, flags, NULL, NULL, &si, &pi);
-        WaitForSingleObject(pi.hProcess, INFINITE);
-        if (ret)
-        {
-            CloseHandle(pi.hProcess);
-            CloseHandle(pi.hThread);
-            CloseHandle(h);
-        }
+        //ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+        //ZeroMemory(&si, sizeof(STARTUPINFO));
+        //si.cb = sizeof(STARTUPINFO);
+        //si.dwFlags |= STARTF_USESTDHANDLES;
+        //si.hStdInput = NULL;
+        //si.hStdError = h;
+        //si.hStdOutput = h;
 
-        progressFilePath = (juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\" + fileName + ".txt").toStdString();
-        juce::File progressFile(progressFilePath);
-        if (progressFile.exists())
-        {
+        //TCHAR cmd[] = TEXT("Test.exe 30");
+        //ret = CreateProcess(NULL, str, NULL, NULL, TRUE, flags, NULL, NULL, &si, &pi);
+        //WaitForSingleObject(pi.hProcess, INFINITE);
+        //if (ret)
+        //{
+        //    CloseHandle(pi.hProcess);
+        //    CloseHandle(pi.hThread);
+        //    CloseHandle(h);
+        //}
 
-            juce::StringArray progressInfo;
-            progressFile.readLines(progressInfo);
-            int currentProgressLine = progressInfo.size() - 9; //récupère la ligne out_time_ms
-            juce::String progressLine = progressInfo[currentProgressLine].trimCharactersAtStart("    I:         ").trimCharactersAtEnd(" LUFS");//enlève le début
-            integratedLoudness = progressLine.getDoubleValue();
-            double loudnessDifference = -23. - integratedLoudness;
-            loudnessCalculatedBroadcaster->sendChangeMessage();
-        }
+        //progressFilePath = (juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\" + fileName + ".txt").toStdString();
+        //juce::File progressFile(progressFilePath);
+        //if (progressFile.exists())
+        //{
+
+        //    juce::StringArray progressInfo;
+        //    progressFile.readLines(progressInfo);
+        //    int currentProgressLine = progressInfo.size() - 9; //récupère la ligne out_time_ms
+        //    juce::String progressLine = progressInfo[currentProgressLine].trimCharactersAtStart("    I:         ").trimCharactersAtEnd(" LUFS");//enlève le début
+        //    integratedLoudness = progressLine.getDoubleValue();
+        //    double loudnessDifference = -23. - integratedLoudness;
+
+        //}
+        loudnessCalculatedBroadcaster->sendChangeMessage();
     }
 
     void setFilePath(juce::String p)
@@ -136,6 +145,12 @@ public:
             progressFile.deleteFile();
     }
 
+    void killThread()
+    {
+        process.kill();
+    }
+
+    juce::ChildProcess process;
     std::string progressFilePath;
     std::string filePath;
     std::string fileName;

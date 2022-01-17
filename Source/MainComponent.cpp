@@ -48,11 +48,14 @@ MainComponent::MainComponent() :
         Settings::sampleRate = deviceManager.getAudioDeviceSetup().sampleRate;
     }
     
+
+    SoundPlayer::Mode mode = SoundPlayer::Mode::KeyMap;
+    launchSoundPlayer(mode);
+
     //ADD SOUND PLAYER
-    soundPlayers.add(new SoundPlayer());
+    /*soundPlayers.add(new SoundPlayer());
     addAndMakeVisible(soundPlayers[0]);
     soundPlayers[0]->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
-    //soundPlayers[0]->setBounds(0, 30, getWidth(), getHeight() - playersStartHeightPosition);
     myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
     myCueMixer.addInputSource(&soundPlayers[0]->myCueMixer, false);
     soundPlayers[0]->playerSelectionChanged->addChangeListener(this);
@@ -61,7 +64,10 @@ MainComponent::MainComponent() :
     soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->playBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->fxButtonBroadcaster->addChangeListener(this);
-    soundPlayers[0]->myPlaylists[1]->fxButtonBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[1]->fxButtonBroadcaster->addChangeListener(this);*/
+
+
+
 
     //ADD MIXER
     addAndMakeVisible(&mixer);
@@ -101,21 +107,25 @@ MainComponent::MainComponent() :
     loadButton.setBounds(600, 0, 100, 25);
     loadButton.setButtonText("Load");
     loadButton.onClick = [this] { loadPlaylist(); };
+
+    addAndMakeVisible(&soundPlayerTypeSelector);
+    soundPlayerTypeSelector.addItem("Playlist + Cart", 1);
+    soundPlayerTypeSelector.addItem("8 Faders", 2);
+    soundPlayerTypeSelector.addItem("Keyboard Mapping", 3);
+    soundPlayerTypeSelector.setBounds(200, 0, 150, 25);
+    soundPlayerTypeSelector.addListener(this);
+    soundPlayerTypeSelector.setSelectedId(1, juce::NotificationType::dontSendNotification);
     
     addAndMakeVisible(timeLabel);
     timeLabel.setBounds(getParentWidth()-200, 0, 200, 50);
     timeLabel.setFont(juce::Font(50.00f, juce::Font::plain).withTypefaceStyle("Regular"));
 
-    addAndMakeVisible(connectOSCButton);
+    /*addAndMakeVisible(connectOSCButton);
     connectOSCButton.setBounds(200, 0, 100, 25);
     connectOSCButton.setButtonText("Connect OSC");
-    connectOSCButton.onClick = [this] { OSCInitialize(); };
+    connectOSCButton.onClick = [this] { OSCInitialize(); };*/
 
 
-    /*addAndMakeVisible(oscStatusLabel);
-    oscStatusLabel.setBounds(400, 0, 100, 25);
-    oscStatusLabel.setText("OSC not connected", juce::NotificationType::dontSendNotification);
-    oscStatusLabel.setColour(juce::Label::textColourId, juce::Colours::red);*/
 
     audioSetupComp.setColour(juce::ResizableWindow::ColourIds::backgroundColourId, juce::Colours::white);
     audioSetupWindow.setSize(400, 800);
@@ -152,8 +162,12 @@ MainComponent::MainComponent() :
         5, 600, // size must be between 20% and 60% of the available space
         350);        // and its preferred size is 50 pixels
 
+
+
     horizontalDividerBar.reset(new juce::StretchableLayoutResizerBar(&myLayout, 1, false));
     addAndMakeVisible(horizontalDividerBar.get());
+
+
 
 
     settingsButton.setBounds(0, 0, 100, 25);
@@ -173,9 +187,9 @@ MainComponent::MainComponent() :
         noConvertSoundsWindow->showMessageBox(juce::AlertWindow::AlertIconType::InfoIcon, "", "Select Converted Sounds Folder");
         settingsButtonClicked();
     }
-
+    //defaultPlayersPlaylist(4);
     setSize(1300, 550);
-    defaultPlayersPlaylist(4);
+
 
 }
 
@@ -293,6 +307,12 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
             soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
             soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
         }
+
+        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
+        {
+            soundPlayers[0]->keyMappedSoundboard->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY());
+        }
+
     }
     else if (source == bottomComponent.dbBrowser.fileDroppedFromDataBase)
     {
@@ -302,19 +322,31 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
         std::unique_ptr<juce::StringArray> null = std::make_unique<juce::StringArray >();
 
-        if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
+        juce::String selectedSoundName = bottomComponent.dbBrowser.getSelectedSoundName();
+        juce::String fullPathName = bottomComponent.dbBrowser.getSelectedFile().getFullPathName();
+
+        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
         {
-            soundPlayers[0]->myPlaylists[0]->setDroppedSoundName(bottomComponent.dbBrowser.getSelectedSoundName());
-            soundPlayers[0]->myPlaylists[0]->filesDropped(bottomComponent.dbBrowser.getSelectedFile().getFullPathName(), getMouseXYRelative().getX(), getMouseXYRelative().getY() - 60 + playlistScrollPosition);
-            
+            soundPlayers[0]->keyMappedSoundboard->setDroppedFile(getMouseXYRelative(), fullPathName, selectedSoundName);
+            soundPlayers[0]->keyMappedSoundboard->fileDragExit();
         }
-        else if (getMouseXYRelative().getX() > cartPosition)
+        else
         {
-            soundPlayers[0]->myPlaylists[1]->setDroppedSoundName(bottomComponent.dbBrowser.getSelectedSoundName());
-            soundPlayers[0]->myPlaylists[1]->filesDropped(bottomComponent.dbBrowser.getSelectedFile().getFullPathName(), getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - 60 + cartScrollPoisiton);          
+            if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
+            {
+                soundPlayers[0]->myPlaylists[0]->setDroppedSoundName(selectedSoundName);
+                soundPlayers[0]->myPlaylists[0]->filesDropped(fullPathName, getMouseXYRelative().getX(), getMouseXYRelative().getY() - 60 + playlistScrollPosition);
+
+            }
+            else if (getMouseXYRelative().getX() > cartPosition)
+            {
+                soundPlayers[0]->myPlaylists[1]->setDroppedSoundName(selectedSoundName);
+                soundPlayers[0]->myPlaylists[1]->filesDropped(fullPathName, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - 60 + cartScrollPoisiton);
+            }
+            soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
+            soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
         }
-        soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
-        soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
+
     }
     else if (source == bottomComponent.distantDbBrowser.fileDraggedFromDataBase)
     {
@@ -456,6 +488,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
+    //TODO vérifier bug changement de soundplayer sur mode mono et double stereo
     if (soundPlayers[0] != nullptr)
     {
         soundPlayers[0]->getNextAudioBlock(bufferToFill);
@@ -497,8 +530,8 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             {
                 bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                 bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
-                soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
-                soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
+                //soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
+                //soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
             }
             delete(inputBuffer);
             delete(outputBuffer);
@@ -584,11 +617,11 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 
             if (!bottomComponent.recorderComponent.isEnabled())
             {
-                soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
+                /*soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
                 soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
-                soundPlayers[0]->newMeter->measureBlock(outputBuffer);
+                soundPlayers[0]->newMeter->measureBlock(outputBuffer);*/
             }
-            if (bottomComponent.recorderComponent.isEnabled())
+            if (bottomComponent.recorderComponent.isEnabled() && soundPlayers[0] != nullptr)
             {
                 juce::AudioBuffer<float>* newOutputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
                 bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer, inputBuffer, newOutputBuffer, 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
@@ -775,6 +808,12 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
 
 bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* originatingComponent)
 {
+    
+    DBG(key.getKeyCode());
+    if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap)
+    {
+        soundPlayers[0]->keyMappedSoundboard->keyPressed(key, originatingComponent);
+    }
     if (key == 73 || key == 75 || key == 79 || key == 76 || key == 67 || key == 88 || key == 86)
     {
         if (soundPlayers[0]->draggedPlaylist != -1)
@@ -1063,15 +1102,22 @@ void MainComponent::tryPreferedAudioDevice(int outputChannelsNeeded)
 
 void MainComponent::defaultPlayersPlaylist(int playersToAdd)
 {
-    for (auto i = -1; i < 1; ++i)
+    if (soundPlayers[0]->soundPlayerMode != SoundPlayer::Mode::KeyMap)
     {
-        soundPlayers[0]->myPlaylists[0]->addPlayer(i);
-        soundPlayers[0]->myPlaylists[1]->addPlayer(i);
+        for (auto i = -1; playersToAdd < 1; ++i)
+        {
+            soundPlayers[0]->myPlaylists[0]->addPlayer(i);
+            soundPlayers[0]->myPlaylists[1]->addPlayer(i);
+        }
+        soundPlayers[0]->myPlaylists[1]->assignLeftFader(-1);
+        soundPlayers[0]->myPlaylists[1]->assignLeftFader(0);
+        soundPlayers[0]->myPlaylists[1]->assignRightFader(-1);
+        soundPlayers[0]->myPlaylists[1]->assignRightFader(1);
     }
-    soundPlayers[0]->myPlaylists[1]->assignLeftFader(-1);
-    soundPlayers[0]->myPlaylists[1]->assignLeftFader(0);
-    soundPlayers[0]->myPlaylists[1]->assignRightFader(-1);
-    soundPlayers[0]->myPlaylists[1]->assignRightFader(1);
+    else
+    {
+        soundPlayers[0]->initializeKeyMapPlayer();
+    }
 }
 
 
@@ -1132,42 +1178,84 @@ void MainComponent::setCommandLine(juce::String commandLine)
 {
     if (!commandLine.compare("8p"))
     {
-        isEightPlayerMode = true;
-        launchEightPlayerMode();
+        launchSoundPlayer(SoundPlayer::Mode::EightFaders);
     }
 
 }
-void MainComponent::launchEightPlayerMode()
+void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
 {
-    //This launch the application in 8 players mode
     myMixer.removeAllInputs();
     myCueMixer.removeAllInputs();
     soundPlayers.clear();
-    soundPlayers.add(new SoundPlayer(true));
+    soundPlayers.add(new SoundPlayer(m));
     addAndMakeVisible(soundPlayers[0]);
     soundPlayers[0]->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
-    //soundPlayers[0]->setBounds(0, 30, getWidth(), getHeight() - playersStartHeightPosition);
     myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
     myCueMixer.addInputSource(&soundPlayers[0]->myCueMixer, false);
-    soundPlayers[0]->myPlaylists[0]->isEightPlayerMode(true);
-    soundPlayers[0]->myPlaylists[1]->isEightPlayerMode(true);
-    for (auto i = -1; i < 3; ++i)
+
+    if (m == SoundPlayer::Mode::EightFaders)
     {
-        soundPlayers[0]->myPlaylists[0]->addPlayer(i);
-        soundPlayers[0]->myPlaylists[1]->addPlayer(i);
+        isEightPlayerMode = true;
+        soundPlayers[0]->myPlaylists[0]->isEightPlayerMode(true);
+        soundPlayers[0]->myPlaylists[1]->isEightPlayerMode(true);
+        for (auto i = -1; i < 3; ++i)
+        {
+            soundPlayers[0]->myPlaylists[0]->addPlayer(i);
+            soundPlayers[0]->myPlaylists[1]->addPlayer(i);
+        }
+    }
+    else
+    {
+        for (auto i = -1; i < 2; ++i)
+        {
+            soundPlayers[0]->myPlaylists[0]->addPlayer(i);
+            soundPlayers[0]->myPlaylists[1]->addPlayer(i);
+        }
     }
     soundPlayers[0]->playerSelectionChanged->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->cuePlaylistBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[0]->playBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[1]->playBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->fxButtonBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->fxButtonBroadcaster->addChangeListener(this);
-    soundPlayers[0]->myPlaylists[0]->isEightPlayerMode(true);
-    soundPlayers[0]->myPlaylists[1]->isEightPlayerMode(true);
-    soundPlayers[0]->myPlaylists[1]->setEightPlayersSecondCart(true);
+
+    if (m == SoundPlayer::Mode::EightFaders)
+        soundPlayers[0]->myPlaylists[1]->setEightPlayersSecondCart(true);
     if (soundPlayers[0] != nullptr)
         soundPlayers[0]->setBounds(0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - bottomHeight);
+     
     Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
     myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
-    eightPlayersLaunched = true;
+
+    if (m == SoundPlayer::Mode::EightFaders)
+        eightPlayersLaunched = true;
+
+    if (m == SoundPlayer::Mode::KeyMap)
+    {
+        soundPlayers[0]->initializeKeyMapPlayer();
+    }
+    else
+        defaultPlayersPlaylist(2);
+
     channelsMapping();
+}
+
+void MainComponent::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
+{
+    if (comboBoxThatHasChanged == &soundPlayerTypeSelector)
+    {
+        switch (soundPlayerTypeSelector.getSelectedId())
+        {
+        case 1 :
+            launchSoundPlayer(SoundPlayer::Mode::OnePlaylistOneCart);
+            break;
+        case 2 :
+            launchSoundPlayer(SoundPlayer::Mode::EightFaders);
+            break;
+        case 3 :
+            launchSoundPlayer(SoundPlayer::Mode::KeyMap);
+            break;
+        }
+    }
 }

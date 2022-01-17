@@ -12,6 +12,7 @@
 #include "Player.h"
 #include "Windows.h"
 #define BLUE juce::Colour(40, 134, 189)
+#define ORANGE juce::Colour(229, 149, 0)
 #include "Settings.h"
 #ifdef UNICODE
 typedef LPWSTR LPTSTR;
@@ -40,11 +41,11 @@ Player::Player(int index)/*: thumbnailCache(5),
          borderRectangleWidth = 0;
          waveformThumbnailXStart = leftControlsWidth;
      }
-    
      playBroadcaster = new juce::ActionBroadcaster();
      cueBroadcaster = new juce::ActionBroadcaster();
      draggedBroadcaster = new juce::ActionBroadcaster();
      fxButtonBroadcaster = new juce::ChangeBroadcaster();
+     playerInfoChangedBroadcaster = new juce::ChangeBroadcaster();
      /* int playerPosition = playerIndex + 1;
      addAndMakeVisible(playerPositionLabel);
      playerPositionLabel.setButtonText(juce::String(playerPosition));
@@ -313,12 +314,14 @@ Player::Player(int index)/*: thumbnailCache(5),
 
 Player::~Player()
 {
+    killThreads();
     denoiser.denoiseDoneBroadcaster->removeChangeListener(this);
     denoiser.processStartedBroadcaster->removeChangeListener(this);
     delete playBroadcaster;
     delete cueBroadcaster;
     delete draggedBroadcaster;
     delete fxButtonBroadcaster;
+    delete playerInfoChangedBroadcaster;
     Settings::maxFaderValue.removeListener(this);
     Settings::audioOutputModeValue.removeListener(this);
     trimVolumeSlider.removeListener(this);
@@ -1251,6 +1254,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         convertingBar->setVisible(false);
         loadFile(convertedFilePath);
         extactName(convertedFilePath.toStdString());
+        ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
     }
     else if (source == denoiser.denoiseDoneBroadcaster)
     {
@@ -1274,6 +1278,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
             convertingBar->setVisible(true);
         }
     }
+    playerInfoChangedBroadcaster->sendChangeMessage();
 }
 
 void Player::transportStateChanged(TransportState newState)
@@ -1287,16 +1292,19 @@ void Player::transportStateChanged(TransportState newState)
         switch (state)
         {
         case Stopped:
+            playerInfoChangedBroadcaster->sendChangeMessage();
             transport.setPosition(0.0);
             playButton.setButtonText("Play");
                 break;
         case Starting:
+            playerInfoChangedBroadcaster->sendChangeMessage();
             //volumeSlider.setValue(1.0);
             playBroadcaster->sendActionMessage("Play");
             transport.start();
             playButton.setButtonText("Stop");
             break;
         case Stopping:
+            playerInfoChangedBroadcaster->sendChangeMessage();
             if (looping == true && stopButtonClickedBool == false)
             {
                 //playButton.setEnabled(true);
@@ -1358,6 +1366,7 @@ void Player::sliderValueChanged(juce::Slider* slider)
             cuefilterSource.setCoefficients(filterCoefficients.makeHighPass(actualSampleRate, filterFrequency, 0.4));
         }
     }
+    playerInfoChangedBroadcaster->sendChangeMessage();
 }
 
 
@@ -1741,11 +1750,12 @@ bool Player::loadFile(const juce::String& path)
         cueButton.setEnabled(true);
         //setDraggedPlayer();
     }
-
     else
     {
         return false;
     }
+
+    playerInfoChangedBroadcaster->sendChangeMessage();
 }
 
 const juce::String Player::startFFmpeg(std::string filePath)
@@ -1877,9 +1887,26 @@ void Player::handleAudioTags(std::string filePath)
 
 }
 
+
+Player::PlayerInfo Player::getPlayerInfo()
+{
+    Player::PlayerInfo info;
+    info.filePath = getFilePath();
+    info.name = getName();
+    info.volume = getVolume();
+    info.trimVolume = getTrimVolume();
+    info.loop = getIsLooping();
+    return info;
+}
+
 std::string Player::getFilePath()
 {
     return loadedFilePath;
+}
+
+float Player::getVolume()
+{
+    return volumeSlider.getValue();
 }
 
 
@@ -2319,4 +2346,51 @@ void Player::denoiseButtonClicked()
         denoiser.setFilePath(loadedFilePath);
         denoiser.setTransportGain(trimVolumeSlider.getValue());
     }
+}
+
+void Player::killThreads()
+{
+    ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
+    denoiser.denoiseDoneBroadcaster->removeChangeListener(this);
+    denoiser.processStartedBroadcaster->removeChangeListener(this);
+    luThread.killThread();
+    denoiser.killThread();
+    ffmpegThread.killThread();
+}
+
+bool Player::isPlayerPlaying()
+{
+    return transport.isPlaying();
+}
+
+bool Player::isLastSeconds()
+{
+    if (stopTime - transport.getCurrentPosition() < 6)
+        return true;
+    else
+        return false;
+}
+
+bool Player::isFileLoaded()
+{
+    return fileLoaded;
+}
+
+juce::AudioThumbnailCache& Player::getAudioThumbnailCache()
+{
+    return thumbnailCache;
+}
+
+juce::AudioFormatManager& Player::getAudioFormatManager()
+{
+    return formatManager;
+}
+
+juce::AudioThumbnail& Player::getAudioThumbnail()
+{
+    return thumbnail;
+}
+juce::String Player::getRemainingTimeAsString()
+{
+    return remainingTimeString;
 }

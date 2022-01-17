@@ -22,6 +22,7 @@
 #include <Ebu128LoudnessMeter.h>
 #include "LoudnessBar.h"
 #include "Mixer/Meter.h"
+#include "Soundboard/KeyboardMappedSoundboard.h"
 //==============================================================================
 /*
 */
@@ -39,7 +40,13 @@ class SoundPlayer : public juce::Component,
                     //public juce::DragAndDropContainer
 {
 public:
-    SoundPlayer(bool isEightPlayer = false);
+    enum  class Mode : int
+    {
+        OnePlaylistOneCart = 1,
+        EightFaders = 2,
+        KeyMap = 3
+    };
+    SoundPlayer(SoundPlayer::Mode m);
     ~SoundPlayer() override;
 
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
@@ -62,7 +69,7 @@ public:
     juce::MixerAudioSource myMixer;
     juce::MixerAudioSource myCueMixer;
     juce::OwnedArray<Playlist> myPlaylists;
-
+    std::unique_ptr<KeyboardMappedSoundboard> keyMappedSoundboard;
     //METERS
     foleys::LevelMeterLookAndFeel lnf;
     foleys::LevelMeter meter{ foleys::LevelMeter::MaxNumber }; // See foleys::LevelMeter::MeterFlags for options
@@ -85,6 +92,8 @@ public:
 
     juce::ChangeBroadcaster* playerSelectionChanged;
 
+    SoundPlayer::Mode soundPlayerMode;
+    void initializeKeyMapPlayer();
 private:
     void SoundPlayer::timerCallback();
     void SoundPlayer::valueChanged(juce::Value& value);
@@ -105,6 +114,7 @@ private:
     void SoundPlayer::copyPlayingSound();
     void SoundPlayer::changeListenerCallback(juce::ChangeBroadcaster* source);
     void SoundPlayer::actionListenerCallback(const juce::String& message);
+
     //SAVE
     juce::File myFile;
     double loadingProgress = 0;

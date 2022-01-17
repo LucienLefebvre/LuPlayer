@@ -499,6 +499,12 @@
     <ClCompile Include="Source\Mixer\RemoteInput.cpp">
       <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClCompile>
+    <ClCompile Include="Source\SoundBoard\KeyboardMappedSoundboard.cpp">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SoundBoard\KeyMappedPlayer.cpp">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Soundboard\PlayerEditor.cpp">
       <Filter>MultiPlayer\Source\Soundboard</Filter>
     </ClCompile>
@@ -2825,6 +2831,12 @@
     </ClInclude>
     <ClInclude Include="Source\Mixer\VCA.h">
       <Filter>MultiPlayer\Source\Mixer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SoundBoard\KeyboardMappedSoundboard.h">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SoundBoard\KeyMappedPlayer.h">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
     </ClInclude>
     <ClInclude Include="Source\Soundboard\PlayerEditor.h">
       <Filter>MultiPlayer\Source\Soundboard</Filter>

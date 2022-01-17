@@ -41,12 +41,15 @@ public:
 
     void setTransportGain(float g);
 
+    void killThread();
+
     juce::ChangeBroadcaster* denoiseDoneBroadcaster;
     juce::ChangeBroadcaster* processStartedBroadcaster;
 
     juce::AudioTransportSource transport;
     juce::ResamplingAudioSource resampledSource;
 
+    DenoiseThread thread{ "Denoise thread" };
 private:
     std::unique_ptr<juce::Slider> noiseReductionSlider;
     std::unique_ptr<juce::Slider> noiseFloorSlider;
@@ -59,7 +62,7 @@ private:
     std::unique_ptr<juce::TextButton> processButton;
 
     DenoiseThread::DenoiseParameters denoiseParams;
-    DenoiseThread thread{ "Denoise thread" };
+
 
     std::string returnedFilePath;
 

@@ -52,6 +52,14 @@ class Player : public juce::Component,
     public juce::ActionBroadcaster
 {
 public:
+    struct PlayerInfo
+    {
+        std::string filePath = "";
+        std::string name = "";
+        float volume = 0.0;
+        float trimVolume = 0.0;
+        bool loop = false;
+    };
     Player(int index);
     Player(Player& source) : Player{ source.actualMidiLevel } {};
     Player& operator=(Player& other)
@@ -127,7 +135,11 @@ public:
     float trimValueInput;
     int totalPlayerWidth;
 
+    Player::PlayerInfo getPlayerInfo();
+
     std::string Player::getFilePath();
+
+    float getVolume();
 
 
     float Player::getTrimVolume();
@@ -237,10 +249,26 @@ public:
 
     void denoiseButtonClicked();
 
+    void killThreads();
+
+    bool isPlayerPlaying();
+
+    bool isLastSeconds();
+
+    bool isFileLoaded();
+
+    juce::AudioThumbnailCache& getAudioThumbnailCache();
+
+    juce::AudioFormatManager& getAudioFormatManager();
+
+    juce::AudioThumbnail& getAudioThumbnail();
+
+    juce::String getRemainingTimeAsString();
+
     FilterProcessor filterProcessor;
     CompProcessor compProcessor{CompProcessor::Mode::Stereo};
 
-
+    juce::ChangeBroadcaster* playerInfoChangedBroadcaster;
 private:
     enum TransportState
     {
@@ -563,6 +591,8 @@ private:
     std::string denoisedFile;
     std::unique_ptr<juce::DialogWindow> denoiseWindow;
     bool denoisedFileLoaded = false;
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };
 
