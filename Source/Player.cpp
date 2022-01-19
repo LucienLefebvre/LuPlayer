@@ -669,7 +669,7 @@ void Player::resized()
         trimVolumeSlider.setBounds(0 - 8, 40, 64, 56);
        /* playerPositionLabel.setBounds(0 + 5, 5, 35, 35);*/
         borderRectangleWidth = 0;
-        soundName.setBounds(denoiseButton.getRight() + 1, 80, waveformThumbnailXSize - 50 - fxButtonSize - normButtonSize, 20);
+        soundName.setBounds(denoiseButton.getRight() + 1, 80, waveformThumbnailXSize - 50 - fxButtonSize - normButtonSize - normButtonSize - 6, 20);
         trimLabel.setBounds(0, 81, 50, 24);
     }
     else if (isCart == false)

@@ -67,8 +67,13 @@ public:
                               DocumentWindow::allButtons)
         {
             //setUsingNativeTitleBar (true);
+            setFullScreen(true);
+            setVisible(true);
+            setUsingNativeTitleBar(true);
+            mainComponent.setSize(getWidth(), getHeight());
             setContentOwned (&mainComponent, true);
             setResizable(true, false);
+
 
            #if JUCE_IOS || JUCE_ANDROID
             setFullScreen (true);
@@ -78,9 +83,8 @@ public:
            #endif
             //setSize(1300, 550);
             setResizeLimits(900, 400, 1920, 1080);
-            setVisible (true);
-            setUsingNativeTitleBar(true);
-            setFullScreen(true);
+
+
             //setTitleBarHeight(30);
 
             //toFront(true);

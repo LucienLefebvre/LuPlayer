@@ -54,7 +54,8 @@ public:
     juce::String Settings::getPreferedAudioDeviceName();
     void Settings::updateSampleRateValue(double sampleRate);
     int Settings::getAudioOutputMode();
-
+    void Settings::setPreferedSoundPlayerMode(int p);
+    int Settings::getPreferedSoundPlayerMode();
     juce::TextButton saveButton;
     //int maxFaderValue = 0;
 
@@ -103,6 +104,8 @@ public:
     static int Settings::draggedPlayer;
     static int Settings::fxEditedPlayer;
     static int Settings::fxEditedPlaylist;
+
+    static int Settings::preferedSoundPlayerMode;
 
 private:
 

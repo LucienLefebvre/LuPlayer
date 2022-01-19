@@ -1922,7 +1922,7 @@ void SoundPlayer::actionListenerCallback(const juce::String& message)
 
 void SoundPlayer::initializeKeyMapPlayer()
 {
-    for (int i = 0; i < 30; i++)
+    for (int i = 0; myPlaylists[0]->players.size() < 32; i++)
     {
         //myPlaylists[0]->players.clear();
         myPlaylists[0]->addPlayer(i);

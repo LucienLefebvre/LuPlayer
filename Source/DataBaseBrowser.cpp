@@ -44,7 +44,8 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     table.getHeader().addColumn("Name", 1, 400);
     table.getHeader().addColumn("Duration", 2, 100);
     table.getHeader().addColumn("Date", 3, 150);
-    table.getHeader().addColumn("File", 4, 50, juce::TableHeaderComponent::ColumnPropertyFlags::notResizableOrSortable);
+    if (showFileColumn)
+        table.getHeader().addColumn("File", 4, 50, juce::TableHeaderComponent::ColumnPropertyFlags::notResizableOrSortable);
 
     //table.getHeader().addColumn("File", 4, 200);
     table.addMouseListener(this, true);
@@ -207,7 +208,7 @@ void DataBaseBrowser::paintCell(juce::Graphics& g, int rowNumber, int columnId, 
     {
         g.drawText(dates[rowNumber], 2, 0, width - 4, height, juce::Justification::centredLeft, true);
     }
-    else if (columnId == 4)
+    else if (columnId == 4 && showFileColumn == true)
     {
         std::string filePath = std::string("D:\\SONS\\ADMIN\\" + files[rowNumber].toStdString());
         juce::File sourceFile(filePath);
@@ -222,8 +223,8 @@ void DataBaseBrowser::paintCell(juce::Graphics& g, int rowNumber, int columnId, 
         }
         else
         {
-            g.setColour(juce::Colours::red);
-            g.drawText("No", 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+            g.setColour(juce::Colours::orange);
+            g.drawText("Not converted", 2, 0, width - 4, height, juce::Justification::centredLeft, true);
             delete reader;
         }
         if (isConverting)
@@ -438,6 +439,11 @@ void DataBaseBrowser::changeListenerCallback(juce::ChangeBroadcaster* source)
                 startOrStop();
             }
             myConvertObjects[i]->setVisible(false);
+            if (myConvertObjects[i]->getId() == table.getSelectedRow() && wantToLoadFile == true && mouseIsUp == true)
+            {
+                fileDroppedFromDataBase->sendChangeMessage();
+                wantToLoadFile = false;
+            }
             myConvertObjects.remove(i);
             //remove progress bar
             if (myConvertObjects.size() == 0)
@@ -502,6 +508,8 @@ void DataBaseBrowser::mouseDown(const juce::MouseEvent& e)
         mouseDrag(e);
         startDrag = false;
     }
+    mouseIsUp = false;
+
 }
 
 void DataBaseBrowser::mouseDrag(const juce::MouseEvent& e)
@@ -520,10 +528,16 @@ void DataBaseBrowser::mouseDrag(const juce::MouseEvent& e)
 }
 void DataBaseBrowser::mouseUp(const juce::MouseEvent& e)
 {
+    mouseIsUp = true;
     if (mouseDragged == true)
     {
-        fileDroppedFromDataBase->sendChangeMessage();
-        mouseDragged = false;
+        if (fileLoaded)
+        {
+            fileDroppedFromDataBase->sendChangeMessage();
+            mouseDragged = false;
+        }
+        else 
+            wantToLoadFile = true;
     }
     startDrag = false;
 }
@@ -818,10 +832,13 @@ void DataBaseBrowser::batchConvert()
 
 bool DataBaseBrowser::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
 {
-    if (key == juce::KeyPress::spaceKey)
+    if (isVisible())
     {
-        play();
-        return false;
+        if (key == juce::KeyPress::spaceKey)
+        {
+            play();
+            return false;
+        }
     }
 }
 

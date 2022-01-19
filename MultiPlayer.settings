@@ -19,4 +19,5 @@
   <VALUE name="MouseWheelControl" val="1"/>
   <VALUE name="AutoNormalize" val="1"/>
   <VALUE name="ShowMeter" val="1"/>
+  <VALUE name="PreferedSoundPlayerMode" val="1"/>
 </PROPERTIES>

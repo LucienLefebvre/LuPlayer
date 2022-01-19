@@ -421,6 +421,16 @@ public:
         }
     }
 
+    void keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
+    {
+        if (isVisible())
+        {
+            if (key == juce::KeyPress::spaceKey)
+            {
+                startOrStop();
+            }
+        }
+    }
 
     juce::FileBrowserComponent* fileBrowser;
     juce::File* fileFolder;

@@ -124,6 +124,8 @@ Recorder::Recorder() : editingThumbnailCache(5), editingThumbnail(521, editingFo
 
 Recorder::~Recorder()
 {
+    backgroundThread.stopThread(1000);
+    thumbnail.clear();
     lastRecording.deleteFile();
     cueTransport.setSource(nullptr);
     delete mouseDragInRecorder;

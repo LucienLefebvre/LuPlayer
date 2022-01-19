@@ -54,6 +54,8 @@ int Settings::draggedPlaylist;
 int Settings::draggedPlayer;
 int Settings::fxEditedPlayer;
 int Settings::fxEditedPlaylist;
+
+int Settings::preferedSoundPlayerMode;
 //==============================================================================
 Settings::Settings() : settingsFile(options)
 {
@@ -62,7 +64,6 @@ Settings::Settings() : settingsFile(options)
     options.filenameSuffix = ".settings";
 
     options.folderName = juce::File::getCurrentWorkingDirectory().getFullPathName();
-    //options.folderName = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory).getChildFile("MultiPlayer").getFullPathName();
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     properties.setStorageParameters(options);
 
@@ -72,6 +73,18 @@ Settings::Settings() : settingsFile(options)
     Settings::FFmpegPath = properties.getUserSettings()->getValue("FFmpeg Path");
     Settings::exiftoolPath = properties.getUserSettings()->getValue("Exiftool Path");
     Settings::convertedSoundsPath = properties.getUserSettings()->getValue("Converted Sound Path");
+    Settings::preferedMidiDeviceIndex = properties.getUserSettings()->getValue("Midi Device").getIntValue();
+    Settings::midiShift = properties.getUserSettings()->getValue("Midi Shift").getIntValue();
+    Settings::adress1 = properties.getUserSettings()->getValue("IP Adress 1");
+    Settings::adress2 = properties.getUserSettings()->getValue("IP Adress 2");
+    Settings::adress3 = properties.getUserSettings()->getValue("IP Adress 3");
+    Settings::adress4 = properties.getUserSettings()->getValue("IP Adress 4");
+    Settings::ipAdress = properties.getUserSettings()->getValue("IP Adress");
+    Settings::inOscPort = properties.getUserSettings()->getValue("In OSC Port").getIntValue();
+    Settings::outOscPort = properties.getUserSettings()->getValue("Out OSC Port").getIntValue();
+    Settings::preferedAudioDeviceType = properties.getUserSettings()->getValue("Audio Device Type");
+    Settings::preferedAudioDeviceName = properties.getUserSettings()->getValue("audioDeviceName");
+    Settings::preferedSoundPlayerMode = properties.getUserSettings()->getValue("PreferedSoundPlayerMode").getIntValue();
 
     if (properties.getUserSettings()->getValue("Skew Factor").isEmpty())
         Settings::skewFactorGlobal = 0.5;
@@ -95,18 +108,6 @@ Settings::Settings() : settingsFile(options)
     else
         Settings::faderTempTime = properties.getUserSettings()->getValue("Fader Temp").getIntValue();
 
-    Settings::preferedMidiDeviceIndex = properties.getUserSettings()->getValue("Midi Device").getIntValue();
-    Settings::midiShift = properties.getUserSettings()->getValue("Midi Shift").getIntValue();
-    Settings::adress1 = properties.getUserSettings()->getValue("IP Adress 1");
-    Settings::adress2 = properties.getUserSettings()->getValue("IP Adress 2");
-    Settings::adress3 = properties.getUserSettings()->getValue("IP Adress 3");
-    Settings::adress4 = properties.getUserSettings()->getValue("IP Adress 4");
-    Settings::ipAdress = properties.getUserSettings()->getValue("IP Adress");
-    Settings::inOscPort = properties.getUserSettings()->getValue("In OSC Port").getIntValue();
-    Settings::outOscPort = properties.getUserSettings()->getValue("Out OSC Port").getIntValue();
-    Settings::preferedAudioDeviceType = properties.getUserSettings()->getValue("Audio Device Type");
-    Settings::preferedAudioDeviceName = properties.getUserSettings()->getValue("audioDeviceName");
-
     if (properties.getUserSettings()->getValue("Launchatzero").isEmpty())
         Settings::lauchAtZeroDB = true;
     else
@@ -127,7 +128,7 @@ Settings::Settings() : settingsFile(options)
     else
         Settings::showMeter = properties.getUserSettings()->getValue("ShowMeter").getIntValue();
 
-    //SAVE & CLOSE BUTTon
+    //SAVE & CLOSE BUTTONS
     saveButton.setBounds(250, 400, 100, 50);
     addAndMakeVisible(saveButton);
     saveButton.setButtonText("Save & Close");
@@ -173,17 +174,14 @@ Settings::Settings() : settingsFile(options)
 
     //FMPEG PATH
     ffmpegPathLabel.setBounds(200, 300, 400, 25);
-    //addAndMakeVisible(ffmpegPathLabel);
 
     selectFFmpegButton.setBounds(0, 300, 200, 25);
     selectFFmpegButton.setButtonText("Select FFmpeg.exe");
-    //addAndMakeVisible(selectFFmpegButton);
     selectFFmpegButton.onClick = [this] { selectFFmpeg(); };
     ffmpegPathLabel.setText(Settings::FFmpegPath, juce::NotificationType::dontSendNotification);
 
     //EXIFTOOL PATH
     exiftoolLabel.setBounds(200, 350, 400, 25);
-    //addAndMakeVisible(exiftoolLabel);
 
     selectExiftoolButton.setBounds(0, 350, 200, 25);
     selectExiftoolButton.setButtonText("Select Exiftool.exe");
@@ -305,7 +303,7 @@ Settings::Settings() : settingsFile(options)
     meterButton.setToggleState(Settings::showMeter, juce::NotificationType::dontSendNotification);
     meterButton.addListener(this);
 
-    //LAUNCHE LEVEL
+    //LAUNCH LEVEL
     addAndMakeVisible(&launchLevelButton);
     launchLevelButton.setButtonText("Always launch sounds at 0dB");
     launchLevelButton.setBounds(0, 250, 200, 25);
@@ -350,7 +348,7 @@ Settings::~Settings()
 
 void Settings::paint (juce::Graphics& g)
 {
-    g.fillAll (juce::Colour(45, 56, 61));   // clear the background
+    g.fillAll (juce::Colour(45, 56, 61));
     g.setColour(juce::Colour(40, 134, 189));
     g.drawRect(0, 0, 600, 470);
 
@@ -358,9 +356,6 @@ void Settings::paint (juce::Graphics& g)
 
 void Settings::resized()
 {
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
-
 }
 
 void Settings::selectFFmpeg()
@@ -377,8 +372,6 @@ void Settings::selectFFmpeg()
     ffmpegPathLabel.setText(Settings::FFmpegPath, juce::NotificationType::dontSendNotification);
     setOptions();
     settingsFile.save();
-    //saveOptions();
-    //DBG(FFmpegPath);
 }
 
 juce::String Settings::getFFmpegPath()
@@ -399,9 +392,6 @@ void Settings::selectExiftool()
         properties.getUserSettings()->setValue("Exiftool Path", Settings::exiftoolPath);
     }
     exiftoolLabel.setText(Settings::exiftoolPath, juce::NotificationType::dontSendNotification);
-
-    //saveOptions();
-    //DBG(FFmpegPath);
 }
 
 juce::String Settings::getExiftoolPath()
@@ -424,8 +414,6 @@ void Settings::selectSoundsFolder()
     convertedSoundsLabel.setText(Settings::convertedSoundsPath, juce::NotificationType::dontSendNotification);
     properties.saveIfNeeded();
     settingsFile.save();
-    //saveOptions();
-    //DBG(FFmpegPath);
 }
 
 void Settings::setOptions()
@@ -595,8 +583,6 @@ juce::AudioDeviceManager::AudioDeviceSetup Settings::getPreferedAudioDevice()
     Settings::preferedAudioDevice.outputChannels = properties.getUserSettings()->getValue("outputChannels").getLargeIntValue();
     Settings::preferedAudioDevice.useDefaultOutputChannels = properties.getUserSettings()->getValue("useDefaultOutputsChannels").getIntValue();
 
-
-
     return Settings::preferedAudioDevice;
 }
 
@@ -619,9 +605,20 @@ void Settings::updateSampleRateValue(double sampleRate)
     Settings::sampleRate = sampleRate;
     properties.saveIfNeeded();
     settingsFile.save();
-
 }
 
+void Settings::setPreferedSoundPlayerMode(int p)
+{
+    Settings::preferedSoundPlayerMode = p;
+    properties.getUserSettings()->setValue("PreferedSoundPlayerMode", Settings::preferedSoundPlayerMode);
+    properties.saveIfNeeded();
+    settingsFile.save();
+}
+
+int Settings::getPreferedSoundPlayerMode()
+{
+    return properties.getUserSettings()->getValue("PreferedSoundPlayerMode").getIntValue();
+}
 
 int Settings::getAudioOutputMode()
 {

@@ -71,9 +71,14 @@ private:
     void DataBaseBrowser::tableColumnDraggingChanged(juce::TableHeaderComponent* tableHeader, int columnIdNowBeingDragged) override;
     void DataBaseBrowser::valueChanged(juce::Value& value);
 
+    bool showFileColumn = false;
+
     bool fileLoaded = false;
     bool wantToPlay = false;
+    bool wantToLoadFile = false;
 
+    
+    bool mouseIsUp = false;
     bool mouseDragged = false;
     bool startDrag = false;
     nanodbc::connection conn;

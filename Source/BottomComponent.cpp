@@ -37,7 +37,6 @@ BottomComponent::BottomComponent()
         addTab("Netia DataBase", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &noDbLabel, false);
     }
     addTab("Distant DataBase", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &distantDbBrowser, false);
-    addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
     if (conn.connected())
     {
         addTab("Netia Database Import", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &dbImport, false);
@@ -46,6 +45,7 @@ BottomComponent::BottomComponent()
     {
         addTab("Netia Database Import", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &noDbLabel, false);
     }
+    addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
     addTab("Clip Effect", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &clipEffect, false);
     setTabBarDepth(tabBarHeight);
     setCurrentTabIndex(1);
@@ -121,10 +121,10 @@ void BottomComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         if (recorderComponent.isRecording())
         {
-            getTabbedButtonBar().setTabBackgroundColour(3, juce::Colours::red);
+            getTabbedButtonBar().setTabBackgroundColour(4, juce::Colours::red);
         }
         else
-            getTabbedButtonBar().setTabBackgroundColour(3, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+            getTabbedButtonBar().setTabBackgroundColour(4, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     }
     //stop the cue on the others components of the panel and send change message to maincomponent
     else if (source == dbBrowser.cuePlay)
@@ -155,6 +155,7 @@ bool BottomComponent::keyPressed(const juce::KeyPress& key, juce::Component* ori
     if (key == juce::KeyPress::spaceKey)
     {
         dbBrowser.keyPressed(key, originatingComponent);
+        audioPlaybackDemo.keyPressed(key, originatingComponent);
     }
     return false;
 }

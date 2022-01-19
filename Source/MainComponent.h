@@ -404,5 +404,6 @@ private:
 
     std::unique_ptr<KeyboardMappedSoundboard> keymapSoundboard;
     juce::ModifierKeys currentModifier;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
