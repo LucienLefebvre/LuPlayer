@@ -53,9 +53,14 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     table.addComponentListener(this);
     table.getHeader().addListener(this);
 
-    addAndMakeVisible(&timeLabel);
-    timeLabel.setFont(juce::Font(20.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+    addChildComponent(&timeLabel);
+    timeLabel.setFont(juce::Font(25.0f, juce::Font::plain).withTypefaceStyle("Regular"));
     timeLabel.setJustificationType(juce::Justification::centred);
+
+    addAndMakeVisible(&nameLabel);
+    nameLabel.setFont(juce::Font(25.0f, juce::Font::plain).withTypefaceStyle("Regular"));
+    nameLabel.setJustificationType(juce::Justification::centred);
+    nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(229, 149, 0));
 
     addAndMakeVisible(startStopButton);
     startStopButton.setColour(juce::TextButton::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
@@ -158,8 +163,9 @@ void DataBaseBrowser::resized()
 
     thumbnailBounds.setBounds(getWidth() / 2 + 4, 30, getWidth() / 2, getHeight() - 30);
     startStopButton.setBounds(getWidth() / 2 + 4, 0, 100, 25);
-    autoPlayButton.setBounds(getWidth() / 2 + 4 + 101, 0, 100, 25);
-    timeLabel.setBounds(autoPlayButton.getRight(), 0, getWidth() - autoPlayButton.getRight(), 25);
+    autoPlayButton.setBounds(getWidth() / 2 + 4 + 101, 0, 90, 25);
+    timeLabel.setBounds(getWidth() - timeLabelWidth, 0, timeLabelWidth, 25);
+    nameLabel.setBounds(autoPlayButton.getRight(), 0, getWidth() - autoPlayButton.getRight() - timeLabelWidth, 25);
     playHead.setSize(1, getHeight() - 30);
 
     convertProgress.setBounds(getWidth() / 2 - 204, 5, 200, 20);
@@ -375,6 +381,13 @@ void DataBaseBrowser::clearListBox()
 
 void DataBaseBrowser::cellClicked(int rowNumber, int columnID, const juce::MouseEvent& e)
 {
+    transport.setSource(nullptr);
+    thumbnail.setSource(nullptr);
+    fileLoaded = false;
+    nameLabel.setText("", juce::NotificationType::dontSendNotification);
+    timeLabel.setVisible(false);
+    startStopButton.setColour(juce::TextButton::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    repaint();
     if (!files[rowNumber].isEmpty())
     {
         checkAndConvert(rowNumber);
@@ -389,12 +402,12 @@ void DataBaseBrowser::cellClicked(int rowNumber, int columnID, const juce::Mouse
     if (autoPlayButton.getToggleState())
     {
         if (!transport.isPlaying())
-            startOrStop();
+            play();
     }
     if (e.getNumberOfClicks() == 2)
     {
         if (!transport.isPlaying())
-            startOrStop();
+            play();
     }
 }
 
@@ -419,7 +432,11 @@ void DataBaseBrowser::changeListenerCallback(juce::ChangeBroadcaster* source)
         {
             //load file and delete object
             if (!isBatchConverting)
-                loadFile(myConvertObjects[i]->getReturnedFile());
+                fileLoaded = loadFile(myConvertObjects[i]->getReturnedFile());
+            if (wantToPlay)
+            {
+                startOrStop();
+            }
             myConvertObjects[i]->setVisible(false);
             myConvertObjects.remove(i);
             //remove progress bar
@@ -430,12 +447,6 @@ void DataBaseBrowser::changeListenerCallback(juce::ChangeBroadcaster* source)
             }
         }
     }
-    //else if (source == myConvertObjects.getLast()->finishedBroadcaster)
-    //{
-    //    loadFile(myConvertObjects.getLast()->getReturnedFile());
-    //    myConvertObjects.getLast()->setVisible(false);
-    //    //myConvertObjects.rel;
-    //}
 }
 
 void DataBaseBrowser::startOrStop()
@@ -576,6 +587,8 @@ bool DataBaseBrowser::loadFile(const juce::String& path)
         playSource.reset(tempSource.release());
         thumbnail.setSource(new juce::FileInputSource(file));
         repaint();
+        nameLabel.setText(names[table.getSelectedRow()], juce::NotificationType::dontSendNotification);
+        timeLabel.setVisible(true);
         return true;
     }
     else
@@ -745,7 +758,7 @@ bool DataBaseBrowser::checkAndConvert(int rowNumber)
     if (juce::AudioFormatReader* reader = formatManager.createReaderFor(fileToTest))
     {
         if (!isBatchConverting)
-            loadFile(fileToTest.getFullPathName());
+            fileLoaded = loadFile(fileToTest.getFullPathName());
         delete reader;
         return true;
     }
@@ -800,5 +813,27 @@ void DataBaseBrowser::batchConvert()
         progression = -1.;
         batchConvertButton.setButtonText("Convert");
     }
+    }
+}
+
+bool DataBaseBrowser::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
+{
+    if (key == juce::KeyPress::spaceKey)
+    {
+        play();
+        return false;
+    }
+}
+
+void DataBaseBrowser::play()
+{
+    if (fileLoaded)
+    {
+        startOrStop();
+        wantToPlay = false;
+    }
+    else
+    {
+        wantToPlay = true;
     }
 }

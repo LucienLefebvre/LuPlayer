@@ -96,15 +96,16 @@ void FilterProcessor::createFilters(juce::dsp::ProcessorDuplicator<juce::dsp::II
 
 juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> FilterProcessor::getFilterCoefs(int band)
 {
-    return processors[band]->state;
+    if (processors[band] != nullptr)
+        return processors[band]->state;
 }
 
 FilterProcessor::FilterParameters& FilterProcessor::getFilterParameters(int filterBand)
 {
     FilterParameters fp;
-    if (filtersParams[filterBand] != nullptr)
+    if (filterBand >= 0)
     {
-        if (filterBand >= 0)
+        if (filtersParams[filterBand] != nullptr)
             fp = *filtersParams[filterBand];
     }
     return fp;

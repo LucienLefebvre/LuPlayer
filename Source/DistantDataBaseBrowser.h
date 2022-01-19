@@ -92,9 +92,15 @@ private:
 
     void connectButtonClicked();
 
+    void updateButtonStates();
+
+    void unmapDistantDrive();
+
+    void keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
+
     bool mouseDragged = false;
     bool startDrag = false;
-    nanodbc::connection conn;
+    std::unique_ptr<nanodbc::connection> conn;
 
     int numRows = 0;
 
@@ -112,9 +118,12 @@ private:
     juce::TextButton clearSearchButton;
     juce::ToggleButton autoPlayButton{ "Autoplay" };
 
-    juce::Label hostLabel;
+    juce::TextEditor hostLabel;
     juce::TextButton connectButton;
     juce::ComboBox lastServerBox;
+
+    juce::TextEditor userLabel;
+    juce::TextEditor passwordLabel{"Password", (juce::juce_wchar) 0x25cf };
 
     juce::Label timeLabel;
 
@@ -123,7 +132,7 @@ private:
     juce::ToggleButton todayButton;
 
     juce::TextButton batchConvertButton;
-
+    
     juce::File file;
     double fileSampleRate = 48000;
     Ebu128LoudnessMeter loudnessMeter;
@@ -153,7 +162,7 @@ private:
     juce::String DistantDataBaseBrowser::secondsToMMSS(int seconds);
     const juce::String DistantDataBaseBrowser::startFFmpeg(std::string filePath);
 
-
+    juce::ChildProcess process;
 
     class connectThread : public juce::Thread
     {
@@ -161,11 +170,13 @@ private:
         connectThread::connectThread() : juce::Thread("Distant Database")
         {
             //setStatusMessage("Connecting to database......");
+            connectionTriedBroadcaster = new juce::ChangeBroadcaster();
         }
 
         connectThread::~connectThread()
         {
-
+            isConnected = false;
+            delete connectionTriedBroadcaster;
         }
 
         void connectThread::run()
@@ -173,7 +184,9 @@ private:
             auto const connection_string = NANODBC_TEXT(connectionString.toStdString());
             try
             {
-                connection.connect(connection_string);
+                DBG(hostAdress);
+                DBG(user);
+                connection->connect(connection_string, 5L);
 
                 //nanodbc::connection conn(connection_string);
                 //conn.dbms_name();
@@ -183,46 +196,41 @@ private:
                 std::cerr << e.what() << std::endl;
             }
 
-            if (connection.connected())
+            if (connection->connected())
             {
-
-
-                //setStatusMessage("Mapping distant drive......");
-                //setProgress(0.5);
-                //DISK MAPPING
+                DBG("mapping...");
                 std::string USES_CONVERSION_EX;
-                std::string cmdstring = std::string("net use z: \\\\" + hostAdress.toStdString() + "\\sons$");
-                std::wstring w = (utf8_to_utf16(cmdstring));
-                LPWSTR str = const_cast<LPWSTR>(w.c_str());
-                DBG(str);
-                PROCESS_INFORMATION pi;
-                STARTUPINFOW si;
-                si.wShowWindow = SW_SHOW;
-                si.dwFlags = STARTF_USESHOWWINDOW;
-                ZeroMemory(&si, sizeof(si));
-                BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
-                if (logDone)
-                {
-                    WaitForSingleObject(pi.hProcess, 2);
-                }
+                std::string cmdstring = std::string("net use z: \\\\" 
+                                        + hostAdress.toStdString() 
+                                        + "\\sons$ " 
+                                        + password.toStdString() 
+                                        + " /user:" 
+                                        + user.toStdString());
+
+                process.start(cmdstring);
+                if (process.waitForProcessToFinish(5000))
+                    DBG("isconnected");
                 isConnected = true;
-                signalThreadShouldExit();
+
                 juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon,
                     "Distant Database Found",
                     "");
+                signalThreadShouldExit();
             }
             else
             {
                 isConnected = false;
-                signalThreadShouldExit();
+
                 juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
                     "No Database Found",
                     "");
+                signalThreadShouldExit();
+
             }
-            if (threadShouldExit())
-            {
+            //if (threadShouldExit())
+            //{
                 return;
-            }
+            //}
         }
 
         void connectThread::setString(juce::String s)
@@ -235,16 +243,35 @@ private:
             hostAdress = h;
         }
 
+        void connectThread::setUser(juce::String u)
+        {
+            user = u;
+        }
+
+        void connectThread::setPassword(juce::String p)
+        {
+            password = p;
+        }
+
         void connectThread::setConnection(nanodbc::connection& c)
         {
-            connection = c;
+            connection = &c;
         }
+        /*bool connectThread::getIsConnected()
+        {
+            return connection->connected();
+        }*/
+
+        juce::ChangeBroadcaster* connectionTriedBroadcaster;
+
+        juce::ChildProcess process;
+
         juce::String connectionString;
         juce::String hostAdress;
-        nanodbc::connection connection;
-        bool isConnected;
-
-
+        juce::String user;
+        juce::String password;
+        nanodbc::connection* connection;
+        bool isConnected = false;
 
         std::wstring connectThread::utf8_to_utf16(const std::string& utf8)
         {
@@ -319,6 +346,6 @@ private:
         }
     };
 
-    connectThread thread;
+    std::unique_ptr<connectThread> thread;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DistantDataBaseBrowser)
 };

@@ -46,6 +46,7 @@ Player::Player(int index)/*: thumbnailCache(5),
      draggedBroadcaster = new juce::ActionBroadcaster();
      fxButtonBroadcaster = new juce::ChangeBroadcaster();
      playerInfoChangedBroadcaster = new juce::ChangeBroadcaster();
+     remainingTimeBroadcaster = new juce::ChangeBroadcaster();
      /* int playerPosition = playerIndex + 1;
      addAndMakeVisible(playerPositionLabel);
      playerPositionLabel.setButtonText(juce::String(playerPosition));
@@ -322,6 +323,7 @@ Player::~Player()
     delete draggedBroadcaster;
     delete fxButtonBroadcaster;
     delete playerInfoChangedBroadcaster;
+    delete remainingTimeBroadcaster;
     Settings::maxFaderValue.removeListener(this);
     Settings::audioOutputModeValue.removeListener(this);
     trimVolumeSlider.removeListener(this);
@@ -907,6 +909,11 @@ void Player::updateRemainingTime()
     else
         remainingTimeString = juce::String(remainingTimeMinuts) + ":" + juce::String(remainingTimeSeconds);
     remainingTimeLabel.setText(remainingTimeString, juce::NotificationType::dontSendNotification);
+
+    if (remainingTimeString.equalsIgnoreCase("0:05"))
+    {
+        remainingTimeBroadcaster->sendChangeMessage();
+    }
 }
 
 //AUDIO OUTPUT

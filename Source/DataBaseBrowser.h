@@ -43,6 +43,8 @@ public:
     void paintRowBackground(juce::Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected) override;
     void paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool /*rowIsSelected*/) override;
     void DataBaseBrowser::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
+    bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
+    void play();
     juce::File DataBaseBrowser::getSelectedFile();
     juce::String DataBaseBrowser::getSelectedSoundName();
     juce::AudioTransportSource transport;
@@ -69,6 +71,9 @@ private:
     void DataBaseBrowser::tableColumnDraggingChanged(juce::TableHeaderComponent* tableHeader, int columnIdNowBeingDragged) override;
     void DataBaseBrowser::valueChanged(juce::Value& value);
 
+    bool fileLoaded = false;
+    bool wantToPlay = false;
+
     bool mouseDragged = false;
     bool startDrag = false;
     nanodbc::connection conn;
@@ -94,6 +99,8 @@ private:
 
 
     juce::Label timeLabel;
+    int timeLabelWidth = 150;
+    juce::Label nameLabel;
 
     juce::File file;
     double fileSampleRate = 48000;

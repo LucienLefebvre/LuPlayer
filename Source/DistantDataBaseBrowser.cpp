@@ -74,7 +74,7 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
     todayButton.setButtonText("Today");
     todayButton.setBounds(426, 1, 59, 25);
     todayButton.onClick = [this] {todayButtonClicked(); };
-    todayButton.setToggleState(true, juce::NotificationType::dontSendNotification);
+    todayButton.setToggleState(false, juce::NotificationType::dontSendNotification);
 
     addAndMakeVisible(&batchConvertButton);
     batchConvertButton.onClick = [this] { batchConvertButtonClicked(); };
@@ -83,10 +83,16 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
 
     addAndMakeVisible(&hostLabel);
     hostLabel.setBounds(0, getHeight() - 27, 150, 25);
-    hostLabel.setText("IP or host name", juce::NotificationType::dontSendNotification);
     hostLabel.setColour(juce::Label::outlineColourId, juce::Colours::lightgrey);
-    hostLabel.setEditable(true, true, false);
-    hostLabel.addListener(this);
+    hostLabel.setTextToShowWhenEmpty("IP or host name", juce::Colours::white);
+
+    addAndMakeVisible(&userLabel);
+    userLabel.setColour(juce::Label::outlineColourId, juce::Colours::lightgrey);
+    userLabel.setTextToShowWhenEmpty("User", juce::Colours::white);
+
+    addAndMakeVisible(&passwordLabel);
+    passwordLabel.setColour(juce::Label::outlineColourId, juce::Colours::lightgrey);
+    passwordLabel.setTextToShowWhenEmpty("Password", juce::Colours::white);
 
     addAndMakeVisible(&lastServerBox);
     updateLastServersBox();
@@ -112,7 +118,9 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
     connectionLabel.setFont(juce::Font(50.));
     connectionLabel.setText("Trying to connect...", juce::NotificationType::dontSendNotification);
 
-    thread.addListener(this);
+    thread.reset(new connectThread);
+    thread->addListener(this);
+    
 
     addChildComponent(convertProgress);
     convertProgress.setColour(juce::ProgressBar::ColourIds::foregroundColourId, juce::Colour(40, 134, 189));
@@ -129,7 +137,9 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
     //    std::cerr << e.what() << std::endl;
     //}
 
+    updateButtonStates();
 
+    conn.reset(new nanodbc::connection());
 
 }
 
@@ -146,22 +156,9 @@ DistantDataBaseBrowser::~DistantDataBaseBrowser()
     transport.removeAllChangeListeners();
     //transport.releaseResources();
     //resampledSource.releaseResources();
-    conn.disconnect();
-    thread.removeListener(this);
-    //UNMAP DRIVE
-    std::string cmdstring = std::string("net use z: /delete");
-    //std::string cmdstring = std::string("net use z: \\\\Laptop-67vrd21a\\sons$");
-    std::wstring w = (utf8_to_utf16(cmdstring));
-    LPWSTR str = const_cast<LPWSTR>(w.c_str());
-    ////////////Launch FFMPEG
-    PROCESS_INFORMATION pi;
-    STARTUPINFOW si;
-    ZeroMemory(&si, sizeof(si));
-    BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
-    if (logDone)
-    {
-        WaitForSingleObject(pi.hProcess, INFINITE);
-    }
+    conn->disconnect();
+    thread->removeListener(this);
+    unmapDistantDrive();
 
 }
 
@@ -195,14 +192,18 @@ void DistantDataBaseBrowser::resized()
     table.getHeader().setColumnWidth(3, getWidth() * 2 / 16 - 4);
     table.getHeader().setColumnWidth(4, 45);
 
+    int bottomButtonsYPosition = getHeight() - 27;
+    int spaceBetweenBoxes = 10;
     thumbnailBounds.setBounds(getWidth() / 2 + 4, 30, getWidth() / 2, getHeight() - 30);
     startStopButton.setBounds(getWidth() / 2 + 4, 0, 100, 25);
     autoPlayButton.setBounds(getWidth() / 2 + 4 + 101, 0, 100, 25);
     timeLabel.setBounds(autoPlayButton.getRight(), 0, getWidth() - autoPlayButton.getRight(), 25);
     playHead.setSize(1, getHeight() - 30);
-    hostLabel.setBounds(150, getHeight() - 27, 150, 25);
-    lastServerBox.setBounds(0, getHeight() - 27, 150, 25);
-    connectButton.setBounds(300, getHeight() - 27, 100, 25);
+    lastServerBox.setBounds(0, bottomButtonsYPosition, 150, 25);
+    hostLabel.setBounds(lastServerBox.getRight() + spaceBetweenBoxes, bottomButtonsYPosition, 150, 25);
+    userLabel.setBounds(hostLabel.getRight() + spaceBetweenBoxes, bottomButtonsYPosition, 150, 25);
+    passwordLabel.setBounds(userLabel.getRight() + spaceBetweenBoxes, bottomButtonsYPosition, 150, 25);
+    connectButton.setBounds(passwordLabel.getRight() + spaceBetweenBoxes, bottomButtonsYPosition, 100, 25);
     connectionLabel.setCentrePosition(getWidth() / 2, getHeight() / 2);
     convertProgress.setBounds(getWidth() / 2 - 204, 5, 200, 20);
 }
@@ -290,8 +291,8 @@ void DistantDataBaseBrowser::paintCell(juce::Graphics& g, int rowNumber, int col
 
 void DistantDataBaseBrowser::initialize()
 {
-    //sqlQuery("", 3, 1);
-    table.getHeader().setSortColumnId(3, false);
+    sqlQuery("", 3, 1);
+    //table.getHeader().setSortColumnId(3, false);
 }
 
 void DistantDataBaseBrowser::sqlQuery(std::string search, int sortColum, int sortDirection)
@@ -333,7 +334,7 @@ void DistantDataBaseBrowser::sqlQuery(std::string search, int sortColum, int sor
 
 
     nanodbc::result row = execute(
-        conn,
+        *conn,
         searchString);
 
 
@@ -403,10 +404,10 @@ void DistantDataBaseBrowser::labelTextChanged(juce::Label* labelThatHasChanged)
         clearListBox();
         sqlQuery(searchLabel.getText().toStdString());
     }
-    else if (labelThatHasChanged == &hostLabel)
+    /*else if (labelThatHasChanged == &hostLabel)
     {
         connectButtonClicked();
-    }
+    }*/
 }
 
 void DistantDataBaseBrowser::clearListBox()
@@ -423,7 +424,7 @@ void DistantDataBaseBrowser::clearListBox()
 
 void DistantDataBaseBrowser::cellClicked(int rowNumber, int columnID, const juce::MouseEvent& e)
 {
-    if (conn.connected())
+    if (conn->connected())
     {
         checkAndConvert(rowNumber);
         /*if (!files[rowNumber].isEmpty())
@@ -789,13 +790,23 @@ void DistantDataBaseBrowser::connectToDB()
 
 
     juce::String connectionString = "Driver=ODBC Driver 17 for SQL Server;Server=" + hostLabel.getText() + ";Database=ABC4;Uid=SYSADM;Pwd=SYSADM;";
+    conn.release();
+    conn.reset(new nanodbc::connection());
+    conn->disconnect();
+    conn->deallocate();
 
-    thread.setString(connectionString);
-    thread.setHost(hostLabel.getText());
-    thread.setConnection(conn);
-    thread.startThread();
 
-    if (thread.isConnected == true)
+    thread->stopThread(5000);
+    thread.reset(new connectThread);
+    thread->addListener(this);
+    thread->setString(connectionString);
+    thread->setHost(hostLabel.getText());
+    thread->setUser(userLabel.getText());
+    thread->setPassword(passwordLabel.getText());
+    thread->setConnection(*conn);
+    thread->startThread();
+
+    if (thread->isConnected == true)
     {
         initialize();
         isConnecting = false;
@@ -811,7 +822,8 @@ void DistantDataBaseBrowser::connectToDB()
 void DistantDataBaseBrowser::exitSignalSent()
 {
     const juce::MessageManagerLock mmLock;
-    if (thread.isConnected)
+    DBG("exit signal sent");
+    if (thread->isConnected)
     {
         initialize();
     }
@@ -819,7 +831,12 @@ void DistantDataBaseBrowser::exitSignalSent()
     {
         clearListBox();
         resetThumbnail();
+        thread->process.kill();
+        connectButton.setButtonText("Connect");
+        isConnecting = false;
+        updateButtonStates();
     }
+    updateButtonStates();
     isConnecting = false;
 }
 
@@ -948,17 +965,96 @@ void DistantDataBaseBrowser::todayButtonClicked()
 
 void DistantDataBaseBrowser::connectButtonClicked()
 {
-    if (isConnecting == false)
+    if (conn == nullptr)
+        conn.reset(new nanodbc::connection());
+
+    if (conn != nullptr)
     {
-        clearListBox();
-        connectToDB();
-        connectButton.setButtonText("Cancel");
-        isConnecting = true;
+        if (conn->connected())
+        {
+            DBG("thread connected");
+            conn->disconnect();
+            conn->deallocate();
+            unmapDistantDrive();
+            names.clear();
+            namesbis.clear();
+            files.clear();
+            durations.clear();
+            dates.clear();
+            numRows = 0;
+            table.updateContent();
+            connectButton.setButtonText("Connect");
+            updateButtonStates();
+        }
+        else if (isConnecting == false)
+        {
+            DBG("connecting");
+            thread->process.kill();
+            thread->stopThread(1000);
+            clearListBox();
+            connectToDB();
+            connectButton.setButtonText("Cancel");
+            isConnecting = true;
+        }
+        else if (isConnecting == true)
+        {
+            DBG("Stop connection");
+            conn->disconnect();
+            conn.release();
+            thread->process.kill();
+            thread->signalThreadShouldExit();
+            thread->stopThread(1000);
+            connectButton.setButtonText("Connect");
+            isConnecting = false;
+            updateButtonStates();
+        }
     }
-    else if (isConnecting == true)
+}
+
+void DistantDataBaseBrowser::updateButtonStates()
+{
+    if (conn != nullptr)
     {
-        thread.stopThread(1000);
-        connectButton.setButtonText("Connect");
-        isConnecting = false;
+        bool b = conn->connected();
+
+        searchLabel.setEnabled(b);
+        todayButton.setEnabled(b);
+        clearSearchButton.setEnabled(b);
+        refreshButton.setEnabled(b);
+        batchConvertButton.setEnabled(b);
+
+        if (conn->connected())
+        {
+            connectButton.setButtonText("Disconnect");
+        }
+        else
+            connectButton.setButtonText("Connect");
     }
+}
+
+
+void DistantDataBaseBrowser::unmapDistantDrive()
+{
+    //UNMAP DRIVE
+    std::string cmdstring = std::string("net use z: /delete");
+    process.start(cmdstring);
+    process.waitForProcessToFinish(5000);
+
+
+
+    /*std::wstring w = (utf8_to_utf16(cmdstring));
+    LPWSTR str = const_cast<LPWSTR>(w.c_str());
+    PROCESS_INFORMATION pi;
+    STARTUPINFOW si;
+    ZeroMemory(&si, sizeof(si));
+    BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+    if (logDone)
+    {
+        WaitForSingleObject(pi.hProcess, INFINITE);
+    }*/
+}
+
+void DistantDataBaseBrowser::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
+{
+    DBG("key pressed");
 }

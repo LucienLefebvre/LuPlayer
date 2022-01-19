@@ -36,6 +36,7 @@ public:
     void BottomComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void BottomComponent::tabSelected();
     void BottomComponent::stopCue();
+    bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
     AudioPlaybackDemo audioPlaybackDemo;
     Recorder recorderComponent;
     DataBaseBrowser dbBrowser;

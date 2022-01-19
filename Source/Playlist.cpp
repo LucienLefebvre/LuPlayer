@@ -1360,12 +1360,12 @@ void Playlist::changeListenerCallback(juce::ChangeBroadcaster* source)
             }
             else if (source == players[i]->fxButtonBroadcaster)
             {
-                if (playlistType == 0)
+                if (playlistPosition == 0)
                 {
                     Settings::fxEditedPlaylist = 0;
                     Settings::fxEditedPlayer = i;
                 }
-                else if (playlistType == 1)
+                else if (playlistPosition == 1)
                 {
                     Settings::fxEditedPlaylist = 1;
                     Settings::fxEditedPlayer = i;
@@ -1891,4 +1891,14 @@ void Playlist::stopCues()
     
         players[i]->cueTransport.stop();
     }
+}
+
+void Playlist::setPlaylistType(int t)
+{
+    playlistType = t;
+}
+
+void Playlist::setPlaylistPosition(int p)
+{
+    playlistPosition = p;
 }

@@ -220,6 +220,7 @@ public:
     juce::ActionBroadcaster* cueBroadcaster;
     juce::ActionBroadcaster* draggedBroadcaster;
     juce::ChangeBroadcaster* fxButtonBroadcaster;
+    juce::ChangeBroadcaster* remainingTimeBroadcaster;
 
     std::unique_ptr<juce::MemoryAudioSource> outputSource;
 

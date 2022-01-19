@@ -44,8 +44,6 @@ public:
     void Playlist::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
 
 
-
-
     void Playlist::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message);
     void Playlist::handleIncomingMidiMessageEightPlayers(int value, int number);
     void Playlist::handleTrimMidiMessage(int value, int number);//8 players mode
@@ -152,10 +150,13 @@ public:
     juce::ChangeBroadcaster* fxButtonBroadcaster;
 
     void Playlist::stopCues();
+    void setPlaylistType(int t);
+    void setPlaylistPosition(int p);
     int cuedPlayer = 0;
 
 private:
     int playlistType;
+    int playlistPosition = 0;
     juce::String droppedName;
     void Playlist::updateNextPlayer();
     int previousvalueint = 0;

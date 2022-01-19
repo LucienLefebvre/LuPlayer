@@ -392,6 +392,7 @@ private:
     bool isEightPlayerMode = false;
     void MainComponent::launchSoundPlayer(SoundPlayer::Mode m);
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
+    void modifierKeysChanged(const juce::ModifierKeys& modifiers);
     bool eightPlayersLaunched = false;
 
     //MIXER
@@ -402,6 +403,6 @@ private:
     bool playerSwitching = false;
 
     std::unique_ptr<KeyboardMappedSoundboard> keymapSoundboard;
-
+    juce::ModifierKeys currentModifier;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

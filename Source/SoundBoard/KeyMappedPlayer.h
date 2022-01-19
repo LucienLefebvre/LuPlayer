@@ -18,7 +18,7 @@
 class KeyMappedPlayer  :    public juce::Component,
                             public juce::ChangeListener,
                             public juce::Slider::Listener,
-                            public juce::Timer
+                            public juce::MultiTimer
 {
 public:
     KeyMappedPlayer();
@@ -43,7 +43,11 @@ public:
 
     void sliderValueChanged(juce::Slider* slider);
 
-    void timerCallback();
+    void timerCallback(int timerID);
+
+    void setPlayerColours(juce::Colour c);
+
+    void scrollNameLabel();
 
 private:
     //Player dummyPlayer;
@@ -58,6 +62,7 @@ private:
 
     bool isDragged = false;
 
+    juce::Colour currentColour;
 
     juce::AudioThumbnail* thumbnail;
     juce::Rectangle<int> thumbnailBounds;
@@ -69,5 +74,11 @@ private:
     int thumbnailHeight = 100;
     int elapsedTimeWidth = 100;
     int elapsedTimeHeight = 20;
+    int nameLabelScrollX = 0;
+    int nameLabelTextTotalWidth = 0;
+
+    int startTickScrollTimer = 0;
+    int endTickScrollTimer = 0;
+    bool scrollLabel = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappedPlayer)
 };

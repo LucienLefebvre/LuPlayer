@@ -149,3 +149,12 @@ void BottomComponent::stopCue() //stop cues on this panel when a cue is launched
     audioPlaybackDemo.transportSource.stop();
     dbBrowser.transport.stop();
 }
+
+bool BottomComponent::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
+{
+    if (key == juce::KeyPress::spaceKey)
+    {
+        dbBrowser.keyPressed(key, originatingComponent);
+    }
+    return false;
+}
