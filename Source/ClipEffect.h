@@ -41,6 +41,8 @@ public:
 
     void changeListenerCallback(juce::ChangeBroadcaster* source);
 
+    void setFxEditedPlayer();
+
 
 private:
     FilterEditor filterEditor;

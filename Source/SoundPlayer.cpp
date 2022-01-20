@@ -211,17 +211,17 @@ void SoundPlayer::resized()
     {
         //setSize(getParentWidth(), getParentHeight());
         playlistViewport.setBounds(0, playersStartHeightPosition,
-            (getParentWidth() / 2) - 50 - dragZoneWidth, (getHeight() - 60));
+            (getParentWidth() / 2) - 50 - dragZoneWidth, (getHeight() - playersStartHeightPosition - bottomButtonsHeight));
         if (myPlaylists[0] != nullptr)
         {
             myPlaylists[0]->setSize(playlistViewport.getWidth() - 2, playlistViewport.getHeight() - 2);
         }
         if (!isEightPlayerMode)
             playlistbisViewport.setBounds(getParentWidth() / 2 + 50, playersStartHeightPosition,
-                getParentWidth() / 2 - 50, (getHeight() - 60));
+                getParentWidth() / 2 - 50, (getHeight() - playersStartHeightPosition - bottomButtonsHeight));
         else
             playlistbisViewport.setBounds(getParentWidth() / 2 + 50, playersStartHeightPosition,
-                getParentWidth() / 2 - 50, (getHeight() - 60));
+                getParentWidth() / 2 - 50, (getHeight() - playersStartHeightPosition - bottomButtonsHeight));
         if (myPlaylists[1] != nullptr)
         {
             myPlaylists[1]->setSize(playlistbisViewport.getWidth(), playlistbisViewport.getHeight() - 2);
@@ -243,14 +243,14 @@ void SoundPlayer::resized()
             0, upDownButtonsWidth, upDownButtonsHeight);
 
         addPlayerPlaylist.setBounds(playlistViewport.getWidth() - 200,
-            playlistViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
+            playlistViewport.getHeight() + playersStartHeightPosition + 5, 100, bottomButtonsHeight);
         removePlayerPlaylist.setBounds(playlistViewport.getWidth() - 100,
-            playlistViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
+            playlistViewport.getHeight() + playersStartHeightPosition + 5, 100, bottomButtonsHeight);
 
         addPlayerCart.setBounds(playlistbisViewport.getX(),
-            playlistbisViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
+            playlistbisViewport.getHeight() + playersStartHeightPosition + 5, 100, bottomButtonsHeight);
         removePlayerCart.setBounds(playlistbisViewport.getX() + 100,
-            playlistbisViewport.getHeight() + playersStartHeightPosition + 5, 100, 25);
+            playlistbisViewport.getHeight() + playersStartHeightPosition + 5, 100, bottomButtonsHeight);
 
         int cueMeterXStart = playlistViewport.getWidth();
 

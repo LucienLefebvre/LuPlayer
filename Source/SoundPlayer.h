@@ -136,10 +136,10 @@ private:
     int totalPlayerWidthWithButtons = totalPlayerWidth + controlButtonWidth;
     int spaceBetwennPlaylistAndControls = 30;
     int upDownButtonsWidth = 100;
-    int upDownButtonsHeight = 25;
+    int upDownButtonsHeight = 0;
     int cartsStartX = 800;
     int defaultWindowWidth = 1560;
-    int bottomButtonsHeight = 30;
+    int bottomButtonsHeight = 0;
 
     //METERS
     int levelMeterMaximumHeight = 510;

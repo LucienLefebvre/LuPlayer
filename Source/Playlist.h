@@ -152,6 +152,7 @@ public:
     void Playlist::stopCues();
     void setPlaylistType(int t);
     void setPlaylistPosition(int p);
+    void resetFxEditedButtons();
     int cuedPlayer = 0;
 
 private:

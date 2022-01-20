@@ -17,6 +17,9 @@ KeyMappedPlayer::KeyMappedPlayer()
 {
     currentColour = BLUE;
 
+    addMouseListener(this, true);
+    
+
     shortcutLabel.reset(new juce::Label());
     addAndMakeVisible(shortcutLabel.get());
     shortcutLabel->setAlpha(0.25);
@@ -171,10 +174,21 @@ void KeyMappedPlayer::updatePlayerInfo()
 
 void KeyMappedPlayer::shortcutKeyPressed()
 {
+    startOrStop();
+}
+
+void KeyMappedPlayer::startOrStop()
+{
     if (!soundPlayer->isPlayerPlaying())
         soundPlayer->play();
     else
         soundPlayer->stop();
+}
+
+void KeyMappedPlayer::mouseDown(const juce::MouseEvent& event)
+{
+    if (event.originalComponent != volumeSlider.get())
+        startOrStop();
 }
 
 void KeyMappedPlayer::sliderValueChanged(juce::Slider* slider)

@@ -145,3 +145,9 @@ void ClipEffect::changeListenerCallback(juce::ChangeBroadcaster* source)
         }
     }
 }
+
+void ClipEffect::setFxEditedPlayer()
+{
+    if (editedPlayer != nullptr)
+        editedPlayer->setFxEditedPlayer(true);
+}

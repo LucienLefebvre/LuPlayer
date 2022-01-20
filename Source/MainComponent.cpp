@@ -49,7 +49,7 @@ MainComponent::MainComponent() :
         Settings::sampleRate = deviceManager.getAudioDeviceSetup().sampleRate;
     } 
 
-
+    
 
     //ADD MIXER
     addAndMakeVisible(&mixer);
@@ -75,6 +75,27 @@ MainComponent::MainComponent() :
     bottomComponent.getTabbedButtonBar().getTabButton(3)->addMouseListener(this, false);
 
     //ADD BUTTONS
+    addAndMakeVisible(settingsButton);
+    settingsButton.setBounds(spaceBetweenButtons, topButtonsYStart, topButtonsWidth, topButtonsHeight);
+    settingsButton.setButtonText("Settings");
+    settingsButton.onClick = [this] { settingsButtonClicked(); };
+
+    addAndMakeVisible(audioSetupButton);
+    audioSetupButton.setBounds(settingsButton.getRight() + spaceBetweenButtons, topButtonsYStart, topButtonsWidth, topButtonsHeight);
+    audioSetupButton.setButtonText("Audio Setup");
+    audioSetupButton.onClick = [this] { audioSetupWindow.showDialog("Audio Setup", &audioSetupComp, this,
+        getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true, false); };
+    audioSetupComp.setColour(juce::ResizableWindow::ColourIds::backgroundColourId, juce::Colours::white);
+    audioSetupWindow.setSize(400, 800);
+    audioSetupComp.setSize(400, 800);
+
+    addAndMakeVisible(&soundPlayerTypeSelector);
+    soundPlayerTypeSelector.addItem("Playlist + Cart", 1);
+    soundPlayerTypeSelector.addItem("8 Faders", 2);
+    soundPlayerTypeSelector.addItem("Keyboard Mapping", 3);
+    soundPlayerTypeSelector.setBounds(audioSetupButton.getRight() + spaceBetweenButtons, topButtonsYStart, topButtonsWidth + 50, topButtonsHeight);
+    soundPlayerTypeSelector.addListener(this);
+
     addAndMakeVisible(saveButton);
     saveButton.setBounds(500, 0, 100, 25);
     saveButton.setButtonText("Save");
@@ -85,25 +106,13 @@ MainComponent::MainComponent() :
     loadButton.setButtonText("Load");
     loadButton.onClick = [this] { loadPlaylist(); };
 
-    addAndMakeVisible(&soundPlayerTypeSelector);
-    soundPlayerTypeSelector.addItem("Playlist + Cart", 1);
-    soundPlayerTypeSelector.addItem("8 Faders", 2);
-    soundPlayerTypeSelector.addItem("Keyboard Mapping", 3);
-    soundPlayerTypeSelector.setBounds(200, 0, 150, 25);
-    soundPlayerTypeSelector.addListener(this);
+
     
     addAndMakeVisible(timeLabel);
     timeLabel.setBounds(getParentWidth()-200, 0, 200, 50);
     timeLabel.setFont(juce::Font(50.00f, juce::Font::plain).withTypefaceStyle("Regular"));
 
-    audioSetupComp.setColour(juce::ResizableWindow::ColourIds::backgroundColourId, juce::Colours::white);
-    audioSetupWindow.setSize(400, 800);
-    audioSetupComp.setSize(400, 800);
-    addAndMakeVisible(audioSetupButton);
-    audioSetupButton.setBounds(100, 0, 100, 25);
-    audioSetupButton.setButtonText("Audio Setup");
-    audioSetupButton.onClick = [this] { audioSetupWindow.showDialog("Audio Setup", &audioSetupComp, this, 
-                                        getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true, false); };
+
 
     deviceManager.addChangeListener(this);
     Settings::audioOutputModeValue.addListener(this);
@@ -128,10 +137,7 @@ MainComponent::MainComponent() :
     horizontalDividerBar.reset(new juce::StretchableLayoutResizerBar(&myLayout, 1, false));
     addAndMakeVisible(horizontalDividerBar.get());
 
-    settingsButton.setBounds(0, 0, 100, 25);
-    addAndMakeVisible(settingsButton);
-    settingsButton.setButtonText("Settings");
-    settingsButton.onClick = [this] { settingsButtonClicked(); };
+
 
     addKeyListener(this);
     setWantsKeyboardFocus(true);
@@ -185,12 +191,14 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
 
     if (source == &bottomComponent.getTabbedButtonBar())
-    {
-          myLayout.setItemLayout(2,          // for item 1
-              25, 350, // size must be between 20% and 60% of the available space
-              325);        // and its preferred size is 50 pixels
-          Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
-          myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - mixerHeight - 4, true, false);
+    {   //Update red colour on fx button on player if the clipeffect tab is selected
+        if (bottomComponent.getTabbedButtonBar().getCurrentTabIndex() != 5)
+        {
+            for (auto* p : soundPlayers[0]->myPlaylists)
+                p->resetFxEditedButtons();
+        }
+        else
+            bottomComponent.clipEffect.setFxEditedPlayer();
     }
     if (source == &deviceManager) //save devicemanager state each time it changes
     {
@@ -661,6 +669,8 @@ void MainComponent::resized()
 {
     //reposition time label
     timeLabel.setBounds(getParentWidth() - 220, 0, 200, 50);
+    saveButton.setTopRightPosition(getWidth() / 2 - 1, topButtonsYStart);
+    loadButton.setTopLeftPosition(getWidth() / 2 + 1, topButtonsYStart);
     int windowWidth = getWidth();
     
     //reposition sound player
@@ -982,48 +992,7 @@ void MainComponent::buttonClicked(juce::Button* button)
 
 void MainComponent::mouseDown(const juce::MouseEvent& event)
 {
-    if (event.eventComponent == bottomComponent.getTabbedButtonBar().getTabButton(0) && bottomComponent.getCurrentContentComponent() == &bottomComponent.audioPlaybackDemo
-        || event.eventComponent == bottomComponent.getTabbedButtonBar().getTabButton(3) && bottomComponent.getCurrentContentComponent() == &bottomComponent.recorderComponent
-        || event.eventComponent == bottomComponent.getTabbedButtonBar().getTabButton(1) && bottomComponent.getCurrentContentComponent() == &bottomComponent.dbBrowser
-        || event.eventComponent == bottomComponent.getTabbedButtonBar().getTabButton(2) && bottomComponent.getCurrentContentComponent() == &bottomComponent.dbImport)
-    {
-        if (bottomComponent.getHeight() < 50)
-        {
-            myLayout.setItemLayout(2,          // for item 1
-                25, 600, // size must be between 20% and 60% of the available space
-                300);        // and its preferred size is 50 pixels
-            Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
-            myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
-        }
-        else
-        {
-            myLayout.setItemLayout(2,          // for item 1
-                25, 600, // size must be between 20% and 60% of the available space
-                20);        // and its preferred size is 50 pixels
-            Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
-            myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
-        }
-    }
-    //else if (event.eventComponent == bottomComponent.getTabbedButtonBar().getTabButton(1)
-    //    && bottomComponent.getCurrentContentComponent() == &bottomComponent.recorderComponent)
-    //{
-    //    if (bottomComponent.getHeight() < 50)
-    //    {
-    //        myLayout.setItemLayout(2,          // for item 1
-    //            25, 600, // size must be between 20% and 60% of the available space
-    //            300);        // and its preferred size is 50 pixels
-    //        Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
-    //        myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
-    //    }
-    //    else
-    //    {
-    //        myLayout.setItemLayout(2,          // for item 1
-    //            25, 600, // size must be between 20% and 60% of the available space
-    //            20);        // and its preferred size is 50 pixels
-    //        Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
-    //        myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
-    //    }
-    //}
+
 }
 
 void MainComponent::channelsMapping()
@@ -1031,9 +1000,6 @@ void MainComponent::channelsMapping()
 
     myMixer.removeAllInputs();
     myCueMixer.removeAllInputs();
-
- /*   loudnessMeter.prepareToPlay(actualSampleRate, 2, actualSamplesPerBlockExpected, 20);
-    cueloudnessMeter.prepareToPlay(actualSampleRate, 2, actualSamplesPerBlockExpected, 20);*/
 
     if (Settings::audioOutputMode == 1)
     {

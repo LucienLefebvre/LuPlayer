@@ -96,7 +96,7 @@ void BottomComponent::resized()
     recorderComponent.setBounds(0, 0, getWidth(), getHeight() - 25);
     dbBrowser.setBounds(0, 0, getWidth(), getHeight() - 25);
     TabbedComponent::resized();
-    getTabbedButtonBar().setBounds(getTabbedButtonBar().getBounds());
+    getTabbedButtonBar().setBounds(0, 0, getWidth(), 25);
 }
 
 void BottomComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)

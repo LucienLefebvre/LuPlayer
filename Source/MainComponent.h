@@ -126,6 +126,10 @@ private:
     int upDownButtonsHeight = 25;
     int cartsStartX = 800;
     int defaultWindowWidth = 1560;
+    int spaceBetweenButtons = 2;
+    int topButtonsYStart = 1;
+    int topButtonsWidth = 100;
+    int topButtonsHeight = 25;
 
 
     int bottomHeight = 100;

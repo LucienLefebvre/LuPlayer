@@ -2261,7 +2261,6 @@ void Player::fxButtonClicked()
     }
     else
     {
-       //fxButtonBroadcaster->sendChangeMessage();
         if (!fxEnabled)
         {
             fxEnabled = true;

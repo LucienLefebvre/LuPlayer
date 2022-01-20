@@ -1902,3 +1902,9 @@ void Playlist::setPlaylistPosition(int p)
 {
     playlistPosition = p;
 }
+
+void Playlist::resetFxEditedButtons()
+{
+    for (auto* p : players)
+        p->setFxEditedPlayer(false);
+}

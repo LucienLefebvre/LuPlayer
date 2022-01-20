@@ -41,6 +41,10 @@ public:
 
     void shortcutKeyPressed();
 
+    void startOrStop();
+
+    void mouseDown(const juce::MouseEvent& event);
+
     void sliderValueChanged(juce::Slider* slider);
 
     void timerCallback(int timerID);
