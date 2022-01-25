@@ -70,7 +70,7 @@ public:
             setFullScreen(true);
             setVisible(true);
             setUsingNativeTitleBar(true);
-            mainComponent.setSize(getWidth(), getHeight());
+            mainComponent.setSize(1024, 768);
             setContentOwned (&mainComponent, true);
             setResizable(true, false);
 

@@ -36,11 +36,13 @@ FilterEditor::FilterEditor()
         if (j < 20000)
         frequencyLines.add(j);
     }
+
+    filterEditedBroadcaster = new juce::ChangeBroadcaster();
 }
 
 FilterEditor::~FilterEditor()
 {
-
+    delete filterEditedBroadcaster;
 }
 
 void FilterEditor::paint(juce::Graphics& g)
@@ -502,6 +504,7 @@ void FilterEditor::sendParameters(int i)
     params.Q = filterBands[i]->qSlider.getValue();
     params.type = filterBands[i]->getFilterType();
     editedFilterProcessor->setFilterParameters(i, params);
+    filterEditedBroadcaster->sendChangeMessage();
     magnitudeChanged = true;
     parametersChanged = true;
     

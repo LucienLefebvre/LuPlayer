@@ -47,6 +47,8 @@ Player::Player(int index)/*: thumbnailCache(5),
      fxButtonBroadcaster = new juce::ChangeBroadcaster();
      playerInfoChangedBroadcaster = new juce::ChangeBroadcaster();
      remainingTimeBroadcaster = new juce::ChangeBroadcaster();
+     envButtonBroadcaster = new juce::ChangeBroadcaster();
+     trimValueChangedBroacaster = new juce::ChangeBroadcaster();
      /* int playerPosition = playerIndex + 1;
      addAndMakeVisible(playerPositionLabel);
      playerPositionLabel.setButtonText(juce::String(playerPosition));
@@ -71,6 +73,11 @@ Player::Player(int index)/*: thumbnailCache(5),
      playButton.setEnabled(false);
      playButton.setWantsKeyboardFocus(false);
     
+     addAndMakeVisible(&envButton);
+     envButton.setButtonText("ENV");
+     envButton.onClick = [this] {envButtonClicked(); };
+     envButton.addListener(this);
+
      addAndMakeVisible(&fxButton);
      fxButton.setButtonText("FX");
      fxButton.onClick = [this] {fxButtonClicked(); };
@@ -304,7 +311,7 @@ Player::Player(int index)/*: thumbnailCache(5),
      //convertingBar->setColour(juce::ProgressBar::ColourIds::backgroundColourId, BLUE);
      convertingBar->setTextToDisplay("Converting...");
     
-    
+     createDefaultEnveloppePath();
      repaint();
 }
 
@@ -324,6 +331,8 @@ Player::~Player()
     delete fxButtonBroadcaster;
     delete playerInfoChangedBroadcaster;
     delete remainingTimeBroadcaster;
+    delete envButtonBroadcaster;
+    delete trimValueChangedBroacaster;
     Settings::maxFaderValue.removeListener(this);
     Settings::audioOutputModeValue.removeListener(this);
     trimVolumeSlider.removeListener(this);
@@ -656,7 +665,8 @@ void Player::resized()
 {
     // This method is where you should set the bounds of any child
     // components that your component contains..
-    fxButton.setBounds(leftControlsWidth + borderRectangleWidth + 1, 81, fxButtonSize, 16);
+    envButton.setBounds(leftControlsWidth + borderRectangleWidth + 1, 81, fxButtonSize, 16);
+    fxButton.setBounds(envButton.getRight() + borderRectangleWidth + 1, 81, fxButtonSize, 16);
     normButton.setBounds(fxButton.getRight() + 2, 81, normButtonSize, 16);
     denoiseButton.setBounds(normButton.getRight() + 2, 81, normButtonSize, 16);
     if (isCart == true)
@@ -932,13 +942,21 @@ void Player::playerPrepareToPlay(int samplesPerBlockExpected, double sampleRate)
     
 
     playerBuffer = std::make_unique<juce::AudioBuffer<float>>(2, actualSamplesPerBlockExpected);
+    cueBuffer = std::make_unique<juce::AudioBuffer<float>>(2, actualSamplesPerBlockExpected);
+
     outputSource = std::make_unique <juce::MemoryAudioSource>(*playerBuffer, false);
     outputSource->prepareToPlay(samplesPerBlockExpected, sampleRate);
     playerBuffer->setSize(2, actualSamplesPerBlockExpected, false, true, false);
+    cueOutputSource = std::make_unique <juce::MemoryAudioSource>(*cueBuffer, false);
+    cueOutputSource->prepareToPlay(samplesPerBlockExpected, sampleRate);
+    cueBuffer->setSize(2, actualSamplesPerBlockExpected, false, true, false);
+
     filterProcessor.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+    cueFilterProcessor.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     compProcessor.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     compProcessor.setGateBypass(true);
     compProcessor.setLimitBypass(true);
+
     inputMeter.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     outputMeter.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     compMeter.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
@@ -961,22 +979,73 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
         juce::AudioSourceChannelInfo* playerSource = new juce::AudioSourceChannelInfo(*playerBuffer);
         playerBuffer->clear();
         mixer.getNextAudioBlock(*playerSource);
+
+        juce::AudioSourceChannelInfo* cuePlayerSource = new juce::AudioSourceChannelInfo(*cueBuffer);
+        cueBuffer->clear();
+        cueMixer.getNextAudioBlock(*cuePlayerSource);
+
+        float nextReadPosition = transport.getNextReadPosition();
+        float cueNextReadPosition = cueTransport.getNextReadPosition();
+        if (enveloppeEnabled)
+        {
+            juce::Path envP = enveloppePath;
+            for (int i = 0; i < bufferToFill.numSamples; i++)
+            {
+                float enveloppePosition = (nextReadPosition + i) / (float)transport.getTotalLength();
+                float gainToApply = juce::Decibels::decibelsToGain(getEnveloppeValue(enveloppePosition, envP).load() * 12);
+                playerBuffer->applyGain(i, 1, gainToApply);
+
+                float cueEnveloppePosition = (cueNextReadPosition + i) / (float)cueTransport.getTotalLength();
+                float cueGainToApply = juce::Decibels::decibelsToGain(getEnveloppeValue(cueEnveloppePosition, envP).load() * 12);
+                cueBuffer->applyGain(i, 1, cueGainToApply);
+            }
+        }
+
         inputMeter.measureBlock(playerBuffer.get());
         filterProcessor.getNextAudioBlock(playerBuffer.get());
+        cueFilterProcessor.getNextAudioBlock(cueBuffer.get());
         compProcessor.getNextAudioBlock(playerBuffer.get());
         compMeter.setReductionGain(compProcessor.getCompReductionDB());
         outputMeter.measureBlock(playerBuffer.get());
     }
-
-
-    //bufferToFill.clearActiveBufferRegion();
-    //filterSource.getNextAudioBlock(bufferToFill);
-    //resampledSource.getNextAudioBlock(bufferToFill);
-    //cueResampledSource.getNextAudioBlock(bufferToFill);
-
-    //meterSource.measureBlock(*bufferToFill.buffer);
 }
 
+std::atomic<float> Player::getEnveloppeValue(float x, juce::Path& p)
+{//get the enveloppe value (between 0 and 1) for a given x position (between 0 and 1)
+    std::atomic<float> value = 0.0;
+
+    juce::Path::Iterator iterator(p);
+    //creates an array of lines representing the enveloppe
+    float lineStartX = 0.0;
+    float lineStartY = 0.0;
+    float lineEndX = 0.0;
+    float lineEndY = 0.0;
+    juce::Array<juce::Line<float>> linesArray;
+    while (iterator.next())
+    {
+        if (iterator.elementType == juce::Path::Iterator::PathElementType::lineTo)
+        {
+            lineEndX = iterator.x1;
+            lineEndY = iterator.y1;
+            linesArray.add(juce::Line<float>(lineStartX, lineStartY, lineEndX, lineEndY));
+            lineStartX = lineEndX;
+            lineStartY = lineEndY;
+        }
+    }
+
+    juce::Line<float> valueLine(x, 1.0, x, -1.0); //playhead line
+
+    for (int i = 0; i < linesArray.size(); i++)
+    {//for each line in the array, check if it intersect with the playhead
+        if (linesArray[i].intersects(valueLine))
+        {
+            //If yes, get the y value corresponding
+            juce::Point<float> intersectPoint = linesArray[i].getIntersection(valueLine);
+            value.store(intersectPoint.getY());
+        }
+    }
+    return value.load();
+}
 
 //Play Control
 void Player::play()
@@ -1363,6 +1432,7 @@ void Player::sliderValueChanged(juce::Slider* slider)
         {
             repaint();
         }
+        trimValueChangedBroacaster->sendChangeMessage();
     }
     if (slider == &filterFrequencySlider)
     {
@@ -1962,6 +2032,15 @@ void Player::setName(std::string Name)
     }
 }
 
+bool Player::isStartTimeSet()
+{
+    return startTimeSet;
+}
+
+bool Player::isStopTimeSet()
+{
+    return stopTimeSet;
+}
 
 void Player::setOptions()
 {
@@ -2224,7 +2303,17 @@ void Player::setFilterParameters(FilterProcessor::GlobalParameters g)
     filterProcessor.setFilterParameters(0, g.lowBand);
     filterProcessor.setFilterParameters(1, g.lowMidBand);
     filterProcessor.setFilterParameters(2, g.highMidBand);
-    filterProcessor.setFilterParameters(3, g.highBand);
+    filterProcessor.setFilterParameters(3, g.highBand);    
+    cueFilterProcessor.setFilterParameters(0, g.lowBand);
+    cueFilterProcessor.setFilterParameters(1, g.lowMidBand);
+    cueFilterProcessor.setFilterParameters(2, g.highMidBand);
+    cueFilterProcessor.setFilterParameters(3, g.highBand);
+}
+
+void Player::setFilterParameters(int i, FilterProcessor::FilterParameters p)
+{
+    filterProcessor.setFilterParameters(i, p);
+    cueFilterProcessor.setFilterParameters(i, p);
 }
 
 Meter& Player::getInputMeter()
@@ -2270,10 +2359,17 @@ void Player::fxButtonClicked()
     }
 }
 
+void Player::envButtonClicked()
+{
+    enveloppeEnabled = true;
+    envButtonBroadcaster->sendChangeMessage();
+}
+
 void Player::bypassFX(bool isBypassed)
 {
     fxEnabled = !isBypassed;
     filterProcessor.setBypassed(isBypassed);
+    cueFilterProcessor.setBypassed(isBypassed);
     compProcessor.setBypass(isBypassed);
     if (isBypassed)
         fxButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
@@ -2399,4 +2495,22 @@ juce::AudioThumbnail& Player::getAudioThumbnail()
 juce::String Player::getRemainingTimeAsString()
 {
     return remainingTimeString;
+}
+
+void Player::setEnveloppePath(juce::Path& p)
+{
+    const juce::ScopedLock sl();
+    enveloppePath = p;
+}
+
+void Player::createDefaultEnveloppePath()
+{
+    enveloppePath.startNewSubPath(0.0, 0.0);
+    enveloppePath.lineTo(1.0, 0.0);
+    enveloppePath.closeSubPath();
+}
+
+juce::Path* Player::getEnveloppePath()
+{
+    return &enveloppePath;
 }

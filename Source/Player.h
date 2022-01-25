@@ -33,6 +33,7 @@
 #include "ffmpegConvert.h"
 #include "convertObject.h"
 #include "Denoiser.h"
+//#include "Clip Editor/EnveloppeEditor.h"
 typedef char* LPSTR;
 
 
@@ -72,6 +73,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
+    std::atomic<float> getEnveloppeValue(float x, juce::Path& p);
     void Player::playerPrepareToPlay(int samplesPerBlockExpected, double sampleRate);
 
     void Player::timerCallback();
@@ -150,6 +152,8 @@ public:
     bool getHasBeenNormalized();
     void setHasBeenNormalized(bool b);
     void Player::setName(std::string Name);
+    bool isStartTimeSet();
+    bool isStopTimeSet();
     void Player::enableHPF(bool shouldBeEnabled);
     bool Player::isHpfEnabled();
 
@@ -220,14 +224,19 @@ public:
     juce::ActionBroadcaster* cueBroadcaster;
     juce::ActionBroadcaster* draggedBroadcaster;
     juce::ChangeBroadcaster* fxButtonBroadcaster;
+    juce::ChangeBroadcaster* envButtonBroadcaster;
     juce::ChangeBroadcaster* remainingTimeBroadcaster;
+    juce::ChangeBroadcaster* trimValueChangedBroacaster;
 
     std::unique_ptr<juce::MemoryAudioSource> outputSource;
+    std::unique_ptr<juce::MemoryAudioSource> cueOutputSource;
+
 
     FilterProcessor& Player::getFilterProcessor();
     std::unique_ptr<juce::AudioBuffer<float>>& getBuffer();
     FilterProcessor::GlobalParameters getFilterParameters();
     void setFilterParameters(FilterProcessor::GlobalParameters g);
+    void setFilterParameters(int i, FilterProcessor::FilterParameters p);
     Meter& getInputMeter();
     Meter& getOutputMeter();
     Meter& getCompMeter();
@@ -235,6 +244,8 @@ public:
     void setDraggedPlayer();
 
     void fxButtonClicked();
+
+    void envButtonClicked();
 
     void bypassFX(bool isBypassed);
 
@@ -266,7 +277,14 @@ public:
 
     juce::String getRemainingTimeAsString();
 
+    void setEnveloppePath(juce::Path& p);
+
+    void createDefaultEnveloppePath();
+
+    juce::Path* getEnveloppePath();
+
     FilterProcessor filterProcessor;
+    FilterProcessor cueFilterProcessor;
     CompProcessor compProcessor{CompProcessor::Mode::Stereo};
 
     juce::ChangeBroadcaster* playerInfoChangedBroadcaster;
@@ -353,6 +371,7 @@ private:
     bool stopCueTransportOut = false;
     //GUI
 
+    juce::TextButton envButton;
     juce::TextButton fxButton;
     juce::TextButton normButton;
     juce::TextButton denoiseButton;
@@ -578,6 +597,7 @@ private:
     bool hasBeenNormalized = false;
 
     std::unique_ptr<juce::AudioBuffer<float>> playerBuffer;
+    std::unique_ptr<juce::AudioBuffer<float>> cueBuffer;
     Meter inputMeter                                        { Meter::Mode::Stereo };
     Meter outputMeter                                       { Meter::Mode::Stereo };
     Meter compMeter                                         { Meter::Mode::Stereo_ReductionGain };
@@ -593,7 +613,8 @@ private:
     std::unique_ptr<juce::DialogWindow> denoiseWindow;
     bool denoisedFileLoaded = false;
 
-
+    juce::Path enveloppePath;
+    bool enveloppeEnabled = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };
 

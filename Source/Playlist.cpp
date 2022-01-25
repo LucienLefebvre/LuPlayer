@@ -38,6 +38,7 @@ Playlist::Playlist(int splaylistType)
     cuePlaylistBroadcaster = new juce::ChangeBroadcaster();
     cuePlaylistActionBroadcaster = new juce::ActionBroadcaster();
     fxButtonBroadcaster = new juce::ChangeBroadcaster();
+    envButtonBroadcaster = new juce::ChangeBroadcaster();
     //addPlayer(1);
 
     //addKeyListener(this);
@@ -67,6 +68,7 @@ Playlist::~Playlist()
     delete cuePlaylistBroadcaster;
     delete cuePlaylistActionBroadcaster;
     delete fxButtonBroadcaster;
+    delete envButtonBroadcaster;
     removeMouseListener(this);
     playlistMixer.removeAllInputs();
     playlistCueMixer.removeAllInputs();
@@ -911,7 +913,7 @@ void Playlist::addPlayer(int playerID)
     players[idAddedPlayer]->playerPrepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     //playlistMixer.addInputSource(&players[idAddedPlayer]->mixer, false);
     playlistMixer.addInputSource(players[idAddedPlayer]->outputSource.get(), false);
-    playlistCueMixer.addInputSource(&players[idAddedPlayer]->cueMixer, false);
+    playlistCueMixer.addInputSource(players[idAddedPlayer]->cueOutputSource.get(), false);
 
     players[idAddedPlayer]->fileName.addListener(this);
     players[idAddedPlayer]->playerPositionLabel.addListener(this);
@@ -922,6 +924,7 @@ void Playlist::addPlayer(int playerID)
     players[idAddedPlayer]->cueBroadcaster->addActionListener(this);
     players[idAddedPlayer]->playBroadcaster->addActionListener(this);
     players[idAddedPlayer]->fxButtonBroadcaster->addChangeListener(this);
+    players[idAddedPlayer]->envButtonBroadcaster->addChangeListener(this);
 
     playersPositionLabels.insert(idAddedPlayer, new juce::Label);
 
@@ -992,12 +995,14 @@ void Playlist::removePlayer(int playerID)
                     players[playerID]->stopButtonClicked();
                     playlistMixer.removeInputSource(&players[playerID]->mixer);
                     playlistMixer.removeInputSource(players[playerID]->outputSource.get());
-                    playlistCueMixer.removeInputSource(&players[playerID]->cueMixer);
+                    playlistCueMixer.removeInputSource(players[playerID]->cueOutputSource.get());
                     players[playerID]->fileName.removeListener(this);
                     players[playerID]->playerPositionLabel.addListener(this);
                     players[playerID]->cueStopped.addListener(this);
                     players[playerID]->cueBroadcaster->removeActionListener(this);
                     players[playerID]->fxButtonBroadcaster->removeChangeListener(this);
+                    players[playerID]->envButtonBroadcaster->removeChangeListener(this);
+
                     players.remove(playerID);
                     playersPositionLabels.remove(playerID);
                     //swapNextButtons.remove(playerID);
@@ -1020,10 +1025,13 @@ void Playlist::removePlayer(int playerID)
                     playlistMixer.removeInputSource(&players[playerID]->mixer);
                     playlistCueMixer.removeInputSource(&players[playerID]->cueMixer);
                     playlistMixer.removeInputSource(players[playerID]->outputSource.get());
+                    playlistCueMixer.removeInputSource(players[playerID]->cueOutputSource.get());
                     players[playerID]->fileName.removeListener(this);
                     players[playerID]->playerPositionLabel.addListener(this);
                     players[playerID]->cueStopped.addListener(this);
                     players[playerID]->cueBroadcaster->removeActionListener(this);
+                    players[playerID]->fxButtonBroadcaster->removeChangeListener(this);
+                    players[playerID]->envButtonBroadcaster->removeChangeListener(this);
                     players.remove(playerID);
                     playersPositionLabels.remove(playerID);
                     assignLeftFaderButtons.remove(playerID);
@@ -1371,6 +1379,20 @@ void Playlist::changeListenerCallback(juce::ChangeBroadcaster* source)
                     Settings::fxEditedPlayer = i;
                 }
                 fxButtonBroadcaster->sendChangeMessage();
+            }
+            else if (source == players[i]->envButtonBroadcaster)
+            {
+                if (playlistPosition == 0)
+                {
+                    Settings::fxEditedPlaylist = 0;
+                    Settings::fxEditedPlayer = i;
+                }
+                else if (playlistPosition == 1)
+                {
+                    Settings::fxEditedPlaylist = 1;
+                    Settings::fxEditedPlayer = i;
+                }
+                envButtonBroadcaster->sendChangeMessage();
             }
         }
     }

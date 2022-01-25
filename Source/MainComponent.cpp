@@ -425,7 +425,13 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         auto* player = soundPlayers[0]->myPlaylists[Settings::fxEditedPlaylist]->players[Settings::fxEditedPlayer];
         bottomComponent.clipEffect.setPlayer(player);
-        bottomComponent.setCurrentTabIndex(5);
+        bottomComponent.setCurrentTabIndex(6);
+    }
+    else if (source == soundPlayers[0]->myPlaylists[0]->envButtonBroadcaster || source == soundPlayers[0]->myPlaylists[1]->envButtonBroadcaster)
+    {
+    auto* player = soundPlayers[0]->myPlaylists[Settings::fxEditedPlaylist]->players[Settings::fxEditedPlayer];
+    bottomComponent.clipEditor.setPlayer(player);
+    bottomComponent.setCurrentTabIndex(5);
     }
 }
 
@@ -1206,7 +1212,8 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     soundPlayers[0]->myPlaylists[1]->playBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->fxButtonBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->fxButtonBroadcaster->addChangeListener(this);
-
+    soundPlayers[0]->myPlaylists[0]->envButtonBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[1]->envButtonBroadcaster->addChangeListener(this);
 
     if (soundPlayers[0] != nullptr)
         soundPlayers[0]->setBounds(0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - bottomHeight);

@@ -46,6 +46,7 @@ BottomComponent::BottomComponent()
         addTab("Netia Database Import", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &noDbLabel, false);
     }
     addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
+    addTab("Clip Editor", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &clipEditor, false);
     addTab("Clip Effect", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &clipEffect, false);
     setTabBarDepth(tabBarHeight);
     setCurrentTabIndex(1);
@@ -156,6 +157,7 @@ bool BottomComponent::keyPressed(const juce::KeyPress& key, juce::Component* ori
     {
         dbBrowser.keyPressed(key, originatingComponent);
         audioPlaybackDemo.keyPressed(key, originatingComponent);
+        clipEditor.keyPressed(key, originatingComponent);
     }
     return false;
 }

@@ -151,6 +151,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Clip Editor\EnveloppeEditor.cpp"/>
     <ClCompile Include="Source\convertObject.cpp"/>
     <ClCompile Include="Source\Mixer\FilterEditor.cpp"/>
     <ClCompile Include="Source\Mixer\FilterProcessor.cpp"/>
@@ -2228,6 +2229,9 @@
     <ClCompile Include="JuceLibraryCode\include_juce_osc.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Clip Editor\ClipEditor.h"/>
+    <ClInclude Include="Source\Clip Editor\EnveloppeEditor.h"/>
+    <ClInclude Include="Source\Clip Editor\EnveloppePoint.h"/>
     <ClInclude Include="Source\DenoiseThread.h"/>
     <ClInclude Include="Source\batchConvertThread.h"/>
     <ClInclude Include="Source\convertObject.h"/>

@@ -18,12 +18,31 @@
 class PlayHead  : public juce::Component
 {
 public:
-    PlayHead();
-    ~PlayHead() override;
+    PlayHead()
+    {
+        colour = juce::Colours::white;
+    };
 
-    void paint (juce::Graphics&) override;
-    void resized() override;
-    void PlayHead::setColour(juce::Colour color);
+    ~PlayHead() override
+    {
+
+    };
+
+    void PlayHead::paint(juce::Graphics& g)
+    {
+        g.fillAll(colour);
+    };
+
+    void PlayHead::resized()
+    {
+
+    };
+
+
+    void setColour(juce::Colour color)
+    {
+        colour = color;
+    };
 
 private:
     juce::Colour colour;

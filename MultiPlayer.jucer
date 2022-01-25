@@ -3,6 +3,15 @@
 <JUCERPROJECT id="tfw8KZ" name="MultiPlayer" projectType="guiapp" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="xbXPa2" name="MultiPlayer">
+    <GROUP id="{3C322B62-9274-4FE4-A3DF-EF440CA830B5}" name="Clip Editor">
+      <FILE id="NVw8ph" name="ClipEditor.h" compile="0" resource="0" file="Source/Clip Editor/ClipEditor.h"/>
+      <FILE id="BPgE3W" name="EnveloppeEditor.cpp" compile="1" resource="0"
+            file="Source/Clip Editor/EnveloppeEditor.cpp"/>
+      <FILE id="nW4iAM" name="EnveloppeEditor.h" compile="0" resource="0"
+            file="Source/Clip Editor/EnveloppeEditor.h"/>
+      <FILE id="hM1J9a" name="EnveloppePoint.h" compile="0" resource="0"
+            file="Source/Clip Editor/EnveloppePoint.h"/>
+    </GROUP>
     <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
       <FILE id="cif9Kn" name="DenoiseThread.h" compile="0" resource="0" file="Source/DenoiseThread.h"/>
       <FILE id="TV1izO" name="batchConvertThread.h" compile="0" resource="0"

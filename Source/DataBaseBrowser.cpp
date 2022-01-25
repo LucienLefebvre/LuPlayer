@@ -81,7 +81,7 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     todayButton.setButtonText("Today");
     todayButton.setBounds(426, 1, 59, 25);
     todayButton.onClick = [this] {todayButtonClicked(); };
-    todayButton.setToggleState(true, juce::NotificationType::dontSendNotification);
+    todayButton.setToggleState(false, juce::NotificationType::dontSendNotification);
 
     addAndMakeVisible(&batchConvertButton);
     batchConvertButton.onClick = [this] { batchConvertButtonClicked(); };

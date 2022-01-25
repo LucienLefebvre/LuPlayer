@@ -13,6 +13,7 @@
 #include "filterGraphPoint.h"
 #include "FilterBandEditor.h"
 #include "FFTAnalyser.h"
+
 class FilterEditor : public juce::Component,
     public juce::Slider::Listener,
     public juce::MouseListener,
@@ -32,7 +33,7 @@ public:
     void setColour(juce::Colour colour);
     int getFilterGraphXStart();
 
-
+    juce::ChangeBroadcaster* filterEditedBroadcaster;
 private:
     void addFilterBand(int i);
 

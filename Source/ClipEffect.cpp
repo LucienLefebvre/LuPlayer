@@ -35,6 +35,8 @@ ClipEffect::ClipEffect()
     displayCompMeter.shouldDrawScale(false);
     addAndMakeVisible(&compEditor);
     juce::Timer::startTimer(50);
+
+    filterEditor.filterEditedBroadcaster->addChangeListener(this);
 }
 
 ClipEffect::~ClipEffect()
@@ -142,6 +144,10 @@ void ClipEffect::changeListenerCallback(juce::ChangeBroadcaster* source)
                 nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
             else
                 nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(229, 149, 0));
+        }
+        else if (source == filterEditor.filterEditedBroadcaster)
+        {
+            editedPlayer->setFilterParameters(editedPlayer->getFilterParameters());
         }
     }
 }
