@@ -49,6 +49,7 @@ Player::Player(int index)/*: thumbnailCache(5),
      remainingTimeBroadcaster = new juce::ChangeBroadcaster();
      envButtonBroadcaster = new juce::ChangeBroadcaster();
      trimValueChangedBroacaster = new juce::ChangeBroadcaster();
+     soundEditedBroadcaster = new juce::ChangeBroadcaster();
      /* int playerPosition = playerIndex + 1;
      addAndMakeVisible(playerPositionLabel);
      playerPositionLabel.setButtonText(juce::String(playerPosition));
@@ -333,6 +334,7 @@ Player::~Player()
     delete remainingTimeBroadcaster;
     delete envButtonBroadcaster;
     delete trimValueChangedBroacaster;
+    delete soundEditedBroadcaster;
     Settings::maxFaderValue.removeListener(this);
     Settings::audioOutputModeValue.removeListener(this);
     trimVolumeSlider.removeListener(this);
@@ -761,6 +763,7 @@ void Player::timerCallback()
         if (stopCueTransportOut)
         {
             cueTransport.stop();
+            soundEditedBroadcaster->sendChangeMessage();
         }
     }
     updateRemainingTime();
@@ -781,8 +784,7 @@ void Player::timerCallback()
             cuePlayHead.setVisible(false);
     }
 
-    if (cueTransport.isPlaying() || mouseIsDragged)
-    {
+
         //CUE TIME LABEL
         int remainingSeconds = juce::int16(trunc((float)cueTransport.getLengthInSeconds() - (float)cueTransport.getCurrentPosition()));
         int remainingTimeSeconds = remainingSeconds % 60;
@@ -803,8 +805,9 @@ void Player::timerCallback()
         else
             cueelapsedTimeString = juce::String(elapsedTimeMinuts) + ":" + juce::String(elapsedTimeSeconds);
 
-        juce::String cueTimeString = (cueelapsedTimeString + " / " + cueremainingTimeString);
-
+        cueTimeString = (cueelapsedTimeString + " / " + cueremainingTimeString);
+    if (cueTransport.isPlaying() || mouseIsDragged)
+    {
         addAndMakeVisible(cueTimeLabel);
         cueTimeLabel.setText(cueTimeString, juce::NotificationType::dontSendNotification);
         if (cuedrawPosition > waveformThumbnailXEnd - 100)
@@ -1001,12 +1004,18 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
             }
         }
 
-        inputMeter.measureBlock(playerBuffer.get());
+        if (transport.isPlaying())
+            inputMeter.measureBlock(playerBuffer.get());
+        else
+            inputMeter.measureBlock(cueBuffer.get());
         filterProcessor.getNextAudioBlock(playerBuffer.get());
         cueFilterProcessor.getNextAudioBlock(cueBuffer.get());
         compProcessor.getNextAudioBlock(playerBuffer.get());
         compMeter.setReductionGain(compProcessor.getCompReductionDB());
-        outputMeter.measureBlock(playerBuffer.get());
+        if (transport.isPlaying())
+            outputMeter.measureBlock(playerBuffer.get());
+        else
+            outputMeter.measureBlock(cueBuffer.get());
     }
 }
 
@@ -1053,13 +1062,14 @@ void Player::play()
     const juce::MessageManagerLock mmLock;
     transport.setPosition(startTime);
     transportStateChanged(Starting);
-
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 void Player::stop()
 {
     const juce::MessageManagerLock mmLock;
     transportStateChanged(Stopping);
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 //BUTTONS
@@ -1136,7 +1146,7 @@ void Player::playButtonClicked()
         }
     }
 
-
+    soundEditedBroadcaster->sendChangeMessage();
     //playButtonHasBeenClicked = false;
 }
 
@@ -1157,7 +1167,7 @@ void Player::spaceBarPlay()
             volumeSlider.setValue(1.0);
         play();
     }
-
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 
@@ -1180,7 +1190,7 @@ void Player::stopButtonClicked()
         transportStateChanged(Stopping);
         stopButtonClickedBool = false;
     }
-
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 void Player::buttonClicked(juce::Button* b)
@@ -1248,6 +1258,7 @@ void Player::cueButtonClicked()
             cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         }
     }
+    soundEditedBroadcaster->sendChangeMessage();
 }
 void Player::cueStopButtonClicked()
 {
@@ -1265,15 +1276,17 @@ void Player::cueStopButtonClicked()
         cueStopButton.setButtonText("Stop");
         cueButton.setButtonText("Stop");
     }
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 void Player::updateLoopButton(juce::Button* button, juce::String name)
 {
     auto state = button->getToggleState();
+    loopButton.setToggleState(state, juce::NotificationType::sendNotification);
     looping = state;
     //transport.isLooping();
     transport.setLooping(looping);
-    
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
@@ -1297,6 +1310,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
             repaint();
             endRepainted = false;
         }
+        soundEditedBroadcaster->sendChangeMessage();
     }
     else if (source == &thumbnail)
     {
@@ -1322,6 +1336,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         convertingBar->setVisible(false);
         convertingBar->setTextToDisplay("Converting...");
         hasBeenNormalized = true;
+        soundEditedBroadcaster->sendChangeMessage();
         //normButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
     }
     else if (source == ffmpegThread.conversionEndedBroadcaster)
@@ -1331,6 +1346,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         loadFile(convertedFilePath);
         extactName(convertedFilePath.toStdString());
         ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
+        soundEditedBroadcaster->sendChangeMessage();
     }
     else if (source == denoiser.denoiseDoneBroadcaster)
     {
@@ -1343,6 +1359,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         loadedFilePath = oldFilePath;
         convertingBar->setVisible(false);
         denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
+        soundEditedBroadcaster->sendChangeMessage();
     }
     else if (source == denoiser.processStartedBroadcaster)
     {
@@ -1355,6 +1372,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         }
     }
     playerInfoChangedBroadcaster->sendChangeMessage();
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 void Player::transportStateChanged(TransportState newState)
@@ -1401,6 +1419,7 @@ void Player::transportStateChanged(TransportState newState)
         }
 
     }
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 void Player::sliderValueChanged(juce::Slider* slider)
@@ -1421,6 +1440,7 @@ void Player::sliderValueChanged(juce::Slider* slider)
         if (previousSliderValue != actualSliderValue)
             volumeSliderValue = volumeSlider.getValue();
         previousSliderValue = actualSliderValue;
+
     }
     if (slider == &trimVolumeSlider)
     {
@@ -1444,6 +1464,7 @@ void Player::sliderValueChanged(juce::Slider* slider)
         }
     }
     playerInfoChangedBroadcaster->sendChangeMessage();
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 
@@ -1577,6 +1598,7 @@ void Player::setStart()
         startTimeSet = true;
         endRepainted = false;
         startTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(0, 196, 255));
+        soundEditedBroadcaster->sendChangeMessage();
     }
 }
 
@@ -1585,6 +1607,7 @@ void Player::setStartTime(float time)
     startTime = time;
     startTimeSet = true;
     startTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(0, 196, 255));
+    soundEditedBroadcaster->sendChangeMessage();
 }
 void Player::setStopTime(float time)
 {
@@ -1592,6 +1615,7 @@ void Player::setStopTime(float time)
     stopTimeSet = true;
     stopTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(238, 255, 0));
     endRepainted = false;
+    soundEditedBroadcaster->sendChangeMessage();
     repaint();
 }
 
@@ -1612,6 +1636,7 @@ void Player::deleteStart()
         startTimeSet = false;
         repaint();
         startTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(0, 115, 150));
+        soundEditedBroadcaster->sendChangeMessage();
 }
 
 void Player::setStop()
@@ -1623,6 +1648,7 @@ void Player::setStop()
     endRepainted = false;
     repaint();
     stopTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(238, 255, 0));
+    soundEditedBroadcaster->sendChangeMessage();
     }
 
 
@@ -1634,6 +1660,7 @@ void Player::deleteStop()
     stopTimeSet = false;
     repaint();
     stopTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(141, 150, 0));
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 
@@ -1808,6 +1835,7 @@ bool Player::loadFile(const juce::String& path)
         thumbnail.setSource(new juce::FileInputSource(file));
         waveformPainted = false;
         fileLoaded = true;
+        soundEditedBroadcaster->sendChangeMessage();
         //setDraggedPlayer();
     }
     //R128
@@ -1833,6 +1861,7 @@ bool Player::loadFile(const juce::String& path)
     }
 
     playerInfoChangedBroadcaster->sendChangeMessage();
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 const juce::String Player::startFFmpeg(std::string filePath)
@@ -1941,6 +1970,7 @@ std::string Player::extactName(std::string Filepath)
     if (!newName.empty())
     {
         soundName.setText(newName, juce::NotificationType::dontSendNotification);
+        soundEditedBroadcaster->sendChangeMessage();
     }
     /*else
     {
@@ -2131,7 +2161,7 @@ void Player::optionButtonClicked()
         }
 
     }
-
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 
@@ -2153,6 +2183,7 @@ void Player::enableHPF(bool shouldBeEnabled)
         optionButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::black);
         hpfEnabled = true;
     }
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 bool Player::isHpfEnabled()
@@ -2357,6 +2388,7 @@ void Player::fxButtonClicked()
             fxButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
         }
     }
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 void Player::envButtonClicked()
@@ -2375,7 +2407,7 @@ void Player::bypassFX(bool isBypassed)
         fxButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     else
         fxButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
-
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 bool Player::getBypassed()
@@ -2448,6 +2480,7 @@ void Player::denoiseButtonClicked()
         denoiser.setFilePath(loadedFilePath);
         denoiser.setTransportGain(trimVolumeSlider.getValue());
     }
+    soundEditedBroadcaster->sendChangeMessage();
 }
 
 void Player::killThreads()
@@ -2497,6 +2530,11 @@ juce::String Player::getRemainingTimeAsString()
     return remainingTimeString;
 }
 
+juce::String Player::getCueTimeAsString()
+{
+    return cueTimeString;
+}
+
 void Player::setEnveloppePath(juce::Path& p)
 {
     const juce::ScopedLock sl();
@@ -2513,4 +2551,9 @@ void Player::createDefaultEnveloppePath()
 juce::Path* Player::getEnveloppePath()
 {
     return &enveloppePath;
+}
+
+bool Player::getIsCart()
+{
+    return isCart;
 }

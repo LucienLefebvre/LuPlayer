@@ -425,12 +425,14 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         auto* player = soundPlayers[0]->myPlaylists[Settings::fxEditedPlaylist]->players[Settings::fxEditedPlayer];
         bottomComponent.clipEffect.setPlayer(player);
+        bottomComponent.clipEditor.setPlayer(player);
         bottomComponent.setCurrentTabIndex(6);
     }
     else if (source == soundPlayers[0]->myPlaylists[0]->envButtonBroadcaster || source == soundPlayers[0]->myPlaylists[1]->envButtonBroadcaster)
     {
     auto* player = soundPlayers[0]->myPlaylists[Settings::fxEditedPlaylist]->players[Settings::fxEditedPlayer];
     bottomComponent.clipEditor.setPlayer(player);
+    bottomComponent.clipEffect.setPlayer(player);
     bottomComponent.setCurrentTabIndex(5);
     }
 }
@@ -493,7 +495,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
     //TODO vérifier bug changement de soundplayer sur mode mono et double stereo
-    if (soundPlayers[0] != nullptr)
+    if (soundPlayers[0] != nullptr && soundboardLaunched)
     {
         soundPlayers[0]->getNextAudioBlock(bufferToFill);
         if (Settings::audioOutputMode == 3 && (bufferToFill.buffer->getNumChannels() > 3))
@@ -1152,6 +1154,7 @@ void MainComponent::setCommandLine(juce::String commandLine)
 }
 void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
 {
+    soundboardLaunched = false;
     switch (m)
     {
     case SoundPlayer::Mode::OnePlaylistOneCart : 
@@ -1222,6 +1225,8 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
 
     channelsMapping();
+
+    soundboardLaunched = true;
 }
 
 void MainComponent::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)

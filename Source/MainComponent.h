@@ -405,6 +405,7 @@ private:
     int mixerHeight = 260;
 
     bool playerSwitching = false;
+    bool soundboardLaunched = false;
 
     std::unique_ptr<KeyboardMappedSoundboard> keymapSoundboard;
     juce::ModifierKeys currentModifier;

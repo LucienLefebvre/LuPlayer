@@ -156,7 +156,7 @@ public:
     bool isStopTimeSet();
     void Player::enableHPF(bool shouldBeEnabled);
     bool Player::isHpfEnabled();
-
+    void Player::updateLoopButton(juce::Button* button, juce::String name);
 
     void Player::setStart();
     void Player::deleteStart();
@@ -198,6 +198,7 @@ public:
 
     juce::Value volumeSliderValue;
     juce::String remainingTimeString;
+    juce::String cueTimeString;
     juce::Label soundName;
     juce::Value fileName;
     juce::Value cueStopped;
@@ -227,6 +228,7 @@ public:
     juce::ChangeBroadcaster* envButtonBroadcaster;
     juce::ChangeBroadcaster* remainingTimeBroadcaster;
     juce::ChangeBroadcaster* trimValueChangedBroacaster;
+    juce::ChangeBroadcaster* soundEditedBroadcaster;
 
     std::unique_ptr<juce::MemoryAudioSource> outputSource;
     std::unique_ptr<juce::MemoryAudioSource> cueOutputSource;
@@ -277,17 +279,23 @@ public:
 
     juce::String getRemainingTimeAsString();
 
+    juce::String getCueTimeAsString();
+
     void setEnveloppePath(juce::Path& p);
 
     void createDefaultEnveloppePath();
 
     juce::Path* getEnveloppePath();
 
+    bool getIsCart();
+
     FilterProcessor filterProcessor;
     FilterProcessor cueFilterProcessor;
     CompProcessor compProcessor{CompProcessor::Mode::Stereo};
 
     juce::ChangeBroadcaster* playerInfoChangedBroadcaster;
+
+    juce::String Player::secondsToMMSS(int seconds);
 private:
     enum TransportState
     {
@@ -437,7 +445,7 @@ private:
     void Player::paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds);
     void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, float thumbnailZoomValue);
     void Player::paintPlayHead(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds);
-    void Player::updateLoopButton(juce::Button* button, juce::String name);
+
 
     void Player::updateRemainingTime();
 
@@ -452,7 +460,7 @@ private:
     void Player::calculThumbnailBounds();
     void Player::repaintPlayHead();
 
-    juce::String Player::secondsToMMSS(int seconds);
+
 
     float oldThumbnailOffset = 0;
     juce::Label cueTimeLabel;

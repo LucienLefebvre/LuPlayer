@@ -80,6 +80,8 @@ private:
 
     PlayHead playHead;
     PlayHead cuePlayHead;
+    PlayHead inMark;
+    PlayHead outMark;
     juce::Label infoLabel;
     
     bool drawPointInfo = false;

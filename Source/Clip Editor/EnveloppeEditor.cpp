@@ -9,7 +9,7 @@ EnveloppeEditor::EnveloppeEditor()
     addPoint(juce::Point<float>(1.0, 0.0));
     myPoints.getLast()->setCanMoveTime(false);*/
 
-    setSize(600, 400);
+    //setSize(600, 400);
     constrainer.setMinimumOnscreenAmounts(2, 2, 2, 2);
 
     addAndMakeVisible(&playHead);
@@ -18,8 +18,11 @@ EnveloppeEditor::EnveloppeEditor()
     addAndMakeVisible(&cuePlayHead);
     cuePlayHead.setColour(juce::Colours::black);
 
-    //addAndMakeVisible(&infoLabel);
-    //infoLabel.setBounds(0, 0, 200, 25);
+    addChildComponent(&inMark);
+    inMark.setColour(juce::Colour(0, 196, 255));
+
+    addChildComponent(&outMark);
+    outMark.setColour(juce::Colour(238, 255, 0));
 
     juce::Timer::startTimerHz(60);
 }
@@ -86,17 +89,25 @@ void EnveloppeEditor::resized()
     }
     cuePlayHead.setSize(2, getHeight());
     playHead.setSize(2, getHeight());
+    inMark.setSize(2, getHeight());
+    outMark.setSize(2, getHeight());
     thumbnailBounds.setBounds(0, 0, getWidth(), getHeight());
     repaint();
 }
 
 void EnveloppeEditor::setEditedPlayer(Player* p)
 {
+    if (editedPlayer != nullptr)
+    {
+        editedPlayer->trimValueChangedBroacaster->removeChangeListener(this);
+        editedPlayer->soundEditedBroadcaster->removeChangeListener(this);
+    }
     myPoints.clear();
     editedPlayer = p;
     thumbnail = &editedPlayer->getAudioThumbnail();
     thumbnail->addChangeListener(this);
     editedPlayer->trimValueChangedBroacaster->addChangeListener(this);
+    editedPlayer->soundEditedBroadcaster->addChangeListener(this);
     createPointsFromPath(editedPlayer->getEnveloppePath());
     resized();
 }
@@ -111,7 +122,7 @@ bool EnveloppeEditor::keyPressed(const juce::KeyPress& key, juce::Component* ori
 }
 
 void EnveloppeEditor::timerCallback()
-{//Cue PlayHead
+{
     if (editedPlayer != nullptr)
     {   //transport playhead
         juce::AudioTransportSource* transport = &editedPlayer->transport;
@@ -127,7 +138,23 @@ void EnveloppeEditor::timerCallback()
         auto cuedrawPosition = (timeToX(cueaudioPosition / cuetransportLenght));
         cuePlayHead.setTopLeftPosition(cuedrawPosition, 0);
 
+        //in mark
+        if (editedPlayer->isStartTimeSet())
+        {
+            inMark.setVisible(true);
+            inMark.setTopLeftPosition(timeToX(editedPlayer->getStart() / editedPlayer->transport.getLengthInSeconds()), 0);
+        }
+        else
+            inMark.setVisible(false);
 
+        //out mark
+        if (editedPlayer->isStopTimeSet())
+        {
+            outMark.setVisible(true);
+            outMark.setTopLeftPosition(timeToX(editedPlayer->getStop() / editedPlayer->transport.getLengthInSeconds()), 0);
+        }
+        else
+            outMark.setVisible(false);
     }
 }
 
@@ -137,6 +164,10 @@ void EnveloppeEditor::changeListenerCallback(juce::ChangeBroadcaster* source)
         repaint();
     else if (source == editedPlayer->trimValueChangedBroacaster)
         resized();
+    else if (source == editedPlayer->soundEditedBroadcaster)
+    {
+      
+    }
 }
 
 juce::Point<int> EnveloppeEditor::getPointPosition(EnveloppePoint& point)
