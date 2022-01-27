@@ -197,8 +197,8 @@ public:
     bool isCart = false;
 
     juce::Value volumeSliderValue;
-    juce::String remainingTimeString;
-    juce::String cueTimeString;
+    juce::String remainingTimeString = "";
+    juce::String cueTimeString = "";
     juce::Label soundName;
     juce::Value fileName;
     juce::Value cueStopped;
@@ -257,7 +257,9 @@ public:
 
     void normalize(std::string p);
 
-    void setFxEditedPlayer(bool isEdited);
+    void setEditedPlayer(bool isEdited);
+
+
 
     juce::TextButton* getfxButton();
 
@@ -289,11 +291,22 @@ public:
 
     bool getIsCart();
 
+    bool isEnveloppeEnabled();
+
+    void setEnveloppeEnabled(bool isEnabled);
+
+    bool isFxEnabled();
+
+    void enableButtons(bool isEnabled);
+
+    bool isEditedPlayer();
+
     FilterProcessor filterProcessor;
     FilterProcessor cueFilterProcessor;
     CompProcessor compProcessor{CompProcessor::Mode::Stereo};
 
     juce::ChangeBroadcaster* playerInfoChangedBroadcaster;
+    juce::ChangeBroadcaster* playerDeletedBroadcaster;
 
     juce::String Player::secondsToMMSS(int seconds);
 private:
@@ -615,6 +628,7 @@ private:
     double progress = -1.0;
 
     bool fxEnabled = false;
+    bool isEdited = false;
 
     Denoiser denoiser;
     std::string denoisedFile;

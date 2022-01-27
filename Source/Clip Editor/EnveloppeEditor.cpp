@@ -1,6 +1,8 @@
 #include "EnveloppeEditor.h"
 #define BLUE juce::Colour(40, 134, 189)
 #define ORANGE juce::Colour(229, 149, 0)
+
+//TODO bloquer le premier et denier point
 //==============================================================================
 EnveloppeEditor::EnveloppeEditor()
 {
@@ -25,10 +27,15 @@ EnveloppeEditor::EnveloppeEditor()
     outMark.setColour(juce::Colour(238, 255, 0));
 
     juce::Timer::startTimerHz(60);
+
+    /*addAndMakeVisible(&scaleButton);
+    scaleButton.setButtonText("+-12dB");
+    scaleButton.onClick = [this] {scaleButtonClicked(); };*/
 }
 
 EnveloppeEditor::~EnveloppeEditor()
 {
+    setNullPlayer();
 }
 
 //==============================================================================
@@ -71,12 +78,12 @@ void EnveloppeEditor::paint(juce::Graphics& g)
             g.setColour(juce::Colours::white);
             g.setOpacity(0.15);
             g.fillRoundedRectangle(xPos, yPos,
-                40, 25, 5);
+                45, 25, 5);
 
             g.setColour(juce::Colours::white);
-            auto roundedGain = std::ceil(myPoints[pointInfoToDraw]->getYPos() * 12.0 * 10.0) / 10.0;
+            auto roundedGain = std::ceil(myPoints[pointInfoToDraw]->getYPos() * (float)scale * 10.0) / 10.0;
             g.drawText(juce::String(roundedGain) << "dB",
-                xPos, yPos, 40, 25, juce::Justification::centred);
+                xPos, yPos, 45, 25, juce::Justification::centred);
         }
     }
 }
@@ -92,6 +99,7 @@ void EnveloppeEditor::resized()
     inMark.setSize(2, getHeight());
     outMark.setSize(2, getHeight());
     thumbnailBounds.setBounds(0, 0, getWidth(), getHeight());
+    scaleButton.setBounds(getWidth() - scaleButtonWidth, getHeight() - scaleButtonHeight, scaleButtonWidth, scaleButtonHeight);
     repaint();
 }
 
@@ -108,6 +116,8 @@ void EnveloppeEditor::setEditedPlayer(Player* p)
     thumbnail->addChangeListener(this);
     editedPlayer->trimValueChangedBroacaster->addChangeListener(this);
     editedPlayer->soundEditedBroadcaster->addChangeListener(this);
+    thumbnailHorizontalZoom = 1.0;
+    thumbnailRange = thumbnailRange.withStartAndLength(0.0, 1.0);
     createPointsFromPath(editedPlayer->getEnveloppePath());
     resized();
 }
@@ -162,11 +172,14 @@ void EnveloppeEditor::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     if (source == thumbnail)
         repaint();
-    else if (source == editedPlayer->trimValueChangedBroacaster)
-        resized();
-    else if (source == editedPlayer->soundEditedBroadcaster)
+    if (editedPlayer != nullptr)
     {
-      
+        if (source == editedPlayer->trimValueChangedBroacaster)
+            resized();
+        else if (source == editedPlayer->soundEditedBroadcaster)
+        {
+
+        }
     }
 }
 
@@ -225,6 +238,8 @@ void EnveloppeEditor::mouseDown(const juce::MouseEvent& e)
     {
         juce::Point<float> p = getPointValue(mousePos);
         draggedComponent = addPoint(p);
+        if (!editedPlayer->isEnveloppeEnabled())
+            editedPlayer->setEnveloppeEnabled(true);
     }
     else if (!e.mods.isShiftDown() && !e.mods.isRightButtonDown())
     {
@@ -242,62 +257,65 @@ void EnveloppeEditor::mouseDrag(const juce::MouseEvent& e)
     juce::Point<int> mousePos = e.getEventRelativeTo(this).getPosition();
     int mouseXPos = mousePos.getX();
     int mouseYPos = mousePos.getY();
-    if (draggedComponent)
+    if (editedPlayer != nullptr)
     {
-        EnveloppePoint* draggedPoint = dynamic_cast<EnveloppePoint*>(draggedComponent);
-        int indexOfDraggedPoint = myPoints.indexOf(draggedPoint);
-        drawPointInfo = true;
-        pointInfoToDraw = indexOfDraggedPoint;
-        if (myPoints[indexOfDraggedPoint + 1] != nullptr && myPoints[indexOfDraggedPoint - 1] != nullptr)
+        if (draggedComponent)
         {
-
-            int previousPointX = myPoints[indexOfDraggedPoint - 1]->getX() + draggedPoint->getRadius();
-            int nextPointX = myPoints[indexOfDraggedPoint + 1]->getX() + draggedPoint->getRadius();
-
-
-            if (mouseXPos >= previousPointX && mouseXPos <= nextPointX)
+            EnveloppePoint* draggedPoint = dynamic_cast<EnveloppePoint*>(draggedComponent);
+            int indexOfDraggedPoint = myPoints.indexOf(draggedPoint);
+            drawPointInfo = true;
+            pointInfoToDraw = indexOfDraggedPoint;
+            if (myPoints[indexOfDraggedPoint + 1] != nullptr && myPoints[indexOfDraggedPoint - 1] != nullptr)
             {
-                draggedPoint->setPosition(getPointValue(mousePos));
+
+                int previousPointX = myPoints[indexOfDraggedPoint - 1]->getX() + draggedPoint->getRadius();
+                int nextPointX = myPoints[indexOfDraggedPoint + 1]->getX() + draggedPoint->getRadius();
+
+
+                if (mouseXPos >= previousPointX && mouseXPos <= nextPointX)
+                {
+                    draggedPoint->setPosition(getPointValue(mousePos));
+                }
+                else if (mouseXPos < previousPointX)
+                {
+                    draggedPoint->setPosition(getXValue(previousPointX), getYValue(mouseYPos));
+                }
+                else if (mouseXPos > nextPointX)
+                {
+                    draggedPoint->setPosition(getXValue(nextPointX), getYValue(mouseYPos));
+                }
+                createEnveloppePath();
+                resized();
             }
-            else if (mouseXPos < previousPointX)
-            {
-                draggedPoint->setPosition(getXValue(previousPointX), getYValue(mouseYPos));
-            }
-            else if (mouseXPos > nextPointX)
-            {
-                draggedPoint->setPosition(getXValue(nextPointX), getYValue(mouseYPos));
-            }
-            createEnveloppePath();
+        }
+        else if (e.mods.isShiftDown())
+        {
+            setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+            int dragValue = thumbnailDragStart - getMouseXYRelative().getX();
+            thumbnailDragStart = getMouseXYRelative().getX();
+            float rangeDragValue = (float)dragValue / (float)getWidth() * thumbnailRange.getLength();
+            float thumbnailRangeStart = thumbnailRange.getStart() + rangeDragValue;
+
+            thumbnailRange = thumbnailRange.movedToStartAt(juce::jlimit<double>(0.0, 1.0, thumbnailRangeStart));
+            if (thumbnailRange.getEnd() > 1.0)
+                thumbnailRange.setEnd(1.0);
             resized();
         }
-    }
-    else if (e.mods.isShiftDown())
-    {
-        setMouseCursor(juce::MouseCursor::DraggingHandCursor);
-        int dragValue = thumbnailDragStart - getMouseXYRelative().getX();
-        thumbnailDragStart = getMouseXYRelative().getX();
-        float rangeDragValue = (float)dragValue / (float)getWidth() * thumbnailRange.getLength();
-        float thumbnailRangeStart = thumbnailRange.getStart() + rangeDragValue;
-
-        thumbnailRange = thumbnailRange.movedToStartAt(juce::jlimit<double>(0.0, 1.0, thumbnailRangeStart));
-        if (thumbnailRange.getEnd() > 1.0)
-            thumbnailRange.setEnd(1.0);
-        resized();
-    }
-    else
-    {
-        int playHeadXPos = juce::jlimit<int>(0, getWidth(), mousePos.getX());
-        float playHeadPosition = float(playHeadXPos) / getWidth();
-        float valueInDB = getEnveloppeValue(playHeadPosition, *editedPlayer->getEnveloppePath()) * 12.0;
-        infoLabel.setText("Position : " + juce::String(playHeadPosition)
-            + " Value : " + juce::String(valueInDB) + "dB"
-            , juce::NotificationType::dontSendNotification);
-
-        if (editedPlayer != nullptr)
+        else
         {
-            double position = editedPlayer->cueTransport.getLengthInSeconds() * getXValue(mousePos.getX());
-            lastPositionClickedorDragged = editedPlayer->cueTransport.getCurrentPosition() / editedPlayer->cueTransport.getLengthInSeconds();
-            editedPlayer->cueTransport.setPosition(juce::jlimit<double>(0.0, editedPlayer->cueTransport.getLengthInSeconds(), position));
+            int playHeadXPos = juce::jlimit<int>(0, getWidth(), mousePos.getX());
+            float playHeadPosition = float(playHeadXPos) / getWidth();
+            float valueInDB = getEnveloppeValue(playHeadPosition, *editedPlayer->getEnveloppePath()) * (float)scale;
+            infoLabel.setText("Position : " + juce::String(playHeadPosition)
+                + " Value : " + juce::String(valueInDB) + "dB"
+                , juce::NotificationType::dontSendNotification);
+
+            if (editedPlayer != nullptr)
+            {
+                double position = editedPlayer->cueTransport.getLengthInSeconds() * getXValue(mousePos.getX());
+                lastPositionClickedorDragged = editedPlayer->cueTransport.getCurrentPosition() / editedPlayer->cueTransport.getLengthInSeconds();
+                editedPlayer->cueTransport.setPosition(juce::jlimit<double>(0.0, editedPlayer->cueTransport.getLengthInSeconds(), position));
+            }
         }
     }
     mouseIsDragged = true;
@@ -306,37 +324,41 @@ void EnveloppeEditor::mouseDrag(const juce::MouseEvent& e)
 void EnveloppeEditor::mouseMove(const juce::MouseEvent& e)
 {
     juce::Point<int> mousePos = e.getEventRelativeTo(this).getPosition();
-
-    for (int i = 0; i < myPoints.size(); i++)
+    if (editedPlayer != nullptr)
     {
-        if (myPoints[i]->getBounds().contains(mousePos))
+        for (int i = 0; i < myPoints.size(); i++)
         {
-            drawPointInfo = true;
-            pointInfoToDraw = i;
-            repaint();
-            return;
+            if (myPoints[i]->getBounds().contains(mousePos))
+            {
+                drawPointInfo = true;
+                pointInfoToDraw = i;
+                repaint();
+                return;
+            }
+            else
+            {
+                drawPointInfo = false;
+                repaint();
+            }
         }
-        else
+        for (int i = 0; i < linesArray.size(); i++)
         {
-            drawPointInfo = false;
-            repaint();
+
         }
     }
-    for (int i = 0; i < linesArray.size(); i++)
-    {
-
-    }
-
 }
 
 void EnveloppeEditor::mouseUp(const juce::MouseEvent& e)
 {
-    setMouseCursor(juce::MouseCursor::NormalCursor);
-    thumbnailDragStart = 0;
-    drawPointInfo = false;
-    mouseIsDragged = false;
-    createEnveloppePath();
-    resized();
+    if (editedPlayer != nullptr)
+    {
+        setMouseCursor(juce::MouseCursor::NormalCursor);
+        thumbnailDragStart = 0;
+        drawPointInfo = false;
+        mouseIsDragged = false;
+        createEnveloppePath();
+        resized();
+    }
 }
 
 void EnveloppeEditor::mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel)
@@ -426,14 +448,16 @@ std::atomic<float> EnveloppeEditor::getEnveloppeValue(float x, juce::Path& p)
 
 void EnveloppeEditor::createEnveloppePath()
 {//creates a path from the enveloppe points
-    editedPlayer->getEnveloppePath()->clear();
-    editedPlayer->getEnveloppePath()->startNewSubPath(0, 0);
-    for (auto* point : myPoints)
+    if (editedPlayer != nullptr)
     {
-        editedPlayer->getEnveloppePath()->lineTo(point->getPos());
+        editedPlayer->getEnveloppePath()->clear();
+        editedPlayer->getEnveloppePath()->startNewSubPath(0, 0);
+        for (auto* point : myPoints)
+        {
+            editedPlayer->getEnveloppePath()->lineTo(point->getPos());
+        }
+        editedPlayer->getEnveloppePath()->closeSubPath();
     }
-    editedPlayer->getEnveloppePath()->closeSubPath();
-
     /*if (editedPlayer != nullptr)
         editedPlayer->setEnveloppePath(enveloppePath);*/
 }
@@ -460,4 +484,41 @@ void EnveloppeEditor::createPointsFromPath(juce::Path* p)
             return;
         }
     }
+}
+
+void EnveloppeEditor::setNullPlayer()
+{
+    editedPlayer = nullptr;
+    myPoints.clear();
+    outMark.setVisible(false);
+    inMark.setVisible(false);
+    resized();
+}
+
+void EnveloppeEditor::createDefaultEnveloppePath()
+{
+    enveloppePath.clear();
+    enveloppePath.startNewSubPath(0.0, 0.0);
+    enveloppePath.lineTo(1.0, 0.0);
+    enveloppePath.closeSubPath();
+}
+
+void EnveloppeEditor::scaleButtonClicked()
+{
+    switch (scale)
+    {
+    case 6:
+        scale = 12;
+        scaleButton.setButtonText("+-12dB");
+        break;
+    case 12 : 
+        scale = 24;
+        scaleButton.setButtonText("+-24dB");
+        break;
+    case 24:
+        scale = 6;
+        scaleButton.setButtonText("+-6dB");
+        break;
+    }
+    resized();
 }

@@ -55,8 +55,11 @@ public:
     void createPointsFromPath(juce::Path* p);
 
     void setEditedPlayer(Player* p);
+    void setNullPlayer();
     bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
     void timerCallback();
+    void createDefaultEnveloppePath();
+    void scaleButtonClicked();
 private:
     void changeListenerCallback(juce::ChangeBroadcaster* source);
     Player* editedPlayer = nullptr;
@@ -65,6 +68,7 @@ private:
     juce::ComponentDragger myDragger;
     juce::ComponentBoundsConstrainer constrainer;
     juce::Component* draggedComponent = nullptr;
+    juce::TextButton scaleButton;
 
     juce::AudioThumbnail* thumbnail;
     juce::Rectangle<int> thumbnailBounds;
@@ -94,5 +98,9 @@ private:
     float thumbnailDrawStart = 0;
     float thumbnailDrawEnd = 0;
     int thumbnailDragStart = 0;
+
+    int scale = 24;
+    int scaleButtonWidth = 100;
+    int scaleButtonHeight = 25;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnveloppeEditor)
 };

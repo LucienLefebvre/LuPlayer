@@ -70,7 +70,7 @@ public:
             setFullScreen(true);
             setVisible(true);
             setUsingNativeTitleBar(true);
-            mainComponent.setSize(1024, 768);
+            mainComponent.setSize(1280, 768);
             setContentOwned (&mainComponent, true);
             setResizable(true, false);
 
@@ -82,7 +82,7 @@ public:
             //centreWithSize (getWidth(), getHeight());
            #endif
             //setSize(1300, 550);
-            setResizeLimits(900, 400, 1920, 1080);
+            setResizeLimits(1000, 600, 10000, 10000);
 
 
             //setTitleBarHeight(30);

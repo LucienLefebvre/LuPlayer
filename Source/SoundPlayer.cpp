@@ -279,7 +279,7 @@ void SoundPlayer::resized()
         }
     }
     else
-        keyMappedSoundboard->setBounds(getLocalBounds());
+        keyMappedSoundboard->setBounds(0, 15, getWidth(), getHeight());
 
 }
 
@@ -429,78 +429,41 @@ void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source,
 
 bool SoundPlayer::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
 {
-    if (myPlaylists[draggedPlaylist] != nullptr)
+    if (myPlaylists[Settings::editedPlaylist] != nullptr)
     {
-        if (key == 73)
+        auto* player = myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
+
+        if (player != nullptr)
         {
-            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
+            if (key == 73)
+                    player->setStart();
+            else if (key == 75)
+                    player->deleteStart();
+            else if (key == 79)
+                    player->setStop();
+            else if (key == 76)
+                    player->deleteStop();
+            else if (key == 67)
             {
-                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->setStart();
-            }
-        }
-        else if (key == 75)
-        {
-            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
-            {
-                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->deleteStart();
-            }
-        }
-        else if (key == 79)
-        {
-            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
-            {
-                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->setStop();
-            }
-        }
-        else if (key == 76)
-        {
-            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
-            {
-                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->deleteStop();
-            }
-        }
-        else if (key == 67)
-        {
-            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
-            {
-                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->cueButtonClicked();
+                player->cueButtonClicked();
                 return true;
             }
-        }
-        else if (key == 88)
-        {
-            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
+            else if (key == 88)
             {
-                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->cueTransport.setPosition(myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->startTime);
-                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->cueButtonClicked();
+                player->cueTransport.setPosition(player->startTime);
+                player->cueButtonClicked();
                 return true;
             }
-        }
-        else if (key == 86)
-        {
-            if (myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer] != nullptr)
+            else if (key == 86)
             {
-                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->cueTransport.setPosition(myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->stopTime - 6);
-                myPlaylists[draggedPlaylist]->players[Settings::draggedPlayer]->cueButtonClicked();
+                player->cueTransport.setPosition(player->stopTime - 6);
+                player->cueButtonClicked();
                 return true;
             }
-        }
-        else if (myPlaylists[0] != nullptr)
-        {
-            //myPlaylists[0]->keyPressed(key, originatingComponent);
-            //myPlaylists[1]->keyPressed(key, originatingComponent);
         }
     }
     if (key == juce::KeyPress::rightKey)
         copyPlayingSound();
-    else if (key == juce::KeyPress::spaceKey)
-    {
-    
-       //myPlaylists[0]->spaceBarPressed();
-    }
-
-
-
     return false;
 }
 

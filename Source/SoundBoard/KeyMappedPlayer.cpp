@@ -48,10 +48,17 @@ KeyMappedPlayer::KeyMappedPlayer()
     if (!Settings::mouseWheelControlVolume)
         volumeSlider->setScrollWheelEnabled(false);
 
+    editButton.reset(new juce::TextButton());
+    addChildComponent(editButton.get());
+    editButton->setButtonText("Edit");
+    editButton->onClick = [this] {editButtonClicked(); };
 }
 
 KeyMappedPlayer::~KeyMappedPlayer()
 {
+    juce::MultiTimer::stopTimer(0);
+    juce::MultiTimer::stopTimer(1);
+    soundPlayer = nullptr;
 }
 
 void KeyMappedPlayer::paint (juce::Graphics& g)
@@ -74,7 +81,8 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
     //DRAW THUMBNAIL
 
     g.setColour(currentColour);
-    thumbnail->drawChannels(g, thumbnailBounds, 0.0, thumbnail->getTotalLength(), juce::Decibels::decibelsToGain(playerInfos.trimVolume) * 2.0f);
+    if (thumbnail != nullptr)
+        thumbnail->drawChannels(g, thumbnailBounds, 0.0, thumbnail->getTotalLength(), juce::Decibels::decibelsToGain(playerInfos.trimVolume) * 2.0f);
 }
 
 void KeyMappedPlayer::resized()
@@ -97,10 +105,15 @@ void KeyMappedPlayer::resized()
     elapsedTimeLabel->setBounds(0, elapsedTimeHeight, elapsedTimeWidth, elapsedTimeHeight);
     elapsedTimeLabel->setFont(juce::Font(nameLabelHeight, juce::Font::plain).withTypefaceStyle("Regular"));
 
-    shortcutLabelSize = getWidth();
-    shortcutLabel->setBounds(0, 0, shortcutLabelSize, shortcutLabelSize);
+    shortcutLabelWidth = getWidth();
+    shortcutLabelHeight = getHeight();
+    shortcutLabel->setSize(shortcutLabelWidth, shortcutLabelHeight);
+    shortcutLabel->setCentrePosition(getWidth() / 2, getHeight() / 2);
     shortcutLabel->setFont(juce::Font(getWidth(), juce::Font::plain).withTypefaceStyle("Regular"));
     shortcutLabel->setJustificationType(juce::Justification::centred);
+
+    editButtonWidth = 3 * getWidth() / 10;
+    editButton->setBounds(elapsedTimeWidth, elapsedTimeHeight, editButtonWidth, elapsedTimeHeight);
 }
 
 void KeyMappedPlayer::setPlayer(Player* p)
@@ -108,6 +121,8 @@ void KeyMappedPlayer::setPlayer(Player* p)
     soundPlayer = p;
     soundPlayer->playerInfoChangedBroadcaster->addChangeListener(this);
     soundPlayer->remainingTimeBroadcaster->addChangeListener(this);
+    soundPlayer->soundEditedBroadcaster->addChangeListener(this);
+    soundPlayer->playerDeletedBroadcaster->addChangeListener(this);
     thumbnail = &soundPlayer->getAudioThumbnail();
     thumbnail->addChangeListener(this);
     juce::MultiTimer::startTimer(0, 50);
@@ -146,6 +161,7 @@ void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
         {
             volumeSlider->setVisible(true);
             elapsedTimeLabel->setVisible(true);
+            editButton->setVisible(true);
         }
     }
     else if (source == thumbnail)
@@ -156,6 +172,15 @@ void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         setPlayerColours(juce::Colours::red);
     }
+    else if (source == soundPlayer->soundEditedBroadcaster)
+    {
+        updatePlayerInfo();
+    }
+    else if (source == soundPlayer->playerDeletedBroadcaster)
+    {
+        soundPlayer = nullptr;
+        thumbnail = nullptr;
+    }
 }
 
 void KeyMappedPlayer::updatePlayerInfo()
@@ -163,11 +188,17 @@ void KeyMappedPlayer::updatePlayerInfo()
     playerInfos = soundPlayer->getPlayerInfo();
     nameLabel->setText(playerInfos.name, juce::NotificationType::dontSendNotification);
     elapsedTimeLabel->setText(soundPlayer->getRemainingTimeAsString(), juce::NotificationType::dontSendNotification);
+
     if (soundPlayer->isPlayerPlaying())
         setPlayerColours(juce::Colours::green);
     else
         setPlayerColours(BLUE);
 
+    if (soundPlayer->isEditedPlayer())
+        editButton->setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::red);
+    else
+        editButton->setColour(juce::TextButton::ColourIds::buttonColourId,
+            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     resized();
     repaint();
 }
@@ -179,15 +210,19 @@ void KeyMappedPlayer::shortcutKeyPressed()
 
 void KeyMappedPlayer::startOrStop()
 {
-    if (!soundPlayer->isPlayerPlaying())
-        soundPlayer->play();
-    else
-        soundPlayer->stop();
+    if (soundPlayer != nullptr)
+    {
+        if (!soundPlayer->isPlayerPlaying())
+            soundPlayer->play();
+        else
+            soundPlayer->stop();
+    }
 }
 
 void KeyMappedPlayer::mouseDown(const juce::MouseEvent& event)
 {
-    if (event.originalComponent != volumeSlider.get())
+    if (event.originalComponent != volumeSlider.get()
+        && event.originalComponent != editButton.get())
         startOrStop();
 }
 
@@ -204,9 +239,12 @@ void KeyMappedPlayer::timerCallback(int timerID)
     switch (timerID)
     {
     case 0:
-        if (soundPlayer != nullptr && soundPlayer->isFileLoaded())
+        if (soundPlayer != nullptr)
         {
-            elapsedTimeLabel->setText(soundPlayer->getRemainingTimeAsString(), juce::NotificationType::dontSendNotification);
+            if (soundPlayer->isFileLoaded())
+            {
+                elapsedTimeLabel->setText(soundPlayer->getRemainingTimeAsString(), juce::NotificationType::dontSendNotification);
+            }
         }
         //repaint();
         break;
@@ -226,36 +264,45 @@ void KeyMappedPlayer::setPlayerColours(juce::Colour c)
 
 void KeyMappedPlayer::scrollNameLabel()
 {
-    if (soundPlayer->isFileLoaded())
+    if (soundPlayer != nullptr)
     {
-        if (scrollLabel == false)
+        if (soundPlayer->isFileLoaded())
         {
-            startTickScrollTimer++;
-            if (startTickScrollTimer == 20)
+            if (scrollLabel == false)
             {
-                scrollLabel = true;
-                startTickScrollTimer = 0;
-            }
-        }
-        else if (scrollLabel == true)
-        {
-            nameLabelScrollX += 2;
-            if (nameLabelScrollX > (nameLabelTextTotalWidth - getWidth()))
-            {
-                endTickScrollTimer++;
-                if (endTickScrollTimer == 20)
+                startTickScrollTimer++;
+                if (startTickScrollTimer == 20)
                 {
-                    scrollLabel = false;
-                    nameLabelScrollX = 0;
-                    nameLabel->setTopLeftPosition(nameLabelScrollX, 0);
-                    endTickScrollTimer = 0;
+                    scrollLabel = true;
+                    startTickScrollTimer = 0;
                 }
             }
-            else
+            else if (scrollLabel == true)
             {
-                nameLabel->setTopLeftPosition(-nameLabelScrollX, 0);
-            }
+                nameLabelScrollX += 2;
+                if (nameLabelScrollX > (nameLabelTextTotalWidth - getWidth()))
+                {
+                    endTickScrollTimer++;
+                    if (endTickScrollTimer == 20)
+                    {
+                        scrollLabel = false;
+                        nameLabelScrollX = 0;
+                        nameLabel->setTopLeftPosition(nameLabelScrollX, 0);
+                        endTickScrollTimer = 0;
+                    }
+                }
+                else
+                {
+                    nameLabel->setTopLeftPosition(-nameLabelScrollX, 0);
+                }
 
+            }
         }
     }
+}
+
+void KeyMappedPlayer::editButtonClicked()
+{
+    if (soundPlayer != nullptr)
+        soundPlayer->envButtonClicked();
 }

@@ -130,7 +130,7 @@ MainComponent::MainComponent() :
     myLayout.setItemLayout(1, 4, 4, 4);
     myLayout.setItemLayout(2,          // for item 1
         5, 600, // size must be between 20% and 60% of the available space
-        325);        // and its preferred size is 50 pixels
+        390);        // and its preferred size is 50 pixels
 
 
 
@@ -423,14 +423,14 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
     else if (source == soundPlayers[0]->myPlaylists[0]->fxButtonBroadcaster || source == soundPlayers[0]->myPlaylists[1]->fxButtonBroadcaster)
     {
-        auto* player = soundPlayers[0]->myPlaylists[Settings::fxEditedPlaylist]->players[Settings::fxEditedPlayer];
+        auto* player = soundPlayers[0]->myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
         bottomComponent.clipEffect.setPlayer(player);
         bottomComponent.clipEditor.setPlayer(player);
         bottomComponent.setCurrentTabIndex(6);
     }
     else if (source == soundPlayers[0]->myPlaylists[0]->envButtonBroadcaster || source == soundPlayers[0]->myPlaylists[1]->envButtonBroadcaster)
     {
-    auto* player = soundPlayers[0]->myPlaylists[Settings::fxEditedPlaylist]->players[Settings::fxEditedPlayer];
+    auto* player = soundPlayers[0]->myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
     bottomComponent.clipEditor.setPlayer(player);
     bottomComponent.clipEffect.setPlayer(player);
     bottomComponent.setCurrentTabIndex(5);
@@ -687,7 +687,7 @@ void MainComponent::resized()
 
     bottomComponent.setBounds(0, getHeight(), getWidth(), 25);
     if (showMixer)
-    mixer.setBounds(0, getHeight() - mixerHeight, getWidth(), mixerHeight);
+        mixer.setBounds(0, getHeight() - mixerHeight, getWidth(), mixerHeight);
     //Layout the window
     horizontalDividerBar.get()->setBounds(0, 200 - bottomHeight, getWidth(), 8);
     Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
@@ -1203,6 +1203,8 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
         soundPlayers[0]->myPlaylists[1]->assignLeftFader(0);
         soundPlayers[0]->myPlaylists[1]->assignRightFader(-1);
         soundPlayers[0]->myPlaylists[1]->assignRightFader(1);
+        soundPlayers[0]->myPlaylists[0]->setPlaylistPosition(0);
+        soundPlayers[0]->myPlaylists[1]->setPlaylistPosition(1);
     }
     if (m == SoundPlayer::Mode::KeyMap)
     {

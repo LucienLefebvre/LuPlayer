@@ -52,9 +52,8 @@ juce::StringArray Settings::tempFiles;
 
 int Settings::draggedPlaylist;
 int Settings::draggedPlayer;
-int Settings::fxEditedPlayer;
-int Settings::fxEditedPlaylist;
-
+int Settings::editedPlayer;
+int Settings::editedPlaylist;
 int Settings::preferedSoundPlayerMode;
 //==============================================================================
 Settings::Settings() : settingsFile(options)

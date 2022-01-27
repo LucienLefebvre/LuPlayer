@@ -41,6 +41,7 @@ ClipEffect::ClipEffect()
 
 ClipEffect::~ClipEffect()
 {
+    setNullPlayer();
 }
 
 void ClipEffect::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -101,15 +102,22 @@ void ClipEffect::setName(std::string n)
 
 void ClipEffect::timerCallback()
 {
-    displayInputMeter.setMeterData(inputMeter->getMeterData());
-    displayOutputMeter.setMeterData(outputMeter->getMeterData());
-    displayCompMeter.setReductionGain(compMeter->getReductionGain());
+    if (editedPlayer != nullptr)
+        displayInputMeter.setMeterData(inputMeter->getMeterData());
+    if (editedPlayer != nullptr)
+        displayOutputMeter.setMeterData(outputMeter->getMeterData());
+    if (editedPlayer != nullptr)
+        displayCompMeter.setReductionGain(compMeter->getReductionGain());
 }
 
 void ClipEffect::setPlayer(Player* p)
 {
     if (editedPlayer != nullptr)
-        editedPlayer->setFxEditedPlayer(false);
+    {
+        editedPlayer->setEditedPlayer(false);
+        editedPlayer->fxButtonBroadcaster->removeChangeListener(this);
+        editedPlayer->playerDeletedBroadcaster->removeChangeListener(this);
+    }
 
     editedPlayer = p;
     if (editedPlayer != nullptr)
@@ -118,12 +126,14 @@ void ClipEffect::setPlayer(Player* p)
         setEditedCompProcessor(editedPlayer->compProcessor);
         setEditedBuffer(editedPlayer->getBuffer());
         setMeters(editedPlayer->getInputMeter(), editedPlayer->getOutputMeter(), editedPlayer->getCompMeter());
-        editedPlayer->setFxEditedPlayer(true);
+        editedPlayer->setEditedPlayer(true);
         setName(editedPlayer->getName());
         editedPlayer->fxButtonBroadcaster->addChangeListener(this);
+        editedPlayer->playerDeletedBroadcaster->addChangeListener(this);
     }
     else
         setEditedFilterProcessor(dummyFilterProcessor);
+
     resized();
 }
 
@@ -149,11 +159,22 @@ void ClipEffect::changeListenerCallback(juce::ChangeBroadcaster* source)
         {
             editedPlayer->setFilterParameters(editedPlayer->getFilterParameters());
         }
+        else if (source == editedPlayer->playerDeletedBroadcaster)
+        {
+            setNullPlayer();
+        }
     }
 }
 
 void ClipEffect::setFxEditedPlayer()
 {
     if (editedPlayer != nullptr)
-        editedPlayer->setFxEditedPlayer(true);
+        editedPlayer->setEditedPlayer(true);
+}
+
+void ClipEffect::setNullPlayer()
+{
+    editedPlayer = nullptr;
+    filterEditor.setNullProcessor();
+    nameLabel.setText("", juce::NotificationType::dontSendNotification);
 }

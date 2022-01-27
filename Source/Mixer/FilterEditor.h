@@ -32,7 +32,7 @@ public:
     void updateBypassed();
     void setColour(juce::Colour colour);
     int getFilterGraphXStart();
-
+    void setNullProcessor();
     juce::ChangeBroadcaster* filterEditedBroadcaster;
 private:
     void addFilterBand(int i);
@@ -73,6 +73,7 @@ private:
 
     FilterProcessor* editedFilterProcessor = 0;
     FilterProcessor filterProcessor;
+    FilterProcessor dummyFilterProcessor;
     int numFilterBands = 4;
     int knobWidth = 66;
     int knobHeight = 80;

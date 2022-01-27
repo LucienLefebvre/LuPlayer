@@ -7,6 +7,7 @@
 
   ==============================================================================
 */
+//TODO résoudre bug glisser en haut
 
 #include <JuceHeader.h>
 #include "Playlist.h"
@@ -1370,13 +1371,13 @@ void Playlist::changeListenerCallback(juce::ChangeBroadcaster* source)
             {
                 if (playlistPosition == 0)
                 {
-                    Settings::fxEditedPlaylist = 0;
-                    Settings::fxEditedPlayer = i;
+                    Settings::editedPlaylist = 0;
+                    Settings::editedPlayer = i;
                 }
                 else if (playlistPosition == 1)
                 {
-                    Settings::fxEditedPlaylist = 1;
-                    Settings::fxEditedPlayer = i;
+                    Settings::editedPlaylist = 1;
+                    Settings::editedPlayer = i;
                 }
                 fxButtonBroadcaster->sendChangeMessage();
             }
@@ -1384,13 +1385,13 @@ void Playlist::changeListenerCallback(juce::ChangeBroadcaster* source)
             {
                 if (playlistPosition == 0)
                 {
-                    Settings::fxEditedPlaylist = 0;
-                    Settings::fxEditedPlayer = i;
+                    Settings::editedPlaylist = 0;
+                    Settings::editedPlayer = i;
                 }
                 else if (playlistPosition == 1)
                 {
-                    Settings::fxEditedPlaylist = 1;
-                    Settings::fxEditedPlayer = i;
+                    Settings::editedPlaylist = 1;
+                    Settings::editedPlayer = i;
                 }
                 envButtonBroadcaster->sendChangeMessage();
             }
@@ -1780,14 +1781,14 @@ void Playlist::mouseUp(const juce::MouseEvent& event)
             assignRightFader(player);*/
         if (players[player] != nullptr)
         {
-            players[player]->setDraggedPlayer();
+            //players[player]->envButtonClicked();
         }
     }
     else if (playlistType == 1 && getMouseXYRelative().getX() < dragZoneWidth)
     {
         if (players[player] != nullptr)
         {
-            players[player]->setDraggedPlayer();
+            //players[player]->envButtonClicked();
         }
     }
     //fileDragPlayerSource = -1;
@@ -1927,6 +1928,6 @@ void Playlist::setPlaylistPosition(int p)
 
 void Playlist::resetFxEditedButtons()
 {
-    for (auto* p : players)
-        p->setFxEditedPlayer(false);
+    /*for (auto* p : players)
+        p->setFxEditedPlayer(false);*/
 }

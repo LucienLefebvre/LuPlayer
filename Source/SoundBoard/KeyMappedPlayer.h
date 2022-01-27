@@ -53,6 +53,8 @@ public:
 
     void scrollNameLabel();
 
+    void editButtonClicked();
+
 private:
     //Player dummyPlayer;
     Player* soundPlayer = 0;
@@ -62,6 +64,8 @@ private:
     std::unique_ptr<juce::Label> elapsedTimeLabel;
     std::unique_ptr<juce::Label> nameLabel;
     std::unique_ptr<juce::Slider> volumeSlider;
+    std::unique_ptr<juce::TextButton> editButton;
+    int editButtonWidth = 0;
     juce::String shortcutKey;
 
     bool isDragged = false;
@@ -71,7 +75,8 @@ private:
     juce::AudioThumbnail* thumbnail;
     juce::Rectangle<int> thumbnailBounds;
     //DISPLAY POSITIONS
-    int shortcutLabelSize = 20;
+    int shortcutLabelWidth = 20;
+    int shortcutLabelHeight = 20;
     int nameLabelHeight = 20;
     int volumeSliderHeight;
     int volumeSliderWidth = 30;

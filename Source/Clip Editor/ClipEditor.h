@@ -19,7 +19,8 @@
 class ClipEditor  : public juce::Component,
     public juce::ChangeListener,
     public juce::Slider::Listener,
-    public juce::Timer
+    public juce::Timer,
+    public juce::Button::Listener
 {
 public:
     ClipEditor()
@@ -85,12 +86,14 @@ public:
         enveloppeButton.reset(new juce::TextButton());
         addAndMakeVisible(enveloppeButton.get());
         enveloppeButton->setButtonText("Enveloppe");
-        enveloppeButton->onClick = [this] {if (editedPlayer != nullptr) editedPlayer->envButtonClicked(); };
+        enveloppeButton->addListener(this);
+        enveloppeButton->onClick = [this] {enveloppeButtonClicked(); };
         //FX button
         fxButton.reset(new juce::TextButton());
         addAndMakeVisible(fxButton.get());
         fxButton->setButtonText("Effects");
-        fxButton->onClick = [this] {if (editedPlayer != nullptr) editedPlayer->fxButtonClicked(); };
+        fxButton->addListener(this);
+        fxButton->onClick = [this] {fxButtonClicked(); };
         //Normalise button
         normButton.reset(new juce::TextButton());
         addAndMakeVisible(normButton.get());
@@ -101,10 +104,13 @@ public:
         addAndMakeVisible(denoiseButton.get());
         denoiseButton->setButtonText("Denoiser");
         denoiseButton->onClick = [this] {if (editedPlayer != nullptr) editedPlayer->denoiseButtonClicked(); };
+
+        enableButttons(false);
     }
 
     ~ClipEditor() override
     {
+        setNullPlayer();
     }
 
     void paint (juce::Graphics& g) override
@@ -154,6 +160,8 @@ public:
         {
             enveloppeEditor.setEditedPlayer(editedPlayer);
             editedPlayer->soundEditedBroadcaster->addChangeListener(this);
+            editedPlayer->playerDeletedBroadcaster->addChangeListener(this);
+            enableButttons(true);
             updateInfos();
         }
     }
@@ -165,11 +173,30 @@ public:
         return true;
     }
 
+    void buttonStateChanged(juce::Button* b)
+    {
+        auto& modifiers = juce::ModifierKeys::getCurrentModifiers();
+        if (modifiers.isRightButtonDown())
+        {
+            rightClickDown = true;
+        }
+    }
+
     void changeListenerCallback(juce::ChangeBroadcaster* source)
     {
-        if (source == editedPlayer->soundEditedBroadcaster)
+        if (editedPlayer != nullptr)
         {
-            updateInfos();
+            if (source == editedPlayer->soundEditedBroadcaster)
+            {
+                updateInfos();
+            }
+            else if (source == editedPlayer->playerDeletedBroadcaster)
+            {
+                editedPlayer->setEditedPlayer(false);
+                editedPlayer->soundEditedBroadcaster->removeChangeListener(this);
+                editedPlayer->playerDeletedBroadcaster->removeChangeListener(this);
+                setNullPlayer();
+            }
         }
     }
 
@@ -215,6 +242,20 @@ public:
 
             //Loop Button
             loopButton->setToggleState(editedPlayer->getIsLooping(), juce::NotificationType::dontSendNotification);
+
+            //Enveloppe
+            if (editedPlayer->isEnveloppeEnabled())
+                enveloppeButton->setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
+            else
+                enveloppeButton->setColour(juce::TextButton::ColourIds::buttonColourId,
+                    getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+
+            //Enveloppe
+            if (editedPlayer->isFxEnabled())
+                fxButton->setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
+            else
+                fxButton->setColour(juce::TextButton::ColourIds::buttonColourId,
+                    getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         }
     }
 
@@ -227,6 +268,11 @@ public:
                 editedPlayer->setTrimVolume(trimVolumeSlider->getValue());
             }
         }
+    }
+
+    void buttonClicked(juce::Button* b)
+    {
+
     }
 
     void cueButtonClicked()
@@ -260,9 +306,64 @@ public:
             editedPlayer->stopTimeClicked();
         }
     }
+
+    void enveloppeButtonClicked()
+    {
+        if (editedPlayer != nullptr)
+        {
+            if (rightClickDown)
+                editedPlayer->setEnveloppeEnabled(!editedPlayer->isEnveloppeEnabled());
+            else
+                editedPlayer->envButtonClicked();
+        }
+        rightClickDown = false;
+    }
+
+    void fxButtonClicked()
+    {
+        if (editedPlayer != nullptr)
+        {
+            if (rightClickDown)
+                editedPlayer->bypassFX(editedPlayer->isFxEnabled());
+            else
+                editedPlayer->fxButtonClicked();
+        }
+        rightClickDown = false;
+    }
+
+    void enableButttons(bool isEnabled)
+    {
+        trimVolumeSlider->setEnabled(isEnabled);
+        cueButton->setEnabled(isEnabled);
+        inButton->setEnabled(isEnabled);
+        outButton->setEnabled(isEnabled);
+        //inLabel->setVisible(isEnabled);
+        //outLabel->setVisible(isEnabled);
+        loopButton->setEnabled(isEnabled);
+        enveloppeButton->setEnabled(isEnabled);
+        fxButton->setEnabled(isEnabled);
+        normButton->setEnabled(isEnabled);
+        denoiseButton->setEnabled(isEnabled);
+    }
+
+    void setNullPlayer()
+    {
+        enableButttons(false);
+        editedPlayer = nullptr;
+        nameLabel->setText("", juce::NotificationType::dontSendNotification);
+        inLabel->setText("", juce::NotificationType::dontSendNotification);
+        outLabel->setText("", juce::NotificationType::dontSendNotification);
+        loopButton->setToggleState(false, juce::NotificationType::dontSendNotification);
+        cueTimeLabel->setText("", juce::NotificationType::dontSendNotification);
+        trimVolumeSlider->setValue(0.0);
+        enveloppeEditor.setNullPlayer();
+    }
+
 private:
     EnveloppeEditor enveloppeEditor;
     Player* editedPlayer = nullptr;
+
+    bool rightClickDown = false;
 
     int dividerBarWidth = 4;
     int volumeSliderWidth = 80;

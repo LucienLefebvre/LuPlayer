@@ -102,8 +102,8 @@ public:
 
     static int Settings::draggedPlaylist;
     static int Settings::draggedPlayer;
-    static int Settings::fxEditedPlayer;
-    static int Settings::fxEditedPlaylist;
+    static int Settings::editedPlayer;
+    static int Settings::editedPlaylist;
 
     static int Settings::preferedSoundPlayerMode;
 

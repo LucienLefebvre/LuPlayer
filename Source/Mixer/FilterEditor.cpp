@@ -232,6 +232,7 @@ void FilterEditor::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     actualSampleRate = sampleRate;
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
+    dummyFilterProcessor.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
 }
 
 void FilterEditor::addFilterBand(int i)
@@ -282,7 +283,8 @@ void FilterEditor::createMagnitudeArray()
     highMagnitudeArray.clear();
     for (auto i = 0; i < 4; i++)//create an array of filters coefficients
     {
-        filterCoefficients.set(i, *editedFilterProcessor->getFilterCoefs(i).state);
+        if (editedFilterProcessor != nullptr)
+            filterCoefficients.set(i, *editedFilterProcessor->getFilterCoefs(i).state);
 
     }
     double arraySize = frequencyPlotBounds.getWidth();
@@ -580,4 +582,24 @@ void FilterEditor::setBypassedSliderColours(bool isBypassed)
             band->setSlidersThumbColours(juce::Colours::grey);
         }
     }
+}
+
+void FilterEditor::setNullProcessor()
+{
+    FilterProcessor::GlobalParameters defaultParams = FilterProcessor::makeDefaultFilter();
+    editedFilterProcessor = &dummyFilterProcessor;
+    dummyFilterProcessor.setFilterParameters(0, defaultParams.lowBand);
+    dummyFilterProcessor.setFilterParameters(1, defaultParams.lowMidBand);
+    dummyFilterProcessor.setFilterParameters(2, defaultParams.highMidBand);
+    dummyFilterProcessor.setFilterParameters(3, defaultParams.highBand);
+    createMagnitudeArray();
+    updateFilterGraphPoints();
+    for (auto i = 0; i < filterBands.size(); i++)
+    {
+        filterBands[i]->enableControl(false);
+        setBypassedSliderColours(true);
+        filterPoints[i]->setColour(4);
+    }
+    repaint();
+    editedFilterProcessor = nullptr;
 }

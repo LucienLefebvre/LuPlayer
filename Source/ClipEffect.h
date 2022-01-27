@@ -43,6 +43,8 @@ public:
 
     void setFxEditedPlayer();
 
+    void setNullPlayer();
+
 
 private:
     FilterEditor filterEditor;
