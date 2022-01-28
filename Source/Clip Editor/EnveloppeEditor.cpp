@@ -31,6 +31,7 @@ EnveloppeEditor::EnveloppeEditor()
     /*addAndMakeVisible(&scaleButton);
     scaleButton.setButtonText("+-12dB");
     scaleButton.onClick = [this] {scaleButtonClicked(); };*/
+    //addMouseListener(this, true);
 }
 
 EnveloppeEditor::~EnveloppeEditor()
@@ -45,6 +46,10 @@ void EnveloppeEditor::paint(juce::Graphics& g)
 
     if (editedPlayer != nullptr)
     {
+        //Draw X axis
+        g.setColour(juce::Colours::white);
+        g.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2, 2);
+        g.drawArrow(juce:)
         //Draw Thumbnail
         g.setColour(BLUE);
         thumbnail->drawChannels(g, thumbnailBounds,
@@ -52,12 +57,46 @@ void EnveloppeEditor::paint(juce::Graphics& g)
             juce::jlimit<double>(0, thumbnail->getTotalLength(), thumbnailRange.getEnd() * thumbnail->getTotalLength()),
             juce::Decibels::decibelsToGain(editedPlayer->getTrimVolume()));
 
-        //Draw X axis
+        //Draw dB lines
+        /*g.setColour(juce::Colours::lightgrey);
+        for (auto i = 0; i < dBLines.size(); i++)
+        {
+            auto yPosition = gainToY(dBLines[i]);
+            g.setOpacity(0.05);
+            g.drawHorizontalLine(yPosition, 0, getWidth());
+            g.setOpacity(0.5);
+            g.drawText(juce::String(dBLines[i] * 24) << "dB", getWidth() - 40, yPosition - 16,
+                40, 15, juce::Justification::centredRight);
+        }*/
+        
+        //Draw time lines
         g.setColour(juce::Colours::white);
-        g.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2, 2);
+        for (int i = 1; i < timeLines.size(); i++)
+        {
+            if (getRangeInSeconds(thumbnailRange) > 1000)
+            {
+                drawTimeLines(g, i * 300);
+            }
+            else if (getRangeInSeconds(thumbnailRange) > 200)
+            {
+                drawTimeLines(g, i * 60);
+            }
+            else if (getRangeInSeconds(thumbnailRange) > 20)
+            {
+                drawTimeLines(g, i * 10);
+            }
+            else if (getRangeInSeconds(thumbnailRange) < 20)
+            {
+                drawTimeLines(g, i);
+            }
+        }
 
         //Draw enveloppe line
-        g.setColour(juce::Colours::orange);
+        g.setOpacity(1);
+        if (editedPlayer->isEnveloppeEnabled())
+            g.setColour(juce::Colours::orange);
+        else
+            g.setColour(juce::Colours::grey);
         for (int i = 0; i < myPoints.size() - 1; i++)
         {
             juce::Point<int> startPoint = getPointPosition(*myPoints[i]);
@@ -86,6 +125,20 @@ void EnveloppeEditor::paint(juce::Graphics& g)
                 xPos, yPos, 45, 25, juce::Justification::centred);
         }
     }
+}
+
+void EnveloppeEditor::drawTimeLines(juce::Graphics& g, int multiplier)
+{
+    g.setOpacity(0.1);
+    if ((multiplier % 60) == 0)
+        g.setOpacity(0.3);
+    else if ((multiplier % 10) == 0)
+        g.setOpacity(0.2);
+    int xPos = timeToX(timeLines[multiplier] / editedPlayer->getLenght());
+    g.drawVerticalLine(xPos, 0, getHeight());
+    g.setOpacity(0.5);
+    g.drawText(secondsToMMSS(timeLines[multiplier]), xPos + 2, 0,
+        50, 15, juce::Justification::centredLeft);
 }
 
 void EnveloppeEditor::resized()
@@ -119,6 +172,7 @@ void EnveloppeEditor::setEditedPlayer(Player* p)
     thumbnailHorizontalZoom = 1.0;
     thumbnailRange = thumbnailRange.withStartAndLength(0.0, 1.0);
     createPointsFromPath(editedPlayer->getEnveloppePath());
+    createTimeLines();
     resized();
 }
 
@@ -178,7 +232,8 @@ void EnveloppeEditor::changeListenerCallback(juce::ChangeBroadcaster* source)
             resized();
         else if (source == editedPlayer->soundEditedBroadcaster)
         {
-
+            setPointsColour(editedPlayer->isEnveloppeEnabled() ? juce::Colours::red : juce::Colours::grey);
+            resized();
         }
     }
 }
@@ -214,6 +269,18 @@ float EnveloppeEditor::getYValue(int y)
     return 1 - 2 * ((y) / float(getHeight()));
 }
 
+int EnveloppeEditor::gainToY(float gain)
+{
+    return (getHeight() * (1 - gain)) / 2;
+}
+
+void EnveloppeEditor::mouseDoubleClick(const juce::MouseEvent& e)
+{
+    thumbnailHorizontalZoom = 1.0;
+    thumbnailRange = thumbnailRange.withStartAndLength(0.0, 1.0);
+    resized();
+}
+
 void EnveloppeEditor::mouseDown(const juce::MouseEvent& e)
 {
     draggedComponent = nullptr;
@@ -232,6 +299,7 @@ void EnveloppeEditor::mouseDown(const juce::MouseEvent& e)
                 draggedComponent = myPoints[i];
         }
     }
+
     if (draggedComponent)
         myDragger.startDraggingComponent(draggedComponent, e);
     else if (e.mods.isCtrlDown())
@@ -492,6 +560,8 @@ void EnveloppeEditor::setNullPlayer()
     myPoints.clear();
     outMark.setVisible(false);
     inMark.setVisible(false);
+    playHead.setTopLeftPosition(0, 0);
+    cuePlayHead.setTopLeftPosition(0, 0);
     resized();
 }
 
@@ -521,4 +591,46 @@ void EnveloppeEditor::scaleButtonClicked()
         break;
     }
     resized();
+}
+
+juce::Array<int> EnveloppeEditor::createTimeLines()
+{
+    if (editedPlayer != nullptr)
+    {
+        auto lenght = editedPlayer->getLenght();
+        timeLines.clear();
+        int i = 0;
+        while (i < lenght)
+        {
+            timeLines.add(i);
+            i += 1;
+            DBG("time line created : " << timeLines.getLast());
+        }
+    }
+    return timeLines;
+}
+
+juce::String EnveloppeEditor::secondsToMMSS(int seconds)
+{
+    int timeSeconds = seconds % 60;
+    int timeMinuts = trunc(seconds / 60);
+    juce::String timeString;
+    if (timeSeconds < 10)
+        timeString = juce::String(timeMinuts) + ":0" + juce::String(timeSeconds);
+    else
+        timeString = juce::String(timeMinuts) + ":" + juce::String(timeSeconds);
+    return timeString;
+}
+
+float EnveloppeEditor::getRangeInSeconds(juce::Range<double>& r)
+{
+    return r.getLength() * editedPlayer->getLenght();
+}
+
+void EnveloppeEditor::setPointsColour(juce::Colour c)
+{
+    for (auto* p : myPoints)
+    {
+        p->setPointColour(c);
+    }
 }

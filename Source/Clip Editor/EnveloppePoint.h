@@ -23,6 +23,7 @@ public:
         // In your constructor, you should add any child components, and
         // initialise any special settings that your component needs.
         setSize(size, size);
+        pointColour = juce::Colours::red;
     }
 
     ~EnveloppePoint() override
@@ -32,7 +33,7 @@ public:
     void paint (juce::Graphics& g) override
     {
         //g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-        g.setColour(juce::Colours::red);
+        g.setColour(pointColour);
         g.fillEllipse(0, 0, getWidth(), getHeight());
     }
 
@@ -111,12 +112,16 @@ public:
         return canMoveTime;
     }
 
-
+    void setPointColour(juce::Colour c)
+    {
+        pointColour = c;
+    }
 private:
     float xPos = 0.0;
     float yPos = 0.0;
     int size = 10;
     bool canMoveTime = true;
+    juce::Colour pointColour;
     //juce::ComponentDragger myDragger;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnveloppePoint)
 };

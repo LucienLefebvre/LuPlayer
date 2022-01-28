@@ -20,6 +20,7 @@ public:
 
     //==============================================================================
     void paint(juce::Graphics&) override;
+    void drawTimeLines(juce::Graphics& g, int multiplier);
     void resized() override;
 
     juce::Point<int> getPointPosition(EnveloppePoint& point);
@@ -32,6 +33,8 @@ public:
 
     float getYValue(int y);
 
+    int gainToY(float gain);
+
     void mouseDown(const juce::MouseEvent& e);
 
     void mouseDrag(const juce::MouseEvent& e);
@@ -41,6 +44,8 @@ public:
     void mouseMove(const juce::MouseEvent& e);
 
     void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel);
+
+    void mouseDoubleClick(const juce::MouseEvent& e);
 
     EnveloppePoint* addPoint(juce::Point<float> position, bool createPath = true);
 
@@ -62,6 +67,10 @@ public:
     void scaleButtonClicked();
 private:
     void changeListenerCallback(juce::ChangeBroadcaster* source);
+    juce::Array<int> createTimeLines();
+    juce::String secondsToMMSS(int seconds);
+    float getRangeInSeconds(juce::Range<double>& r);
+    void setPointsColour(juce::Colour c);
     Player* editedPlayer = nullptr;
 
     juce::OwnedArray<EnveloppePoint> myPoints;
@@ -102,5 +111,8 @@ private:
     int scale = 24;
     int scaleButtonWidth = 100;
     int scaleButtonHeight = 25;
+
+    juce::Array<float> dBLines{ -0.75f, -0.5f, -0.25, 0.25f, 0.5f, 0.75f };
+    juce::Array<int> timeLines;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnveloppeEditor)
 };

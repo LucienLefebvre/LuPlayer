@@ -573,14 +573,14 @@ void Player::timerCallback()
 
     if ((float)transport.getCurrentPosition() > stopTime)
     {
-        if (looping == true)
+        /*if (looping == true)
         {
             transport.setPosition(startTime);
             repaint();
             endRepainted = false;
         }
         else
-            stop();
+            stop();*/
     }
     if ((float)cueTransport.getCurrentPosition() > stopTime)
     {
@@ -618,6 +618,7 @@ void Player::timerCallback()
             cueremainingTimeString = juce::String(remainingTimeMinuts) + ":0" + juce::String(remainingTimeSeconds);
         else
             cueremainingTimeString = juce::String(remainingTimeMinuts) + ":" + juce::String(remainingTimeSeconds);
+
 
 
         int elapsedSeconds = (float)cueTransport.getCurrentPosition();
@@ -716,6 +717,11 @@ void Player::timerCallback()
     else
             outMark.setVisible(false);
     
+    if (shouldRepaint.load())
+    {
+        repaint();
+        shouldRepaint.store(false);
+    }
 
 }
 
@@ -750,6 +756,7 @@ void Player::updateRemainingTime()
     if (remainingTimeString.equalsIgnoreCase("0:05"))
     {
         remainingTimeBroadcaster->sendChangeMessage();
+        repaint();
     }
 }
 
@@ -803,6 +810,28 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 
         float nextReadPosition = transport.getNextReadPosition();
         float cueNextReadPosition = cueTransport.getNextReadPosition();
+        if (stopTimeSet || looping)
+        {
+            for (int i = 0; i < bufferToFill.numSamples; i++)
+            {
+                if (stopTimePosition < nextReadPosition + i)
+                {
+                    if (looping)
+                    {
+                        transport.setPosition(startTime);
+                        shouldRepaint.store(true);
+                    }
+                    else
+                    {
+                        //bufferToFill.buffer->addSample(0, i, 0.0);
+                        //bufferToFill.buffer->addSample(1, i, 0.0);
+                        transport.setPosition(transport.getLengthInSeconds());
+                        //transport.stop();
+                    }
+                }
+            }
+        }
+
         if (enveloppeEnabled)
         {
             juce::Path envP = enveloppePath;
@@ -837,7 +866,8 @@ std::atomic<float> Player::getEnveloppeValue(float x, juce::Path& p)
 {//get the enveloppe value (between 0 and 1) for a given x position (between 0 and 1)
     std::atomic<float> value = 0.0;
 
-    juce::Path::Iterator iterator(p);
+    auto path = p;
+    juce::Path::Iterator iterator(path);
     //creates an array of lines representing the enveloppe
     float lineStartX = 0.0;
     float lineStartY = 0.0;
@@ -1189,20 +1219,20 @@ void Player::transportStateChanged(TransportState newState)
             break;
         case Stopping:
             playerInfoChangedBroadcaster->sendChangeMessage();
-            if (looping == true && stopButtonClickedBool == false)
-            {
-                transport.setPosition(startTime);
-                //transport.stop();
-                transport.start();
-                endRepainted = false;
-            }
-            else if ((looping == true && stopButtonClickedBool == true) || looping == false)
-            {
+            //if (looping == true && stopButtonClickedBool == false)
+            //{
+            //    transport.setPosition(startTime);
+            //    //transport.stop();
+            //    transport.start();
+            //    endRepainted = false;
+            //}
+            //if ((looping == true && stopButtonClickedBool == true) || looping == false)
+            //{
                 playButton.setButtonText("Play");
                 transport.stop();
                 transport.setPosition(0.0);
                 stopButtonClickedBool == false;
-            }
+            //}
                 break;       
         }
 
@@ -1379,6 +1409,9 @@ void Player::setStart()
         startTimeSet = true;
         endRepainted = false;
         startTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(0, 196, 255));
+        if (!transport.isPlaying())
+            transport.setPosition(startTime);
+        updateRemainingTime();
         soundEditedBroadcaster->sendChangeMessage();
     }
 }
@@ -1388,12 +1421,16 @@ void Player::setStartTime(float time)
     startTime = time;
     startTimeSet = true;
     startTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(0, 196, 255));
+    if (!transport.isPlaying())
+        transport.setPosition(startTime);
+    updateRemainingTime();
     soundEditedBroadcaster->sendChangeMessage();
 }
 void Player::setStopTime(float time)
 {
     stopTime = time;
     stopTimeSet = true;
+    stopTimePosition = (cueTransport.getCurrentPosition() / cueTransport.getLengthInSeconds()) * cueTransport.getTotalLength();
     stopTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(238, 255, 0));
     endRepainted = false;
     soundEditedBroadcaster->sendChangeMessage();
@@ -1416,6 +1453,9 @@ void Player::deleteStart()
         startTime = 0;
         startTimeSet = false;
         repaint();
+        if (!transport.isPlaying())
+            transport.setPosition(startTime);
+        updateRemainingTime();
         startTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(0, 115, 150));
         soundEditedBroadcaster->sendChangeMessage();
 }
@@ -1425,6 +1465,7 @@ void Player::setStop()
     if ((float)cueTransport.getCurrentPosition() > startTime && (float)cueTransport.getCurrentPosition() > 0)
     {
     stopTime = (float)cueTransport.getCurrentPosition();
+    stopTimePosition = (cueTransport.getCurrentPosition() / cueTransport.getLengthInSeconds()) * cueTransport.getTotalLength();
     stopTimeSet = true;
     endRepainted = false;
     repaint();
@@ -1586,6 +1627,7 @@ bool Player::loadFile(const juce::String& path)
 
         startTime = 0;
         stopTime = (float)transport.getLengthInSeconds();
+        stopTimePosition = transport.getTotalLength();
         endRepainted = false;
 
         thumbnail.setSource(new juce::FileInputSource(file));
@@ -1832,6 +1874,7 @@ void Player::optionButtonClicked()
             enableHPF(false);
             filterFrequencySlider.setVisible(false);
             trimVolumeSlider.setVisible(true);
+            trimLabel.setText("Trim", juce::NotificationType::dontSendNotification);
         }
         else if (!hpfEnabled)
         {
@@ -2314,4 +2357,12 @@ void Player::enableButtons(bool b)
 bool Player::isEditedPlayer()
 {
     return isEdited;
+}
+
+float Player::getLenght()
+{
+    if (fileLoaded)
+        return transport.getLengthInSeconds();
+    else
+        return 0.0;
 }

@@ -209,6 +209,7 @@ public:
     
     float startTime = 0;
     float stopTime;
+    double stopTimePosition = 0;
 
     void Player::buttonClicked(juce::Button* button) override;
     void Player::buttonStateChanged(juce::Button* b) override;
@@ -300,6 +301,8 @@ public:
     void enableButtons(bool isEnabled);
 
     bool isEditedPlayer();
+
+    float getLenght();
 
     FilterProcessor filterProcessor;
     FilterProcessor cueFilterProcessor;
@@ -637,6 +640,8 @@ private:
 
     juce::Path enveloppePath;
     bool enveloppeEnabled = false;
+
+    std::atomic<bool> shouldRepaint = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };
 
