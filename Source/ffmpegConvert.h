@@ -17,6 +17,11 @@
 #include "helpers.h"
 #include <regex>
 #include "Settings.h"
+#include "ffmpegcpp.h"
+#include <iostream>
+//#include "ffmpeg-cpp/ffmpegcpp.h"
+//#include "ffmpeg-cpp-master/lib/release/ffmpeg-cpp.lib"
+//#pragma comment(lib, "ffmpeg-cpp-master/lib/x64/release/ffmpeg-cpp.lib") 
 //==============================================================================
 
 class ffmpegConvert  : public juce::Thread
@@ -35,6 +40,7 @@ public:
 
     void run()
     {
+        
         hasBeenKilled = false;
 
         std::string USES_CONVERSION_EX;
@@ -59,6 +65,7 @@ public:
         std::string rawnamedoubleslash = std::regex_replace(rawname, std::regex(R"(\\)"), R"(\\)");
         //create entire command string
         std::string cmdstring;
+        /*
         if (makeProgressFile)
             cmdstring = std::string("\"" + newFFmpegPath + "\" -i \"" + newFilePath + "\" -ar 48000 -y \"" + newConvertedFilesPath + rawnamedoubleslash + ".wav\" -progress " + newConvertedFilesPath + rawnamedoubleslash + ".txt\"");
         else
@@ -68,15 +75,56 @@ public:
         ////////////Launch FFMPEG
         process.start(cmdstring);
         bool result = process.waitForProcessToFinish(30000);
-        /*PROCESS_INFORMATION pi;
-        STARTUPINFOW si;
-        ZeroMemory(&si, sizeof(si));
-        BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
-        if (logDone)
-        {
-            WaitForSingleObject(pi.hProcess, INFINITE);
-        }*/
+        */
 
+
+        
+
+
+        // This example will take a raw audio file and encode it into as MP3.
+        try
+        {
+            // Create a muxer that will output as MP3.
+            std::string outputFilePath = newConvertedFilesPath + rawnamedoubleslash + ".wav";
+            DBG("sortie : " << outputFilePath);
+            ffmpegcpp::Muxer* muxer = new ffmpegcpp::Muxer(outputFilePath.c_str());
+
+            // Create a MP3 codec that will encode the raw data.
+            ffmpegcpp::AudioCodec* codec = new ffmpegcpp::AudioCodec(AV_CODEC_ID_PCM_S16LE);
+            //ffmpegcpp::AudioCodec* codec = new ffmpegcpp::AudioCodec(AV_CODEC_ID_MP1);
+            
+
+            // Create an encoder that will encode the raw audio data as MP3.
+            // Tie it to the muxer so it will be written to the file.
+            ffmpegcpp::AudioEncoder* encoder = new ffmpegcpp::AudioEncoder(codec, muxer);
+
+
+            ffmpegcpp::Demuxer* audioContainer = new ffmpegcpp::Demuxer(newFilePath.c_str());
+            audioContainer->DecodeBestAudioStream(encoder);
+
+            // Push all the remaining frames through.
+            while (!audioContainer->IsDone())
+            {
+                audioContainer->Step();
+                
+                DBG("frame count : " << audioContainer->GetFrameCount(0));
+            }
+
+            // Save everything to disk by closing the muxer.
+            muxer->Close();
+            //conversionEndedBroadcaster->sendChangeMessage();
+        }
+        catch (ffmpegcpp::FFmpegException e)
+        {
+            //DBG(e.what());
+            //std::cerr << "Exception caught!" << std::endl;
+            //std::cerr << e.what() << std::endl;
+            //throw e;
+        }
+
+
+
+        
 
 
         /////////////////////return created file path
@@ -90,7 +138,8 @@ public:
         conversionEndedBroadcaster->sendChangeMessage();
         }
 
-        int i = 3;
+
+        
         signalThreadShouldExit();
     }
 

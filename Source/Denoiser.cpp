@@ -214,6 +214,8 @@ void Denoiser::processButtonClicked()
 {
     if (!denoiseParams.filePath.empty())
     {
+        if (transport.isPlaying())
+            transport.stop();
         denoiseParams.isPreview = false;
         sendDenoiseParams();
         thread.startThread();

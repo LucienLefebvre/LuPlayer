@@ -49,7 +49,6 @@ void EnveloppeEditor::paint(juce::Graphics& g)
         //Draw X axis
         g.setColour(juce::Colours::white);
         g.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2, 2);
-        g.drawArrow(juce:)
         //Draw Thumbnail
         g.setColour(BLUE);
         thumbnail->drawChannels(g, thumbnailBounds,

@@ -52,8 +52,6 @@
         <FILE id="kP7ltE" name="Mixer.h" compile="0" resource="0" file="Source/Mixer/Mixer.h"/>
         <FILE id="rRtGhq" name="MixerInput.cpp" compile="1" resource="0" file="Source/Mixer/MixerInput.cpp"/>
         <FILE id="J0Ddjw" name="MixerInput.h" compile="0" resource="0" file="Source/Mixer/MixerInput.h"/>
-        <FILE id="M7QcwQ" name="RemoteInput.cpp" compile="1" resource="0" file="Source/Mixer/RemoteInput.cpp"/>
-        <FILE id="Ge64LT" name="RemoteInput.h" compile="0" resource="0" file="Source/Mixer/RemoteInput.h"/>
         <FILE id="dhPDv5" name="VCA.h" compile="0" resource="0" file="Source/Mixer/VCA.h"/>
       </GROUP>
       <GROUP id="{B14A7909-DE9B-0519-F1D9-67C76AB4710E}" name="Soundboard">
@@ -140,13 +138,13 @@
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK="0"
                JUCE_ASIO="1" JUCE_USE_LAME_AUDIO_FORMAT="1"/>
   <EXPORTFORMATS>
-    <VS2019 externalLibraries="opus.lib&#10;uvgrtp.lib" targetFolder="C:/Juce/Projects"
+    <VS2019 externalLibraries="ffmpeg-cpp.lib" targetFolder="C:/Juce/Projects"
             smallIcon="XTYVTJ" bigIcon="XTYVTJ">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="MultiPlayer" libraryPath="C:\local\lib\debug"
-                       headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3&#10;C:\local\include\nanodbc&#10;C:\local\include\LUFSMeter&#10;C:\local\include\fxobjects"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="MultiPlayer" headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3&#10;C:\local\include\nanodbc&#10;C:\local\include\LUFSMeter&#10;C:\local\include\fxobjects"
-                       libraryPath="C:\local\lib\release"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="MultiPlayer" libraryPath="C:\local\include\ffmpeg-cpp-master\lib\x64\Debug&#10;C:\local\lib\debug"
+                       headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3&#10;C:\local\include\nanodbc&#10;C:\local\include\LUFSMeter&#10;C:\local\include\fxobjects&#10;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp&#10;C:\local\include\ffmpeg-cpp-master\ffmpeg\include&#10;C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;C:\local\include\ffmpeg-cpp-master\include"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="MultiPlayer" headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3&#10;C:\local\include\nanodbc&#10;C:\local\include\LUFSMeter&#10;C:\local\include\fxobjects&#10;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp&#10;C:\local\include\ffmpeg-cpp-master\ffmpeg\include&#10;C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;C:\local\include\ffmpeg-cpp-master\include"
+                       libraryPath="C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
