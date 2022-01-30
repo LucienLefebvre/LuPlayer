@@ -33,6 +33,7 @@ public:
     void setColour(juce::Colour colour);
     int getFilterGraphXStart();
     void setNullProcessor();
+    FilterProcessor* getEditedFilterProcessor();
     juce::ChangeBroadcaster* filterEditedBroadcaster;
 private:
     void addFilterBand(int i);
@@ -120,3 +121,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FilterEditor)
 };
+
+FilterProcessor* getEditedFilterProcessor();

@@ -130,7 +130,7 @@ public:
                     }
                 }
             }
-            else if (Settings::tempFiles.size() > 0)
+            if (Settings::tempFiles.size() > 0 && !mainComponent.hasBeenSaved())
             {
                 std::unique_ptr<juce::AlertWindow> deleteFilesWindow;
                 int result = deleteFilesWindow->showYesNoCancelBox(juce::AlertWindow::QuestionIcon, "Delete converted sounds ?", "");

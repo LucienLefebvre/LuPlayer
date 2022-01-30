@@ -603,3 +603,9 @@ void FilterEditor::setNullProcessor()
     repaint();
     editedFilterProcessor = nullptr;
 }
+
+FilterProcessor* FilterEditor::getEditedFilterProcessor()
+{
+    if (editedFilterProcessor != nullptr)
+        return editedFilterProcessor;
+}

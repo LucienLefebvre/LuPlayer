@@ -304,6 +304,10 @@ public:
 
     float getLenght();
 
+    void createArraysFromPath();
+    juce::Array<float> getEnveloppeXArray();
+    juce::Array<float> getEnveloppeYArray();
+    static juce::Path createEnveloppePathFromArrays(juce::Array<float> xArray, juce::Array<float> yArray);
     FilterProcessor filterProcessor;
     FilterProcessor cueFilterProcessor;
     CompProcessor compProcessor{CompProcessor::Mode::Stereo};

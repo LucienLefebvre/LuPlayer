@@ -58,6 +58,7 @@ private:
     void DataBaseBrowser::labelTextChanged(juce::Label* labelThatHasChanged);
     void DataBaseBrowser::clearListBox();
     void DataBaseBrowser::cellClicked(int rowNumber, int columnID, const juce::MouseEvent& e);
+    void selectedRowsChanged(int row);
     void DataBaseBrowser::sqlQuery(std::string search, int sortColum = 0, int sortDirection = 0);
     void DataBaseBrowser::changeListenerCallback(juce::ChangeBroadcaster* source);
     void DataBaseBrowser::startOrStop();

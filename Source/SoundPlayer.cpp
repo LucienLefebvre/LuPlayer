@@ -1537,88 +1537,98 @@ void SoundPlayer::metersInitialize()
 void SoundPlayer::savePlaylist()
 {
     juce::XmlElement* playlist = new juce::XmlElement("PLAYLIST");
-
     for (int i = 0; i < myPlaylists[0]->players.size(); ++i)
     {
         if (myPlaylists[0]->players[i]->fileLoaded == true)
         {
-            juce::XmlElement* player = new juce::XmlElement("PLAYER");
-            player->setAttribute("ID", i);
-            player->setAttribute("path", myPlaylists[0]->players[i]->getFilePath());
-            player->setAttribute("trimvolume", myPlaylists[0]->players[i]->getTrimVolume());
-            player->setAttribute("islooping", myPlaylists[0]->players[i]->getIsLooping());
-            player->setAttribute("Name", juce::String(myPlaylists[0]->players[i]->getName()));
-            player->setAttribute("isHpfEnabled", myPlaylists[0]->players[i]->isHpfEnabled());
-            bool isStartTimeSet = myPlaylists[0]->players[i]->startTimeSet;
-            player->setAttribute("isStartTimeSet", isStartTimeSet);
-            if (isStartTimeSet)
-                player->setAttribute("startTime", myPlaylists[0]->players[i]->getStart());
-            bool isStopTimeSet = myPlaylists[0]->players[i]->stopTimeSet;
-            player->setAttribute("isStopTimeSet", isStopTimeSet);
-            if (isStopTimeSet)
-                player->setAttribute("stopTime", myPlaylists[0]->players[i]->getStop());
-            juce::StringArray params = myPlaylists[0]->players[i]->getFilterProcessor().getFilterParametersAsArray();
-            for (int i = 0; i < params.size(); i++)
-            {
-                juce::String identifier = "filterParams" + juce::String(i);
-                if (!params[i].isEmpty())
-                    player->setAttribute(identifier, params[i]);
-            }
-            player->setAttribute("isBypassed", myPlaylists[0]->players[i]->getBypassed());
-            playlist->addChildElement(player);
+            auto* xmlPlayer = new juce::XmlElement("PLAYER");
+            createPlayerXmlElement(i, 0, xmlPlayer);
+            if (xmlPlayer != nullptr)
+                playlist->addChildElement(xmlPlayer);
         }
     }
 
     juce::XmlElement* cart = new juce::XmlElement("CART");
-
     for (int i = 0; i < myPlaylists[1]->players.size(); ++i)
     {
         if (myPlaylists[1]->players[i]->fileLoaded == true)
         {
-            juce::XmlElement* player = new juce::XmlElement("PLAYER");
-            player->setAttribute("ID", i);
-            player->setAttribute("path", myPlaylists[1]->players[i]->getFilePath());
-            player->setAttribute("trimvolume", myPlaylists[1]->players[i]->getTrimVolume());
-            player->setAttribute("islooping", myPlaylists[1]->players[i]->getIsLooping());
-            player->setAttribute("Name", myPlaylists[1]->players[i]->getName());
-            player->setAttribute("isHpfEnabled", myPlaylists[1]->players[i]->isHpfEnabled());
-            bool isStartTimeSet = myPlaylists[1]->players[i]->startTimeSet;
-            player->setAttribute("isStartTimeSet", isStartTimeSet);
-            if (isStartTimeSet)
-                player->setAttribute("startTime", myPlaylists[1]->players[i]->getStart());
-            bool isStopTimeSet = myPlaylists[1]->players[i]->stopTimeSet;
-            player->setAttribute("isStopTimeSet", isStopTimeSet);
-            if (isStopTimeSet)
-                player->setAttribute("stopTime", myPlaylists[1]->players[i]->getStop());
-            juce::StringArray params = myPlaylists[1]->players[i]->getFilterProcessor().getFilterParametersAsArray();
-            for (int i = 0; i < params.size(); i++)
-            {
-                juce::String identifier = "filterParams" + juce::String(i);
-                if (!params[i].isEmpty())
-                    player->setAttribute(identifier, params[i]);
-            }
-            player->setAttribute("isBypassed", myPlaylists[1]->players[i]->getBypassed());
-            cart->addChildElement(player);
+            auto* xmlPlayer = new juce::XmlElement("PLAYER");
+            createPlayerXmlElement(i, 1, xmlPlayer);
+            if (xmlPlayer != nullptr)
+                cart->addChildElement(xmlPlayer);
         }
     }
 
 
     juce::XmlElement multiPlayer("MULTIPLAYER");
-
     multiPlayer.addChildElement(playlist);
     multiPlayer.addChildElement(cart);
-
-
     auto xmlString = multiPlayer.toString();
 
     juce::FileChooser chooser("Choose an XML file", juce::File::getSpecialLocation(juce::File::userDocumentsDirectory), "*.xml");
-
     if (chooser.browseForFileToSave(true))
     {
         juce::File myPlaylistSave;
         myPlaylistSave = chooser.getResult();
         multiPlayer.writeTo(myPlaylistSave);
     }
+}
+
+juce::XmlElement* SoundPlayer::createPlayerXmlElement(int playerID, int playlistID, juce::XmlElement* e)
+{
+    if (myPlaylists[playlistID]->players[playerID] != nullptr)
+    {
+        auto* soundPlayer = myPlaylists[playlistID]->players[playerID];
+
+        e->setAttribute("ID", playerID);
+        e->setAttribute("path", soundPlayer->getFilePath());
+        e->setAttribute("trimvolume", soundPlayer->getTrimVolume());
+        e->setAttribute("islooping", soundPlayer->getIsLooping());
+        e->setAttribute("Name", juce::String(soundPlayer->getName()));
+        e->setAttribute("isHpfEnabled", soundPlayer->isHpfEnabled());
+        bool isStartTimeSet = soundPlayer->startTimeSet;
+        e->setAttribute("isStartTimeSet", isStartTimeSet);
+        if (isStartTimeSet)
+            e->setAttribute("startTime", soundPlayer->getStart());
+        bool isStopTimeSet = soundPlayer->stopTimeSet;
+        e->setAttribute("isStopTimeSet", isStopTimeSet);
+        if (isStopTimeSet)
+            e->setAttribute("stopTime", soundPlayer->getStop());
+
+        //FILTER
+        juce::StringArray params = soundPlayer->getFilterProcessor().getFilterParametersAsArray();
+        for (int i = 0; i < params.size(); i++)
+        {
+            juce::String identifier = "filterParams" + juce::String(i);
+            if (!params[i].isEmpty())
+                e->setAttribute(identifier, params[i]);
+        }
+        e->setAttribute("isBypassed", soundPlayer->getBypassed());
+
+        //ENVELOPPE
+        e->setAttribute("enveloppeEnabled", soundPlayer->isEnveloppeEnabled());
+
+        juce::Array<float> enveloppeXArray = soundPlayer->getEnveloppeXArray();
+        for (int i = 0; i < enveloppeXArray.size(); i++)
+        {
+            juce::String identifier = "xArray" + juce::String(i);
+            e->setAttribute(identifier, enveloppeXArray[i]);
+        }
+        juce::Array<float> enveloppeYArray = soundPlayer->getEnveloppeYArray();
+        for (int i = 0; i < enveloppeYArray.size(); i++)
+        {
+            juce::String identifier = "yArray" + juce::String(i);
+            e->setAttribute(identifier, enveloppeYArray[i]);
+        }
+
+        int enveloppePointsNumber = enveloppeXArray.size();
+        e->setAttribute("envPointsNumber", enveloppePointsNumber);
+        return e;
+
+    }
+    else
+        return nullptr;
 }
 
 
@@ -1717,39 +1727,7 @@ void SoundPlayer::loadPlaylist()
                             {
                                 if (e->hasTagName("PLAYER"))
                                 {
-                                    int playerID = e->getIntAttribute("ID");
-                                    juce::String filePath = juce::String(e->getStringAttribute("path"));
-                                    int trimvolume = e->getDoubleAttribute("trimvolume");
-                                    bool islooping = e->getBoolAttribute("islooping");
-                                    std::string name = (e->getStringAttribute("Name")).toStdString();
-                                    bool hpfEnabled = e->getBoolAttribute("isHpfEnabled");
-                                    bool isStartTimeSet = e->getBoolAttribute("isStartTimeSet");
-                                    float startTime = e->getDoubleAttribute("startTime");
-                                    bool isStopTimeSet = e->getBoolAttribute("isStopTimeSet");
-                                    float stopTime = e->getDoubleAttribute("stopTime");
-                                    if (myPlaylists[0]->players[iLoadedPlayer] == nullptr)
-                                    {
-                                        myPlaylists[0]->addPlayer(iLoadedPlayer - 1);
-                                    }
-                                    myPlaylists[0]->players[iLoadedPlayer]->verifyAudioFileFormat(filePath);
-                                    myPlaylists[0]->players[iLoadedPlayer]->setTrimVolume(trimvolume);
-                                    myPlaylists[0]->players[iLoadedPlayer]->setIsLooping(islooping);
-                                    myPlaylists[0]->players[iLoadedPlayer]->setName(name);
-                                    myPlaylists[0]->players[iLoadedPlayer]->enableHPF(hpfEnabled);
-                                    if (isStartTimeSet)
-                                        myPlaylists[0]->players[iLoadedPlayer]->setStartTime(startTime);
-                                    if (isStopTimeSet)
-                                        myPlaylists[0]->players[iLoadedPlayer]->setStopTime(stopTime);
-
-                                    //EQ
-                                    juce::StringArray filterParams;
-                                    for (int i = 0; i < 16; i++)
-                                    {
-                                        filterParams.add(e->getStringAttribute("filterParams" + juce::String(i)));
-                                    }
-                                    myPlaylists[0]->players[iLoadedPlayer]->getFilterProcessor().setFilterParametersAsArray(filterParams);
-                                    myPlaylists[0]->players[iLoadedPlayer]->bypassFX(e->getBoolAttribute("isBypassed"));
-
+                                    loadXMLElement(e, iLoadedPlayer, 0);
                                     iLoadedPlayer++;
                                     loaddedPlayers++;
                                     loadingProgress = loaddedPlayers / numberOfPlayersToLoad;
@@ -1765,36 +1743,7 @@ void SoundPlayer::loadPlaylist()
                             {
                                 if (e->hasTagName("PLAYER"))
                                 {
-                                    int playerID = e->getIntAttribute("ID");
-                                    juce::String filePath = juce::String(e->getStringAttribute("path"));
-                                    int trimvolume = e->getDoubleAttribute("trimvolume");
-                                    bool islooping = e->getBoolAttribute("islooping");
-                                    std::string name = (e->getStringAttribute("Name")).toStdString();
-                                    bool hpfEnabled = e->getBoolAttribute("isHpfEnabled");
-                                    bool isStartTimeSet = e->getBoolAttribute("isStartTimeSet");
-                                    float startTime = e->getDoubleAttribute("startTime");
-                                    bool isStopTimeSet = e->getBoolAttribute("isStopTimeSet");
-                                    float stopTime = e->getDoubleAttribute("stopTime");
-                                    if (myPlaylists[1]->players[iLoadedPlayer] == nullptr)
-                                    {
-                                        myPlaylists[1]->addPlayer(iLoadedPlayer - 1);
-                                    }
-                                    myPlaylists[1]->players[iLoadedPlayer]->verifyAudioFileFormat(filePath);
-                                    myPlaylists[1]->players[iLoadedPlayer]->setTrimVolume(trimvolume);
-                                    myPlaylists[1]->players[iLoadedPlayer]->setIsLooping(islooping);
-                                    myPlaylists[1]->players[iLoadedPlayer]->setName(name);
-                                    myPlaylists[1]->players[iLoadedPlayer]->enableHPF(hpfEnabled);
-                                    if (isStartTimeSet)
-                                        myPlaylists[1]->players[iLoadedPlayer]->setStartTime(startTime);
-                                    if (isStopTimeSet)
-                                        myPlaylists[1]->players[iLoadedPlayer]->setStopTime(stopTime);
-                                    juce::StringArray filterParams;
-                                    for (int i = 0; i < 16; i++)
-                                    {
-                                        filterParams.add(e->getStringAttribute("filterParams" + juce::String(i)));
-                                    }
-                                    myPlaylists[1]->players[iLoadedPlayer]->getFilterProcessor().setFilterParametersAsArray(filterParams);
-                                    myPlaylists[1]->players[iLoadedPlayer]->bypassFX(e->getBoolAttribute("isBypassed"));
+                                    loadXMLElement(e, iLoadedPlayer, 1);
 
                                     iLoadedPlayer++;
                                     myPlaylists[1]->assignLeftFader(0);
@@ -1807,8 +1756,6 @@ void SoundPlayer::loadPlaylist()
                     }
                 }
             }
-            //if (myPlaylists[0]->players.size() == 0)
-            //    myPlaylists[0]->addPlayer(0);
             myPlaylists[0]->playersResetPositionClicked();
             myPlaylists[0]->fader1Player = 0;
             myPlaylists[0]->fader2Player = 0;
@@ -1819,13 +1766,65 @@ void SoundPlayer::loadPlaylist()
             myPlaylists[1]->assignRightFader(1);
             myPlaylists[0]->resized();
             myPlaylists[0]->resized();
-            while (myPlaylists[0]->players.size() < 4)
+            /*while (myPlaylists[0]->players.size() < 4)
                 myPlaylists[0]->addPlayer(myPlaylists[0]->players.size() - 1);
             while (myPlaylists[1]->players.size() < 4)
-                myPlaylists[1]->addPlayer(myPlaylists[1]->players.size() - 1);
+                myPlaylists[1]->addPlayer(myPlaylists[1]->players.size() - 1);*/
             Settings::draggedPlayer = -1;
         }
     }
+}
+
+void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID)
+{
+    int playerID = e->getIntAttribute("ID");
+    juce::String filePath = juce::String(e->getStringAttribute("path"));
+    int trimvolume = e->getDoubleAttribute("trimvolume");
+    bool islooping = e->getBoolAttribute("islooping");
+    std::string name = (e->getStringAttribute("Name")).toStdString();
+    bool hpfEnabled = e->getBoolAttribute("isHpfEnabled");
+    bool isStartTimeSet = e->getBoolAttribute("isStartTimeSet");
+    float startTime = e->getDoubleAttribute("startTime");
+    bool isStopTimeSet = e->getBoolAttribute("isStopTimeSet");
+    float stopTime = e->getDoubleAttribute("stopTime");
+
+    if (myPlaylists[playlistID]->players[player] == nullptr)
+    {
+        myPlaylists[playlistID]->addPlayer(player - 1);
+    }
+
+    auto* playerToLoad = myPlaylists[playlistID]->players[player];
+
+    playerToLoad->verifyAudioFileFormat(filePath);
+    playerToLoad->setTrimVolume(trimvolume);
+    playerToLoad->setIsLooping(islooping);
+    playerToLoad->setName(name);
+    playerToLoad->enableHPF(hpfEnabled);
+    if (isStartTimeSet)
+        playerToLoad->setStartTime(startTime);
+    if (isStopTimeSet)
+        playerToLoad->setStopTime(stopTime);
+
+    //EQ
+    juce::StringArray filterParams;
+    for (int i = 0; i < 16; i++)
+    {
+        filterParams.add(e->getStringAttribute("filterParams" + juce::String(i)));
+    }
+    playerToLoad->getFilterProcessor().setFilterParametersAsArray(filterParams);
+    playerToLoad->bypassFX(e->getBoolAttribute("isBypassed"));
+
+    //Enveloppe
+    playerToLoad->setEnveloppeEnabled(e->getBoolAttribute("enveloppeEnabled"));
+    int enveloppePointsNumber = e->getStringAttribute("envPointsNumber").getIntValue();
+    juce::Array<float> xArray;
+    juce::Array<float> yArray;
+    for (auto i = 0; i < enveloppePointsNumber; i++)
+    {
+        xArray.add(e->getStringAttribute("xArray" + juce::String(i)).getFloatValue());
+        yArray.add(e->getStringAttribute("yArray" + juce::String(i)).getFloatValue());
+    }
+    playerToLoad->setEnveloppePath(Player::createEnveloppePathFromArrays(xArray, yArray));
 }
 
 void SoundPlayer::setTimerTime(int timertime)
@@ -1893,4 +1892,9 @@ void SoundPlayer::initializeKeyMapPlayer()
     }
     keyMappedSoundboard->setShortcutKeys();
     keyMappedSoundboard->resized();
+}
+
+SoundPlayer::Mode SoundPlayer::getSoundPlayerMode()
+{
+    return soundPlayerMode;
 }

@@ -45,6 +45,8 @@ public:
 
     void setNullPlayer();
 
+    void updateBypassed();
+
 
 private:
     FilterEditor filterEditor;

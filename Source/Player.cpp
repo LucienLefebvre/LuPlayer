@@ -1345,7 +1345,7 @@ void Player::mouseDrag(const juce::MouseEvent& event)
 
             }
     }
-    if (event.mods.isCtrlDown())
+    /*if (event.mods.isCtrlDown())
     {
         setMouseCursor(juce::MouseCursor::DraggingHandCursor);
         thumbnailMiddle = waveformThumbnailXSize / 2;
@@ -1354,12 +1354,12 @@ void Player::mouseDrag(const juce::MouseEvent& event)
         thumbnailDrawSize = thumbnailDrawEnd - thumbnailDrawStart;
         thumbnailOffset = oldThumbnailOffset + thumbnailDragStart - getMouseXYRelative().getX();
         repaintThumbnail();
-    }
+    }*/
 }
 
 void Player::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
 {
-    if (event.mods.isCtrlDown())
+    /*if (event.mods.isCtrlDown())
     {
         thumbnailHorizontalZoom = thumbnailHorizontalZoom * (5 + wheel.deltaY) / 5;
         if (thumbnailHorizontalZoom < 1)
@@ -1376,11 +1376,11 @@ void Player::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWhee
         calculThumbnailBounds();
 
     }
-    else
-    {
+    else*/
+    //{
         if (getParentComponent() != nullptr) // passes only if it's not a listening event 
             getParentComponent()->mouseWheelMove(event, wheel);
-    }
+    //}
 }
 
 void Player::mouseDoubleClick(const juce::MouseEvent& event)
@@ -1430,7 +1430,7 @@ void Player::setStopTime(float time)
 {
     stopTime = time;
     stopTimeSet = true;
-    stopTimePosition = (cueTransport.getCurrentPosition() / cueTransport.getLengthInSeconds()) * cueTransport.getTotalLength();
+    stopTimePosition = (stopTime / cueTransport.getLengthInSeconds()) * cueTransport.getTotalLength();
     stopTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(238, 255, 0));
     endRepainted = false;
     soundEditedBroadcaster->sendChangeMessage();
@@ -2106,6 +2106,7 @@ void Player::fxButtonClicked()
     {
         fxEnabled = !fxEnabled;
         bypassFX(!fxEnabled);
+        fxButtonBroadcaster->sendChangeMessage();
         soundEditedBroadcaster->sendChangeMessage();
         rightClickDown = false;
     }
@@ -2159,6 +2160,7 @@ void Player::bypassFX(bool isBypassed)
     else
         fxButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
     soundEditedBroadcaster->sendChangeMessage();
+    fxButtonBroadcaster->sendChangeMessage();
 }
 
 bool Player::getBypassed()
@@ -2305,6 +2307,7 @@ void Player::createDefaultEnveloppePath()
 {
     enveloppePath.clear();
     enveloppePath.startNewSubPath(0.0, 0.0);
+    enveloppePath.lineTo(0.5, 0.5);
     enveloppePath.lineTo(1.0, 0.0);
     enveloppePath.closeSubPath();
 }
@@ -2365,4 +2368,87 @@ float Player::getLenght()
         return transport.getLengthInSeconds();
     else
         return 0.0;
+}
+
+//void Player::createArraysFromPath()
+//{
+//    juce::Path::Iterator iterator(enveloppePath);
+//
+//    while (iterator.next())
+//    {
+//        if (iterator.elementType == juce::Path::Iterator::PathElementType::startNewSubPath)
+//        {
+//            juce::Point<float> point(iterator.x1, iterator.y1);
+//            addPoint(point, false);
+//        }
+//        else if (iterator.elementType == juce::Path::Iterator::PathElementType::lineTo)
+//        {
+//            juce::Point<float> point(iterator.x1, iterator.y1);
+//            addPoint(point, false);
+//        }
+//        else if (iterator.elementType == juce::Path::Iterator::PathElementType::closePath)
+//        {
+//            resized();
+//            return;
+//        }
+//    }
+//}
+
+juce::Array<float> Player::getEnveloppeXArray()
+{
+    juce::Path::Iterator iterator(enveloppePath);
+
+    juce::Array<float> xArray;
+    xArray.clear();
+    while (iterator.next())
+    {
+        if (iterator.elementType == juce::Path::Iterator::PathElementType::startNewSubPath)
+        {
+            xArray.add(iterator.x1);
+        }
+        else if (iterator.elementType == juce::Path::Iterator::PathElementType::lineTo)
+        {
+            xArray.add(iterator.x1);
+        }
+        else if (iterator.elementType == juce::Path::Iterator::PathElementType::closePath)
+        {
+            return xArray;
+        }
+    }
+}
+
+juce::Array<float> Player::getEnveloppeYArray()
+{
+    juce::Path::Iterator iterator(enveloppePath);
+
+    juce::Array<float> yArray;
+    yArray.clear();
+    while (iterator.next())
+    {
+        if (iterator.elementType == juce::Path::Iterator::PathElementType::startNewSubPath)
+        {
+            yArray.add(iterator.y1);
+        }
+        else if (iterator.elementType == juce::Path::Iterator::PathElementType::lineTo)
+        {
+            yArray.add(iterator.y1);
+        }
+        else if (iterator.elementType == juce::Path::Iterator::PathElementType::closePath)
+        {
+            return yArray;
+        }
+    }
+}
+
+juce::Path Player::createEnveloppePathFromArrays(juce::Array<float> xArray, juce::Array<float> yArray)
+{
+    juce::Path p;
+    p.clear();
+    p.startNewSubPath(0.0, 0.0);
+    for (int i = 0; i < xArray.size(); i++)
+    {
+        p.lineTo(xArray[i], yArray[i]);
+    }
+    p.closeSubPath();
+    return p;
 }

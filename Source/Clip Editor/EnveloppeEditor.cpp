@@ -1,4 +1,5 @@
 #include "EnveloppeEditor.h"
+#include <random>
 #define BLUE juce::Colour(40, 134, 189)
 #define ORANGE juce::Colour(229, 149, 0)
 
@@ -218,6 +219,17 @@ void EnveloppeEditor::timerCallback()
         }
         else
             outMark.setVisible(false);
+        if (myPoints[1] != nullptr)
+        {//generate random position for debugging
+            std::random_device rd;
+            std::mt19937 mt(rd());
+            std::uniform_real_distribution<double> dist(0.0, 1.0);
+            std::uniform_real_distribution<double> disty(-1.0, 1.0);
+            myPoints[1]->setXpos(dist(mt));
+            myPoints[1]->setYpos(disty(mt));
+            resized();
+        }
+
     }
 }
 

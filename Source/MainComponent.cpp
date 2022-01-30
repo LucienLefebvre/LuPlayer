@@ -820,18 +820,25 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
 bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* originatingComponent)
 {
     DBG(key.getKeyCode());
-    if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap)
+    if (soundPlayers[0]->getSoundPlayerMode() == SoundPlayer::Mode::KeyMap)
     {
         soundPlayers[0]->keyMappedSoundboard->keyPressed(key, originatingComponent);
     }
-    if (key == 73 || key == 75 || key == 79 || key == 76 || key == 67 || key == 88 || key == 86)
+    else if (key == juce::KeyPress::createFromDescription("i")
+        || key == juce::KeyPress::createFromDescription("o")
+        || key == juce::KeyPress::createFromDescription("k")
+        || key == juce::KeyPress::createFromDescription("l")
+        || key == juce::KeyPress::createFromDescription("c")
+        || key == juce::KeyPress::createFromDescription("v")
+        || key == juce::KeyPress::createFromDescription("x")
+        || key == 67 || key == 88 || key == 86)
     {
         if (soundPlayers[0]->draggedPlaylist != -1)
         soundPlayers[0]->keyPressed(key, originatingComponent);
         else if (soundPlayers[0]->draggedPlaylist == -1)
             bottomComponent.recorderComponent.keyPressed(key);
     }
-    else if (key == juce::KeyPress::spaceKey)
+    if (key == juce::KeyPress::spaceKey)
     {
         if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
             soundPlayers[0]->myPlaylists[0]->spaceBarPressed();
@@ -943,9 +950,10 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
         if (!isEightPlayerMode)
             soundPlayers[0]->myPlaylists[0]->playersPreviousPositionClicked();
     }
-    else if (key == 82)
+    else if (key == juce::KeyPress::createFromDescription("r"))
     {
-        launchRecord();
+        if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::KeyMap)
+            launchRecord();
     }
     
     return false;
@@ -954,6 +962,12 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
 void MainComponent::savePlaylist()
 {
     soundPlayers[0]->savePlaylist();
+    saved = true;
+}
+
+bool MainComponent::hasBeenSaved()
+{
+    return saved;
 }
 
 void MainComponent::loadPlaylist()

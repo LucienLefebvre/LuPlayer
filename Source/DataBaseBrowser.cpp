@@ -382,6 +382,16 @@ void DataBaseBrowser::clearListBox()
 
 void DataBaseBrowser::cellClicked(int rowNumber, int columnID, const juce::MouseEvent& e)
 {
+    selectedRowsChanged(rowNumber);
+    /*if (e.getNumberOfClicks() == 2)
+    {
+        if (!transport.isPlaying())
+            play();
+    }*/
+}
+
+void DataBaseBrowser::selectedRowsChanged(int row)
+{
     transport.setSource(nullptr);
     thumbnail.setSource(nullptr);
     fileLoaded = false;
@@ -389,9 +399,9 @@ void DataBaseBrowser::cellClicked(int rowNumber, int columnID, const juce::Mouse
     timeLabel.setVisible(false);
     startStopButton.setColour(juce::TextButton::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     repaint();
-    if (!files[rowNumber].isEmpty())
+    if (!files[row].isEmpty())
     {
-        checkAndConvert(rowNumber);
+        checkAndConvert(row);
     }
     else
     {
@@ -401,11 +411,6 @@ void DataBaseBrowser::cellClicked(int rowNumber, int columnID, const juce::Mouse
         startStopButton.setColour(juce::TextButton::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     }
     if (autoPlayButton.getToggleState())
-    {
-        if (!transport.isPlaying())
-            play();
-    }
-    if (e.getNumberOfClicks() == 2)
     {
         if (!transport.isPlaying())
             play();

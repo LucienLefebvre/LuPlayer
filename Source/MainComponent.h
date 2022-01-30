@@ -70,6 +70,7 @@ public:
 
     bool MainComponent::isPlayingOrRecording();
     void MainComponent::setCommandLine(juce::String commandLine);
+    bool hasBeenSaved();
 
 private:
     //==============================================================================
@@ -251,6 +252,7 @@ private:
 
 
     void MainComponent::savePlaylist();
+
     void MainComponent::loadPlaylist();
 
     //juce::XmlElement playlist;
@@ -409,6 +411,6 @@ private:
 
     std::unique_ptr<KeyboardMappedSoundboard> keymapSoundboard;
     juce::ModifierKeys currentModifier;
-
+    bool saved = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

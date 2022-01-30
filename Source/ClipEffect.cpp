@@ -130,6 +130,7 @@ void ClipEffect::setPlayer(Player* p)
         setName(editedPlayer->getName());
         editedPlayer->fxButtonBroadcaster->addChangeListener(this);
         editedPlayer->playerDeletedBroadcaster->addChangeListener(this);
+        updateBypassed();
     }
     else
         setEditedFilterProcessor(dummyFilterProcessor);
@@ -148,12 +149,7 @@ void ClipEffect::changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         if (source == editedPlayer->fxButtonBroadcaster)
         {
-            filterEditor.updateBypassed();
-            compEditor.updateBypassedSliders();
-            if (editedPlayer->getFilterProcessor().isBypassed())
-                nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
-            else
-                nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(229, 149, 0));
+            updateBypassed();
         }
         else if (source == filterEditor.filterEditedBroadcaster)
         {
@@ -177,4 +173,14 @@ void ClipEffect::setNullPlayer()
     editedPlayer = nullptr;
     filterEditor.setNullProcessor();
     nameLabel.setText("", juce::NotificationType::dontSendNotification);
+}
+
+void ClipEffect::updateBypassed()
+{
+    filterEditor.updateBypassed();
+    compEditor.updateBypassedSliders();
+    if (filterEditor.getEditedFilterProcessor()->isBypassed())
+        nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+    else
+        nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(229, 149, 0));
 }

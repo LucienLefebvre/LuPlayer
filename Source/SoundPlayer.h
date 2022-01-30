@@ -63,6 +63,7 @@ public:
     void SoundPlayer::oscMessageReceived(const juce::OSCMessage& message);
     void SoundPlayer::metersInitialize();
     void SoundPlayer::savePlaylist();
+    juce::XmlElement* createPlayerXmlElement(int player, int playlist, juce::XmlElement* e);
     void SoundPlayer::loadPlaylist();
     void SoundPlayer::positionViewport(int player);
     void SoundPlayer::updateDraggedPlayerDisplay(int playerDragged, int playlistDragged);
@@ -87,6 +88,8 @@ public:
     int draggedPlaylist = 0;
     bool oscConnected = false;
 
+    void loadXMLElement(juce::XmlElement* e, int playerID, int playlistID);
+
     void SoundPlayer::setTimerTime(int timertime);
     void SoundPlayer::setEightPlayersMode(bool isEightPlayers);
 
@@ -94,6 +97,7 @@ public:
 
     SoundPlayer::Mode soundPlayerMode;
     void initializeKeyMapPlayer();
+    SoundPlayer::Mode getSoundPlayerMode();
 private:
     void SoundPlayer::timerCallback();
     void SoundPlayer::valueChanged(juce::Value& value);
