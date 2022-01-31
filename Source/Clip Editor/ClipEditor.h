@@ -359,6 +359,23 @@ public:
         enveloppeEditor.setNullPlayer();
     }
 
+    void setStart()
+    {
+        if (isVisible())
+            inButtonClicked();
+    }
+
+    void setStop()
+    {
+        if (isVisible())
+            outButtonClicked();
+    }
+
+    void launchCue()
+    {
+        if (isVisible() && editedPlayer != nullptr)
+            editedPlayer->cueButtonClicked();
+    }
 private:
     EnveloppeEditor enveloppeEditor;
     Player* editedPlayer = nullptr;

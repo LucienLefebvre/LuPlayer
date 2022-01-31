@@ -161,3 +161,15 @@ bool BottomComponent::keyPressed(const juce::KeyPress& key, juce::Component* ori
     }
     return false;
 }
+
+void BottomComponent::setStart()
+{
+    recorderComponent.setStart();
+    clipEditor.setStart();
+}
+
+void BottomComponent::setStop()
+{
+    recorderComponent.setStart();
+    clipEditor.setStop();
+}

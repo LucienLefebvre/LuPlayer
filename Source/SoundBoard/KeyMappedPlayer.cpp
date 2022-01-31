@@ -22,7 +22,7 @@ KeyMappedPlayer::KeyMappedPlayer()
 
     shortcutLabel.reset(new juce::Label());
     addAndMakeVisible(shortcutLabel.get());
-    shortcutLabel->setAlpha(0.25);
+    shortcutLabel->setAlpha(0.32);
     shortcutLabel->setColour(juce::Label::ColourIds::textColourId, ORANGE);
 
     nameLabel.reset(new juce::Label());
@@ -89,7 +89,7 @@ void KeyMappedPlayer::resized()
 {
     nameLabelHeight = getHeight() / 5;
     nameLabel->setBounds(- nameLabelScrollX, 0, getWidth(), nameLabelHeight);
-    nameLabel->setFont(juce::Font(nameLabelHeight, juce::Font::plain).withTypefaceStyle("Regular"));
+    nameLabel->setFont(juce::Font(nameLabelHeight * 0.75f, juce::Font::plain).withTypefaceStyle("Regular"));
     nameLabelTextTotalWidth = nameLabel->getFont().getStringWidth(nameLabel->getText());
     nameLabel->setSize(nameLabelTextTotalWidth, nameLabelHeight);
 
@@ -257,7 +257,7 @@ void KeyMappedPlayer::timerCallback(int timerID)
 void KeyMappedPlayer::setPlayerColours(juce::Colour c)
 {
     currentColour = c;
-    elapsedTimeLabel->setColour(juce::Label::ColourIds::textColourId, currentColour);
+    elapsedTimeLabel->setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
     nameLabel->setColour(juce::Label::ColourIds::textColourId, currentColour);
     repaint();
 }

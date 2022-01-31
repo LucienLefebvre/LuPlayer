@@ -360,7 +360,7 @@ void Player::paint (juce::Graphics& g)
         g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         outputMeter.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     }
-    g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), 4);   // clear the background
+    g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), roundCornerSize);   // clear the background
     float x = 0.0f, y = 0.0f, width = 650.0f, height = 100.0f;
     juce::Colour fillColour = juce::Colour(0x23000000);
     juce::Colour strokeColour = juce::Colours::black;
@@ -442,7 +442,6 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
             g.setColour(juce::Colours::red);
         else
             g.setColour(juce::Colours::green);
-
     }
     else
         if (isNextPlayer == true)   g.setColour(juce::Colour(229, 149, 0));
@@ -464,7 +463,7 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
 
     //HIDE THE WAVEFORM WHEN DRAGGED
 
-    if ((stopTime - transport.getCurrentPosition() < 6) && state == Playing)
+    /*if ((stopTime - transport.getCurrentPosition() < 6) && state == Playing)
         g.setColour(juce::Colours::red);
     else if (state == Playing)
         g.setColour(juce::Colours::green);
@@ -491,7 +490,7 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
             g.fillRoundedRectangle(0, 0, borderRectangleWidth, borderRectangleHeight, 4);
             g.fillRoundedRectangle(getParentWidth() - borderRectangleWidth - playlistButtonsControlWidth - 20, 0, borderRectangleWidth, borderRectangleHeight, 4);
         }
-    }
+    }*/
 }
 
 void Player::paintPlayHead(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds)
@@ -573,14 +572,7 @@ void Player::timerCallback()
 
     if ((float)transport.getCurrentPosition() > stopTime)
     {
-        /*if (looping == true)
-        {
-            transport.setPosition(startTime);
-            repaint();
-            endRepainted = false;
-        }
-        else
-            stop();*/
+
     }
     if ((float)cueTransport.getCurrentPosition() > stopTime)
     {
@@ -593,9 +585,9 @@ void Player::timerCallback()
     updateRemainingTime();
 
     //Cue PlayHead
-        auto cueaudioPosition = (float)cueTransport.getCurrentPosition();
-        auto cuecurrentPosition = cueTransport.getLengthInSeconds();
-        auto cuedrawPosition = ((cueaudioPosition / cuecurrentPosition) * (float)thumbnailBounds.getWidth())
+    auto cueaudioPosition = (float)cueTransport.getCurrentPosition();
+    auto cuecurrentPosition = cueTransport.getLengthInSeconds();
+    auto cuedrawPosition = ((cueaudioPosition / cuecurrentPosition) * (float)thumbnailBounds.getWidth())
             + (float)thumbnailBounds.getX();
     if (cueTransport.isPlaying() || mouseIsDragged)
     {
@@ -609,28 +601,29 @@ void Player::timerCallback()
     }
 
 
-        //CUE TIME LABEL
-        int remainingSeconds = juce::int16(trunc((float)cueTransport.getLengthInSeconds() - (float)cueTransport.getCurrentPosition()));
-        int remainingTimeSeconds = remainingSeconds % 60;
-        int remainingTimeMinuts = trunc(remainingSeconds / 60);
-        juce::String cueremainingTimeString;
-        if (remainingTimeSeconds < 10)
-            cueremainingTimeString = juce::String(remainingTimeMinuts) + ":0" + juce::String(remainingTimeSeconds);
-        else
-            cueremainingTimeString = juce::String(remainingTimeMinuts) + ":" + juce::String(remainingTimeSeconds);
+    //CUE TIME LABEL
+    int remainingSeconds = juce::int16(trunc((float)cueTransport.getLengthInSeconds() - (float)cueTransport.getCurrentPosition()));
+    int remainingTimeSeconds = remainingSeconds % 60;
+    int remainingTimeMinuts = trunc(remainingSeconds / 60);
+    juce::String cueremainingTimeString;
+    if (remainingTimeSeconds < 10)
+        cueremainingTimeString = juce::String(remainingTimeMinuts) + ":0" + juce::String(remainingTimeSeconds);
+    else
+        cueremainingTimeString = juce::String(remainingTimeMinuts) + ":" + juce::String(remainingTimeSeconds);
 
 
 
-        int elapsedSeconds = (float)cueTransport.getCurrentPosition();
-        int elapsedTimeSeconds = elapsedSeconds % 60;
-        int elapsedTimeMinuts = trunc(elapsedSeconds / 60);
-        juce::String cueelapsedTimeString;
-        if (elapsedTimeSeconds < 10)
-            cueelapsedTimeString = juce::String(elapsedTimeMinuts) + ":0" + juce::String(elapsedTimeSeconds);
-        else
-            cueelapsedTimeString = juce::String(elapsedTimeMinuts) + ":" + juce::String(elapsedTimeSeconds);
+    int elapsedSeconds = (float)cueTransport.getCurrentPosition();
+    int elapsedTimeSeconds = elapsedSeconds % 60;
+    int elapsedTimeMinuts = trunc(elapsedSeconds / 60);
+    juce::String cueelapsedTimeString;
+    if (elapsedTimeSeconds < 10)
+        cueelapsedTimeString = juce::String(elapsedTimeMinuts) + ":0" + juce::String(elapsedTimeSeconds);
+    else
+        cueelapsedTimeString = juce::String(elapsedTimeMinuts) + ":" + juce::String(elapsedTimeSeconds);
 
-        cueTimeString = (cueelapsedTimeString + " / " + cueremainingTimeString);
+    cueTimeString = (cueelapsedTimeString + " / " + cueremainingTimeString);
+
     if (cueTransport.isPlaying() || mouseIsDragged)
     {
         addAndMakeVisible(cueTimeLabel);
@@ -937,6 +930,10 @@ void Player::openButtonClicked()
 
 void Player::deleteFile()
 {
+    fxButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+        getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    envButton.setColour(juce::TextButton::ColourIds::buttonColourId,
+        getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     transport.releaseResources();
     thumbnail.setSource(nullptr);
     transport.setSource(nullptr);
@@ -1164,7 +1161,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         juce::String convertedFilePath = ffmpegThread.getFile();
         convertingBar->setVisible(false);
-        loadFile(convertedFilePath);
+        loadFile(convertedFilePath, true);
         extactName(convertedFilePath.toStdString());
         ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
         soundEditedBroadcaster->sendChangeMessage();
@@ -1175,7 +1172,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         std::string oldFilePath = loadedFilePath;
         denoisedFile = denoiser.getDenoisedFile();
         denoisedFileLoaded = true;
-        loadFile(denoisedFile);
+        loadFile(denoisedFile, true);
         setName(n);
         loadedFilePath = oldFilePath;
         convertingBar->setVisible(false);
@@ -1208,7 +1205,7 @@ void Player::transportStateChanged(TransportState newState)
         {
         case Stopped:
             playerInfoChangedBroadcaster->sendChangeMessage();
-            transport.setPosition(0.0);
+            transport.setPosition(startTime);
             playButton.setButtonText("Play");
                 break;
         case Starting:
@@ -1219,21 +1216,11 @@ void Player::transportStateChanged(TransportState newState)
             break;
         case Stopping:
             playerInfoChangedBroadcaster->sendChangeMessage();
-            //if (looping == true && stopButtonClickedBool == false)
-            //{
-            //    transport.setPosition(startTime);
-            //    //transport.stop();
-            //    transport.start();
-            //    endRepainted = false;
-            //}
-            //if ((looping == true && stopButtonClickedBool == true) || looping == false)
-            //{
-                playButton.setButtonText("Play");
-                transport.stop();
-                transport.setPosition(0.0);
-                stopButtonClickedBool == false;
-            //}
-                break;       
+            playButton.setButtonText("Play");
+            transport.stop();
+            transport.setPosition(startTime);
+            stopButtonClickedBool == false;
+            break;       
         }
 
     }
@@ -1330,7 +1317,6 @@ void Player::mouseUp(const juce::MouseEvent& event)
 
 void Player::mouseDrag(const juce::MouseEvent& event)
 {
-
     if (thumbnail.getNumChannels() != 0
         && !event.mods.isCtrlDown())
     {
@@ -1345,42 +1331,12 @@ void Player::mouseDrag(const juce::MouseEvent& event)
 
             }
     }
-    /*if (event.mods.isCtrlDown())
-    {
-        setMouseCursor(juce::MouseCursor::DraggingHandCursor);
-        thumbnailMiddle = waveformThumbnailXSize / 2;
-        thumbnailDrawStart = thumbnailMiddle - (thumbnailMiddle * thumbnailHorizontalZoom);
-        thumbnailDrawEnd = thumbnailMiddle + (thumbnailMiddle * thumbnailHorizontalZoom);
-        thumbnailDrawSize = thumbnailDrawEnd - thumbnailDrawStart;
-        thumbnailOffset = oldThumbnailOffset + thumbnailDragStart - getMouseXYRelative().getX();
-        repaintThumbnail();
-    }*/
 }
 
 void Player::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
 {
-    /*if (event.mods.isCtrlDown())
-    {
-        thumbnailHorizontalZoom = thumbnailHorizontalZoom * (5 + wheel.deltaY) / 5;
-        if (thumbnailHorizontalZoom < 1)
-            thumbnailHorizontalZoom = 1;
-        calculThumbnailBounds();
-
-
-
-        auto thumbnailDrawMiddle = (thumbnailBounds.getTopLeft().getX() + thumbnailBounds.getWidth() / 2);
-        thumbnailOffset = cuePlayHead.getX() - thumbnailDrawMiddle;
-        thumbnailBounds.setPosition(leftControlsWidth + borderRectangleWidth + thumbnailDrawStart - thumbnailOffset, 0);
-        oldThumbnailOffset = thumbnailOffset;
-        repaintPlayHead();
-        calculThumbnailBounds();
-
-    }
-    else*/
-    //{
-        if (getParentComponent() != nullptr) // passes only if it's not a listening event 
-            getParentComponent()->mouseWheelMove(event, wheel);
-    //}
+    if (getParentComponent() != nullptr) // passes only if it's not a listening event 
+        getParentComponent()->mouseWheelMove(event, wheel);
 }
 
 void Player::mouseDoubleClick(const juce::MouseEvent& event)
@@ -1565,7 +1521,7 @@ void Player::verifyAudioFileFormat(const juce::String& path)
         juce::File file(path);
         if (juce::AudioFormatReader* reader = formatManager.createReaderFor(file))
         {
-            loadFile(file.getFullPathName());
+            loadFile(file.getFullPathName(), true);
             delete reader;
         }
         else
@@ -1573,7 +1529,7 @@ void Player::verifyAudioFileFormat(const juce::String& path)
             std::string pathstd = path.toStdString();
             juce::String newpath = startFFmpeg(pathstd);
             std::string newpathstd = newpath.toStdString();
-            loadFile(newpathstd);
+            loadFile(newpathstd, false);
         }
     }
     else
@@ -1589,7 +1545,7 @@ void Player::verifyAudioFileFormat(const juce::String& path)
 }
 
 
-bool Player::loadFile(const juce::String& path)
+bool Player::loadFile(const juce::String& path, bool shouldSendChangeMessage)
 {
     loadedFilePath = path.toStdString();
     juce::File file(path);
@@ -1608,7 +1564,6 @@ bool Player::loadFile(const juce::String& path)
 
         setChannelsMapping();
 
-        //calcul Integrated loudness
 
 
         fileName = file.getFileNameWithoutExtension();
@@ -1634,7 +1589,7 @@ bool Player::loadFile(const juce::String& path)
         waveformPainted = false;
         fileLoaded = true;
         enableButtons(true);
-        soundEditedBroadcaster->sendChangeMessage();
+        //soundEditedBroadcaster->sendChangeMessage();
     }
     //R128
     if (Settings::autoNormalize && !hasBeenNormalized)
@@ -1657,9 +1612,11 @@ bool Player::loadFile(const juce::String& path)
     {
         return false;
     }
-
-    playerInfoChangedBroadcaster->sendChangeMessage();
-    soundEditedBroadcaster->sendChangeMessage();
+    if (shouldSendChangeMessage)
+    {
+        playerInfoChangedBroadcaster->sendChangeMessage();
+        soundEditedBroadcaster->sendChangeMessage();
+    }
 }
 
 const juce::String Player::startFFmpeg(std::string filePath)
@@ -1709,9 +1666,6 @@ const juce::String Player::startFFmpeg(std::string filePath)
 
 std::string Player::extactName(std::string Filepath)
 {
-
-
-
     auto const connection_string = NANODBC_TEXT("Driver=ODBC Driver 17 for SQL Server;Server=localhost\\NETIA;Database=ABC4;Uid=SYSADM;Pwd=SYSADM;");
     nanodbc::connection conn;
     try
@@ -2214,7 +2168,7 @@ void Player::denoiseButtonClicked()
         if (denoisedFileLoaded)
         {
             std::string n = newName;
-            loadFile(loadedFilePath);
+            loadFile(loadedFilePath, true);
             denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
             denoisedFileLoaded = false;
             setName(n);
@@ -2225,7 +2179,7 @@ void Player::denoiseButtonClicked()
             {
                 std::string n = newName;
                 std::string oldFilePath = loadedFilePath;
-                loadFile(denoisedFile);
+                loadFile(denoisedFile, true);
                 denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
                 denoisedFileLoaded = true;
                 setName(n);
@@ -2307,7 +2261,6 @@ void Player::createDefaultEnveloppePath()
 {
     enveloppePath.clear();
     enveloppePath.startNewSubPath(0.0, 0.0);
-    enveloppePath.lineTo(0.5, 0.5);
     enveloppePath.lineTo(1.0, 0.0);
     enveloppePath.closeSubPath();
 }
@@ -2369,30 +2322,6 @@ float Player::getLenght()
     else
         return 0.0;
 }
-
-//void Player::createArraysFromPath()
-//{
-//    juce::Path::Iterator iterator(enveloppePath);
-//
-//    while (iterator.next())
-//    {
-//        if (iterator.elementType == juce::Path::Iterator::PathElementType::startNewSubPath)
-//        {
-//            juce::Point<float> point(iterator.x1, iterator.y1);
-//            addPoint(point, false);
-//        }
-//        else if (iterator.elementType == juce::Path::Iterator::PathElementType::lineTo)
-//        {
-//            juce::Point<float> point(iterator.x1, iterator.y1);
-//            addPoint(point, false);
-//        }
-//        else if (iterator.elementType == juce::Path::Iterator::PathElementType::closePath)
-//        {
-//            resized();
-//            return;
-//        }
-//    }
-//}
 
 juce::Array<float> Player::getEnveloppeXArray()
 {

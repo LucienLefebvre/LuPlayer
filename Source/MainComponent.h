@@ -15,6 +15,7 @@
 #include "Mixer/Mixer.h"
 #include "R128IntegratedThread.h"
 #include "SoundBoard/KeyboardMappedSoundboard.h"
+#include "StopWatch.h"
 //#include <MacrosAndJuceHeaders.h>
 //#include <SecondOrderIIRFilter.h>
 //==============================================================================
@@ -399,6 +400,7 @@ private:
     void MainComponent::launchSoundPlayer(SoundPlayer::Mode m);
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
     void modifierKeysChanged(const juce::ModifierKeys& modifiers);
+    void stopWatchShortcuPressed();
     bool eightPlayersLaunched = false;
 
     //MIXER
@@ -412,5 +414,7 @@ private:
     std::unique_ptr<KeyboardMappedSoundboard> keymapSoundboard;
     juce::ModifierKeys currentModifier;
     bool saved = false;
+
+    StopWatch mainStopWatch;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

@@ -574,10 +574,10 @@
     <ClCompile Include="Source\Denoiser.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
-    <ClCompile Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.cpp">
+    <ClCompile Include="..\..\modules\ff_meters\LevelMeter\LevelMeter.cpp">
       <Filter>JUCE Modules\ff_meters\LevelMeter</Filter>
     </ClCompile>
-    <ClCompile Include="JuceLibraryCode\modules\ff_meters\ff_meters.cpp">
+    <ClCompile Include="..\..\modules\ff_meters\ff_meters.cpp">
       <Filter>JUCE Modules\ff_meters</Filter>
     </ClCompile>
     <ClCompile Include="..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
@@ -2775,6 +2775,9 @@
     <ClInclude Include="Source\Clip Editor\EnveloppePoint.h">
       <Filter>MultiPlayer\Clip Editor</Filter>
     </ClInclude>
+    <ClInclude Include="Source\StopWatch.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
     <ClInclude Include="Source\DenoiseThread.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
@@ -2922,31 +2925,31 @@
     <ClInclude Include="Source\R128IntegratedThread.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
-    <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeter.h">
+    <ClInclude Include="..\..\modules\ff_meters\LevelMeter\LevelMeter.h">
       <Filter>JUCE Modules\ff_meters\LevelMeter</Filter>
     </ClInclude>
-    <ClInclude Include="JuceLibraryCode\modules\ff_meters\LevelMeter\LevelMeterSource.h">
+    <ClInclude Include="..\..\modules\ff_meters\LevelMeter\LevelMeterSource.h">
       <Filter>JUCE Modules\ff_meters\LevelMeter</Filter>
     </ClInclude>
-    <ClInclude Include="JuceLibraryCode\modules\ff_meters\LookAndFeel\LevelMeterLookAndFeel.h">
+    <ClInclude Include="..\..\modules\ff_meters\LookAndFeel\LevelMeterLookAndFeel.h">
       <Filter>JUCE Modules\ff_meters\LookAndFeel</Filter>
     </ClInclude>
-    <ClInclude Include="JuceLibraryCode\modules\ff_meters\LookAndFeel\LevelMeterLookAndFeelMethods.h">
+    <ClInclude Include="..\..\modules\ff_meters\LookAndFeel\LevelMeterLookAndFeelMethods.h">
       <Filter>JUCE Modules\ff_meters\LookAndFeel</Filter>
     </ClInclude>
-    <ClInclude Include="JuceLibraryCode\modules\ff_meters\LookAndFeel\SoundFieldLookAndFeelMethods.h">
+    <ClInclude Include="..\..\modules\ff_meters\LookAndFeel\SoundFieldLookAndFeelMethods.h">
       <Filter>JUCE Modules\ff_meters\LookAndFeel</Filter>
     </ClInclude>
-    <ClInclude Include="JuceLibraryCode\modules\ff_meters\Visualisers\OutlineBuffer.h">
+    <ClInclude Include="..\..\modules\ff_meters\Visualisers\OutlineBuffer.h">
       <Filter>JUCE Modules\ff_meters\Visualisers</Filter>
     </ClInclude>
-    <ClInclude Include="JuceLibraryCode\modules\ff_meters\Visualisers\StereoFieldBuffer.h">
+    <ClInclude Include="..\..\modules\ff_meters\Visualisers\StereoFieldBuffer.h">
       <Filter>JUCE Modules\ff_meters\Visualisers</Filter>
     </ClInclude>
-    <ClInclude Include="JuceLibraryCode\modules\ff_meters\Visualisers\StereoFieldComponent.h">
+    <ClInclude Include="..\..\modules\ff_meters\Visualisers\StereoFieldComponent.h">
       <Filter>JUCE Modules\ff_meters\Visualisers</Filter>
     </ClInclude>
-    <ClInclude Include="JuceLibraryCode\modules\ff_meters\ff_meters.h">
+    <ClInclude Include="..\modules\ff_meters\ff_meters.h">
       <Filter>JUCE Modules\ff_meters</Filter>
     </ClInclude>
     <ClInclude Include="..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h">
@@ -5351,10 +5354,10 @@
     <None Include="..\..\Users\DPR\Downloads\logo sens.png">
       <Filter>MultiPlayer\Source</Filter>
     </None>
-    <None Include="JuceLibraryCode\modules\ff_meters\LICENSE.md">
+    <None Include="..\..\modules\ff_meters\LICENSE.md">
       <Filter>JUCE Modules\ff_meters</Filter>
     </None>
-    <None Include="JuceLibraryCode\modules\ff_meters\README.md">
+    <None Include="..\..\modules\ff_meters\README.md">
       <Filter>JUCE Modules\ff_meters</Filter>
     </None>
     <None Include="..\modules\juce_audio_devices\native\oboe\CMakeLists.txt">

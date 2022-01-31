@@ -42,14 +42,13 @@ MainComponent::MainComponent() :
     tryPreferedAudioDevice(2);
     deviceManager.initialise(2, 2, nullptr, true);
 
-    settings = std::make_unique<Settings>();
+
 
     if (deviceManager.getCurrentAudioDevice() != nullptr)
     {
+        settings = std::make_unique<Settings>();
         Settings::sampleRate = deviceManager.getAudioDeviceSetup().sampleRate;
     } 
-
-    
 
     //ADD MIXER
     addAndMakeVisible(&mixer);
@@ -97,19 +96,20 @@ MainComponent::MainComponent() :
     soundPlayerTypeSelector.addListener(this);
 
     addAndMakeVisible(saveButton);
-    saveButton.setBounds(500, 0, 100, 25);
+    saveButton.setBounds(soundPlayerTypeSelector.getRight() + spaceBetweenButtons, topButtonsYStart, 100, 25);
     saveButton.setButtonText("Save");
     saveButton.onClick = [this] { savePlaylist(); };
 
     addAndMakeVisible(loadButton);
-    loadButton.setBounds(600, 0, 100, 25);
+    loadButton.setBounds(saveButton.getRight() + spaceBetweenButtons, topButtonsYStart, 100, 25);
     loadButton.setButtonText("Load");
     loadButton.onClick = [this] { loadPlaylist(); };
 
+    addChildComponent(mainStopWatch);
 
     
     addAndMakeVisible(timeLabel);
-    timeLabel.setBounds(getParentWidth()-200, 0, 200, 50);
+    timeLabel.setBounds(getParentWidth()-200, 0, 200, topButtonsHeight);
     timeLabel.setFont(juce::Font(50.00f, juce::Font::plain).withTypefaceStyle("Regular"));
 
 
@@ -172,9 +172,10 @@ MainComponent::MainComponent() :
 
 void MainComponent::settingsButtonClicked()
 {  
+        Settings* settings = new Settings();
         settings->saveButton.addListener(this);
         juce::DialogWindow::LaunchOptions o;
-        o.content.setOwned(settings.get());
+        o.content.setOwned(settings);
         o.content->setSize(600, 470);
         o.dialogTitle = TRANS("Settings");
         o.dialogBackgroundColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
@@ -394,16 +395,16 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     //XOR Solo on cues
     else if (source == soundPlayers[0]->myPlaylists[0]->cuePlaylistBroadcaster)
     {
-    soundPlayers[0]->myPlaylists[1]->stopCues();
-    bottomComponent.stopCue();
+        soundPlayers[0]->myPlaylists[1]->stopCues();
+        bottomComponent.stopCue();
     }
     else if (source == soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster)
     {
-    soundPlayers[0]->myPlaylists[0]->stopCues();
-    bottomComponent.stopCue();
+        soundPlayers[0]->myPlaylists[0]->stopCues();
+        bottomComponent.stopCue();
     }
     else if (source == soundPlayers[0]->myPlaylists[0]->playBroadcaster
-    || source == soundPlayers[0]->myPlaylists[1]->playBroadcaster)
+            || source == soundPlayers[0]->myPlaylists[1]->playBroadcaster)
     {
         if (Settings::audioOutputMode == 2)
         {
@@ -414,12 +415,12 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
     else if (source == bottomComponent.cuePlay)
     {
-    soundPlayers[0]->myPlaylists[0]->stopCues();
-    soundPlayers[0]->myPlaylists[1]->stopCues();
+        soundPlayers[0]->myPlaylists[0]->stopCues();
+        soundPlayers[0]->myPlaylists[1]->stopCues();
     }
     else if (source == soundPlayers[0]->playerSelectionChanged)
     {
-    bottomComponent.clipEffect.setDummyPlayer();
+        bottomComponent.clipEffect.setDummyPlayer();
     }
     else if (source == soundPlayers[0]->myPlaylists[0]->fxButtonBroadcaster || source == soundPlayers[0]->myPlaylists[1]->fxButtonBroadcaster)
     {
@@ -430,10 +431,16 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
     else if (source == soundPlayers[0]->myPlaylists[0]->envButtonBroadcaster || source == soundPlayers[0]->myPlaylists[1]->envButtonBroadcaster)
     {
-    auto* player = soundPlayers[0]->myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
-    bottomComponent.clipEditor.setPlayer(player);
-    bottomComponent.clipEffect.setPlayer(player);
-    bottomComponent.setCurrentTabIndex(5);
+        auto* player = soundPlayers[0]->myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
+        bottomComponent.clipEditor.setPlayer(player);
+        bottomComponent.clipEffect.setPlayer(player);
+        bottomComponent.setCurrentTabIndex(5);
+    }
+    else if (source == soundPlayers[0]->playlistLoadedBroadcaster)
+    {
+        juce::Time::waitForMillisecondCounter(juce::Time::getMillisecondCounter() + 1000);
+        bottomComponent.clipEffect.setNullPlayer();
+        bottomComponent.clipEditor.setNullPlayer();
     }
 }
 
@@ -447,7 +454,6 @@ MainComponent::~MainComponent()
     bottomComponent.recorderComponent.mouseDragInRecorder->removeChangeListener(this);
     Settings::audioOutputModeValue.removeListener(this);
     shutdownAudio();
-    //delete globalSettings;
 }
 
 void MainComponent::exitRequested()
@@ -477,19 +483,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
     actualSampleRate = sampleRate;
 
-    //bottomComponent.clipEffect.setEditedFilterProcessor(soundPlayers[0]->myPlaylists[0]->players[0]->filterProcessor);
-
-  /*  loudnessMeter.prepareToPlay(actualSampleRate, 2, actualSamplesPerBlockExpected, 20);
-    cueloudnessMeter.prepareToPlay(actualSampleRate, 2, actualSamplesPerBlockExpected, 20);
-    meterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
-    cuemeterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
-
-    myMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    myCueMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    actualSampleRate = sampleRate;
-    actualSamplesPerBlockExpected = samplesPerBlockExpected;*/
     mixerOutputBuffer = std::make_unique<juce::AudioBuffer<float>>(2, samplesPerBlockExpected);
-
 }
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
@@ -676,9 +670,10 @@ void MainComponent::paint(juce::Graphics& g)
 void MainComponent::resized()
 {
     //reposition time label
-    timeLabel.setBounds(getParentWidth() - 220, 0, 200, 50);
-    saveButton.setTopRightPosition(getWidth() / 2 - 1, topButtonsYStart);
-    loadButton.setTopLeftPosition(getWidth() / 2 + 1, topButtonsYStart);
+    timeLabel.setBounds(getWidth() - 220, 0, 200, 50);
+    mainStopWatch.setSize(120, topButtonsHeight);
+    mainStopWatch.setCentrePosition(getWidth() / 2, topButtonsHeight / 2 + 1);
+    //mainStopWatch.setBounds(timeLabel.getX() - 220, 1, 120, topButtonsHeight);
     int windowWidth = getWidth();
     
     //reposition sound player
@@ -724,48 +719,13 @@ void MainComponent::audioInitialize()
 
 void MainComponent::midiInitialize()
 {
-       /* addAndMakeVisible(midiInputList);
-        midiInputList.setTextWhenNoChoicesAvailable("No MIDI Inputs Enabled");
-        midiInputList.setBounds(200, 0, 100, 25);
-        auto midiInputs = juce::MidiInput::getAvailableDevices();
-        midiInputList.setWantsKeyboardFocus(false);
-        midiInputList.clear();
-
-        juce::StringArray midiInputNames;
-
-        for (auto input : midiInputs)
-            midiInputNames.add(input.name);*/
-
-      /*  midiInputList.addItemList(midiInputNames, 1);
-        midiInputList.onChange = [this] { setMidiInput(midiInputList.getSelectedItemIndex());
-        std::unique_ptr<Settings> settings;
-        DBG(midiInputList.getSelectedItemIndex());
-        settings.reset(new Settings());
-        settings->setPreferedMidiDevice(midiInputList.getSelectedItemIndex());
-        };*/
-
-        auto midiInputs = juce::MidiInput::getAvailableDevices();
-        for (auto input : midiInputs)
-        {
-            if (!deviceManager.isMidiInputDeviceEnabled(input.identifier))
-                deviceManager.setMidiInputDeviceEnabled(input.identifier, true);
-                deviceManager.addMidiInputDeviceCallback(input.identifier, this);
-        }
-
-        //// find the first enabled device and use that by default
-        //for (auto input : midiInputs)
-        //{
-        //    if (deviceManager.isMidiInputDeviceEnabled(input.identifier))
-        //    {
-        //        setMidiInput(midiInputs.indexOf(input));
-        //        break;
-        //    }
-        //}
-
-        //setMidiInput(Settings::preferedMidiDeviceIndex);
-        //// if no enabled devices were found just use the first one in the list
-        //if (midiInputList.getSelectedId() == 0)
-        //    setMidiInput(0);
+    auto midiInputs = juce::MidiInput::getAvailableDevices();
+    for (auto input : midiInputs)
+    {
+        if (!deviceManager.isMidiInputDeviceEnabled(input.identifier))
+            deviceManager.setMidiInputDeviceEnabled(input.identifier, true);
+            deviceManager.addMidiInputDeviceCallback(input.identifier, this);
+    }
 }
 
 void MainComponent::updateMidiInputs()
@@ -793,10 +753,11 @@ void MainComponent::setMidiInput(int index)
 
 void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message)
 {
-    //DBG(message.getControllerNumber());
-    if (!isEightPlayerMode)
+    DBG(message.getControllerNumber());
+    auto mode = soundPlayers[0]->getSoundPlayerMode();
+    if (mode == SoundPlayer::Mode::OnePlaylistOneCart)
         soundPlayers[0]->handleIncomingMidiMessage(source, message);
-    else if (eightPlayersLaunched)
+    else if (mode == SoundPlayer::Mode::EightFaders)
         soundPlayers[0]->handleIncomingMidiMessageEightPlayers(source, message);
     if (message.getControllerNumber() == 45 && message.getControllerValue() == 127)
         {
@@ -804,13 +765,24 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
         }
     else if (message.getControllerNumber() == 61 && message.getControllerValue() == 127)
     {
-        bottomComponent.recorderComponent.setStart();
+        const juce::MessageManagerLock mmLock;
+        bottomComponent.setStart();
     }
     else if (message.getControllerNumber() == 62 && message.getControllerValue() == 127)
     {
-        bottomComponent.recorderComponent.setStop();
+        const juce::MessageManagerLock mmLock;
+        bottomComponent.setStop();
     }
-
+    else if (message.getControllerNumber() == 60 && message.getControllerValue() == 127)
+    {
+        const juce::MessageManagerLock mmLock;
+        bottomComponent.clipEditor.launchCue();
+    }
+    else if (message.getControllerNumber() == 46 && message.getControllerValue() == 127)
+    {
+        const juce::MessageManagerLock mmLock;
+        stopWatchShortcuPressed();
+    }
 }
 
 
@@ -832,11 +804,15 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
         || key == juce::KeyPress::createFromDescription("v")
         || key == juce::KeyPress::createFromDescription("x")
         || key == 67 || key == 88 || key == 86)
+        {
+            if (soundPlayers[0]->draggedPlaylist != -1)
+            soundPlayers[0]->keyPressed(key, originatingComponent);
+            else if (soundPlayers[0]->draggedPlaylist == -1)
+                bottomComponent.recorderComponent.keyPressed(key);
+        }
+    else if (key == juce::KeyPress::createFromDescription("t"))
     {
-        if (soundPlayers[0]->draggedPlaylist != -1)
-        soundPlayers[0]->keyPressed(key, originatingComponent);
-        else if (soundPlayers[0]->draggedPlaylist == -1)
-            bottomComponent.recorderComponent.keyPressed(key);
+        stopWatchShortcuPressed();
     }
     if (key == juce::KeyPress::spaceKey)
     {
@@ -994,12 +970,10 @@ void MainComponent::OSCInitialize()
     soundPlayers[0]->OSCInitialize();
     if (soundPlayers[0]->oscConnected == true)
     {
-        //connectOSCButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::green);
         connectOSCButton.setButtonText("Disconnect OSC");
     }
     else 
     {
-        //connectOSCButton.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::red);
         connectOSCButton.setButtonText("Connect OSC");
     }
 }
@@ -1067,7 +1041,6 @@ void MainComponent::tryPreferedAudioDevice(int outputChannelsNeeded)
                 if (types[i]->getTypeName() == Settings::preferedAudioDeviceType)
                 {
                     deviceManager.setCurrentAudioDeviceType(Settings::preferedAudioDeviceType, true);
-                    //juce::AudioDeviceManager::AudioDeviceSetup& preferedAudioDevice = Settings::Pref;
                     deviceManager.initialise(2, outputChannelsNeeded, nullptr, true, Settings::preferedAudioDeviceName, &settings->getPreferedAudioDevice());
                     if (deviceManager.getCurrentAudioDevice() != nullptr)
                         Settings::outputChannelsNumber = deviceManager.getCurrentAudioDevice()->getOutputChannelNames().size();
@@ -1148,14 +1121,7 @@ void MainComponent::launchRecord()
 
 bool MainComponent::isPlayingOrRecording()
 {
-    if (soundPlayers[0]->myPlaylists[0]->fader1IsPlaying
-        || soundPlayers[0]->myPlaylists[0]->fader2IsPlaying
-        || soundPlayers[0]->myPlaylists[1]->fader1IsPlaying
-        || soundPlayers[0]->myPlaylists[1]->fader2IsPlaying
-        || bottomComponent.recorderComponent.isRecording())
-        return true;
-    else
-        return false;
+    return soundPlayers[0]->isPlaying();
 }
 
 void MainComponent::setCommandLine(juce::String commandLine)
@@ -1225,6 +1191,7 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
         soundPlayers[0]->initializeKeyMapPlayer();
     }
     soundPlayers[0]->playerSelectionChanged->addChangeListener(this);
+    soundPlayers[0]->playlistLoadedBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->cuePlaylistBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->playBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->cuePlaylistBroadcaster->addChangeListener(this);
@@ -1273,4 +1240,10 @@ void MainComponent::modifierKeysChanged(const juce::ModifierKeys& modifiers)
     {
         
     }
+}
+
+void MainComponent::stopWatchShortcuPressed()
+{
+    mainStopWatch.setVisible(true);
+    mainStopWatch.startStopButtonClicked();
 }

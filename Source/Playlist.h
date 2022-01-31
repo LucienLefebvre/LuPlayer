@@ -20,10 +20,8 @@
 /*
 */
 class Playlist  : public juce::Component,
-    //public juce::AudioAppComponent,
     private juce::MidiInputCallback,
     private juce::ChangeListener,
-    //private juce::KeyListener,
     public juce::FileDragAndDropTarget,
     public juce::Value::Listener,
     public juce::Button::Listener,
@@ -39,36 +37,65 @@ public:
 
     void paint (juce::Graphics&) override;
     void resized() override;
+    void rearrangePlayers();
 
-    void Playlist::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
-    void Playlist::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
+    void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
+    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
 
+    void assignLeftFader(int playerID);
+    void assignRightFader(int playerID);
+    void fader1Stop(bool stoppedByFader);
+    void fader2Stop(bool stoppedByFader);
 
-    void Playlist::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message);
-    void Playlist::handleIncomingMidiMessageEightPlayers(int value, int number);
-    void Playlist::handleTrimMidiMessage(int value, int number);//8 players mode
-    void Playlist::handleMidiTrim(int value, int number); //normal mode
-    void Playlist::handleMidiRelativeTrim(int value, int number);
-    bool Playlist::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
-    void Playlist::spaceBarPressed();
-    void Playlist::playersResetPositionClicked();
-    void Playlist::playersPreviousPositionClicked();
-    void Playlist::playersNextPositionClicked();
+    void handleFader1(int faderValue);
+    void handleFader1OSC(float faderValue);
+    void handleFader2(int faderValue);
+    void handleFader2OSC(float faderValue);
+    void handleFader3(int faderValue);
+    void handleFader3OSC(float faderValue);
+    void handleFader4(int faderValue);
+    void handleFader4OSC(float faderValue);
 
-    void Playlist::addPlayer(int playerID);
-    void Playlist::removePlayer(int playerID);
-    void Playlist::removeButtonClicked();
+    void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message);
+    void handleIncomingMidiMessageEightPlayers(int value, int number);
+    void handleTrimMidiMessage(int value, int number);//8 players mode
+    void handleMidiTrim(int value, int number); //normal mode
+    void handleMidiRelativeTrim(int value, int number);
+    bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
+    void spaceBarPressed();
+    void playersResetPositionClicked();
+    void playersPreviousPositionClicked();
+    void playersNextPositionClicked();
 
-    void Playlist::filesDropped(const juce::StringArray& files, int x, int y);
-    void Playlist::fileDragMove(const juce::StringArray& files, int x, int y);
-    void Playlist::fileDragEnter(const juce::StringArray& files, int x, int y);
-    void Playlist::fileDragExit(const juce::StringArray& files);
-    void Playlist::playPlayer(int playerID);
-    void Playlist::setDroppedSoundName(juce::String name);
+    void addPlayer(int playerID);
+    void removePlayer(int playerID);
+    void removeButtonClicked();
 
-    void Playlist::isEightPlayerMode(bool eightPlayersMode);
+    void filesDropped(const juce::StringArray& files, int x, int y);
+    void fileDragMove(const juce::StringArray& files, int x, int y);
+    void fileDragEnter(const juce::StringArray& files, int x, int y);
+    void fileDragExit(const juce::StringArray& files);
+    void playPlayer(int playerID);
+    void setDroppedSoundName(juce::String name);
+
+    void isEightPlayerMode(bool eightPlayersMode);
+    void setEightPlayersSecondCart(bool isSecondCart);
+    void setOptions();
+    void setMidiShift(int MidiShift);
+
+    void mouseDrag(const juce::MouseEvent& event);
+    void mouseDown(const juce::MouseEvent& event);
+    void mouseUp(const juce::MouseEvent& event);
+    void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel);
+
+    void stopCues();
+    void setPlaylistType(int t);
+    void setPlaylistPosition(int p);
+    void resetFxEditedButtons();
+
+    bool isPlaying();
+
     bool eightPlayerMode = false;
-    void Playlist::setEightPlayersSecondCart(bool isSecondCart);
     bool isEightPlayerSecondCart = false;
 
     juce::OwnedArray<Player> players;
@@ -80,13 +107,6 @@ public:
     double actualSampleRate;
     int actualSamplesPerBlockExpected;
 
-    void Playlist::setOptions();
-    //void Playlist::setOptions(juce::String sFFmpegPath, juce::String sExiftoolPath, juce::String sconvertedFilesPath, float sskewFactor, int smaxFaderValue);
-    void Playlist::setMidiShift(int MidiShift);
-
-
-    void Playlist::assignLeftFader(int playerID);
-    void Playlist::assignRightFader(int playerID);
     int fader1Player = 0;
     int fader2Player = 0;
     int nextPlayer = 0;
@@ -108,29 +128,15 @@ public:
     juce::Value fader1Value;
     juce::Value fader1DisplayValue;
     juce::Value playerStoppedID;
-    void Playlist::handleFader1(int faderValue);
-    void Playlist::handleFader1OSC(float faderValue);
-    void Playlist::handleFader2(int faderValue);
-    void Playlist::handleFader2OSC(float faderValue);
-    void Playlist::handleFader3(int faderValue);
-    void Playlist::handleFader3OSC(float faderValue);
-    void Playlist::handleFader4(int faderValue);
-    void Playlist::handleFader4OSC(float faderValue);
-    void Playlist::rearrangePlayers();
-
     juce::Value fader1Name;
     juce::Value fader2Name;
-    void Playlist::fader1Stop(bool stoppedByFader);
-    void Playlist::fader2Stop(bool stoppedByFader);
-    void Playlist::mouseDrag(const juce::MouseEvent& event);
-    void Playlist::mouseDown(const juce::MouseEvent& event);
-    void Playlist::mouseUp(const juce::MouseEvent& event);
-    void Playlist::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel);
+
     juce::Value mouseDragX;
     juce::Value mouseDragY;
     juce::Value mouseDragSource;
     juce::Value mouseDraggedUp;
     juce::Value draggedPlayer;
+
     bool mouseCtrlModifier = false;
     bool mouseAltModifier = false;
     int fileDragPlayerDestination = 0;
@@ -150,36 +156,31 @@ public:
     juce::ChangeBroadcaster* fxButtonBroadcaster;
     juce::ChangeBroadcaster* envButtonBroadcaster;
 
-    void Playlist::stopCues();
-    void setPlaylistType(int t);
-    void setPlaylistPosition(int p);
-    void resetFxEditedButtons();
     int cuedPlayer = 0;
 
 private:
+    void swapNext(int playerID);
+    void updateNextPlayer();
+    void updateButtonsStates();
+    void changeListenerCallback(juce::ChangeBroadcaster* source);
+
+    void spaceBarStop();
+    bool isInterestedInFileDrag(const juce::StringArray& files);
+    void timerCallback();
+    void assignPlaylistFader(int playerToAssign);
+    void buttonClicked(juce::Button* b) override;
+    void fader1Start();
+    void fader2Start();
+    void valueChanged(juce::Value& value);
+    void updateDraggedPlayerDisplay();
+    void actionListenerCallback(const juce::String& message);
+
     int playlistType;
     int playlistPosition = 0;
     juce::String droppedName;
-    void Playlist::updateNextPlayer();
+
     int previousvalueint = 0;
     int valueint = 0;
-
-    void Playlist::swapNext(int playerID);
-
-    void Playlist::updateButtonsStates();
-    void Playlist::changeListenerCallback(juce::ChangeBroadcaster* source);
-
-    void Playlist::spaceBarStop();
-    bool Playlist::isInterestedInFileDrag(const juce::StringArray& files);
-
-
-
-    void Playlist::buttonClicked(juce::Button* b) override;
-
-
-    void Playlist::fader1Start();
-    void Playlist::fader2Start();
-
 
     juce::OwnedArray<juce::TextButton> swapNextButtons;
     juce::OwnedArray<juce::TextButton> removePlayersButtons;
@@ -193,46 +194,28 @@ private:
     int playerHeight = 100;
     int playerWidth = 670;
     int spaceBetweenPlayer = 5;
-
     int playerInsertDragZoneHeight = 20;
-
     int controlButtonHeight = 33;
     int controlButtonWidth = 25;
-
     int borderRectangleWidth = 10;
     int borderRectangleHeight = 80;
-
     int totalPlayerWidth = playerWidth + (borderRectangleWidth * 2);
     int totalPlayerWidthWithButtons = totalPlayerWidth + controlButtonWidth;
-
     int playerNumber;
     int meterWidth = 20;
-
-
     int assignFaderButtonWidth = 30;
     int assignFaderButtonHeight = 30;
-
     int dragZoneWidth = 40;
-
-
     int controlButtonXStart;
-
-    //Management Conduite
 
     int fader3Player = 0;
     int fader4Player = 1;
 
-
-
-    //bool fader1Stopped = true;
     bool fader1IsFlying = false;
     bool fader2IsFlying = false;
 
     bool fader1Stopped = false;
     bool fader2Stopped = false;
-
-
-
 
     //Midi
     int midiMessageNumber;
@@ -243,11 +226,9 @@ private:
     juce::String FFmpegPath;
     juce::String ExiftoolPath;
     juce::String convertedFilesPath;
+
     float skewFactor;
     int maxFaderValue;
-
-    void Playlist::valueChanged(juce::Value& value);
-
 
     //FADER TEMPORISATION
     juce::int64 faderTempTime = 1000;
@@ -260,16 +241,6 @@ private:
 
     int fader1StartPlayer;
     int fader2StartPlayer;
-
-
     bool keypressed = 0;
-
-    void Playlist::timerCallback();
-    void Playlist::assignPlaylistFader(int playerToAssign);
-
-
-    void Playlist::updateDraggedPlayerDisplay();
-    void Playlist::actionListenerCallback(const juce::String& message);
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Playlist)
 };

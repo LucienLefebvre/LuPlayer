@@ -129,6 +129,8 @@ public:
                         JUCEApplication::getInstance()->systemRequestedQuit();
                     }
                 }
+                else
+                    return;
             }
             if (Settings::tempFiles.size() > 0 && !mainComponent.hasBeenSaved())
             {
@@ -149,15 +151,7 @@ public:
 
 
         }
-
-
-
-        /* Note: Be careful if you override any DocumentWindow methods - the base
-           class uses a lot of them, so by overriding you might break its functionality.
-           It's best to do all your work in your content component instead, but if
-           you really have to override any DocumentWindow methods, make sure your
-           subclass also calls the superclass's method.
-        */
+        
 
     private:
         MainComponent mainComponent;

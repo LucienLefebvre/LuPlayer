@@ -138,6 +138,7 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
     mouseDragEnd(1);
 
     playerSelectionChanged = new juce::ChangeBroadcaster();
+    playlistLoadedBroadcaster = new juce::ChangeBroadcaster();
 
     newMeter.reset(new Meter(Meter::Mode::Stereo));
     addAndMakeVisible(newMeter.get());
@@ -157,6 +158,7 @@ SoundPlayer::~SoundPlayer()
 
     myPlaylists.clear(true);
     delete playerSelectionChanged;
+    delete playlistLoadedBroadcaster;
     Settings::audioOutputModeValue.removeListener(this);
 }
 
@@ -170,26 +172,18 @@ void SoundPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
 
 void SoundPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
-
-
     myMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
     myCueMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
     actualSampleRate = sampleRate;
-
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
 
 
     myPlaylists[0]->prepareToPlay(samplesPerBlockExpected, sampleRate);
-    //myPlaylists[0]->playlistMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    //myPlaylists[0]->playlistCueMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-
     myPlaylists[1]->prepareToPlay(samplesPerBlockExpected, sampleRate);
-    //myPlaylists[1]->playlistMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    //[1]->playlistCueMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
     loudnessMeter.prepareToPlay(actualSampleRate, 2, actualSamplesPerBlockExpected, 20);
-    //cueloudnessMeter.prepareToPlay(actualSampleRate, 2, actualSamplesPerBlockExpected, 20);
+
     meterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
     cuemeterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
 
@@ -199,10 +193,6 @@ void SoundPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 void SoundPlayer::paint (juce::Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-
-    
-
-
 }
 
 void SoundPlayer::resized()
@@ -279,7 +269,15 @@ void SoundPlayer::resized()
         }
     }
     else
-        keyMappedSoundboard->setBounds(0, 15, getWidth(), getHeight());
+    {
+        levelMeterHeight = getHeight() - 15;
+        meter.setBounds(getWidth() - meterWidth - loudnessBarWidth - 7, getHeight() - levelMeterHeight,
+            meterWidth, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
+        loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 5,
+            getHeight() - levelMeterHeight, loudnessBarWidth, levelMeterHeight);
+        keyMappedSoundboard->setBounds(0, 15, getWidth() - (getWidth() - meter.getX()), getHeight());
+    }
+
 
 }
 
@@ -984,7 +982,7 @@ void SoundPlayer::mouseDragGetInfos(int playlistSource, int playerID)
 
 void SoundPlayer::drawDragLines()
 {
-    if (soundPlayerMode != SoundPlayer::Mode::KeyMap)
+    if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
     {
         if (myPlaylists[playlistDragSource] != nullptr)
         {
@@ -1019,14 +1017,14 @@ void SoundPlayer::drawDragLines()
                 {
                     playerMouseDragUp = i;
                     playlistDragDestination = 0;
-                    if (!isEightPlayerMode)
+                    if (soundPlayerMode != Mode::EightFaders)
                         myPlaylists[0]->fileDragPaintLine = true;
                     myPlaylists[0]->fileDragPaintRectangle = false;
                     myPlaylists[1]->fileDragPaintRectangle = false;
                     myPlaylists[1]->fileDragPaintLine = false;
                     myPlaylists[0]->fileDragPlayerDestination = playerMouseDragUp;
                     myPlaylists[0]->repaint();
-                    if (!isEightPlayerMode)
+                    if (soundPlayerMode != Mode::EightFaders)
                         destinationPlayerFound = true;
                     insertTop = false;
                 }
@@ -1035,7 +1033,7 @@ void SoundPlayer::drawDragLines()
                     && getMouseXYRelative().getX() < playlistViewport.getWidth()
                     && (getMouseXYRelative().getX() > 0))
                 {
-                    if (!isEightPlayerMode)
+                    if (soundPlayerMode != Mode::EightFaders)
                         insertTop = true;
                     playerMouseDragUp = -1;
                     playlistDragDestination = 0;
@@ -1046,7 +1044,7 @@ void SoundPlayer::drawDragLines()
                     myPlaylists[1]->fileDragPaintLine = false;
                     myPlaylists[0]->fileDragPlayerDestination = playerMouseDragUp;
                     myPlaylists[0]->repaint();
-                    if (!isEightPlayerMode)
+                    if (soundPlayerMode != Mode::EightFaders)
                         destinationPlayerFound = true;
                 }
                 else if (getMouseXYRelative().getY() < playlistViewport.getPosition().getY()
@@ -1142,31 +1140,79 @@ void SoundPlayer::drawDragLines()
             }
         }
     }
-    else
+    else if (soundPlayerMode == Mode::EightFaders)
     {
-
+        int a = 1;
+        int destinationPlaylist = -1;
+        int destinationPlayer = -1;
+        if (myPlaylists[playlistDragSource]->players[playerDragSource]->isFileLoaded())
+        {
+            for (int p = 0; p < myPlaylists.size(); p++)
+            {
+                for (int i = 0; i < myPlaylists[p]->players.size(); i++)
+                {
+                    auto* player = myPlaylists[p]->players[i];
+                    juce::Point<int> mouseGlobal = localPointToGlobal(getMouseXYRelative());
+                    if (player->getScreenBounds().contains(mouseGlobal)
+                        && !player->isFileLoaded())
+                    {
+                        destinationPlaylist = p;
+                        playlistDragDestination = p;
+                        destinationPlayer = i;
+                        playerMouseDragUp = i;
+                        myPlaylists[p]->fileDragPaintRectangle = true;
+                        myPlaylists[p]->fileDragPlayerDestination = destinationPlayer;
+                        myPlaylists[0]->repaint();
+                        myPlaylists[1]->repaint();
+                        break;
+                    }
+                    else
+                    {
+                        myPlaylists[p]->fileDragPaintRectangle = false;
+                        myPlaylists[p]->fileDragPlayerDestination = -1;
+                        myPlaylists[0]->repaint();
+                        myPlaylists[1]->repaint();
+                    }
+                }
+            }
+        }
     }
 }
 
 void SoundPlayer::mouseDragDefinePlayer()
 {
-    if (playlistDragDestination != -1)
-        mouseDragSetInfos(playlistDragDestination, playerMouseDragUp);
-    else
+    if (soundPlayerMode == Mode::OnePlaylistOneCart)
     {
-        mouseDragEnd(0);
-        mouseDragEnd(1);
+        if (playlistDragDestination != -1)
+            mouseDragSetInfos(playlistDragDestination, playerMouseDragUp);
+        else
+        {
+            mouseDragEnd(0);
+            mouseDragEnd(1);
+        }
+    }
+    else if (soundPlayerMode == Mode::EightFaders)
+    {
+        auto* playerSource = myPlaylists[playlistDragSource]->players[playerDragSource];
+        auto* playerDest = myPlaylists[playlistDragDestination]->players[playerMouseDragUp];
+        if (playerSource != nullptr && playerDest != nullptr)
+        {
+            if (playerSource->isFileLoaded ()
+                && !playerDest->isFileLoaded())
+            {
+                mouseDragGetInfos(playlistDragSource, playerDragSource);
+                setSoundInfos(playlistDragDestination, playerMouseDragUp);
+                myPlaylists[playlistDragSource]->players[playerDragSource]->deleteFile();
+                mouseDragEnd(playlistDragDestination);
+            }
+        }
     }
 
 }
 
 bool SoundPlayer::isDraggable(int playlistSource, int playerSource, int playlistDestination, int playerDestination)
 {
-
-
     return true;
-
-
 }
 
 void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestination)
@@ -1177,31 +1223,28 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
     if (destinationPlaylist != nullptr
         && myPlaylists[playlistDragSource] != nullptr)
     {
-        //if (insertTop == true)
-        //{
-        //    if (isDraggable(playlistDragSource, playerDragSource, playlistDestination, playerIdDestination))
-        //    {
-        //        if (myPlaylists[playlistDestination] == myPlaylists[playlistDragSource])
-        //        {
-        //            reassignFaders(playerIdDestination, playerDragSource, playlistDestination);
-        //            myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
-        //            checkAndRemovePlayer(playlistDestination, playerDragSource + 1);
-        //            playerIdDestination++;
-        //            setSoundInfos(playlistDestination, playerIdDestination);
-        //        }
-        //        else
-        //        {
+        if (insertTop == true)
+        {
+            if (isDraggable(playlistDragSource, playerDragSource, playlistDestination, playerIdDestination))
+            {
+                if (myPlaylists[playlistDestination] == myPlaylists[playlistDragSource])
+                {
+                    reassignFaders(playerIdDestination, playerDragSource, playlistDestination);
+                    destinationPlaylist->players.move(playerDragSource, 0);
+                    destinationPlaylist->rearrangePlayers();
+                }
+                else
+                {
+                    myPlaylists[playlistDestination]->fader1Player++;
+                    myPlaylists[playlistDestination]->fader2Player++;
 
-        //            myPlaylists[playlistDestination]->fader1Player++;
-        //            myPlaylists[playlistDestination]->fader2Player++;
-
-        //            myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
-        //            playerIdDestination++;
-        //            setSoundInfos(playlistDestination, playerIdDestination);
-        //        }
-        //        //clearDragInfos();
-        //    }
-        //}
+                    myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
+                    playerIdDestination++;
+                    setSoundInfos(playlistDestination, playerIdDestination);
+                }
+                //clearDragInfos();
+            }
+        }
         if (destinationPlaylist->players[playerIdDestination] != myPlaylists[playlistDragSource]->players[playerDragSource])
         {
             if (isDraggable(playlistDragSource, playerDragSource, playlistDestination, playerIdDestination))
@@ -1214,37 +1257,23 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
                         {
                             if (playlistDestination == 0)
                             {
+                                DBG("player destination : " << playerIdDestination);
                                 reassignFaders(playerIdDestination, playerDragSource, playlistDestination);
                                 if (insertTop)
-                                    destinationPlaylist->players.move(playerDragSource, playerIdDestination - 1);
-                                else if (playerIdDestination > playerDragSource)
+                                    destinationPlaylist->players.move(playerDragSource, 0);
+                                if (playerIdDestination > playerDragSource)
                                     destinationPlaylist->players.move(playerDragSource, playerIdDestination);
                                 else if (playerIdDestination < playerDragSource)
                                   destinationPlaylist->players.move(playerDragSource, playerIdDestination + 1);
 
                                 destinationPlaylist->rearrangePlayers();
-
-                                //setSoundInfos(playlistDestination, playerIdDestination);
                             }
                             else if (playlistDestination == 1)
                             {
-                                //reassignFaders(playerIdDestination, playerDragSource, playlistDestination);
                                 myPlaylists[playlistDestination]->players.move(playerDragSource, playerIdDestination + 1);
                                 destinationPlaylist->assignLeftFaderButtons.move(playerDragSource, playerIdDestination + 1);
                                 destinationPlaylist->assignRightFaderButtons.move(playerDragSource, playerIdDestination + 1);
                                 myPlaylists[playlistDestination]->rearrangePlayers();
-                               /* if (playerIdDestination > playerDragSource)
-                                {
-                                    myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
-                                    checkAndRemovePlayer(playlistDestination, playerDragSource);
-                                }
-                                if (playerIdDestination < playerDragSource)
-                                {
-                                    myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
-                                    checkAndRemovePlayer(playlistDestination, playerDragSource + 1);
-                                    playerIdDestination++;
-                                }
-                                setSoundInfos(playlistDestination, playerIdDestination);*/
                             }
 
                         }
@@ -1269,14 +1298,6 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
                                 if (myPlaylists[0]->fader1Player == myPlaylists[0]->fader2Player && !myPlaylists[0]->fader1IsPlaying && myPlaylists[0]->fader2IsPlaying)
                                     myPlaylists[0]->fader1Player++;
 
-                                /*Player aPlayer(1);
-                                Player* newPlayer = sourcePlayer;
-
-                                destinationPlaylist->players.insert(playerIdDestination + 1, newPlayer);
-                                sourcePlaylist->players.removeObject(sourcePlayer, false);
-                                sourcePlaylist->rearrangePlayers();
-                                destinationPlaylist->rearrangePlayers();*/
-
                                 myPlaylists[playlistDestination]->addPlayer(playerIdDestination);
                                 playerIdDestination++;
                                 setSoundInfos(playlistDestination, playerIdDestination);
@@ -1295,10 +1316,8 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
                         }
 
                         if (myPlaylists[playlistDragSource]->mouseCtrlModifier == true)
-                            //myPlaylists[playlistDragSource]->removePlayer(playerDragSource);
                             checkAndRemovePlayer(playlistDragSource, playerDragSource);
                     }
-                    //clearDragInfos();
                 }
             }
         }
@@ -1311,7 +1330,7 @@ void SoundPlayer::setSoundInfos(int playlistDestination, int playerIdDestination
     playerSelectionChanged->sendChangeMessage();
     auto* player = myPlaylists[playlistDestination]->players[playerIdDestination];
     player->setHasBeenNormalized(draggedNormalized);
-    player->loadFile(draggedPath);
+    player->loadFile(draggedPath, false);
     player->setTrimVolume(draggedTrim);
     player->setName(draggedName);
     player->enableHPF(draggedHpfEnabled);
@@ -1430,7 +1449,7 @@ void SoundPlayer::copyPlayingSound()
         if (myPlaylists[0]->players[myPlaylists[0]->fader1Player] != nullptr)
         {
             myPlaylists[1]->addPlayer(myPlaylists[1]->players.size() - 1);
-            myPlaylists[1]->players.getLast()->loadFile(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->getFilePath());
+            myPlaylists[1]->players.getLast()->loadFile(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->getFilePath(), false);
             myPlaylists[1]->players.getLast()->setTrimVolume(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->getTrimVolume());
             myPlaylists[1]->players.getLast()->setName(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->getName());
             myPlaylists[1]->players.getLast()->enableHPF(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->isHpfEnabled());
@@ -1445,7 +1464,7 @@ void SoundPlayer::copyPlayingSound()
         if (myPlaylists[0]->players[myPlaylists[0]->fader2Player] != nullptr)
         {
             myPlaylists[1]->addPlayer(myPlaylists[1]->players.size() - 1);
-            myPlaylists[1]->players.getLast()->loadFile(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->getFilePath());
+            myPlaylists[1]->players.getLast()->loadFile(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->getFilePath(), false);
             myPlaylists[1]->players.getLast()->setTrimVolume(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->getTrimVolume());
             myPlaylists[1]->players.getLast()->setName(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->getName());
             myPlaylists[1]->players.getLast()->enableHPF(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->isHpfEnabled());
@@ -1460,7 +1479,7 @@ void SoundPlayer::copyPlayingSound()
         if (myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId] != nullptr)
         {
             myPlaylists[1]->addPlayer(myPlaylists[1]->players.size() - 1);
-            myPlaylists[1]->players.getLast()->loadFile(myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->getFilePath());
+            myPlaylists[1]->players.getLast()->loadFile(myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->getFilePath(), false);
             myPlaylists[1]->players.getLast()->setTrimVolume(myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->getTrimVolume());
             myPlaylists[1]->players.getLast()->setName(myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->getName());
             myPlaylists[1]->players.getLast()->enableHPF(myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->isHpfEnabled());
@@ -1661,20 +1680,24 @@ void SoundPlayer::loadPlaylist()
                 myPlaylists[1]->fader1Player = -1;
                 myPlaylists[1]->fader2Player = -1;
                 myPlaylists[0]->spaceBarPlayerId = -1;
-                while (myPlaylists[0]->players.size() > 1)
+                if (soundPlayerMode != Mode::KeyMap)
                 {
-                    myPlaylists[0]->removePlayer(0);
-                    if (myPlaylists[0]->players[0] != nullptr)
+                    while (myPlaylists[0]->players.size() > 1)
                     {
-                        myPlaylists[0]->players[0]->deleteFile();
+                        myPlaylists[0]->removePlayer(0);
+                        if (myPlaylists[0]->players[0] != nullptr)
+                        {
+                            myPlaylists[0]->players[0]->deleteFile();
+                        }
+                    }
+                    while (myPlaylists[1]->players.size() > 1)
+                        myPlaylists[1]->removePlayer(0);
+                    if (myPlaylists[1]->players[0] != nullptr)
+                    {
+                        myPlaylists[1]->players[0]->deleteFile();
                     }
                 }
-                while (myPlaylists[1]->players.size() > 1)
-                    myPlaylists[1]->removePlayer(0);
-                if (myPlaylists[1]->players[0] != nullptr)
-                {
-                    myPlaylists[1]->players[0]->deleteFile();
-                }
+
                 //for (auto i = 0; i < (myPlaylists[1]->players.size() + 1); i++)
                     //myPlaylists[1]->removePlayer(i);
 
@@ -1766,6 +1789,8 @@ void SoundPlayer::loadPlaylist()
             myPlaylists[1]->assignRightFader(1);
             myPlaylists[0]->resized();
             myPlaylists[0]->resized();
+
+            playlistLoadedBroadcaster->sendChangeMessage();
             /*while (myPlaylists[0]->players.size() < 4)
                 myPlaylists[0]->addPlayer(myPlaylists[0]->players.size() - 1);
             while (myPlaylists[1]->players.size() < 4)
@@ -1788,12 +1813,24 @@ void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID
     bool isStopTimeSet = e->getBoolAttribute("isStopTimeSet");
     float stopTime = e->getDoubleAttribute("stopTime");
 
-    if (myPlaylists[playlistID]->players[player] == nullptr)
+    if (soundPlayerMode == Mode::KeyMap)
     {
-        myPlaylists[playlistID]->addPlayer(player - 1);
+        if (myPlaylists[playlistID]->players[playerID] == nullptr)
+        {
+            myPlaylists[playlistID]->addPlayer(playerID - 1);
+        }
+    }
+    else
+
+    {
+        if (myPlaylists[playlistID]->players[player] == nullptr)
+        {
+            myPlaylists[playlistID]->addPlayer(player - 1);
+        }
+        playerID = player;
     }
 
-    auto* playerToLoad = myPlaylists[playlistID]->players[player];
+    auto* playerToLoad = myPlaylists[playlistID]->players[playerID];
 
     playerToLoad->verifyAudioFileFormat(filePath);
     playerToLoad->setTrimVolume(trimvolume);
@@ -1837,6 +1874,8 @@ void SoundPlayer::setTimerTime(int timertime)
 void SoundPlayer::setEightPlayersMode(bool isEightPlayers)
 {
     isEightPlayerMode = isEightPlayers;
+    if (isEightPlayers)
+        soundPlayerMode = Mode::EightFaders;
 }
 
 void SoundPlayer::updateDraggedPlayerDisplay(int playerDragged, int playlistDragged)
@@ -1897,4 +1936,14 @@ void SoundPlayer::initializeKeyMapPlayer()
 SoundPlayer::Mode SoundPlayer::getSoundPlayerMode()
 {
     return soundPlayerMode;
+}
+
+bool SoundPlayer::isPlaying()
+{
+    for (auto* playlist : myPlaylists)
+    {
+        if (playlist->isPlaying())
+            return true;
+    }
+    return false;
 }

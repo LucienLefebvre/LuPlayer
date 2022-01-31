@@ -38,6 +38,8 @@ public:
     void BottomComponent::tabSelected();
     void BottomComponent::stopCue();
     bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
+    void setStart();
+    void setStop();
     AudioPlaybackDemo audioPlaybackDemo;
     Recorder recorderComponent;
     DataBaseBrowser dbBrowser;

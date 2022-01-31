@@ -778,38 +778,44 @@ void Recorder::mouseUp(const juce::MouseEvent& event)
 
 void Recorder::setStart()
 {
-    if (!isRecording())
+    if (isVisible())
     {
-        if ((float)cueTransport.getCurrentPosition() < stopTime && (float)cueTransport.getCurrentPosition() > 0)
+        if (!isRecording())
         {
-            startTime = (float)cueTransport.getCurrentPosition();
-            startTimeSet = true;
-            // startTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(0, 196, 255));
+            if ((float)cueTransport.getCurrentPosition() < stopTime && (float)cueTransport.getCurrentPosition() > 0)
+            {
+                startTime = (float)cueTransport.getCurrentPosition();
+                startTimeSet = true;
+                // startTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(0, 196, 255));
+            }
         }
-    }
-    else
-    {
-        startTime = thumbnail.getTotalLength();
-        startTimeSet = true;
+        else
+        {
+            startTime = thumbnail.getTotalLength();
+            startTimeSet = true;
+        }
     }
 
 }
 
 void Recorder::setStop()
 {
-    if (!isRecording())
+    if (isVisible())
     {
-        if ((float)cueTransport.getCurrentPosition() > startTime && (float)cueTransport.getCurrentPosition() > 0)
+        if (!isRecording())
         {
-            stopTime = (float)cueTransport.getCurrentPosition();
-            stopTimeSet = true;
-            // stopTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(238, 255, 0));
+            if ((float)cueTransport.getCurrentPosition() > startTime && (float)cueTransport.getCurrentPosition() > 0)
+            {
+                stopTime = (float)cueTransport.getCurrentPosition();
+                stopTimeSet = true;
+                // stopTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(238, 255, 0));
+            }
         }
-    }
-    else
-    {
-        stopTime = thumbnail.getTotalLength();
-        stopTimeSet = true;
+        else
+        {
+            stopTime = thumbnail.getTotalLength();
+            stopTimeSet = true;
+        }
     }
 }
 

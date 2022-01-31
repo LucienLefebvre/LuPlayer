@@ -197,8 +197,6 @@ void Playlist::paint(juce::Graphics& g)
     }
     else if (fileDragPaintRectangle == true && (fileDragPlayerSource != fileDragPlayerDestination))
     {
-
-        DBG(fileDragPlayerDestination);
         //Draw a rectangle surroundig the player :
         //two top lines
         g.drawHorizontalLine((playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 3), 0, getParentWidth());
@@ -816,11 +814,8 @@ void Playlist::updateNextPlayer()
                     else
                         players[i]->setRightFaderAssigned(false);
                 }
-
             }
-
         }
-
         spaceBarPlayerId = nextPlayer;
     }
     const juce::MessageManagerLock mmLock;
@@ -896,23 +891,11 @@ void Playlist::playersNextPositionClicked()
 
 void Playlist::addPlayer(int playerID)
 {
-    if (playlistType == 0)
-    {
-
-    }
-    if (playlistType == 1)
-    {
-       /* if (playerID < fader1Player)
-            fader1Player++;
-        if (playerID < fader2Player)
-            fader2Player++;*/
-    }
     int idAddedPlayer = playerID + 1;
     players.insert(idAddedPlayer, new Player(idAddedPlayer));
     if (eightPlayerMode)
         players.getLast()->setEightPlayerMode(true);
     players[idAddedPlayer]->playerPrepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
-    //playlistMixer.addInputSource(&players[idAddedPlayer]->mixer, false);
     playlistMixer.addInputSource(players[idAddedPlayer]->outputSource.get(), false);
     playlistCueMixer.addInputSource(players[idAddedPlayer]->cueOutputSource.get(), false);
 
@@ -988,10 +971,7 @@ void Playlist::removePlayer(int playerID)
     {
             if (players.size() > 1)
             {
-                if (players[playerID] != nullptr 
-                 /*  && !players[playerID]->fader1IsPlaying
-                    && !players[playerID]->fader2IsPlaying
-                    && !players[playerID]->keyIsPlaying*/)
+                if (players[playerID] != nullptr)
                 {
                     players[playerID]->stopButtonClicked();
                     playlistMixer.removeInputSource(&players[playerID]->mixer);
@@ -1006,7 +986,7 @@ void Playlist::removePlayer(int playerID)
 
                     players.remove(playerID);
                     playersPositionLabels.remove(playerID);
-                    //swapNextButtons.remove(playerID);
+
                     removePlayersButtons.remove(playerID);
                     addPlayersButtons.remove(playerID);
                     playerNumber = players.size();
@@ -1288,28 +1268,16 @@ void Playlist::updateButtonsStates()
                     addPlayersButtons[i]->setEnabled(false);
                     removePlayersButtons[i]->setEnabled(false);
                 }
-                //if (fader1Player == i || fader2Player == i)
-                //{
-                //    swapNextButtons[i]->setEnabled(false);
-                //    if (players[i - 1] != nullptr)
-                //        swapNextButtons[i - 1]->setEnabled(false);
-                //}
             }
             else
             {
                 if (addPlayersButtons[i] != nullptr && removePlayersButtons[i] != nullptr)
                 {
-                    //swapNextButtons[i]->setEnabled(true);
                     removePlayersButtons[i]->setEnabled(true);
                     addPlayersButtons[i]->setEnabled(true);
                 }
             }
-
-            //if (i == (players.size() - 1))
-            //    swapNextButtons[i]->setEnabled(false);
-        }
-
-        
+        }     
     }
 }
 
@@ -1478,13 +1446,6 @@ void Playlist::spaceBarStop()
                 fader1Player--;
                 fader2Player--;
             }
-            //while ((players[spaceBarPlayerId] != nullptr) && (players[spaceBarPlayerId]->fileLoaded == false))
-            //{
-            //    spaceBarPlayerId++;
-            //    fader1Player++;
-            //    fader2Player++;
-            //    spaceBarIsPlaying = false;
-            //}
             updateNextPlayer();
         }
         spaceBarIsPlaying = false;
@@ -1524,8 +1485,6 @@ void Playlist::filesDropped(const juce::StringArray& files, int x, int y)
                 addPlayer(i);
                 players[i + 1]->verifyAudioFileFormat(file);
                 players[i + 1]->setName(droppedName.toStdString());
-                //if (fileDragPaintRectangle == true)
-                    //removePlayer(fileDragPlayerDestination);
                 i++;
             }
             else if (fileDragPaintLine == true)
@@ -1679,9 +1638,7 @@ void Playlist::valueChanged(juce::Value& value)
         {
             draggedPlayer.setValue(-1);
             draggedPlayer.setValue(i);
-            //draggedPlayer = players[i]->draggedPlayer.toString().getIntValue();
         }
-
     }
     if (players[draggedPlayer.toString().getIntValue()] != nullptr)
     {
@@ -1692,7 +1649,6 @@ void Playlist::valueChanged(juce::Value& value)
             {
 
             }
-
         }
     }
 
@@ -1723,17 +1679,15 @@ void Playlist::mouseDown(const juce::MouseEvent& event)
     if (playlistType == 0 && getMouseXYRelative().getX() < getWidth())
     {
         int draggedPlayer = getMouseXYRelative().getY() / (playerHeight + spaceBetweenPlayer);
-        //if (draggedPlayer > std::max(fader1Player, fader2Player))
-        //{
-            if (!players[draggedPlayer]->transport.isPlaying())
-            {
-                mouseDragSource = draggedPlayer;
-                mouseDraggedStartPositionOK = true;
-                //assignPlaylistFader(draggedPlayer);
-            }
-        //}
+
+        if (!players[draggedPlayer]->transport.isPlaying())
+        {
+            mouseDragSource = draggedPlayer;
+            mouseDraggedStartPositionOK = true;
+        }
     }
-    else if (playlistType == 1 && getMouseXYRelative().getX() > (getParentWidth() - dragZoneWidth))
+    else if ((playlistType == 1 && getMouseXYRelative().getX() > (getParentWidth() - dragZoneWidth))
+        || (playlistType == 1 && getMouseXYRelative().getX() < dragZoneWidth))
     {
         int draggedPlayer = getMouseXYRelative().getY() / (playerHeight + spaceBetweenPlayer);
             if (!players[draggedPlayer]->transport.isPlaying())
@@ -1761,9 +1715,6 @@ void Playlist::mouseDrag(const juce::MouseEvent& event)
             mouseAltModifier = true;
         }
     }
-
-
-
 }
 
 void Playlist::mouseUp(const juce::MouseEvent& event)
@@ -1775,25 +1726,17 @@ void Playlist::mouseUp(const juce::MouseEvent& event)
     }
     else if (playlistType == 1 && getMouseXYRelative().getX() > getWidth() - dragZoneWidth)
     {
-        /*if (!fader1IsPlaying)
-            assignLeftFader(player);
-        else if (!fader2IsPlaying)
-            assignRightFader(player);*/
         if (players[player] != nullptr)
         {
-            //players[player]->envButtonClicked();
         }
     }
     else if (playlistType == 1 && getMouseXYRelative().getX() < dragZoneWidth)
     {
         if (players[player] != nullptr)
         {
-            //players[player]->envButtonClicked();
         }
     }
-    //fileDragPlayerSource = -1;
     mouseDraggedUp = 1;
-    //mouseModifier = 0;
     setMouseCursor(juce::MouseCursor::NormalCursor);
     repaint();
 }
@@ -1839,8 +1782,6 @@ void Playlist::timerCallback()
                 assignRightFaderButtons[i]->setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::red);
         }
     }
-    /*else if (playlistType == 0)
-        updateNextPlayer();*/
 }
 
 
@@ -1878,7 +1819,6 @@ void Playlist::setEightPlayersSecondCart(bool isSecondCart)
 
 void Playlist::isEightPlayerMode(bool eightPlayersMode)
 {
-    //Set eight players mode for this playlist
     eightPlayerMode = eightPlayersMode;
     for (auto i = 0; i < players.size(); i++)
     {
@@ -1889,7 +1829,6 @@ void Playlist::isEightPlayerMode(bool eightPlayersMode)
 
 void Playlist::actionListenerCallback(const juce::String& message)
 {
-    // NOR on cues
     if (message.compareIgnoreCase("Play") == 0)
     {
         playBroadcaster->sendChangeMessage();
@@ -1908,10 +1847,8 @@ void Playlist::actionListenerCallback(const juce::String& message)
 
 void Playlist::stopCues()
 {
-    //Called by maincomponent to stop all cues on this playlist
     for (auto i = 0; i < players.size(); i++)
     {
-    
         players[i]->cueTransport.stop();
     }
 }
@@ -1928,6 +1865,14 @@ void Playlist::setPlaylistPosition(int p)
 
 void Playlist::resetFxEditedButtons()
 {
-    /*for (auto* p : players)
-        p->setFxEditedPlayer(false);*/
+}
+
+bool Playlist::isPlaying()
+{
+    for (auto* player : players)
+    {
+        if (player->transport.isPlaying())
+            return true;
+    }
+    return false;
 }

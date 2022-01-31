@@ -94,10 +94,12 @@ public:
     void SoundPlayer::setEightPlayersMode(bool isEightPlayers);
 
     juce::ChangeBroadcaster* playerSelectionChanged;
+    juce::ChangeBroadcaster* playlistLoadedBroadcaster;
 
     SoundPlayer::Mode soundPlayerMode;
     void initializeKeyMapPlayer();
     SoundPlayer::Mode getSoundPlayerMode();
+    bool isPlaying();
 private:
     void SoundPlayer::timerCallback();
     void SoundPlayer::valueChanged(juce::Value& value);
@@ -144,6 +146,8 @@ private:
     int cartsStartX = 800;
     int defaultWindowWidth = 1560;
     int bottomButtonsHeight = 0;
+    int meterWidth = 80;
+    int loudnessBarWidth = 25;
 
     //METERS
     int levelMeterMaximumHeight = 510;
