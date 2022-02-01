@@ -151,13 +151,15 @@ void BottomComponent::stopCue() //stop cues on this panel when a cue is launched
     dbBrowser.transport.stop();
 }
 
-bool BottomComponent::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
+bool BottomComponent::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
 {
-    if (key == juce::KeyPress::spaceKey)
+    int keyCode = key.getKeyCode();
+
+    if (keyMapper->getKeyMapping(0) == keyCode)
     {
-        dbBrowser.keyPressed(key, originatingComponent);
-        audioPlaybackDemo.keyPressed(key, originatingComponent);
-        clipEditor.keyPressed(key, originatingComponent);
+        dbBrowser.keyPressed(key, originatingComponent, keyMapper);
+        audioPlaybackDemo.keyPressed(key, originatingComponent, keyMapper);
+        clipEditor.keyPressed(key, originatingComponent, keyMapper);
     }
     return false;
 }

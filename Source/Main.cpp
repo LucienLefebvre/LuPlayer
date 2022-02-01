@@ -42,7 +42,53 @@ public:
     {
         // This is called when the app is being asked to quit: you can ignore this
         // request and let the app carry on running, or call quit() to allow the app to close.
-        quit();
+        if (mainWindow->mainComponent.isPlayingOrRecording())
+        {
+            std::unique_ptr<juce::AlertWindow> quitWindow;
+            bool result = quitWindow->showOkCancelBox(juce::AlertWindow::QuestionIcon, "Quit ?", "Some sounds are playing");
+            if (result == true)
+            {
+                if (Settings::tempFiles.size() > 0)
+                {
+                    std::unique_ptr<juce::AlertWindow> deleteFilesWindow;
+                    int result = deleteFilesWindow->showYesNoCancelBox(juce::AlertWindow::QuestionIcon, "Delete converted sounds ?", "");
+                    if (result == 1)
+                    {
+                        mainWindow->mainComponent.deleteConvertedFiles();
+                        quit();
+                    }
+                    else if (result == 2)
+                    {
+                        quit();
+                    }
+                }
+                else
+                {
+                    quit();
+                }
+            }
+            else
+                return;
+        }
+        if (Settings::tempFiles.size() > 0 && !mainWindow->mainComponent.hasBeenSaved())
+        {
+            std::unique_ptr<juce::AlertWindow> deleteFilesWindow;
+            int result = deleteFilesWindow->showYesNoCancelBox(juce::AlertWindow::QuestionIcon, "Delete converted sounds ?", "");
+            if (result == 1)
+            {
+                mainWindow->mainComponent.deleteConvertedFiles();
+                quit();
+            }
+            else if (result == 2)
+            {
+                quit();
+            }
+        }
+        else
+            quit();
+
+
+
     }
 
     void anotherInstanceStarted (const juce::String& commandLine) override
@@ -104,57 +150,13 @@ public:
             // This is called when the user tries to close this window. Here, we'll just
             // ask the app to quit when this happens, but you can change this to do
             // whatever you need.
-            if (mainComponent.isPlayingOrRecording())
-            {
-                std::unique_ptr<juce::AlertWindow> quitWindow;
-                bool result = quitWindow->showOkCancelBox(juce::AlertWindow::QuestionIcon, "Quit ?", "Some sounds are playing");
-                if (result == true)
-                {
-                    if (Settings::tempFiles.size() > 0)
-                    {
-                        std::unique_ptr<juce::AlertWindow> deleteFilesWindow;
-                        int result = deleteFilesWindow->showYesNoCancelBox(juce::AlertWindow::QuestionIcon, "Delete converted sounds ?", "");
-                        if (result == 1)
-                        {
-                            mainComponent.deleteConvertedFiles();
-                            JUCEApplication::getInstance()->systemRequestedQuit();
-                        }
-                        else if (result == 2)
-                        {
-                            JUCEApplication::getInstance()->systemRequestedQuit();
-                        }
-                    }
-                    else
-                    {
-                        JUCEApplication::getInstance()->systemRequestedQuit();
-                    }
-                }
-                else
-                    return;
-            }
-            if (Settings::tempFiles.size() > 0 && !mainComponent.hasBeenSaved())
-            {
-                std::unique_ptr<juce::AlertWindow> deleteFilesWindow;
-                int result = deleteFilesWindow->showYesNoCancelBox(juce::AlertWindow::QuestionIcon, "Delete converted sounds ?", "");
-                if (result == 1)
-                {
-                    mainComponent.deleteConvertedFiles();
-                    JUCEApplication::getInstance()->systemRequestedQuit();
-                }
-                else if (result == 2)
-                {
-                    JUCEApplication::getInstance()->systemRequestedQuit();
-                }
-            }
-            else 
-                JUCEApplication::getInstance()->systemRequestedQuit();
-
+            juce::JUCEApplication::getInstance()->systemRequestedQuit();
 
         }
         
-
-    private:
         MainComponent mainComponent;
+    private:
+
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };
 

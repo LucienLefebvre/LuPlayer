@@ -19,7 +19,7 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
     if (m == SoundPlayer::Mode::EightFaders)
         isEightPlayerMode = true;;
     juce::Timer::startTimer(50);
-    addKeyListener(this);
+    //addKeyListener(this);
 
     if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
         myPlaylists.add(new Playlist(0));
@@ -425,34 +425,35 @@ void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source,
     }
 }
 
-bool SoundPlayer::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
+bool SoundPlayer::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
 {
     if (myPlaylists[Settings::editedPlaylist] != nullptr)
     {
+        int keyCode = key.getKeyCode();
         auto* player = myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
 
         if (player != nullptr)
         {
-            if (key == 73)
+            if (keyMapper->getKeyMapping(7) == keyCode)
                     player->setStart();
-            else if (key == 75)
+            else if (keyMapper->getKeyMapping(8) == keyCode)
                     player->deleteStart();
-            else if (key == 79)
+            else if (keyMapper->getKeyMapping(9) == keyCode)
                     player->setStop();
-            else if (key == 76)
+            else if (keyMapper->getKeyMapping(10) == keyCode)
                     player->deleteStop();
-            else if (key == 67)
+            else if (keyMapper->getKeyMapping(4) == keyCode)
             {
                 player->cueButtonClicked();
                 return true;
             }
-            else if (key == 88)
+            else if (keyMapper->getKeyMapping(5) == keyCode)
             {
                 player->cueTransport.setPosition(player->startTime);
                 player->cueButtonClicked();
                 return true;
             }
-            else if (key == 86)
+            else if (keyMapper->getKeyMapping(6) == keyCode)
             {
                 player->cueTransport.setPosition(player->stopTime - 6);
                 player->cueButtonClicked();
@@ -1145,33 +1146,38 @@ void SoundPlayer::drawDragLines()
         int a = 1;
         int destinationPlaylist = -1;
         int destinationPlayer = -1;
-        if (myPlaylists[playlistDragSource]->players[playerDragSource]->isFileLoaded())
+        auto* sourcePlayer = myPlaylists[playlistDragSource]->players[playerDragSource];
+        if (sourcePlayer != nullptr)
         {
-            for (int p = 0; p < myPlaylists.size(); p++)
+            if (sourcePlayer->isFileLoaded())
             {
-                for (int i = 0; i < myPlaylists[p]->players.size(); i++)
+                for (int p = 0; p < myPlaylists.size(); p++)
                 {
-                    auto* player = myPlaylists[p]->players[i];
-                    juce::Point<int> mouseGlobal = localPointToGlobal(getMouseXYRelative());
-                    if (player->getScreenBounds().contains(mouseGlobal)
-                        && !player->isFileLoaded())
+                    for (int i = 0; i < myPlaylists[p]->players.size(); i++)
                     {
-                        destinationPlaylist = p;
-                        playlistDragDestination = p;
-                        destinationPlayer = i;
-                        playerMouseDragUp = i;
-                        myPlaylists[p]->fileDragPaintRectangle = true;
-                        myPlaylists[p]->fileDragPlayerDestination = destinationPlayer;
-                        myPlaylists[0]->repaint();
-                        myPlaylists[1]->repaint();
-                        break;
-                    }
-                    else
-                    {
-                        myPlaylists[p]->fileDragPaintRectangle = false;
-                        myPlaylists[p]->fileDragPlayerDestination = -1;
-                        myPlaylists[0]->repaint();
-                        myPlaylists[1]->repaint();
+                        auto* player = myPlaylists[p]->players[i];
+                        juce::Point<int> mouseGlobal = localPointToGlobal(getMouseXYRelative());
+                        if (player->getScreenBounds().contains(mouseGlobal)
+                            && !player->isFileLoaded())
+                        {
+                            destinationPlaylist = p;
+                            playlistDragDestination = p;
+                            destinationPlayer = i;
+                            playerMouseDragUp = i;
+                            myPlaylists[p]->fileDragPaintRectangle = true;
+                            myPlaylists[p]->fileDragPlayerDestination = destinationPlayer;
+                            myPlaylists[0]->repaint();
+                            myPlaylists[1]->repaint();
+                            break;
+                        }
+                        else
+                        {
+                            myPlaylists[p]->fileDragPaintRectangle = false;
+                            myPlaylists[p]->fileDragPlayerDestination = -1;
+                            //playlistDragDestination = -1;
+                            myPlaylists[0]->repaint();
+                            myPlaylists[1]->repaint();
+                        }
                     }
                 }
             }
@@ -1193,17 +1199,21 @@ void SoundPlayer::mouseDragDefinePlayer()
     }
     else if (soundPlayerMode == Mode::EightFaders)
     {
-        auto* playerSource = myPlaylists[playlistDragSource]->players[playerDragSource];
-        auto* playerDest = myPlaylists[playlistDragDestination]->players[playerMouseDragUp];
-        if (playerSource != nullptr && playerDest != nullptr)
+        if (playlistDragDestination != -1)
         {
-            if (playerSource->isFileLoaded ()
-                && !playerDest->isFileLoaded())
+            auto* playerSource = myPlaylists[playlistDragSource]->players[playerDragSource];
+            auto* playerDest = myPlaylists[playlistDragDestination]->players[playerMouseDragUp];
+            if (playerSource != nullptr && playerDest != nullptr)
             {
-                mouseDragGetInfos(playlistDragSource, playerDragSource);
-                setSoundInfos(playlistDragDestination, playerMouseDragUp);
-                myPlaylists[playlistDragSource]->players[playerDragSource]->deleteFile();
-                mouseDragEnd(playlistDragDestination);
+                if (playerSource->isFileLoaded()
+                    && !playerDest->isFileLoaded()
+                    && myPlaylists[playlistDragDestination]->fileDragPaintRectangle == true)
+                {
+                    mouseDragGetInfos(playlistDragSource, playerDragSource);
+                    setSoundInfos(playlistDragDestination, playerMouseDragUp);
+                    myPlaylists[playlistDragSource]->players[playerDragSource]->deleteFile();
+                    mouseDragEnd(playlistDragDestination);
+                }
             }
         }
     }
@@ -1339,7 +1349,7 @@ void SoundPlayer::setSoundInfos(int playlistDestination, int playerIdDestination
     if (draggedStopTimeSet)
         player->setStopTime(draggedStopTime);
     player->setFilterParameters(draggedFilterParameters);
-    player->bypassFX(draggedFxBypassed);
+    player->bypassFX(draggedFxBypassed, false);
     clearDragInfos();
 }
 
@@ -1585,7 +1595,7 @@ void SoundPlayer::savePlaylist()
     multiPlayer.addChildElement(cart);
     auto xmlString = multiPlayer.toString();
 
-    juce::FileChooser chooser("Choose an XML file", juce::File::getSpecialLocation(juce::File::userDocumentsDirectory), "*.xml");
+    juce::FileChooser chooser("Choose an XML file to save", juce::File::getSpecialLocation(juce::File::userDocumentsDirectory), "*.xml");
     if (chooser.browseForFileToSave(true))
     {
         juce::File myPlaylistSave;
@@ -1666,7 +1676,7 @@ void SoundPlayer::loadPlaylist()
     }
     else
     {
-        juce::FileChooser chooser("Choose an XML File", juce::File::getSpecialLocation(juce::File::userDocumentsDirectory), "*.xml");
+        juce::FileChooser chooser("Choose an XML File to load", juce::File::getSpecialLocation(juce::File::userDocumentsDirectory), "*.xml");
 
         if (chooser.browseForFileToOpen())
         {

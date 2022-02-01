@@ -20,6 +20,7 @@
 #include "nanodbc/nanodbc.h"
 #include "ClipEffect.h"
 #include "Clip Editor/ClipEditor.h"
+#include "Settings/KeyMapper.h"
 //==============================================================================
 /*
 */
@@ -37,7 +38,7 @@ public:
     void BottomComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void BottomComponent::tabSelected();
     void BottomComponent::stopCue();
-    bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
+    bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper);
     void setStart();
     void setStop();
     AudioPlaybackDemo audioPlaybackDemo;

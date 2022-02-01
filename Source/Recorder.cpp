@@ -833,36 +833,34 @@ void Recorder::deleteStop()
     //stopTimeButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colour(141, 150, 0));
 }
 
-bool Recorder::keyPressed(const juce::KeyPress& key)
+bool Recorder::keyPressed(const juce::KeyPress& key, KeyMapper* keyMapper)
 {
-    DBG("keypressed");
-    if (key == 73)
+    int keyCode = key.getKeyCode();
+    if (keyMapper->getKeyMapping(7) == keyCode)
     {
         setStart();
         return true;
     }
-    else if (key == 75)
+    else if (keyMapper->getKeyMapping(8) == keyCode)
     {
         deleteStart();
         return true;
     }
-    else if (key == 79)
+    else if (keyMapper->getKeyMapping(9) == keyCode)
     {
         setStop();
         return true;
     }
-    else if (key == 76)
+    else if (keyMapper->getKeyMapping(10) == keyCode)
     {
         deleteStop();
         return true;
     }
-    else if (key == 67)
+    else if (keyMapper->getKeyMapping(4) == keyCode)
     {
         cueButtonClicked();
         return true;
     }
-    //else if (key == juce::KeyPress::spaceKey)
-    //    spaceBarKeyPressed->sendChangeMessage();
     else
         return false;
 }

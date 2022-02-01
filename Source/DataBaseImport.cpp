@@ -253,8 +253,6 @@ void DataBaseImport::deleteKeyPressed(int lastRowSelected)
 
 void DataBaseImport::cellClicked(int rowNumber, int columnID, const juce::MouseEvent&)
 {
-    DBG("clicked");
-    //startOrStop();
     loadFile(sortedFilesToImport[rowNumber], true);
     if (autoPlayButton.getToggleState())
     {

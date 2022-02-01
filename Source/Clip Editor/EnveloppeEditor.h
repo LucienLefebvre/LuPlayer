@@ -4,6 +4,7 @@
 #include "EnveloppePoint.h"
 #include "../PlayHead.h"
 #include "../Player.h"
+#include "../Settings/KeyMapper.h"
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
@@ -61,7 +62,7 @@ public:
 
     void setEditedPlayer(Player* p);
     void setNullPlayer();
-    bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
+    bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper);
     void timerCallback();
     void createDefaultEnveloppePath();
     void scaleButtonClicked();

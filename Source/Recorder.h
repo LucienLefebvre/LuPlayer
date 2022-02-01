@@ -14,7 +14,7 @@
 #include "Player.h"
 #include <algorithm>
 #include <Ebu128LoudnessMeter.h>
-
+#include "Settings/KeyMapper.h"
 //==============================================================================
 /*
 */
@@ -36,7 +36,7 @@ public:
     void Recorder::paint (juce::Graphics&) override;
     void Recorder::resized() override;
     bool Recorder::isEnabled();
-    bool Recorder::keyPressed(const juce::KeyPress& key) override;
+    bool Recorder::keyPressed(const juce::KeyPress& key, KeyMapper* keyMapper);
     void Recorder::enableButtonClicked();
     void Recorder::recordButtonClicked();
     bool Recorder::isRecording();

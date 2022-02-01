@@ -56,6 +56,8 @@ public:
     int Settings::getAudioOutputMode();
     void Settings::setPreferedSoundPlayerMode(int p);
     int Settings::getPreferedSoundPlayerMode();
+    void setKeyMapping(juce::Array<int> c, juce::StringArray s);
+    juce::Array<int> getKeyMapping(juce::StringArray s);
     juce::TextButton saveButton;
     //int maxFaderValue = 0;
 
@@ -174,6 +176,8 @@ private:
 
     void Settings::buttonClicked(juce::Button* button) override;
 
+
+
     
 
 
@@ -187,6 +191,7 @@ private:
     void Settings::makeIpAdress();
 
     void labelTextChanged(juce::Label* labelThatHasChanged) override;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Settings)
 };

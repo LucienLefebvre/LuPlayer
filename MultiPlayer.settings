@@ -21,4 +21,38 @@
   <VALUE name="ShowMeter" val="1"/>
   <VALUE name="PreferedSoundPlayerMode" val="2"/>
   <VALUE name="Launchatzero" val="1"/>
+  <VALUE name="Play next sound in playlist" val="32"/>
+  <VALUE name="Go to first sound in playlist" val="27"/>
+  <VALUE name="Go to next sound in playlist" val="65570"/>
+  <VALUE name="Go to previous sound in playlist" val="65569"/>
+  <VALUE name="Cue play at playhead" val="67"/>
+  <VALUE name="Cue play from start" val="88"/>
+  <VALUE name="Cue play last 5 seconds" val="86"/>
+  <VALUE name="Set in mark" val="73"/>
+  <VALUE name="Delete in mark" val="75"/>
+  <VALUE name="Set out mark" val="79"/>
+  <VALUE name="Delete out mark" val="76"/>
+  <VALUE name="Launch record" val="82"/>
+  <VALUE name="Start timer" val="84"/>
+  <VALUE name="Play cart 1 (playlist) or player 1 (8 players mode)" val="65648"/>
+  <VALUE name="Play cart 2 (playlist) or player 2 (8 players mode)" val="65649"/>
+  <VALUE name="Play cart 3 (playlist) or player 3 (8 players mode)" val="65650"/>
+  <VALUE name="Play cart 4 (playlist) or player 4 (8 players mode)" val="65651"/>
+  <VALUE name="Play cart 5 (playlist) or player 5 (8 players mode)" val="65652"/>
+  <VALUE name="Play cart 6 (playlist) or player 6 (8 players mode)" val="65653"/>
+  <VALUE name="Play cart 7 (playlist) or player 7 (8 players mode)" val="65654"/>
+  <VALUE name="Play cart 8 (playlist) or player 8 (8 players mode)" val="65655"/>
+  <VALUE name="Play cart 9 (playlist)" val="65656"/>
+  <VALUE name="Play cart 10 (playlist)" val="65657"/>
+  <VALUE name="Play cart 11 (playlist)" val="65658"/>
+  <VALUE name="Play cart 12 (playlist)" val="65659"/>
+  <VALUE name="Play next sound in playlist (playlist mode only) or start cue"
+         val="32"/>
+  <VALUE name="Save (Ctrl +)" val="83"/>
+  <VALUE name="Open (Ctrl +)" val="79"/>
+  <VALUE name="Quit (Ctrl +)" val="81"/>
+  <VALUE name="Open genral settings (Ctrl +)" val="71"/>
+  <VALUE name="Open audio &amp; midi settings (Ctrl +)" val="65"/>
+  <VALUE name="Open keyboard shortcuts editor (Ctrl +)" val="75"/>
+  <VALUE name="Open midi mapping editor (Ctrl +)" val="77"/>
 </PROPERTIES>

@@ -23,13 +23,13 @@
 #include "LoudnessBar.h"
 #include "Mixer/Meter.h"
 #include "Soundboard/KeyboardMappedSoundboard.h"
+#include "Settings/KeyMapper.h"
 //==============================================================================
 /*
 */
 class SoundPlayer : public juce::Component,
                     private juce::MidiInputCallback,
                     public juce::ChangeListener,
-                    private juce::KeyListener,
                     public juce::Timer,
                     public juce::Value::Listener,
                     private juce::OSCReceiver,
@@ -58,7 +58,7 @@ public:
 
     void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message);
     void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message);
-    bool SoundPlayer::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
+    bool SoundPlayer::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper);
     void SoundPlayer::OSCInitialize();
     void SoundPlayer::oscMessageReceived(const juce::OSCMessage& message);
     void SoundPlayer::metersInitialize();

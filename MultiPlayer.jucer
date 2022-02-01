@@ -13,6 +13,10 @@
             file="Source/Clip Editor/EnveloppePoint.h"/>
     </GROUP>
     <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
+      <GROUP id="{C446E222-F82A-C695-0D7B-5CADD47B4434}" name="Settings">
+        <FILE id="jf39aT" name="KeyMapper.cpp" compile="1" resource="0" file="Source/Settings/KeyMapper.cpp"/>
+        <FILE id="JCOhon" name="KeyMapper.h" compile="0" resource="0" file="Source/Settings/KeyMapper.h"/>
+      </GROUP>
       <FILE id="EnJnmP" name="StopWatch.h" compile="0" resource="0" file="Source/StopWatch.h"/>
       <FILE id="cif9Kn" name="DenoiseThread.h" compile="0" resource="0" file="Source/DenoiseThread.h"/>
       <FILE id="TV1izO" name="batchConvertThread.h" compile="0" resource="0"
@@ -161,12 +165,12 @@
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
         <MODULEPATH id="juce_osc" path="../../modules"/>
         <MODULEPATH id="juce_dsp" path="../modules"/>
-        <MODULEPATH id="ff_meters" path="../modules"/>
+        <MODULEPATH id="ff_meters" path="ff_meters"/>
       </MODULEPATHS>
     </VS2019>
   </EXPORTFORMATS>
   <MODULES>
-    <MODULE id="ff_meters" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="ff_meters" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>

@@ -16,6 +16,7 @@
 #include "R128IntegratedThread.h"
 #include "SoundBoard/KeyboardMappedSoundboard.h"
 #include "StopWatch.h"
+#include "Settings/KeyMapper.h"
 //#include <MacrosAndJuceHeaders.h>
 //#include <SecondOrderIIRFilter.h>
 //==============================================================================
@@ -33,7 +34,8 @@ class MainComponent :   public juce::AudioAppComponent,
                         public juce::MouseListener,
                         public juce::Slider::Listener,
                         public juce::ChangeBroadcaster,
-                        public juce::ComboBox::Listener
+                        public juce::ComboBox::Listener,
+                        public juce::MenuBarModel
 {
 public:
     //==============================================================================
@@ -91,6 +93,8 @@ private:
     //juce::OwnedArray<juce::AudioBuffer> myBuffers;
 
     void MainComponent::settingsButtonClicked();
+    void audioSettingsButtonClicked();
+    void keyMapperButtonClicked();
     juce::AudioBuffer<float> outputBuffer;
 
     juce::AudioDeviceSelectorComponent audioSetupComp;
@@ -106,6 +110,7 @@ private:
 
     //Settings* settings = new Settings();
     std::unique_ptr<Settings> settings = std::make_unique<Settings>();
+    //Settings settings;
 
     double *ptrplayer1;
     double playersAdress[8]{ 0 };
@@ -401,6 +406,10 @@ private:
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
     void modifierKeysChanged(const juce::ModifierKeys& modifiers);
     void stopWatchShortcuPressed();
+    juce::StringArray getMenuBarNames();
+    juce::PopupMenu getMenuForIndex(int menuIndex, const juce::String& menuName);
+    void menuItemSelected(int menuItemID, int topLevelMenuIndex);
+    void initializeBottomComponent();
     bool eightPlayersLaunched = false;
 
     //MIXER
@@ -416,5 +425,11 @@ private:
     bool saved = false;
 
     StopWatch mainStopWatch;
+
+    std::unique_ptr<juce::MenuBarComponent> menuBar;
+
+    std::unique_ptr<KeyMapper> keyMapper;
+    //juce::MenuBarPosition menuBarPosition = juce::MenuBarPosition::window;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
+

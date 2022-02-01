@@ -4,6 +4,7 @@
 //#include "../Assets/DemoUtilities.h"
 #include <JuceHeader.h>
 #include "Settings.h"
+#include "Settings/KeyMapper.h"
 //==============================================================================
 class DemoThumbnailComp : public juce::Component,
     public juce::ChangeListener,
@@ -421,11 +422,12 @@ public:
         }
     }
 
-    void keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
+    void keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
     {
         if (isVisible())
         {
-            if (key == juce::KeyPress::spaceKey)
+            int keyCode = key.getKeyCode();
+            if (keyMapper->getKeyMapping(0) == keyCode)
             {
                 startOrStop();
             }

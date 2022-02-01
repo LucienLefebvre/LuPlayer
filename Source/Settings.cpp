@@ -127,6 +127,9 @@ Settings::Settings() : settingsFile(options)
     else
         Settings::showMeter = properties.getUserSettings()->getValue("ShowMeter").getIntValue();
 
+    if (properties.getUserSettings()->getValue("Play next sound in playlist").isEmpty())
+        Settings::skewFactorGlobal = 0.5;
+
     //SAVE & CLOSE BUTTONS
     saveButton.setBounds(250, 400, 100, 50);
     addAndMakeVisible(saveButton);
@@ -655,4 +658,25 @@ void Settings::buttonClicked(juce::Button* button)
         properties.saveIfNeeded();
         settingsFile.save();
     }
+}
+
+void Settings::setKeyMapping(juce::Array<int> c, juce::StringArray s)
+{
+    for (int i = 0; i < c.size(); i++)
+    {
+        properties.getUserSettings()->setValue(s[i], c[i]);
+    }
+    properties.saveIfNeeded();
+    settingsFile.save();
+}
+
+juce::Array<int> Settings::getKeyMapping(juce::StringArray s)
+{
+    juce::Array<int> r;
+    for (int i = 0; i < s.size(); i++)
+    {
+        r.set(i, properties.getUserSettings()->getValue(s[i]).getIntValue());
+        DBG(r[i]);
+    }
+    return r;
 }

@@ -108,21 +108,21 @@ public:
     void setName(std::string Name);
     bool isStartTimeSet();
     bool isStopTimeSet();
-    void enableHPF(bool shouldBeEnabled);
+    void enableHPF(bool shouldBeEnabled, bool shouldSendMessage = true);
     bool isHpfEnabled();
     void updateLoopButton(juce::Button* button, juce::String name);
 
     void setStart();
-    void deleteStart();
+    void deleteStart(bool shouldSendMessage = true);
     void setStop();
-    void deleteStop();
+    void deleteStop(bool shouldSendMessage = true);
     void stopTimeClicked();
     void setTimeClicked();
 
     float getStart();
     float getStop();
-    void setStartTime(float startTime);
-    void setStopTime(float stopTime);
+    void setStartTime(float startTime, bool shouldSendMessage = true);
+    void setStopTime(float stopTime, bool shouldSendMessage = true);
     void setActivePlayer(bool isActive);
 
     void setEightPlayerMode(bool isEight);
@@ -151,7 +151,7 @@ public:
     void envButtonClicked();
     juce::TextButton* getfxButton();
 
-    void bypassFX(bool isBypassed);
+    void bypassFX(bool isBypassed, bool shouldSendMessage = true);
     bool getBypassed();
 
     void normButtonClicked();
@@ -177,7 +177,7 @@ public:
     void createDefaultEnveloppePath();
     juce::Path* getEnveloppePath();
     bool isEnveloppeEnabled();
-    void setEnveloppeEnabled(bool isEnabled);
+    void setEnveloppeEnabled(bool isEnabled, bool shouldSendMessage = true);
 
     bool getIsCart();
 

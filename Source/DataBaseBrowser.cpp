@@ -835,11 +835,12 @@ void DataBaseBrowser::batchConvert()
     }
 }
 
-bool DataBaseBrowser::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
+bool DataBaseBrowser::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
 {
     if (isVisible())
     {
-        if (key == juce::KeyPress::spaceKey)
+        int keyCode = key.getKeyCode();
+        if (keyMapper->getKeyMapping(0) == keyCode)
         {
             play();
             return false;
