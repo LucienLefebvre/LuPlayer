@@ -40,6 +40,7 @@ Playlist::Playlist(int splaylistType)
     cuePlaylistActionBroadcaster = new juce::ActionBroadcaster();
     fxButtonBroadcaster = new juce::ChangeBroadcaster();
     envButtonBroadcaster = new juce::ChangeBroadcaster();
+    grabFocusBroadcaster = new juce::ChangeBroadcaster();
     //addPlayer(1);
 
     //addKeyListener(this);
@@ -60,7 +61,8 @@ Playlist::Playlist(int splaylistType)
 
     if (Settings::showMeter == false)
         meterWidth = 0;
-    //DBG(players[1]->importFromNetia("\\WMDRTSV00147742\SONS$\TECHNIQUE\cf68d5d4 - 98c1 - 4502 - adcc - f137d8cb4c62.BWF"));
+
+    setMouseClickGrabsKeyboardFocus(false);
 }
 
 Playlist::~Playlist()
@@ -70,6 +72,7 @@ Playlist::~Playlist()
     delete cuePlaylistActionBroadcaster;
     delete fxButtonBroadcaster;
     delete envButtonBroadcaster;
+    delete grabFocusBroadcaster;
     removeMouseListener(this);
     playlistMixer.removeAllInputs();
     playlistCueMixer.removeAllInputs();
@@ -237,124 +240,132 @@ void Playlist::resized()
 
 }
 
-void Playlist::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message)
+void Playlist::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper)
 {
     int midiMessageValue = message.getControllerValue();
     int midiMessageNumber = message.getControllerNumber();
     if (playlistType == 0)
     {
-        if (midiMessageNumber < playerNumber)
-        {
-            if (midiMessageNumber == 0 + Settings::midiShift)
-                handleFader1(midiMessageValue);
-            if (midiMessageNumber == 1 + Settings::midiShift)
-                handleFader2(midiMessageValue);
-        }
+        if (midiMessageNumber == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader1Level))
+            handleFader1(midiMessageValue);
+        else if (midiMessageNumber == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader2Level))
+            handleFader2(midiMessageValue);
     }
-    if (playlistType == 1)
+    else if (playlistType == 1)
     {
-        if (midiMessageNumber == 2 + Settings::midiShift)
+        if (midiMessageNumber == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader3Level))
             handleFader3(midiMessageValue);
-        if (midiMessageNumber == 3 + Settings::midiShift)
+        if (midiMessageNumber == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader4Level))
             handleFader4(midiMessageValue);
     }
-    if (midiMessageNumber >= 16 && midiMessageNumber < 24)
-    {
-        handleMidiTrim(midiMessageValue, midiMessageNumber);
-    }
-    if (midiMessageNumber >= 54 && midiMessageNumber <= 57)
-    {
-        handleMidiRelativeTrim(midiMessageValue, midiMessageNumber);
-    }
+
+    handleMidiTrim(midiMessageValue, midiMessageNumber, mapper);
+    handleMidiRelativeTrim(midiMessageValue, midiMessageNumber, mapper);
+
     const juce::ScopedValueSetter<bool> scopedInputFlag(isAddingFromMidiInput, true);
 
 }
 
-void Playlist::handleMidiTrim(int value, int number)
+void Playlist::handleMidiTrim(int value, int number, MidiMapper* mapper)
 {
     if (playlistType == 0)
     {
-        switch (number)
-        {
-        case 16:
+        if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader1Trim) && players[fader1Player] != nullptr)
             players[fader1Player]->handleMidiTrimMessage(value);
-            break;
-        case 17:
+        else if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader2Trim) && players[fader2Player] != nullptr)
             players[fader2Player]->handleMidiTrimMessage(value);
-            break;
-        }
     }
     else if (playlistType == 1)
     {
-        switch (number)
-        {
-        case 18:
+        if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader3Trim) && players[fader1Player] != nullptr)
             players[fader1Player]->handleMidiTrimMessage(value);
-            break;
-        case 19:
+        else if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader4Trim) && players[fader2Player] != nullptr)
             players[fader2Player]->handleMidiTrimMessage(value);
-            break;
-        }
     }
 
 }
 
-void Playlist::handleMidiRelativeTrim(int value, int number)
+void Playlist::handleMidiRelativeTrim(int value, int number, MidiMapper* mapper)
 {
     if (playlistType == 0)
     {
-        switch (number)
+        if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader1TrimR) && players[fader1Player] != nullptr)
         {
-        case 54:
-            if (players[fader1Player] != nullptr)
-            {
-                if (value == 127)
-                    players[fader1Player]->handleMidiTrimMessage(true);
-                else
-                    players[fader1Player]->handleMidiTrimMessage(false);
-            }
-            break;
-        case 55:
-            if (players[fader2Player] != nullptr)
-            {
-                if (value == 127)
-                    players[fader2Player]->handleMidiTrimMessage(true);
-                else
-                    players[fader2Player]->handleMidiTrimMessage(false);
-            }
-            break;
+            if (value == 127)
+                players[fader1Player]->handleMidiTrimMessage(true);
+            else
+                players[fader1Player]->handleMidiTrimMessage(false);
+        }
+
+        else if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader2TrimR) && players[fader2Player] != nullptr)
+        {
+            if (value == 127)
+                players[fader2Player]->handleMidiTrimMessage(true);
+            else
+                players[fader2Player]->handleMidiTrimMessage(false);
+        }
+
+    }
+    else if (playlistType == 1)
+    {
+        if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader3TrimR) && players[fader1Player] != nullptr)
+        {
+            if (value == 127)
+                players[fader1Player]->handleMidiTrimMessage(true);
+            else
+                players[fader1Player]->handleMidiTrimMessage(false);
+        }
+        else if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader4TrimR) && players[fader2Player] != nullptr)
+        {
+            if (value == 127)
+                players[fader2Player]->handleMidiTrimMessage(true);
+            else
+                players[fader2Player]->handleMidiTrimMessage(false);
+        }
+    } 
+}
+
+void Playlist::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper, int startIndex)
+{
+    int midiMessageValue = message.getControllerValue();
+    int midiMessageNumber = message.getControllerNumber();
+
+    Player* destinationPlayer = nullptr;
+    for (int i = 0; i < 4; i++)
+    {
+        if (midiMessageNumber == mapper->getMidiCCForCommand(i + startIndex))
+        {
+            if (players[i] != nullptr)
+                destinationPlayer = players[i];
         }
     }
-    if (playlistType == 1)
+
+    actualMidiLevels[midiMessageNumber] = midiMessageValue;
+
+    if (destinationPlayer != nullptr)
     {
-        switch (number)
+        if (destinationPlayer->fileLoaded == true)
         {
-        case 56:
-            if (players[fader1Player] != nullptr)
+
+            if (actualMidiLevels[midiMessageNumber] >= 1 && previousMidiLevels[midiMessageNumber] == 0)
             {
-                if (value == 127)
-                    players[fader1Player]->handleMidiTrimMessage(true);
-                else
-                    players[fader1Player]->handleMidiTrimMessage(false);
+                destinationPlayer->transport.setGain(0.0);
+                destinationPlayer->play();
             }
-            break;
-        case 57:
-            if (players[fader2Player] != nullptr)
+            else if (actualMidiLevels[midiMessageNumber] == 0 && previousMidiLevels[midiMessageNumber] >= 1)
             {
-                if (value == 127)
-                    players[fader2Player]->handleMidiTrimMessage(true);
-                else
-                    players[fader2Player]->handleMidiTrimMessage(false);
+                destinationPlayer->transport.stop();
             }
-            break;
         }
-    }    
+    }
+    destinationPlayer->handleMidiMessage(0, actualMidiLevels[midiMessageNumber]);
+    previousMidiLevels[midiMessageNumber] = actualMidiLevels[midiMessageNumber];
+    const juce::ScopedValueSetter<bool> scopedInputFlag(isAddingFromMidiInput, true);
 }
 
 void Playlist::fader1Start()
 {
-    players[fader1Player]->transport.setGain(0.0);
-    players[fader1Player]->play();
+    players[fader1Player]->play(true);
     players[fader1Player]->fader1IsPlaying = true;
     fader1IsPlaying = true;
     fader1Stopped = false;
@@ -448,39 +459,18 @@ void Playlist::fader2Stop(bool stoppedByFader)
     updateNextPlayer();
 }
 
-void Playlist::handleIncomingMidiMessageEightPlayers(int value, int number)
+void Playlist::handleMidiTrimEightPlayers(int value, int number, MidiMapper* mapper, int startIndex)
 {
-    int midiMessageValue = value;
-    int midiMessageNumber = number;
-    actualMidiLevels[midiMessageNumber] = midiMessageValue;
-
-    if (players[midiMessageNumber] != nullptr)
+    for (int i = 0; i < 4; i++)
     {
-        if (players[midiMessageNumber]->fileLoaded == true)
+        if (number == mapper->getMidiCCForCommand(startIndex + i) && players[i] != nullptr)
         {
-
-            if (actualMidiLevels[midiMessageNumber] >= 1 && previousMidiLevels[midiMessageNumber] == 0)
-            {
-                players[midiMessageNumber]->transport.setGain(0.0);
-                players[midiMessageNumber]->play();
-            }
-            else if (actualMidiLevels[midiMessageNumber] == 0 && previousMidiLevels[midiMessageNumber] >= 1)
-            {
-                players[midiMessageNumber]->transport.stop();
-            }
+            players[i]->handleMidiTrimMessage(value);
+            return;
         }
     }
-    players[midiMessageNumber]->handleMidiMessage(0, actualMidiLevels[midiMessageNumber]);
-    previousMidiLevels[midiMessageNumber] = actualMidiLevels[midiMessageNumber];
-    const juce::ScopedValueSetter<bool> scopedInputFlag(isAddingFromMidiInput, true);
 }
 
-void Playlist::handleTrimMidiMessage(int value, int number)
-{
-    int midiMessageValue = value;
-    int midiMessageNumber = number;
-    players[midiMessageNumber]->handleMidiTrimMessage(midiMessageValue);
-}
 
 void Playlist::handleFader1(int faderValue)
 {
@@ -489,7 +479,6 @@ void Playlist::handleFader1(int faderValue)
     {
         if (players[fader1Player] != nullptr)
         {
-
             if (players[fader1Player]->fileLoaded != 0) //if there is a loaded file
             {
 
@@ -930,23 +919,28 @@ void Playlist::addPlayer(int playerID)
         removePlayersButtons.insert(idAddedPlayer, new juce::TextButton());
         removePlayersButtons[idAddedPlayer]->setButtonText("-");
         removePlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { removePlayer(idAddedPlayer); };
+        removePlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
 
         addPlayersButtons.insert(idAddedPlayer, new juce::TextButton());
         addPlayersButtons[idAddedPlayer]->setButtonText("+");
         addPlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { addPlayer(idAddedPlayer); };
+        addPlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
 
         playersPositionLabels[idAddedPlayer]->setBounds(2, (105 * idAddedPlayer) + 30, 40, 40);
         playersPositionLabels[idAddedPlayer]->setFont(juce::Font(40.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+        playersPositionLabels[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
     }
     else if (playlistType == 1)
     {
         assignLeftFaderButtons.insert(idAddedPlayer, new juce::TextButton());
         assignLeftFaderButtons[idAddedPlayer]->setButtonText("");
         assignLeftFaderButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { assignLeftFader(idAddedPlayer); };
+        assignLeftFaderButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
 
         assignRightFaderButtons.insert(idAddedPlayer, new juce::TextButton());
         assignRightFaderButtons[idAddedPlayer]->setButtonText("");
         assignRightFaderButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { assignRightFader(idAddedPlayer); };
+        assignRightFaderButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
 
         playersPositionLabels[idAddedPlayer]->setBounds(getParentWidth() - 36, (105 * idAddedPlayer) + 30, 40, 40);
         playersPositionLabels[idAddedPlayer]->setFont(juce::Font(40.00f, juce::Font::plain).withTypefaceStyle("Regular"));
@@ -954,10 +948,12 @@ void Playlist::addPlayer(int playerID)
         removePlayersButtons.insert(idAddedPlayer, new juce::TextButton());
         removePlayersButtons[idAddedPlayer]->setButtonText("-");
         removePlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { removePlayer(idAddedPlayer); };
+        removePlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
 
         addPlayersButtons.insert(idAddedPlayer, new juce::TextButton());
         addPlayersButtons[idAddedPlayer]->setButtonText("+");
         addPlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { addPlayer(idAddedPlayer); };
+        addPlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
     }
     playerNumber = players.size();
     rearrangePlayers();
@@ -1024,8 +1020,8 @@ void Playlist::removePlayer(int playerID)
                     rearrangePlayers();
                 }
             }
-        
     }
+    grabFocusBroadcaster->sendChangeMessage();
 }
 
 void Playlist::swapNext(int playerID)
@@ -1183,21 +1179,24 @@ void Playlist::rearrangePlayers()
                     addAndMakeVisible(assignLeftFaderButtons[i]);
                     assignLeftFaderButtons[i]->setBounds(1, 33 + playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), assignFaderButtonWidth - 1, controlButtonHeight + spaceBetweenPlayer + 2);
                     assignLeftFaderButtons[i]->setButtonText("");
-                    assignLeftFaderButtons[i]->onClick = [i, this] { assignLeftFader(i); };
+                    assignLeftFaderButtons[i]->onClick = [i, this] { assignLeftFader(i); grabFocusBroadcaster->sendChangeMessage(); };
+                    assignLeftFaderButtons[i]->setMouseClickGrabsKeyboardFocus(false);
 
                     addAndMakeVisible(assignRightFaderButtons[i]);
                     assignRightFaderButtons[i]->setBounds(getParentWidth() - assignFaderButtonWidth - dragZoneWidth, 33 + playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), assignFaderButtonWidth, controlButtonHeight + spaceBetweenPlayer + 2);
                     assignRightFaderButtons[i]->setButtonText("");
-                    assignRightFaderButtons[i]->onClick = [i, this] { assignRightFader(i); };
+                    assignRightFaderButtons[i]->onClick = [i, this] { assignRightFader(i); grabFocusBroadcaster->sendChangeMessage(); };
+                    assignRightFaderButtons[i]->setMouseClickGrabsKeyboardFocus(false);
 
                     addAndMakeVisible(removePlayersButtons[i]);
                     removePlayersButtons[i]->setBounds(players[i]->getRight() + meterWidth, 16 + playersStartHeightPosition + ((i * (playerHeight + spaceBetweenPlayer))), controlButtonWidth - 3, controlButtonHeight);
                     removePlayersButtons[i]->onClick = [i, this] { removePlayer(i); };
-
+                    removePlayersButtons[i]->setMouseClickGrabsKeyboardFocus(false);
                     // Add Buttons
                     addAndMakeVisible(addPlayersButtons[i]);
                     addPlayersButtons[i]->setBounds(players[i]->getRight() + meterWidth, 16 + playersStartHeightPosition + ((i * (playerHeight + spaceBetweenPlayer))) + controlButtonHeight, controlButtonWidth - 3, controlButtonHeight);
-                    addPlayersButtons[i]->onClick = [i, this] { addPlayer(i); };
+                    addPlayersButtons[i]->onClick = [i, this] { addPlayer(i); grabFocusBroadcaster->sendChangeMessage();  };
+                    addPlayersButtons[i]->setMouseClickGrabsKeyboardFocus(false);
                 }
 
                 players[i]->transport.addChangeListener(this);
@@ -1220,40 +1219,30 @@ void Playlist::rearrangePlayers()
                 players[i]->loopButton.setVisible(false);
                 if (i < (playerNumber - 1))
                 {
-                    //addAndMakeVisible(swapNextButtons[i]);
-                    //swapNextButtons[i]->setBounds(controlButtonXStart, 16 + playersStartHeightPosition + ((i * (playerHeight + spaceBetweenPlayer)) + (2 * controlButtonHeight)), controlButtonWidth, controlButtonHeight + spaceBetweenPlayer + 2);
-                    //swapNextButtons[i]->setButtonText("s");
-                    //swapNextButtons[i]->onClick = [i, this] { swapNext(i); };
                 }
                 players[i]->resized();
                 // Remove Buttons
                 addAndMakeVisible(removePlayersButtons[i]);
                 removePlayersButtons[i]->setBounds(controlButtonXStart, 16 + playersStartHeightPosition + ((i * (playerHeight + spaceBetweenPlayer))), controlButtonWidth - 3, controlButtonHeight);
                 removePlayersButtons[i]->onClick = [i, this] { removePlayer(i); };
-
+                removePlayersButtons[i]->setMouseClickGrabsKeyboardFocus(false);
                 // Add Buttons
                 addAndMakeVisible(addPlayersButtons[i]);
                 addPlayersButtons[i]->setBounds(controlButtonXStart, 16 + playersStartHeightPosition + ((i * (playerHeight + spaceBetweenPlayer))) + controlButtonHeight, controlButtonWidth - 3, controlButtonHeight);
                 addPlayersButtons[i]->setButtonText("+");
-                addPlayersButtons[i]->onClick = [i, this] { addPlayer(i); };
+                addPlayersButtons[i]->onClick = [i, this] { addPlayer(i);
+                                                            grabFocusBroadcaster->sendChangeMessage(); };
+                addPlayersButtons[i]->setMouseClickGrabsKeyboardFocus(false);
                 players[i]->transport.addChangeListener(this);
                 setSize(getParentWidth(), ((playerHeight + spaceBetweenPlayer) * (playerNumber)));
                 updateButtonsStates();
                 players[i]->setLabelPlayerPosition(i);
-                //players[i]->volumeSliderValue.addListener(this);
-
-
             }
 
         }
     }
     updateNextPlayer();
 
-    for (int i = 0; i < getNumChildComponents(); i++)
-    {
-        getChildComponent(i)->setMouseClickGrabsKeyboardFocus(false);
-    }
-    //setSize(715, getParentHeight());
 
 }
 
@@ -1370,12 +1359,6 @@ void Playlist::changeListenerCallback(juce::ChangeBroadcaster* source)
             }
         }
     }
-}
-
-bool Playlist::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
-{
-
-    return false;
 }
 
 void Playlist::playPlayer(int playerID)

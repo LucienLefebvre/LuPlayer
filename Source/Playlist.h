@@ -15,12 +15,12 @@
 #include <iostream>
 #include "Player.h"
 #include "Mixer/Meter.h"
-
+#include "Settings/MidiMapper.h"
 //==============================================================================
 /*
 */
 class Playlist  : public juce::Component,
-    private juce::MidiInputCallback,
+    //private juce::MidiInputCallback,
     private juce::ChangeListener,
     public juce::FileDragAndDropTarget,
     public juce::Value::Listener,
@@ -57,12 +57,14 @@ public:
     void handleFader4(int faderValue);
     void handleFader4OSC(float faderValue);
 
-    void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message);
-    void handleIncomingMidiMessageEightPlayers(int value, int number);
+    void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper);
+    void handleMidiTrim(int value, int number, MidiMapper* mapper); //normal mode
+    void handleMidiRelativeTrim(int value, int number, MidiMapper* mapper);
+
+    void handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper, int startIndex);
+    void handleMidiTrimEightPlayers(int value, int number, MidiMapper* mapper, int startIndex);
     void handleTrimMidiMessage(int value, int number);//8 players mode
-    void handleMidiTrim(int value, int number); //normal mode
-    void handleMidiRelativeTrim(int value, int number);
-    bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
+
     void spaceBarPressed();
     void playersResetPositionClicked();
     void playersPreviousPositionClicked();
@@ -126,9 +128,9 @@ public:
     int fader2PreviousMidiLevel = 0;
     int fader2ActualMidiLevel = 0;
     
-    std::array<int, 8> previousMidiLevels = { 0, 0, 0, 0, 0, 0, 0, 0 };
-    std::array<int, 8> actualMidiLevels = { 0, 0, 0, 0, 0, 0, 0, 0 };
-    std::array<int, 8> trimMidiLevels = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    std::array<int, 300> previousMidiLevels = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    std::array<int, 300> actualMidiLevels = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    std::array<int, 300> trimMidiLevels = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 
     juce::Value minimumPlayer;
@@ -162,6 +164,7 @@ public:
     juce::ActionBroadcaster* cuePlaylistActionBroadcaster;
     juce::ChangeBroadcaster* fxButtonBroadcaster;
     juce::ChangeBroadcaster* envButtonBroadcaster;
+    juce::ChangeBroadcaster* grabFocusBroadcaster;
 
     int cuedPlayer = 0;
 
@@ -249,5 +252,6 @@ private:
     int fader1StartPlayer;
     int fader2StartPlayer;
     bool keypressed = 0;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Playlist)
 };

@@ -77,7 +77,7 @@ public:
     void setRightFaderAssigned(bool isFaderRightAssigned);
     void assignNextPlayer();
 
-    void play();
+    void play(bool launchedByMidi = false);
     void stop();
     void playButtonClicked();
     void stopButtonClicked();
@@ -480,6 +480,6 @@ private:
 
     std::atomic<bool> shouldRepaint = false;
 
-
+    std::atomic<float> bufferGain = 0.0f;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };

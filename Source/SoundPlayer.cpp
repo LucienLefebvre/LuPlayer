@@ -156,10 +156,12 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
     addAndMakeVisible(&mainMeter);
     mainMeter.setMouseClickGrabsKeyboardFocus(false);
 
-    addAndMakeVisible(timeLabel);
+    addAndMakeVisible(&timeLabel);
     //timeLabel.setBounds(getParentWidth() - 200, 0, 200, topButtonsHeight);
     timeLabel.setFont(juce::Font(30.00f, juce::Font::plain).withTypefaceStyle("Regular"));
     timeLabel.setMouseClickGrabsKeyboardFocus(false);
+
+    addChildComponent(&mainStopWatch);
 
     for (int i = 0; i < getNumChildComponents(); i++)
     {
@@ -284,15 +286,17 @@ void SoundPlayer::resized()
         }
         else if (Settings::audioOutputMode == 2)
         {
-            levelMeterHeight = std::min(getHeight() - playersStartHeightPosition - timeLabelHeight, levelMeterMaximumHeight);
+            levelMeterHeight = std::min(getHeight() - playersStartHeightPosition - timeLabelHeight - stopWatchHeight, levelMeterMaximumHeight);
+
             meter.setBounds(playlistViewport.getWidth(), getHeight() - levelMeterHeight,
                 80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));        
-            /*mainMeter.setBounds(playlistViewport.getWidth(), getHeight() - levelMeterHeight,
-                80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));*/
+
             loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7,
                 getHeight() - levelMeterHeight, 25, levelMeterHeight);
+
             timeLabel.setBounds(playlistViewport.getRight(), 0, timeLabelWidth, timeLabelHeight);
-            //newMeter->setBounds(meter.getBounds());
+            mainStopWatch.setBounds(timeLabel.getX(), timeLabel.getBottom(), timeLabelWidth, stopWatchHeight);
+
         }
     }
     else
@@ -398,20 +402,42 @@ void SoundPlayer::timerCallback()
     }
 }
 
-void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message)
+void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper)
 {
     midiMessageValue = message.getControllerValue();
     midiMessageNumber = message.getControllerNumber();
 
-    if (myPlaylists[0] != nullptr)
+    if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
     {
-        myPlaylists[0]->handleIncomingMidiMessage(source, message);
+        for (auto* playlist : myPlaylists)
+            playlist->handleIncomingMidiMessage(source, message, mapper);
     }
-    if (myPlaylists[1] != nullptr)
+    else if (soundPlayerMode == SoundPlayer::Mode::EightFaders)
     {
-        myPlaylists[1]->handleIncomingMidiMessage(source, message);
+        for (int i = 0; i < 4; i++)
+        {
+            if (midiMessageNumber == mapper->getMidiCCForCommand(200 + i))
+            {
+                myPlaylists[0]->handleIncomingMidiMessageEightPlayers(source, message, mapper, 200);
+                return;
+            }
+            else if (midiMessageNumber == mapper->getMidiCCForCommand(204 + i))
+            {
+                myPlaylists[1]->handleIncomingMidiMessageEightPlayers(source, message, mapper, 204);
+                return;
+            }
+            else if (midiMessageNumber == mapper->getMidiCCForCommand(208 + i))
+            {
+                myPlaylists[0]->handleMidiTrimEightPlayers(midiMessageValue, midiMessageNumber, mapper, 208);
+                return;
+            }
+            else if (midiMessageNumber == mapper->getMidiCCForCommand(212 + i))
+            {
+                myPlaylists[1]->handleMidiTrimEightPlayers(midiMessageValue, midiMessageNumber, mapper, 212);
+                return;
+            }
+        }
     }
-
     if (midiMessageNumber == 43 && midiMessageValue == 127)
     {
         myPlaylists[0]->playersPreviousPositionClicked();
@@ -434,65 +460,24 @@ void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce:
 
 void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message)
 {
-    midiMessageValue = message.getControllerValue();
-    midiMessageNumber = message.getControllerNumber();
-    if (myPlaylists[0] != nullptr && midiMessageNumber < 4 && midiMessageNumber >= 0)
-    {
-        myPlaylists[0]->handleIncomingMidiMessageEightPlayers(midiMessageValue, midiMessageNumber);
-    }
-    else if (myPlaylists[1] != nullptr && midiMessageNumber >= 4 && midiMessageNumber < 8)
-    {
-        myPlaylists[1]->handleIncomingMidiMessageEightPlayers(midiMessageValue, midiMessageNumber - 4);
-    }
-    else if (myPlaylists[0] != nullptr && midiMessageNumber >= 16 && midiMessageNumber <= 19)
-    {
-        myPlaylists[0]->handleTrimMidiMessage(midiMessageValue, midiMessageNumber - 16);
-    }
-    else if (myPlaylists[1] != nullptr && midiMessageNumber >= 20 && midiMessageNumber < 24)
-    {
-        myPlaylists[1]->handleTrimMidiMessage(midiMessageValue, midiMessageNumber - 20);
-    }
-}
-
-bool SoundPlayer::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
-{
-    if (myPlaylists[Settings::editedPlaylist] != nullptr)
-    {
-        int keyCode = key.getKeyCode();
-        auto* player = myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
-
-        if (player != nullptr)
-        {
-            if (keyMapper->getKeyMapping(7) == keyCode)
-                    player->setStart();
-            else if (keyMapper->getKeyMapping(8) == keyCode)
-                    player->deleteStart();
-            else if (keyMapper->getKeyMapping(9) == keyCode)
-                    player->setStop();
-            else if (keyMapper->getKeyMapping(10) == keyCode)
-                    player->deleteStop();
-            else if (keyMapper->getKeyMapping(4) == keyCode)
-            {
-                player->cueButtonClicked();
-                return true;
-            }
-            else if (keyMapper->getKeyMapping(5) == keyCode)
-            {
-                player->cueTransport.setPosition(player->startTime);
-                player->cueButtonClicked();
-                return true;
-            }
-            else if (keyMapper->getKeyMapping(6) == keyCode)
-            {
-                player->cueTransport.setPosition(player->stopTime - 6);
-                player->cueButtonClicked();
-                return true;
-            }
-        }
-    }
-    if (key == juce::KeyPress::rightKey)
-        copyPlayingSound();
-    return false;
+    //midiMessageValue = message.getControllerValue();
+    //midiMessageNumber = message.getControllerNumber();
+    //if (myPlaylists[0] != nullptr && midiMessageNumber < 4 && midiMessageNumber >= 0)
+    //{
+    //    myPlaylists[0]->handleIncomingMidiMessageEightPlayers(midiMessageValue, midiMessageNumber);
+    //}
+    //else if (myPlaylists[1] != nullptr && midiMessageNumber >= 4 && midiMessageNumber < 8)
+    //{
+    //    myPlaylists[1]->handleIncomingMidiMessageEightPlayers(midiMessageValue, midiMessageNumber - 4);
+    //}
+    //else if (myPlaylists[0] != nullptr && midiMessageNumber >= 16 && midiMessageNumber <= 19)
+    //{
+    //    myPlaylists[0]->handleTrimMidiMessage(midiMessageValue, midiMessageNumber - 16);
+    //}
+    //else if (myPlaylists[1] != nullptr && midiMessageNumber >= 20 && midiMessageNumber < 24)
+    //{
+    //    myPlaylists[1]->handleTrimMidiMessage(midiMessageValue, midiMessageNumber - 20);
+    //}
 }
 
 void SoundPlayer::positionViewport(int player)

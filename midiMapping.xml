@@ -24,59 +24,60 @@
   <CommandMapping Description="Fader 5 trim relative" CommandID="220" MidiCC="58"/>
   <CommandMapping Description="Fader 6 trim relative" CommandID="221" MidiCC="59"/>
   <CommandMapping Description="Fader 7 trim relative" CommandID="222" MidiCC="60"/>
-  <CommandMapping Description="Fader 8 trim relative" CommandID="223" MidiCC="-1"/>
+  <CommandMapping Description="Fader 8 trim relative" CommandID="223" MidiCC="61"/>
   <CommandMapping Description="Start Timer" CommandID="1" MidiCC="46"/>
-  <CommandMapping Description="Launch record" CommandID="2" MidiCC="45"/>
-  <CommandMapping Description="Display sound browser" CommandID="3" MidiCC="-1"/>
-  <CommandMapping Description="Display Netia database browser" CommandID="4" MidiCC="-1"/>
-  <CommandMapping Description="Display distant database browser" CommandID="5"
+  <CommandMapping Description="Show / hide timer" CommandID="2" MidiCC="-1"/>
+  <CommandMapping Description="Launch record" CommandID="3" MidiCC="45"/>
+  <CommandMapping Description="Display sound browser" CommandID="4" MidiCC="-1"/>
+  <CommandMapping Description="Display Netia database browser" CommandID="5" MidiCC="-1"/>
+  <CommandMapping Description="Display distant database browser" CommandID="6"
                   MidiCC="-1"/>
-  <CommandMapping Description="Display database import" CommandID="6" MidiCC="-1"/>
-  <CommandMapping Description="Display recorder" CommandID="7" MidiCC="-1"/>
-  <CommandMapping Description="Display clip editor" CommandID="8" MidiCC="-1"/>
-  <CommandMapping Description="Display clip effect" CommandID="9" MidiCC="-1"/>
-  <CommandMapping Description="Play" CommandID="10" MidiCC="-1"/>
-  <CommandMapping Description="Go to first" CommandID="11" MidiCC="42"/>
-  <CommandMapping Description="Go to next" CommandID="12" MidiCC="44"/>
-  <CommandMapping Description="Go to previous" CommandID="13" MidiCC="43"/>
+  <CommandMapping Description="Display database import" CommandID="7" MidiCC="-1"/>
+  <CommandMapping Description="Display recorder" CommandID="8" MidiCC="-1"/>
+  <CommandMapping Description="Display clip editor" CommandID="9" MidiCC="-1"/>
+  <CommandMapping Description="Display clip effect" CommandID="10" MidiCC="-1"/>
+  <CommandMapping Description="Play" CommandID="11" MidiCC="-1"/>
+  <CommandMapping Description="Go to first" CommandID="12" MidiCC="-1"/>
+  <CommandMapping Description="Go to next" CommandID="13" MidiCC="-1"/>
+  <CommandMapping Description="Go to previous" CommandID="14" MidiCC="-1"/>
   <CommandMapping Description="Play cart 1 (playlist) or player 1 (8 players mode)"
-                  CommandID="14" MidiCC="32"/>
+                  CommandID="15" MidiCC="-1"/>
   <CommandMapping Description="Play cart 1 (playlist) or player 1 (8 players mode)"
-                  CommandID="15" MidiCC="33"/>
+                  CommandID="16" MidiCC="-1"/>
   <CommandMapping Description="Play cart 1 (playlist) or player 1 (8 players mode)"
-                  CommandID="16" MidiCC="34"/>
+                  CommandID="17" MidiCC="-1"/>
   <CommandMapping Description="Play cart 1 (playlist) or player 1 (8 players mode)"
-                  CommandID="17" MidiCC="35"/>
+                  CommandID="18" MidiCC="-1"/>
   <CommandMapping Description="Play cart 1 (playlist) or player 1 (8 players mode)"
-                  CommandID="18" MidiCC="36"/>
+                  CommandID="19" MidiCC="-1"/>
   <CommandMapping Description="Play cart 1 (playlist) or player 1 (8 players mode)"
-                  CommandID="19" MidiCC="37"/>
+                  CommandID="20" MidiCC="-1"/>
   <CommandMapping Description="Play cart 1 (playlist) or player 1 (8 players mode)"
-                  CommandID="20" MidiCC="38"/>
+                  CommandID="21" MidiCC="-1"/>
   <CommandMapping Description="Play cart 1 (playlist) or player 1 (8 players mode)"
-                  CommandID="21" MidiCC="39"/>
-  <CommandMapping Description="Play cart 9 (playlist)" CommandID="22" MidiCC="-1"/>
-  <CommandMapping Description="Play cart 10 (playlist)" CommandID="23" MidiCC="-1"/>
-  <CommandMapping Description="Play cart 11 (playlist)" CommandID="24" MidiCC="-1"/>
-  <CommandMapping Description="Play cart 12 (playlist)" CommandID="25" MidiCC="-1"/>
-  <CommandMapping Description="Save" CommandID="26" MidiCC="-1"/>
-  <CommandMapping Description="Open" CommandID="27" MidiCC="-1"/>
-  <CommandMapping Description="Quit" CommandID="28" MidiCC="-1"/>
-  <CommandMapping Description="Open Settings" CommandID="29" MidiCC="-1"/>
-  <CommandMapping Description="Open audio settings" CommandID="30" MidiCC="-1"/>
-  <CommandMapping Description="Open keyboard mapping" CommandID="31" MidiCC="-1"/>
-  <CommandMapping Description="Open midi mappings" CommandID="32" MidiCC="-1"/>
-  <CommandMapping Description="Launch playlist mode" CommandID="33" MidiCC="-1"/>
-  <CommandMapping Description="Launch eight faders mode" CommandID="34" MidiCC="-1"/>
-  <CommandMapping Description="Launch key map mode" CommandID="35" MidiCC="-1"/>
+                  CommandID="22" MidiCC="-1"/>
+  <CommandMapping Description="Play cart 9 (playlist)" CommandID="23" MidiCC="-1"/>
+  <CommandMapping Description="Play cart 10 (playlist)" CommandID="24" MidiCC="-1"/>
+  <CommandMapping Description="Play cart 11 (playlist)" CommandID="25" MidiCC="-1"/>
+  <CommandMapping Description="Play cart 12 (playlist)" CommandID="26" MidiCC="-1"/>
+  <CommandMapping Description="Save" CommandID="27" MidiCC="-1"/>
+  <CommandMapping Description="Open" CommandID="28" MidiCC="-1"/>
+  <CommandMapping Description="Quit" CommandID="29" MidiCC="-1"/>
+  <CommandMapping Description="Open Settings" CommandID="30" MidiCC="-1"/>
+  <CommandMapping Description="Open audio settings" CommandID="31" MidiCC="-1"/>
+  <CommandMapping Description="Open keyboard mapping" CommandID="32" MidiCC="-1"/>
+  <CommandMapping Description="Open midi mappings" CommandID="33" MidiCC="-1"/>
+  <CommandMapping Description="Launch playlist mode" CommandID="34" MidiCC="-1"/>
+  <CommandMapping Description="Launch eight faders mode" CommandID="35" MidiCC="-1"/>
+  <CommandMapping Description="Launch key map mode" CommandID="36" MidiCC="-1"/>
   <CommandMapping Description="Cue Play" CommandID="100" MidiCC="-1"/>
   <CommandMapping Description="Cue play from start" CommandID="101" MidiCC="-1"/>
   <CommandMapping Description="Cue play end" CommandID="102" MidiCC="-1"/>
   <CommandMapping Description="Set in mark at cue position cursor" CommandID="103"
-                  MidiCC="61"/>
+                  MidiCC="-1"/>
   <CommandMapping Description="Delete in mark" CommandID="104" MidiCC="-1"/>
   <CommandMapping Description="Set out mark at cue position cursor" CommandID="105"
-                  MidiCC="62"/>
+                  MidiCC="-1"/>
   <CommandMapping Description="Delete out mark" CommandID="106" MidiCC="-1"/>
   <CommandMapping Description="Enable / disable clip effects" CommandID="107" MidiCC="-1"/>
   <CommandMapping Description="Enable / disable clip enveloppe" CommandID="108"

@@ -168,8 +168,8 @@ public:
 
     bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
     {
-        if (isVisible())
-            enveloppeEditor.keyPressed(key, originatingComponent, keyMapper);
+        /*if (isVisible())
+            enveloppeEditor.keyPressed(key, originatingComponent, keyMapper);*/
         return true;
     }
 

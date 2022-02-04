@@ -23,7 +23,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
         setAudioChannels(8, 4);
     }
 
-    juce::MultiTimer::startTimer(0, 500);
+    juce::MultiTimer::startTimer(0, 50);
     juce::MultiTimer::startTimer(1, 5000);
 
     tryPreferedAudioDevice(2);
@@ -45,19 +45,13 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
 
     midiMapper.reset(new MidiMapper());
     midiMapper->setSize(600, 400);
-    //keyMapper->loadKeyMapping();
 
     initializeBottomComponent();
 
     audioSetupComp.setColour(juce::ResizableWindow::ColourIds::backgroundColourId, juce::Colours::white);
     audioSetupWindow.setSize(400, 800);
     audioSetupComp.setSize(400, 800);
-
-    addChildComponent(mainStopWatch);
     
-    //addAndMakeVisible(timeLabel);
-    //timeLabel.setBounds(getParentWidth()-200, 0, 200, topButtonsHeight);
-    //timeLabel.setFont(juce::Font(50.00f, juce::Font::plain).withTypefaceStyle("Regular"));
 
     deviceManager.addChangeListener(this);
     Settings::audioOutputModeValue.addListener(this);
@@ -416,6 +410,10 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         bottomComponent.clipEffect.setNullPlayer();
         bottomComponent.clipEditor.setNullPlayer();
     }
+    else if (source == soundPlayers[0]->myPlaylists[0]->grabFocusBroadcaster || source == soundPlayers[0]->myPlaylists[1]->grabFocusBroadcaster)
+    {
+        grabKeyboardFocus();
+    }
 }
 
 MainComponent::~MainComponent()
@@ -430,10 +428,7 @@ MainComponent::~MainComponent()
     shutdownAudio();
 }
 
-void MainComponent::exitRequested()
-{
 
-}
 void MainComponent::deleteConvertedFiles() //this delete the converted files since the opening of the application
 {
     exitAnswered = true;
@@ -443,8 +438,6 @@ void MainComponent::deleteConvertedFiles() //this delete the converted files sin
         fileToDelete.deleteFile();
         Settings::tempFiles.remove(0);
     }
-
-
 }
 
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
@@ -639,8 +632,6 @@ void MainComponent::resized()
 {
     menuBar->setBounds(0, 0, getWidth(), menuBarHeight);
     timeLabel.setBounds(getWidth() - 220, 0, 200, 50);
-    mainStopWatch.setSize(120, topButtonsHeight);
-    mainStopWatch.setCentrePosition(getWidth() / 2, topButtonsHeight / 2 + 1);
 
     int windowWidth = getWidth();
     
@@ -666,6 +657,7 @@ void MainComponent::timerCallback(int timerID)
 {
     if (timerID == 0)
     {
+        //grabKeyboardFocus();
         /*juce::Time* time = new juce::Time(time->getCurrentTime());
         timeLabel.setText(time->toString(false, true, true, true), juce::NotificationType::dontSendNotification);
         timeLabel.toFront(false);*/
@@ -731,39 +723,36 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
             if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(cID) && message.getControllerValue() == 127)
                 invokeDirectly(cID, true);
         }
-        auto mode = soundPlayers[0]->getSoundPlayerMode();
-        if (mode == SoundPlayer::Mode::OnePlaylistOneCart)
-            soundPlayers[0]->handleIncomingMidiMessage(source, message);
-        else if (mode == SoundPlayer::Mode::EightFaders)
-            soundPlayers[0]->handleIncomingMidiMessageEightPlayers(source, message);
-        //if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(MidiMapper::MidiCommands::LaunchRecord) && message.getControllerValue() == 127)
-        //{
-        //    launchRecord();
-        //}
-        //else if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(CommandIDs::goToClipEditor) && message.getControllerValue() == 127)
-        //{
-        //    //invokeDirectly(CommandIDs::goToClipEditor, true);
-        //}
-        //else if (message.getControllerNumber() == 61 && message.getControllerValue() == 127)
-        //{
-        //    const juce::MessageManagerLock mmLock;
-        //    bottomComponent.setStart();
-        //}
-        //else if (message.getControllerNumber() == 62 && message.getControllerValue() == 127)
-        //{
-        //    const juce::MessageManagerLock mmLock;
-        //    bottomComponent.setStop();
-        //}
-        //else if (message.getControllerNumber() == 60 && message.getControllerValue() == 127)
-        //{
-        //    const juce::MessageManagerLock mmLock;
-        //    bottomComponent.clipEditor.launchCue();
-        //}
-        //else if (message.getControllerNumber() == 46 && message.getControllerValue() == 127)
-        //{
-        //    const juce::MessageManagerLock mmLock;
-        //    stopWatchShortcuPressed();
-        //}
+        soundPlayers[0]->handleIncomingMidiMessage(source, message, midiMapper.get());
+            //if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(MidiMapper::MidiCommands::LaunchRecord) && message.getControllerValue() == 127)
+            //{
+            //    launchRecord();
+            //}
+            //else if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(CommandIDs::goToClipEditor) && message.getControllerValue() == 127)
+            //{
+            //    //invokeDirectly(CommandIDs::goToClipEditor, true);
+            //}
+            //else if (message.getControllerNumber() == 61 && message.getControllerValue() == 127)
+            //{
+            //    const juce::MessageManagerLock mmLock;
+            //    bottomComponent.setStart();
+            //}
+            //else if (message.getControllerNumber() == 62 && message.getControllerValue() == 127)
+            //{
+            //    const juce::MessageManagerLock mmLock;
+            //    bottomComponent.setStop();
+            //}
+            //else if (message.getControllerNumber() == 60 && message.getControllerValue() == 127)
+            //{
+            //    const juce::MessageManagerLock mmLock;
+            //    bottomComponent.clipEditor.launchCue();
+            //}
+            //else if (message.getControllerNumber() == 46 && message.getControllerValue() == 127)
+            //{
+            //    const juce::MessageManagerLock mmLock;
+            //    stopWatchShortcuPressed();
+            //}
+    
     }
 }
 
@@ -1203,6 +1192,8 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     soundPlayers[0]->myPlaylists[1]->fxButtonBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->envButtonBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->envButtonBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[0]->grabFocusBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[1]->grabFocusBroadcaster->addChangeListener(this);
 
     soundPlayers[0]->setMouseClickGrabsKeyboardFocus(false);
 
@@ -1251,8 +1242,8 @@ void MainComponent::modifierKeysChanged(const juce::ModifierKeys& modifiers)
 
 void MainComponent::stopWatchShortcuPressed()
 {
-    mainStopWatch.setVisible(true);
-    mainStopWatch.startStopButtonClicked();
+    soundPlayers[0]->mainStopWatch.setVisible(true);
+    soundPlayers[0]->mainStopWatch.startStopButtonClicked();
 }
 
 juce::StringArray MainComponent::getMenuBarNames()
@@ -1338,6 +1329,7 @@ juce::ApplicationCommandTarget* MainComponent::getNextCommandTarget()
 void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
 {
     juce::Array<juce::CommandID> c{ CommandIDs::startTimer,
+                                    CommandIDs::showTimer,
                                     CommandIDs::lanchRecord,
                                     CommandIDs::goToSoundBrowser,
                                     CommandIDs::goToDataBaseBrowser,
@@ -1384,6 +1376,11 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setTicked(false);
         result.addDefaultKeypress('t', juce::ModifierKeys::noModifiers);
         break;
+    case CommandIDs::showTimer:
+        result.setInfo("Show / hide timer", "Show / hide timer", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('t', juce::ModifierKeys::commandModifier);
+        break;
     case CommandIDs::lanchRecord:
         result.setInfo("Launch record", "Launch record", "Menu", 0);
         result.setTicked(false);
@@ -1397,7 +1394,7 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
     case CommandIDs::goToDataBaseBrowser:
         result.setInfo("Display Netia database browser", "Display Netia database browser", "Menu", 0);
         result.setTicked(false);
-        result.addDefaultKeypress('é', juce::ModifierKeys::noModifiers);
+        result.addDefaultKeypress('#e9', juce::ModifierKeys::noModifiers);
         break;
     case CommandIDs::goToDistantDataBaseBrowser:
         result.setInfo("Display distant database browser", "Display distant database browser", "Menu", 0);
@@ -1564,8 +1561,10 @@ bool MainComponent::perform(const InvocationInfo& info)
     switch (info.commandID)
     {
     case CommandIDs::startTimer:
-        mainStopWatch.setVisible(true);
-        mainStopWatch.startStopButtonClicked();
+        stopWatchShortcuPressed();
+        break;
+    case CommandIDs::showTimer:
+        soundPlayers[0]->mainStopWatch.setVisible(!soundPlayers[0]->mainStopWatch.isVisible());
         break;
     case CommandIDs::lanchRecord:
         launchRecord();
@@ -1674,6 +1673,7 @@ bool MainComponent::perform(const InvocationInfo& info)
         {
             launchSoundPlayer(SoundPlayer::Mode::OnePlaylistOneCart);
             settings->setPreferedSoundPlayerMode(1);
+            grabKeyboardFocus();
         }
         break;
     case CommandIDs::launch8Faders:
@@ -1681,6 +1681,7 @@ bool MainComponent::perform(const InvocationInfo& info)
         {
             launchSoundPlayer(SoundPlayer::Mode::EightFaders);
             settings->setPreferedSoundPlayerMode(2);
+            grabKeyboardFocus();
         }
         break;
     case CommandIDs::launchKeyMapped:
@@ -1688,6 +1689,7 @@ bool MainComponent::perform(const InvocationInfo& info)
         {
             launchSoundPlayer(SoundPlayer::Mode::KeyMap);
             settings->setPreferedSoundPlayerMode(3);
+            grabKeyboardFocus();
         }
         break;
     default:

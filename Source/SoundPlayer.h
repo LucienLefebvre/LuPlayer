@@ -24,12 +24,14 @@
 #include "Mixer/Meter.h"
 #include "Soundboard/KeyboardMappedSoundboard.h"
 #include "Settings/KeyMapper.h"
+#include "Settings/MidiMapper.h"
 #include "Mixer/Meter.h"
+#include "StopWatch.h"
 //==============================================================================
 /*
 */
 class SoundPlayer : public juce::Component,
-                    private juce::MidiInputCallback,
+                    //private juce::MidiInputCallback,
                     public juce::ChangeListener,
                     public juce::Timer,
                     public juce::Value::Listener,
@@ -76,9 +78,8 @@ public:
     Player* getActivePlayer();
     void playPlayer(int playerID);
 
-    void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message);
+    void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper);
     void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message);
-    bool SoundPlayer::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper);
     void SoundPlayer::OSCInitialize();
     void SoundPlayer::oscMessageReceived(const juce::OSCMessage& message);
     void SoundPlayer::metersInitialize();
@@ -126,6 +127,7 @@ public:
     void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result);
     bool perform(const InvocationInfo& info);
 
+    StopWatch mainStopWatch;
 private:
     void SoundPlayer::timerCallback();
     void SoundPlayer::valueChanged(juce::Value& value);
@@ -206,7 +208,6 @@ private:
     int midiMessageValue;
 
     //OSC
-
     juce::OSCSender sender;
     juce::OSCReceiver receiver;
     juce::String ipAdress;
@@ -258,5 +259,8 @@ private:
     LoudnessBar loudnessBarComponent;
 
     bool isEightPlayerMode = false;
+
+    //Stopwatch
+    int stopWatchHeight = 25;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SoundPlayer)
 };

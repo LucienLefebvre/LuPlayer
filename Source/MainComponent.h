@@ -44,6 +44,7 @@ public:
     enum CommandIDs
     {
         startTimer = 1,
+        showTimer,
         lanchRecord,
         goToSoundBrowser,
         goToDataBaseBrowser,
@@ -105,7 +106,6 @@ public:
     void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) override;
     
     void MainComponent::setOptions(juce::String FFmpegPath, juce::String convertedSoundFolder, float skewFactor);
-    void MainComponent::exitRequested();
     void MainComponent::deleteConvertedFiles();
 
     juce::Viewport playlistViewport;
@@ -465,8 +465,6 @@ private:
     std::unique_ptr<KeyboardMappedSoundboard> keymapSoundboard;
     juce::ModifierKeys currentModifier;
     bool saved = false;
-
-    StopWatch mainStopWatch;
 
     std::unique_ptr<juce::MenuBarComponent> menuBar;
 

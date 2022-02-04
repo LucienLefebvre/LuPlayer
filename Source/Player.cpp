@@ -24,6 +24,7 @@ typedef LPSTR LPTSTR;
 //==============================================================================
 Player::Player(int index)
 {
+    setWantsKeyboardFocus(false);
      setMouseClickGrabsKeyboardFocus(false);
      playerIndex = index;
      juce::Timer::startTimer(50);
@@ -576,7 +577,6 @@ void Player::setCuePlayHeadVisible(bool isVisible)
 //TIMER
 void Player::timerCallback()
 {
-
     if (((stopTime - transport.getCurrentPosition() < 6)) && fileLoaded == true && state == Playing)
     {
         if (endRepainted == false)
@@ -587,7 +587,8 @@ void Player::timerCallback()
     }
 
 
-    volumeSlider.setValue(sliderValueToset);
+    volumeSlider.setValue(bufferGain.load(), juce::dontSendNotification);
+    volumeLabel.setText(juce::String(round(juce::Decibels::gainToDecibels(bufferGain.load()))), juce::dontSendNotification);
     trimVolumeSlider.setValue(trimValueToSet);
 
     if ((float)transport.getCurrentPosition() > stopTime)
@@ -839,10 +840,7 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
                     }
                     else
                     {
-                        //bufferToFill.buffer->addSample(0, i, 0.0);
-                        //bufferToFill.buffer->addSample(1, i, 0.0);
                         transport.setPosition(transport.getLengthInSeconds());
-                        //transport.stop();
                     }
                 }
             }
@@ -882,6 +880,7 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
             outputMeter.measureBlock(cueBuffer.get());
             outMeterSource.measureBlock(*playerBuffer.get());
         }
+        playerBuffer->applyGain(bufferGain.load());
     }
 }
 
@@ -924,9 +923,19 @@ std::atomic<float> Player::getEnveloppeValue(float x, juce::Path& p)
 }
 
 //Play Control
-void Player::play()
+void Player::play(bool launchedByMidi)
 {
     const juce::MessageManagerLock mmLock;
+    if (launchedByMidi)
+    {
+        floatMidiMessageValue = 0.0;
+        sliderValueToset = 0.0f;
+        transport.setGain(0.0f);
+        previousSliderValue = 0.0f;
+        actualSliderValue = 0.0f;
+        volumeSlider.setValue(0.0f);
+
+    }
     transport.setPosition(startTime);
     transportStateChanged(Starting);
     soundEditedBroadcaster->sendChangeMessage();
@@ -937,6 +946,7 @@ void Player::stop()
     const juce::MessageManagerLock mmLock;
     transportStateChanged(Stopping);
     soundEditedBroadcaster->sendChangeMessage();
+    floatMidiMessageValue = 0.0;
 }
 
 //BUTTONS
@@ -1229,8 +1239,6 @@ void Player::transportStateChanged(TransportState newState)
     if (newState != state)
     {
         state = newState;
-
-
         switch (state)
         {
         case Stopped:
@@ -1270,17 +1278,18 @@ void Player::sliderValueChanged(juce::Slider* slider)
     {
         sliderValueToset = slider->getValue();
         actualSliderValue = volumeSlider.getValue();
-        transport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * volumeSlider.getValue() * monoReductionGain);
-        volumeLabel.setText(juce::String(round(juce::Decibels::gainToDecibels(volumeSlider.getValue()))), juce::NotificationType::dontSendNotification);
+        transport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * monoReductionGain);
+        volumeLabel.setText(juce::String(round(bufferGain.load())), juce::NotificationType::dontSendNotification);
         if (previousSliderValue != actualSliderValue)
             volumeSliderValue = volumeSlider.getValue();
         previousSliderValue = actualSliderValue;
+        bufferGain.store(volumeSlider.getValue());
 
     }
     if (slider == &trimVolumeSlider)
     {
         trimValueToSet = slider->getValue();
-        transport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * volumeSlider.getValue() * monoReductionGain);
+        transport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * monoReductionGain);
         cueTransport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * monoReductionGain);
         thumbnailZoomValue = juce::Decibels::decibelsToGain(trimVolumeSlider.getValue());
         if (thumbnail.getNumChannels() != 0)
@@ -1479,12 +1488,15 @@ void Player::deleteStop(bool shouldSendMessage)
 //MIDI CONTROL
 void Player::handleMidiMessage(int midiMessageNumber, int midiMessageValue)
 {
-
         floatMidiMessageValue = midiMessageValue / 127.;
-
         juce::NormalisableRange<float>rangedMidiMessage(0.0, juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal, false);
         sliderValueToset = rangedMidiMessage.convertFrom0to1(floatMidiMessageValue);
-        transport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * sliderValueToset * monoReductionGain);
+        //float transportgain = juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * monoReductionGain;
+        float transportgain = juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * sliderValueToset * monoReductionGain;
+
+        bufferGain.store(rangedMidiMessage.convertFrom0to1(floatMidiMessageValue));
+
+        transport.setGain(transportgain);
 }
 
 void Player::handleMidiTrimMessage(int midiMessageValue)
@@ -1501,7 +1513,7 @@ void Player::handleMidiTrimMessage(int midiMessageValue)
          trimSliderRejoignedValue = true;
      if (trimSliderRejoignedValue)
          trimValueToSet = trimValueInput;
-     transport.setGain(juce::Decibels::decibelsToGain(trimValueToSet) * sliderValueToset * monoReductionGain);
+     transport.setGain(juce::Decibels::decibelsToGain(trimValueToSet) * monoReductionGain);
 }
 
 void Player::handleMidiTrimMessage(bool upordown)
@@ -1510,7 +1522,7 @@ void Player::handleMidiTrimMessage(bool upordown)
         trimValueToSet += 1.;
     else
         trimValueToSet -= 1.;
-    transport.setGain(juce::Decibels::decibelsToGain(trimValueToSet) * sliderValueToset * monoReductionGain);
+    transport.setGain(juce::Decibels::decibelsToGain(trimValueToSet) * monoReductionGain);
 }
 
 void Player::setNextPlayer(bool trueOrFalse)
@@ -1959,7 +1971,7 @@ void Player::setChannelsMapping()
         cuechannelRemappingSource.setOutputChannelMapping(0, 0);
         cuechannelRemappingSource.setOutputChannelMapping(1, 0);
         monoReductionGain = juce::Decibels::decibelsToGain(-6.0);
-        transport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * volumeSlider.getValue() * monoReductionGain);
+        transport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * monoReductionGain);
         cueTransport.setGain(monoReductionGain * juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()));
     }
     else
@@ -1971,7 +1983,7 @@ void Player::setChannelsMapping()
         cuechannelRemappingSource.setOutputChannelMapping(0, 0);
         cuechannelRemappingSource.setOutputChannelMapping(1, 1);
         monoReductionGain = juce::Decibels::decibelsToGain(0.0);
-        transport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * volumeSlider.getValue() * monoReductionGain);
+        transport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * monoReductionGain);
         cueTransport.setGain(monoReductionGain * juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()));
     }
 }

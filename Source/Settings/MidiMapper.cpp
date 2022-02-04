@@ -125,6 +125,7 @@ void MidiMapper::handleMidiMessage(const juce::MidiMessage& message)
                 d.command = midiMappings[i].command;
                 d.commandDescription = midiMappings[i].commandDescription;
                 d.cc = -1;
+                d.faderNumber = -1;
                 midiMappings.set(i, d);
             }
         }
@@ -139,7 +140,7 @@ void MidiMapper::handleMidiMessage(const juce::MidiMessage& message)
     }
 }
 
-void MidiMapper::addMidiCommand(juce::CommandID command, int midiCC, juce::String description)
+void MidiMapper::addMidiCommand(juce::CommandID command, int midiCC, juce::String description, int faderNumber)
 {
     MidiCommandMapping m;
     m.command = command;
@@ -151,30 +152,30 @@ void MidiMapper::addMidiCommand(juce::CommandID command, int midiCC, juce::Strin
 void MidiMapper::initializeDefaultMapping()
 {
     midiMappings.clear();
-    addMidiCommand(Fader1Level, 0, "Fader 1 level");
-    addMidiCommand(Fader2Level, 1, "Fader 2 level");
-    addMidiCommand(Fader3Level, 2, "Fader 3 level");
-    addMidiCommand(Fader4Level, 3, "Fader 4 level");
-    addMidiCommand(Fader5Level, 4, "Fader 5 level");
-    addMidiCommand(Fader6Level, 5, "Fader 6 level");
-    addMidiCommand(Fader7Level, 6, "Fader 7 level");
-    addMidiCommand(Fader8Level, 7, "Fader 8 level");
-    addMidiCommand(Fader1Trim, 16, "Fader 1 trim");
-    addMidiCommand(Fader2Trim, 17, "Fader 2 trim");
-    addMidiCommand(Fader3Trim, 18, "Fader 3 trim");
-    addMidiCommand(Fader4Trim, 19, "Fader 4 trim");
-    addMidiCommand(Fader5Trim, 20, "Fader 5 trim");
-    addMidiCommand(Fader6Trim, 21, "Fader 6 trim");
-    addMidiCommand(Fader7Trim, 22, "Fader 7 trim");
-    addMidiCommand(Fader8Trim, 23, "Fader 8 trim");    
-    addMidiCommand(Fader1TrimR, 54, "Fader 1 trim relative");
-    addMidiCommand(Fader2TrimR, 55, "Fader 2 trim relative");
-    addMidiCommand(Fader3TrimR, 56, "Fader 3 trim relative");
-    addMidiCommand(Fader4TrimR, 57, "Fader 4 trim relative");
-    addMidiCommand(Fader5TrimR, 58, "Fader 5 trim relative");
-    addMidiCommand(Fader6TrimR, 59, "Fader 6 trim relative");
-    addMidiCommand(Fader7TrimR, 60, "Fader 7 trim relative");
-    addMidiCommand(Fader8TrimR, 61, "Fader 8 trim relative");
+    addMidiCommand(Fader1Level, 0, "Fader 1 level", 1);
+    addMidiCommand(Fader2Level, 1, "Fader 2 level", 2);
+    addMidiCommand(Fader3Level, 2, "Fader 3 level", 3);
+    addMidiCommand(Fader4Level, 3, "Fader 4 level", 4);
+    addMidiCommand(Fader5Level, 4, "Fader 5 level", 5);
+    addMidiCommand(Fader6Level, 5, "Fader 6 level", 6);
+    addMidiCommand(Fader7Level, 6, "Fader 7 level", 7);
+    addMidiCommand(Fader8Level, 7, "Fader 8 level", 8);
+    addMidiCommand(Fader1Trim, 16, "Fader 1 trim", 1);
+    addMidiCommand(Fader2Trim, 17, "Fader 2 trim", 2);
+    addMidiCommand(Fader3Trim, 18, "Fader 3 trim", 3);
+    addMidiCommand(Fader4Trim, 19, "Fader 4 trim", 4);
+    addMidiCommand(Fader5Trim, 20, "Fader 5 trim", 5);
+    addMidiCommand(Fader6Trim, 21, "Fader 6 trim", 6);
+    addMidiCommand(Fader7Trim, 22, "Fader 7 trim", 7);
+    addMidiCommand(Fader8Trim, 23, "Fader 8 trim", 8);    
+    addMidiCommand(Fader1TrimR, 54, "Fader 1 trim relative", 1);
+    addMidiCommand(Fader2TrimR, 55, "Fader 2 trim relative", 2);
+    addMidiCommand(Fader3TrimR, 56, "Fader 3 trim relative", 3);
+    addMidiCommand(Fader4TrimR, 57, "Fader 4 trim relative", 4);
+    addMidiCommand(Fader5TrimR, 58, "Fader 5 trim relative", 5);
+    addMidiCommand(Fader6TrimR, 59, "Fader 6 trim relative", 6);
+    addMidiCommand(Fader7TrimR, 60, "Fader 7 trim relative", 7);
+    addMidiCommand(Fader8TrimR, 61, "Fader 8 trim relative", 8);
     table->updateContent();
     repaint();
 }
@@ -185,6 +186,16 @@ int MidiMapper::getMidiCCForCommand(juce::CommandID c)
     {
         if (commandMapping.command == c)
             return commandMapping.cc;
+    }
+}
+
+int MidiMapper::getFaderNumberForCommand(juce::CommandID c)
+{
+    for (auto commandMapping : midiMappings)
+    {
+        if (commandMapping.command == c
+            && commandMapping.faderNumber != -1)
+            return commandMapping.faderNumber;
     }
 }
 
@@ -225,6 +236,7 @@ void MidiMapper::saveMidiMapping()
 
     juce::File midiMappingFile(juce::File::getCurrentWorkingDirectory().getChildFile("midiMapping.xml"));
     midiMapping.writeTo(midiMappingFile);
+    DBG("a");
 }
 
 void MidiMapper::loadMappingFile()

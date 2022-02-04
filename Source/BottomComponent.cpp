@@ -178,7 +178,11 @@ void BottomComponent::setStop()
 
 void BottomComponent::spaceBarPressed()
 {
-    dbBrowser.play();
-    audioPlaybackDemo.spaceBarPressed();
-    clipEditor.spaceBarPressed();
+    juce::String selectedTab = getTabbedButtonBar().getCurrentTabName();
+    if (selectedTab.equalsIgnoreCase("Sound Browser"))
+        audioPlaybackDemo.spaceBarPressed();
+    else if (selectedTab.equalsIgnoreCase("Netia DataBase"))
+        dbBrowser.play();
+    else if (selectedTab.equalsIgnoreCase("Clip Editor"))
+     clipEditor.spaceBarPressed();
 }

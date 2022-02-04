@@ -53,6 +53,7 @@ public:
         juce::CommandID command;
         int cc;
         juce::String commandDescription;
+        int faderNumber = -1;
     };
     MidiMapper();
     ~MidiMapper() override;
@@ -70,11 +71,13 @@ public:
 
     void handleMidiMessage(const juce::MidiMessage& message);
 
-    void addMidiCommand(juce::CommandID command, int midiCC, juce::String description);
+    void addMidiCommand(juce::CommandID command, int midiCC, juce::String description, int faderNumber = -1);
 
     void initializeDefaultMapping();
 
     int getMidiCCForCommand(juce::CommandID c);
+
+    int getFaderNumberForCommand(juce::CommandID c);
 
     bool getWantsKeyPress();
     void setCommandManager(juce::ApplicationCommandManager* cm);
