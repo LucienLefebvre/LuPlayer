@@ -116,8 +116,6 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     midiMapper->setCommandManager(&commandManager);
     midiMapper->loadMappingFile();
     setMouseClickGrabsKeyboardFocus(true);
-
-    midiMapperButtonClicked();
 }
 
 void MainComponent::settingsButtonClicked()

@@ -308,6 +308,10 @@ Player::Player(int index)
      enableButtons(false);
      createDefaultEnveloppePath();
      repaint();
+     for (int i = 0; i < getNumChildComponents(); i++)
+     {
+         getChildComponent(i)->setMouseClickGrabsKeyboardFocus(false);
+     }
 }
 
 

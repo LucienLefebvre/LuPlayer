@@ -37,7 +37,6 @@
   <MAPPING commandId="1c" description="Quit" key="ctrl + Q"/>
   <MAPPING commandId="1d" description="Open Settings" key="ctrl + A"/>
   <MAPPING commandId="1e" description="Open audio settings" key="ctrl + Z"/>
-  <MAPPING commandId="1f" description="Open keyboard mapping" key="ctrl + E"/>
   <MAPPING commandId="20" description="Open midi mappings" key="ctrl + R"/>
   <MAPPING commandId="21" description="Launch playlist mode" key="alt + F1"/>
   <MAPPING commandId="22" description="Launch eight faders mode" key="alt + F2"/>
@@ -51,7 +50,6 @@
   <MAPPING commandId="69" description="Set out mark at cue position cursor"
            key="O"/>
   <MAPPING commandId="6a" description="Delete out mark" key="L"/>
-  <MAPPING commandId="6b" description="Enable / disable clip effects" key="ctrl + E"/>
   <MAPPING commandId="6c" description="Enable / disable clip enveloppe"
            key="ctrl + N"/>
   <MAPPING commandId="6d" description="Enable / disable clip looping" key="ctrl + L"/>
@@ -63,4 +61,6 @@
            key="ctrl + cursor down"/>
   <MAPPING commandId="4" description="Display Netia database browser" key="#e9"/>
   <MAPPING commandId="9" description="Display clip effect" key="#e8"/>
+  <MAPPING commandId="8" description="Display clip editor" key="-"/>
+  <MAPPING commandId="1f" description="Open keyboard mapping" key="ctrl + E"/>
 </KEYMAPPINGS>

@@ -159,6 +159,12 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
     addAndMakeVisible(timeLabel);
     //timeLabel.setBounds(getParentWidth() - 200, 0, 200, topButtonsHeight);
     timeLabel.setFont(juce::Font(30.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+    timeLabel.setMouseClickGrabsKeyboardFocus(false);
+
+    for (int i = 0; i < getNumChildComponents(); i++)
+    {
+        getChildComponent(i)->setMouseClickGrabsKeyboardFocus(false);
+    }
 }
 
 SoundPlayer::~SoundPlayer()
@@ -1996,7 +2002,7 @@ bool SoundPlayer::isPlaying()
 
 Player* SoundPlayer::getActivePlayer()
 {
-    auto* r = myPlaylists[Settings::draggedPlaylist]->players[Settings::draggedPlayer];
+    auto* r = myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
     if (r != nullptr)
         return r;
 }

@@ -1249,6 +1249,10 @@ void Playlist::rearrangePlayers()
     }
     updateNextPlayer();
 
+    for (int i = 0; i < getNumChildComponents(); i++)
+    {
+        getChildComponent(i)->setMouseClickGrabsKeyboardFocus(false);
+    }
     //setSize(715, getParentHeight());
 
 }
