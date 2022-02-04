@@ -35,13 +35,17 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
         Settings::sampleRate = deviceManager.getAudioDeviceSetup().sampleRate;
     } 
 
+
     menuBar.reset(new juce::MenuBarComponent(this));
     addAndMakeVisible(menuBar.get());
     menuBar->setWantsKeyboardFocus(false);
 
     keyMapper.reset(new KeyMapper(settings.get()));
     keyMapper->setSize(600, 400);
-    keyMapper->loadKeyMapping();
+
+    midiMapper.reset(new MidiMapper());
+    midiMapper->setSize(600, 400);
+    //keyMapper->loadKeyMapping();
 
     initializeBottomComponent();
 
@@ -51,9 +55,9 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
 
     addChildComponent(mainStopWatch);
     
-    addAndMakeVisible(timeLabel);
-    timeLabel.setBounds(getParentWidth()-200, 0, 200, topButtonsHeight);
-    timeLabel.setFont(juce::Font(50.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+    //addAndMakeVisible(timeLabel);
+    //timeLabel.setBounds(getParentWidth()-200, 0, 200, topButtonsHeight);
+    //timeLabel.setFont(juce::Font(50.00f, juce::Font::plain).withTypefaceStyle("Regular"));
 
     deviceManager.addChangeListener(this);
     Settings::audioOutputModeValue.addListener(this);
@@ -64,15 +68,14 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     midiInitialized = false;
     midiInitialize();
 
-    myLayout.setItemLayout(0, 200, 1080, -0.75);
+    myLayout.setItemLayout(0, 200, 1080, -0.70);
     myLayout.setItemLayout(1, 4, 4, 4);
-    myLayout.setItemLayout(2, 5, 600, 390);
+    myLayout.setItemLayout(2, 5, 600, 420);
 
     horizontalDividerBar.reset(new juce::StretchableLayoutResizerBar(&myLayout, 1, false));
     addAndMakeVisible(horizontalDividerBar.get());
 
     addKeyListener(this);
-    setWantsKeyboardFocus(true);
     start1 = juce::Time::currentTimeMillis();
 
     juce::File convFile(Settings::convertedSoundsPath.toStdString());
@@ -99,6 +102,22 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     }
 
     launchSoundPlayer(mode);
+    setApplicationCommandManagerToWatch(&commandManager);
+    commandManager.registerAllCommandsForTarget(this);
+    commandManager.registerAllCommandsForTarget(soundPlayers[0]);
+    commandManager.getKeyMappings()->resetToDefaultMappings();
+    getTopLevelComponent()->addKeyListener(commandManager.getKeyMappings());
+    addKeyListener(commandManager.getKeyMappings());
+
+    setWantsKeyboardFocus(true);
+
+    keyMapper->setCommandManager(&commandManager);
+    keyMapper->loadMappingFile();
+    midiMapper->setCommandManager(&commandManager);
+    midiMapper->loadMappingFile();
+    setMouseClickGrabsKeyboardFocus(true);
+
+    midiMapperButtonClicked();
 }
 
 void MainComponent::settingsButtonClicked()
@@ -131,9 +150,19 @@ void MainComponent::keyMapperButtonClicked()
     std::unique_ptr<juce::DialogWindow> keyMapperWindow = std::make_unique<juce::DialogWindow>("Key Mapping",
         getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true);
     keyMapperWindow->setSize(600, 400);
-    keyMapperWindow->showDialog("Audio Setup", keyMapper.get(), this,
+    keyMapperWindow->showDialog("Key Mapping", keyMapper.get(), this,
         getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, false, false);
     keyMapper->setWantsKeyboardFocus(true);
+}
+
+void MainComponent::midiMapperButtonClicked()
+{
+    std::unique_ptr<juce::DialogWindow> keyMapperWindow = std::make_unique<juce::DialogWindow>("Midi Mapping",
+        getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true);
+    keyMapperWindow->setSize(600, 400);
+    keyMapperWindow->showDialog("Midi Mapping", midiMapper.get(), this,
+        getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, false, false);
+    midiMapper->setWantsKeyboardFocus(true);
 }
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
@@ -610,7 +639,7 @@ void MainComponent::paint(juce::Graphics& g)
 
 void MainComponent::resized()
 {
-    menuBar->setBounds(0, 0, getWidth(), 25);
+    menuBar->setBounds(0, 0, getWidth(), menuBarHeight);
     timeLabel.setBounds(getWidth() - 220, 0, 200, 50);
     mainStopWatch.setSize(120, topButtonsHeight);
     mainStopWatch.setCentrePosition(getWidth() / 2, topButtonsHeight / 2 + 1);
@@ -631,7 +660,7 @@ void MainComponent::resized()
         myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - mixerHeight - 4, true, false);
     else
         myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - 4, true, false);
-
+    //grabKeyboardFocus();
 }
 
 
@@ -639,10 +668,9 @@ void MainComponent::timerCallback(int timerID)
 {
     if (timerID == 0)
     {
-        juce::Time* time = new juce::Time(time->getCurrentTime());
+        /*juce::Time* time = new juce::Time(time->getCurrentTime());
         timeLabel.setText(time->toString(false, true, true, true), juce::NotificationType::dontSendNotification);
-        timeLabel.toFront(false);
-        cpuUsage.setText(juce::String(deviceManager.getCpuUsage()), juce::NotificationType::dontSendNotification);
+        timeLabel.toFront(false);*/
     }
     else if (timerID == 1)
     {
@@ -692,35 +720,52 @@ void MainComponent::setMidiInput(int index)
 
 void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message)
 {
-    DBG(message.getControllerNumber());
-    auto mode = soundPlayers[0]->getSoundPlayerMode();
-    if (mode == SoundPlayer::Mode::OnePlaylistOneCart)
-        soundPlayers[0]->handleIncomingMidiMessage(source, message);
-    else if (mode == SoundPlayer::Mode::EightFaders)
-        soundPlayers[0]->handleIncomingMidiMessageEightPlayers(source, message);
-    if (message.getControllerNumber() == 45 && message.getControllerValue() == 127)
+    if (midiMapper->getWantsKeyPress())
+    {
+        midiMapper->handleMidiMessage(message);
+    }
+    else
+    {
+        for (int i = 0; i < commandManager.getNumCommands(); i++)
         {
-        launchRecord();
+            juce::CommandID cID = commandManager.getCommandForIndex(i)->commandID;
+            const juce::MessageManagerLock mmLock;
+            if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(cID) && message.getControllerValue() == 127)
+                invokeDirectly(cID, true);
         }
-    else if (message.getControllerNumber() == 61 && message.getControllerValue() == 127)
-    {
-        const juce::MessageManagerLock mmLock;
-        bottomComponent.setStart();
-    }
-    else if (message.getControllerNumber() == 62 && message.getControllerValue() == 127)
-    {
-        const juce::MessageManagerLock mmLock;
-        bottomComponent.setStop();
-    }
-    else if (message.getControllerNumber() == 60 && message.getControllerValue() == 127)
-    {
-        const juce::MessageManagerLock mmLock;
-        bottomComponent.clipEditor.launchCue();
-    }
-    else if (message.getControllerNumber() == 46 && message.getControllerValue() == 127)
-    {
-        const juce::MessageManagerLock mmLock;
-        stopWatchShortcuPressed();
+        auto mode = soundPlayers[0]->getSoundPlayerMode();
+        if (mode == SoundPlayer::Mode::OnePlaylistOneCart)
+            soundPlayers[0]->handleIncomingMidiMessage(source, message);
+        else if (mode == SoundPlayer::Mode::EightFaders)
+            soundPlayers[0]->handleIncomingMidiMessageEightPlayers(source, message);
+        //if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(MidiMapper::MidiCommands::LaunchRecord) && message.getControllerValue() == 127)
+        //{
+        //    launchRecord();
+        //}
+        //else if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(CommandIDs::goToClipEditor) && message.getControllerValue() == 127)
+        //{
+        //    //invokeDirectly(CommandIDs::goToClipEditor, true);
+        //}
+        //else if (message.getControllerNumber() == 61 && message.getControllerValue() == 127)
+        //{
+        //    const juce::MessageManagerLock mmLock;
+        //    bottomComponent.setStart();
+        //}
+        //else if (message.getControllerNumber() == 62 && message.getControllerValue() == 127)
+        //{
+        //    const juce::MessageManagerLock mmLock;
+        //    bottomComponent.setStop();
+        //}
+        //else if (message.getControllerNumber() == 60 && message.getControllerValue() == 127)
+        //{
+        //    const juce::MessageManagerLock mmLock;
+        //    bottomComponent.clipEditor.launchCue();
+        //}
+        //else if (message.getControllerNumber() == 46 && message.getControllerValue() == 127)
+        //{
+        //    const juce::MessageManagerLock mmLock;
+        //    stopWatchShortcuPressed();
+        //}
     }
 }
 
@@ -730,161 +775,168 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
 
 bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* originatingComponent)
 {
-    int keyCode = key.getKeyCode();
+    grabKeyboardFocus();
+    //int keyCode = key.getKeyCode();
+    //if (keyMapper->getKeyMapping(7) == keyCode)
+    //{
+    //    commandManager.invokeDirectly(CommandIDs::startTimer, false);
+    //    //commandManager.invokeDirectly(SoundPlayer::CommandIDs::setInMark, true);
+    //}
+    //
+    //if (key.getModifiers() == juce::ModifierKeys::commandModifier)
+    //{
+    //    if (keyMapper->getKeyMapping(25) == keyCode)
+    //        savePlaylist();
+    //    else if (keyMapper->getKeyMapping(26) == keyCode)
+    //        loadPlaylist();
+    //    else if (keyMapper->getKeyMapping(27) == keyCode)
+    //        juce::JUCEApplication::getInstance()->systemRequestedQuit();
+    //    else if (keyMapper->getKeyMapping(28) == keyCode)
+    //        settingsButtonClicked();
+    //    else if (keyMapper->getKeyMapping(29) == keyCode)
+    //        audioSettingsButtonClicked();
+    //    else if (keyMapper->getKeyMapping(30) == keyCode)
+    //        keyMapperButtonClicked();
+    //    else if (keyMapper->getKeyMapping(31) == keyCode)
+    //        juce::JUCEApplication::getInstance()->systemRequestedQuit();
+    //}
+    //else
+    //{
+    //    if (soundPlayers[0]->getSoundPlayerMode() == SoundPlayer::Mode::KeyMap)//Block all shortcuts for key mapped soundboard
+    //    {
+    //        soundPlayers[0]->keyMappedSoundboard->keyPressed(key, originatingComponent);
+    //    }
+    //    else if (keyMapper->getKeyMapping(12) == keyCode)
+    //    {
+    //        stopWatchShortcuPressed();
+    //    }
+    //    else
+    //    {
+    //        if (soundPlayers[0]->draggedPlaylist != -1)
+    //            soundPlayers[0]->keyPressed(key, originatingComponent, keyMapper.get());
+    //        else if (soundPlayers[0]->draggedPlaylist == -1)
+    //            bottomComponent.recorderComponent.keyPressed(key, keyMapper.get());
+    //    }
 
-    if (key.getModifiers() == juce::ModifierKeys::commandModifier)
-    {
-        if (keyMapper->getKeyMapping(25) == keyCode)
-            savePlaylist();
-        else if (keyMapper->getKeyMapping(26) == keyCode)
-            loadPlaylist();
-        else if (keyMapper->getKeyMapping(27) == keyCode)
-            juce::JUCEApplication::getInstance()->systemRequestedQuit();
-        else if (keyMapper->getKeyMapping(28) == keyCode)
-            settingsButtonClicked();
-        else if (keyMapper->getKeyMapping(29) == keyCode)
-            audioSettingsButtonClicked();
-        else if (keyMapper->getKeyMapping(30) == keyCode)
-            keyMapperButtonClicked();
-        else if (keyMapper->getKeyMapping(31) == keyCode)
-            juce::JUCEApplication::getInstance()->systemRequestedQuit();
-    }
-    else
-    {
-        if (soundPlayers[0]->getSoundPlayerMode() == SoundPlayer::Mode::KeyMap)//Block all shortcuts for key mapped soundboard
-        {
-            soundPlayers[0]->keyMappedSoundboard->keyPressed(key, originatingComponent);
-        }
-        else if (keyMapper->getKeyMapping(12) == keyCode)
-        {
-            stopWatchShortcuPressed();
-        }
-        else
-        {
-            if (soundPlayers[0]->draggedPlaylist != -1)
-                soundPlayers[0]->keyPressed(key, originatingComponent, keyMapper.get());
-            else if (soundPlayers[0]->draggedPlaylist == -1)
-                bottomComponent.recorderComponent.keyPressed(key, keyMapper.get());
-        }
-
-        if (keyMapper->getKeyMapping(0) == keyCode)
-        {
-            if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
-                soundPlayers[0]->myPlaylists[0]->spaceBarPressed();
-            else
-            {
-                bottomComponent.keyPressed(key, originatingComponent, keyMapper.get());
-            }
-        }
-        else if (keyMapper->getKeyMapping(13) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(0);
-            else
-                soundPlayers[0]->myPlaylists[0]->playPlayer(0);
-            soundPlayers[0]->positionViewport(0);
-        }
-        else if (keyMapper->getKeyMapping(14) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(1);
-            else
-                soundPlayers[0]->myPlaylists[0]->playPlayer(1);
-            soundPlayers[0]->positionViewport(1);
-        }
-        else if (keyMapper->getKeyMapping(15) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(2);
-            else
-                soundPlayers[0]->myPlaylists[0]->playPlayer(2);
-            soundPlayers[0]->positionViewport(2);
-        }
-        else if (keyMapper->getKeyMapping(16) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(3);
-            else
-                soundPlayers[0]->myPlaylists[0]->playPlayer(3);
-            soundPlayers[0]->positionViewport(3);
-        }
-        else if (keyMapper->getKeyMapping(17) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(4);
-            else
-                soundPlayers[0]->myPlaylists[1]->playPlayer(0);
-            soundPlayers[0]->positionViewport(4);
-        }
-        else if (keyMapper->getKeyMapping(18) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(5);
-            else
-                soundPlayers[0]->myPlaylists[1]->playPlayer(1);
-            soundPlayers[0]->positionViewport(5);
-        }
-        else if (keyMapper->getKeyMapping(19) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(6);
-            else
-                soundPlayers[0]->myPlaylists[1]->playPlayer(2);
-            soundPlayers[0]->positionViewport(6);
-        }
-        else if (keyMapper->getKeyMapping(20) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(7);
-            else
-                soundPlayers[0]->myPlaylists[1]->playPlayer(3);
-            soundPlayers[0]->positionViewport(7);
-        }
-        else if (keyMapper->getKeyMapping(21) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(8);
-            soundPlayers[0]->positionViewport(8);
-        }
-        else if (keyMapper->getKeyMapping(22) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(9);
-            soundPlayers[0]->positionViewport(9);
-        }
-        else if (keyMapper->getKeyMapping(23) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(10);
-            soundPlayers[0]->positionViewport(10);
-        }
-        else if (keyMapper->getKeyMapping(24) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[1]->playPlayer(11);
-            soundPlayers[0]->positionViewport(11);
-        }
-        else if (keyMapper->getKeyMapping(1) == keyCode)
-        {
-            if (soundPlayers[0]->myPlaylists[0]->spaceBarIsPlaying == false)
-                soundPlayers[0]->myPlaylists[0]->playersResetPositionClicked();
-        }
-        else if (keyMapper->getKeyMapping(2) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[0]->playersNextPositionClicked();
-        }
-        else if (keyMapper->getKeyMapping(3) == keyCode)
-        {
-            if (!isEightPlayerMode)
-                soundPlayers[0]->myPlaylists[0]->playersPreviousPositionClicked();
-        }
-        else if (keyMapper->getKeyMapping(11) == keyCode)
-        {
-            if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::KeyMap)
-                launchRecord();
-        }
-    }
+    //    if (keyMapper->getKeyMapping(0) == keyCode)
+    //    {
+    //        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
+    //            soundPlayers[0]->myPlaylists[0]->spaceBarPressed();
+    //        else
+    //        {
+    //            bottomComponent.keyPressed(key, originatingComponent, keyMapper.get());
+    //        }
+    //    }
+    //    else if (keyMapper->getKeyMapping(13) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(0);
+    //        else
+    //            soundPlayers[0]->myPlaylists[0]->playPlayer(0);
+    //        soundPlayers[0]->positionViewport(0);
+    //    }
+    //    else if (keyMapper->getKeyMapping(14) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(1);
+    //        else
+    //            soundPlayers[0]->myPlaylists[0]->playPlayer(1);
+    //        soundPlayers[0]->positionViewport(1);
+    //    }
+    //    else if (keyMapper->getKeyMapping(15) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(2);
+    //        else
+    //            soundPlayers[0]->myPlaylists[0]->playPlayer(2);
+    //        soundPlayers[0]->positionViewport(2);
+    //    }
+    //    else if (keyMapper->getKeyMapping(16) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(3);
+    //        else
+    //            soundPlayers[0]->myPlaylists[0]->playPlayer(3);
+    //        soundPlayers[0]->positionViewport(3);
+    //    }
+    //    else if (keyMapper->getKeyMapping(17) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(4);
+    //        else
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(0);
+    //        soundPlayers[0]->positionViewport(4);
+    //    }
+    //    else if (keyMapper->getKeyMapping(18) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(5);
+    //        else
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(1);
+    //        soundPlayers[0]->positionViewport(5);
+    //    }
+    //    else if (keyMapper->getKeyMapping(19) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(6);
+    //        else
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(2);
+    //        soundPlayers[0]->positionViewport(6);
+    //    }
+    //    else if (keyMapper->getKeyMapping(20) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(7);
+    //        else
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(3);
+    //        soundPlayers[0]->positionViewport(7);
+    //    }
+    //    else if (keyMapper->getKeyMapping(21) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(8);
+    //        soundPlayers[0]->positionViewport(8);
+    //    }
+    //    else if (keyMapper->getKeyMapping(22) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(9);
+    //        soundPlayers[0]->positionViewport(9);
+    //    }
+    //    else if (keyMapper->getKeyMapping(23) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(10);
+    //        soundPlayers[0]->positionViewport(10);
+    //    }
+    //    else if (keyMapper->getKeyMapping(24) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[1]->playPlayer(11);
+    //        soundPlayers[0]->positionViewport(11);
+    //    }
+    //    else if (keyMapper->getKeyMapping(1) == keyCode)
+    //    {
+    //        if (soundPlayers[0]->myPlaylists[0]->spaceBarIsPlaying == false)
+    //            soundPlayers[0]->myPlaylists[0]->playersResetPositionClicked();
+    //    }
+    //    else if (keyMapper->getKeyMapping(2) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[0]->playersNextPositionClicked();
+    //    }
+    //    else if (keyMapper->getKeyMapping(3) == keyCode)
+    //    {
+    //        if (!isEightPlayerMode)
+    //            soundPlayers[0]->myPlaylists[0]->playersPreviousPositionClicked();
+    //    }
+    //    else if (keyMapper->getKeyMapping(11) == keyCode)
+    //    {
+    //        if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::KeyMap)
+    //            launchRecord();
+    //    }
+    //}
+    //
     return false;
 }
 
@@ -1154,6 +1206,8 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     soundPlayers[0]->myPlaylists[0]->envButtonBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->envButtonBroadcaster->addChangeListener(this);
 
+    soundPlayers[0]->setMouseClickGrabsKeyboardFocus(false);
+
     if (soundPlayers[0] != nullptr)
         soundPlayers[0]->setBounds(0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - bottomHeight);
      
@@ -1161,6 +1215,8 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
 
     channelsMapping();
+
+
 
     soundboardLaunched = true;
 }
@@ -1212,26 +1268,23 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
 
     if (menuIndex == 0)
     {
-        menu.addItem(1, "Open");
-        menu.addItem(2, "Save");
+        menu.addCommandItem(&commandManager, CommandIDs::open, "Open");
+        menu.addCommandItem(&commandManager, CommandIDs::save, "Save");
         menu.addSeparator();
-        menu.addItem(3, "Close");
+        menu.addCommandItem(&commandManager, CommandIDs::open, "Quit");
     }
     else if (menuIndex == 1)
     {
-        menu.addItem(1, "Application Settings");
-        menu.addItem(2, "Audio Settings");
-        menu.addItem(3, "Keyboard Shortcuts");
-        menu.addItem(4, "Midi Mapping");
+        menu.addCommandItem(&commandManager, CommandIDs::openSettings, "General settings");
+        menu.addCommandItem(&commandManager, CommandIDs::audioSettings, "Audio settings");
+        menu.addCommandItem(&commandManager, CommandIDs::keyboardMapping, "Keyboard shortcuts");
+        menu.addCommandItem(&commandManager, CommandIDs::midiMapping, "Midi mapping");
     }
     else if (menuIndex == 2)
     {
-        menu.addItem(1, "One playlist, one cart", true, 
-                    soundPlayers[0]->getSoundPlayerMode() == SoundPlayer::Mode::OnePlaylistOneCart ? true : false);
-        menu.addItem(2, "Eight faders", true,
-                    soundPlayers[0]->getSoundPlayerMode() == SoundPlayer::Mode::EightFaders ? true : false);
-        menu.addItem(3, "Keyboard Mapped", true,
-                    soundPlayers[0]->getSoundPlayerMode() == SoundPlayer::Mode::KeyMap ? true : false);
+        menu.addCommandItem(&commandManager, CommandIDs::launchPlaylist, "One playlist, one cart");
+        menu.addCommandItem(&commandManager, CommandIDs::launch8Faders, "Eight faders");
+        menu.addCommandItem(&commandManager, CommandIDs::launchKeyMapped, "Keyboard Mapped");
     }
     else if (menuIndex == 3)
     {
@@ -1246,55 +1299,7 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
 
 void MainComponent::menuItemSelected(int menuItemID, int topLevelMenuIndex)
 {
-    switch (topLevelMenuIndex)
-    {
-    case 0 :
-        switch (menuItemID)
-        {
-        case 1 : 
-            loadPlaylist();
-            break;
-        case 2 :
-            savePlaylist();
-            break;
-        case 3 :
-            juce::JUCEApplication::getInstance()->systemRequestedQuit();
-            break;
-        }
-        break;
-    case 1:
-        switch (menuItemID)
-        {
-        case 1:
-            settingsButtonClicked();
-            break;
-        case 2:
-            audioSettingsButtonClicked();
-            break;
-        case 3:
-            keyMapperButtonClicked();
-            break;
-        }
-        break;
-    case 2:
-        switch (menuItemID)
-        {
-        case 1:
-            if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::OnePlaylistOneCart)
-                launchSoundPlayer(SoundPlayer::Mode::OnePlaylistOneCart);
-            break;
-        case 2:
-            if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::EightFaders)
-                launchSoundPlayer(SoundPlayer::Mode::EightFaders);
-            break;
-        case 3:
-            if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::KeyMap)
-                launchSoundPlayer(SoundPlayer::Mode::KeyMap);
-            break;
-        }
-        settings->setPreferedSoundPlayerMode(menuItemID);
-        break;
-    }
+
 }
 
 void MainComponent::initializeBottomComponent()
@@ -1323,4 +1328,373 @@ void MainComponent::initializeBottomComponent()
     bottomComponent.getTabbedButtonBar().getTabButton(1)->addMouseListener(this, false);
     bottomComponent.getTabbedButtonBar().getTabButton(2)->addMouseListener(this, false);
     bottomComponent.getTabbedButtonBar().getTabButton(3)->addMouseListener(this, false);
+}
+
+
+juce::ApplicationCommandTarget* MainComponent::getNextCommandTarget()
+{
+    return soundPlayers[0];
+}
+
+
+void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
+{
+    juce::Array<juce::CommandID> c{ CommandIDs::startTimer,
+                                    CommandIDs::lanchRecord,
+                                    CommandIDs::goToSoundBrowser,
+                                    CommandIDs::goToDataBaseBrowser,
+                                    CommandIDs::goToDistantDataBaseBrowser,
+                                    CommandIDs::goToDatabaseImport,
+                                    CommandIDs::goToRecorder,
+                                    CommandIDs::goToClipEditor,
+                                    CommandIDs::goToClipEffect,
+                                    CommandIDs::spaceBarPlay,
+                                    CommandIDs::goToFirst,
+                                    CommandIDs::goToNext,
+                                    CommandIDs::goToPrevious,
+                                    CommandIDs::play1,
+                                    CommandIDs::play2,
+                                    CommandIDs::play3,
+                                    CommandIDs::play4,
+                                    CommandIDs::play5,
+                                    CommandIDs::play6,
+                                    CommandIDs::play7,
+                                    CommandIDs::play8,
+                                    CommandIDs::play9,
+                                    CommandIDs::play10,
+                                    CommandIDs::play11,
+                                    CommandIDs::play12,
+                                    CommandIDs::save,
+                                    CommandIDs::open,
+                                    CommandIDs::quit,
+                                    CommandIDs::openSettings,
+                                    CommandIDs::audioSettings,
+                                    CommandIDs::keyboardMapping,
+                                    CommandIDs::midiMapping,
+                                    CommandIDs::launchPlaylist,
+                                    CommandIDs::launch8Faders,
+                                    CommandIDs::launchKeyMapped};
+    commands.addArray(c);
+}
+
+void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result)
+{
+    switch (commandID)
+    {
+    case CommandIDs::startTimer:
+        result.setInfo("Start Timer", "Start Timer", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('t', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::lanchRecord:
+        result.setInfo("Launch record", "Launch record", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('r', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::goToSoundBrowser:
+        result.setInfo("Display sound browser", "Display sound browser", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('&', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::goToDataBaseBrowser:
+        result.setInfo("Display Netia database browser", "Display Netia database browser", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('é', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::goToDistantDataBaseBrowser:
+        result.setInfo("Display distant database browser", "Display distant database browser", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('"', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::goToDatabaseImport:
+        result.setInfo("Display database import", "Display database import", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('\'', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::goToRecorder:
+        result.setInfo("Display recorder", "Display recorder", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('(', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::goToClipEditor:
+        result.setInfo("Display clip editor", "Display clip editor", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('-', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::goToClipEffect:
+        result.setInfo("Display clip effect", "Display clip effect", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('è', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::spaceBarPlay:
+        result.setInfo("Play next sound in playlist (playlist mode only) or cue play (other modes)", "Play", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::spaceKey, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::goToFirst:
+        result.setInfo("Go to first sound in playlist", "Go to first", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::escapeKey, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::goToNext:
+        result.setInfo("Go to next sound in playlist", "Go to next", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::pageDownKey, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::goToPrevious:
+        result.setInfo("Go to previous sound in playlist", "Go to previous", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::pageUpKey, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play1:
+        result.setInfo("Play cart 1 (playlist) or player 1 (8 players mode)", "Play cart 1 (playlist) or player 1 (8 players mode)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F1Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play2:
+        result.setInfo("Play cart 2 (playlist) or player 21 (8 players mode)", "Play cart 1 (playlist) or player 1 (8 players mode)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F2Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play3:
+        result.setInfo("Play cart 3 (playlist) or player 3 (8 players mode)", "Play cart 1 (playlist) or player 1 (8 players mode)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F3Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play4:
+        result.setInfo("Play cart 4 (playlist) or player 4 (8 players mode)", "Play cart 1 (playlist) or player 1 (8 players mode)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F4Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play5:
+        result.setInfo("Play cart 5 (playlist) or player 5 (8 players mode)", "Play cart 1 (playlist) or player 1 (8 players mode)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F5Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play6:
+        result.setInfo("Play cart 6 (playlist) or player 6 (8 players mode)", "Play cart 1 (playlist) or player 1 (8 players mode)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F6Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play7:
+        result.setInfo("Play cart 7 (playlist) or player 7 (8 players mode)", "Play cart 1 (playlist) or player 1 (8 players mode)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F7Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play8:
+        result.setInfo("Play cart 8 (playlist) or player 8 (8 players mode)", "Play cart 1 (playlist) or player 1 (8 players mode)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F8Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play9:
+        result.setInfo("Play cart 9 (playlist)", "Play cart 9 (playlist)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F9Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play10:
+        result.setInfo("Play cart 10 (playlist)", "Play cart 10 (playlist)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F10Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play11:
+        result.setInfo("Play cart 11 (playlist)", "Play cart 11 (playlist)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F11Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::play12:
+        result.setInfo("Play cart 12 (playlist)", "Play cart 12 (playlist)", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::F12Key, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::save:
+        result.setInfo("Save", "Save", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('s', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::open:
+        result.setInfo("Open", "Open", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('o', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::quit:
+        result.setInfo("Quit", "Quit", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('q', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::openSettings:
+        result.setInfo("Open general settings", "Open Settings", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('a', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::audioSettings:
+        result.setInfo("Open audio settings", "Open audio settings", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('z', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::keyboardMapping:
+        result.setInfo("Open keyboard mapping", "Open keyboard mapping", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('e', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::midiMapping:
+        result.setInfo("Open midi mapping", "Open midi mappings", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('r', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::launchPlaylist:
+        result.setInfo("Launch playlist mode", "Launch playlist mode", "Menu", 0);
+        result.setTicked(soundPlayers[0]->getSoundPlayerMode() == SoundPlayer::Mode::OnePlaylistOneCart ? true : false);
+        result.addDefaultKeypress(juce::KeyPress::F1Key, juce::ModifierKeys::altModifier);
+        break;
+    case CommandIDs::launch8Faders:
+        result.setInfo("Launch eight faders mode", "Launch eight faders mode", "Menu", 0);
+        result.setTicked(soundPlayers[0]->getSoundPlayerMode() == SoundPlayer::Mode::EightFaders ? true : false);
+        result.addDefaultKeypress(juce::KeyPress::F2Key, juce::ModifierKeys::altModifier);
+        break;
+    case CommandIDs::launchKeyMapped:
+        result.setInfo("Launch key map mode", "Launch key map mode", "Menu", 0);
+        result.setTicked(soundPlayers[0]->getSoundPlayerMode() == SoundPlayer::Mode::KeyMap ? true : false);
+        result.addDefaultKeypress(juce::KeyPress::F3Key, juce::ModifierKeys::altModifier);
+        break;
+    default:
+        break;
+    }
+}
+
+bool MainComponent::perform(const InvocationInfo& info)
+{
+    switch (info.commandID)
+    {
+    case CommandIDs::startTimer:
+        mainStopWatch.setVisible(true);
+        mainStopWatch.startStopButtonClicked();
+        break;
+    case CommandIDs::lanchRecord:
+        launchRecord();
+        break;
+    case CommandIDs::goToSoundBrowser:
+        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(0);
+        break;
+    case CommandIDs::goToDataBaseBrowser:
+        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(1);
+        break;
+    case CommandIDs::goToDistantDataBaseBrowser:
+        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(2);
+        break;
+    case CommandIDs::goToDatabaseImport:
+        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(3);
+        break;
+    case CommandIDs::goToRecorder:
+        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(4);
+        break;
+    case CommandIDs::goToClipEditor:
+        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(5);
+        break;
+    case CommandIDs::goToClipEffect:
+        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(6);
+        break;
+    case CommandIDs::spaceBarPlay:
+        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
+            soundPlayers[0]->myPlaylists[0]->spaceBarPressed();
+        else
+        {
+            bottomComponent.spaceBarPressed();
+        }
+        break;
+    case CommandIDs::goToPrevious:
+        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
+            soundPlayers[0]->myPlaylists[0]->playersPreviousPositionClicked();
+        break;
+    case CommandIDs::goToFirst:
+        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
+            soundPlayers[0]->myPlaylists[0]->playersResetPositionClicked();
+        break;
+    case CommandIDs::goToNext:
+        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
+            soundPlayers[0]->myPlaylists[0]->playersNextPositionClicked();
+        break;
+    case CommandIDs::play1:
+        soundPlayers[0]->playPlayer(0);
+        break;
+    case CommandIDs::play2:
+        soundPlayers[0]->playPlayer(1);
+        break;
+    case CommandIDs::play3:
+        soundPlayers[0]->playPlayer(2);
+        break;
+    case CommandIDs::play4:
+        soundPlayers[0]->playPlayer(3);
+        break;
+    case CommandIDs::play5:
+        soundPlayers[0]->playPlayer(4);
+        break;
+    case CommandIDs::play6:
+        soundPlayers[0]->playPlayer(5);
+        break;
+    case CommandIDs::play7:
+        soundPlayers[0]->playPlayer(6);
+        break;
+    case CommandIDs::play8:
+        soundPlayers[0]->playPlayer(7);
+        break;
+    case CommandIDs::play9:
+        soundPlayers[0]->playPlayer(8);
+        break;
+    case CommandIDs::play10:
+        soundPlayers[0]->playPlayer(9);
+        break;
+    case CommandIDs::play11:
+        soundPlayers[0]->playPlayer(10);
+        break;
+    case CommandIDs::play12:
+        soundPlayers[0]->playPlayer(11);
+        break;
+    case CommandIDs::save:
+        savePlaylist();
+        break;
+    case CommandIDs::open:
+        loadPlaylist();
+        break;
+    case CommandIDs::quit:
+        juce::JUCEApplication::getInstance()->systemRequestedQuit();
+        break;
+    case CommandIDs::openSettings:
+        settingsButtonClicked();
+        break;
+    case CommandIDs::audioSettings:
+        audioSettingsButtonClicked();
+        break;
+    case CommandIDs::keyboardMapping:
+        keyMapperButtonClicked();
+        break;
+    case CommandIDs::midiMapping:
+        midiMapperButtonClicked();
+        break;
+    case CommandIDs::launchPlaylist:
+
+        if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::OnePlaylistOneCart)
+        {
+            launchSoundPlayer(SoundPlayer::Mode::OnePlaylistOneCart);
+            settings->setPreferedSoundPlayerMode(1);
+        }
+        break;
+    case CommandIDs::launch8Faders:
+        if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::EightFaders)
+        {
+            launchSoundPlayer(SoundPlayer::Mode::EightFaders);
+            settings->setPreferedSoundPlayerMode(2);
+        }
+        break;
+    case CommandIDs::launchKeyMapped:
+        if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::KeyMap)
+        {
+            launchSoundPlayer(SoundPlayer::Mode::KeyMap);
+            settings->setPreferedSoundPlayerMode(3);
+        }
+        break;
+    default:
+        return false;
+    }
+
+    return true;
 }

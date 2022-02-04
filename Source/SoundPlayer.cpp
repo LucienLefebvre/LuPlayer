@@ -18,7 +18,10 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
     soundPlayerMode = m;
     if (m == SoundPlayer::Mode::EightFaders)
         isEightPlayerMode = true;;
+    setMouseClickGrabsKeyboardFocus(false);
+
     juce::Timer::startTimer(50);
+
     //addKeyListener(this);
 
     if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
@@ -143,10 +146,19 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
     newMeter.reset(new Meter(Meter::Mode::Stereo));
     addAndMakeVisible(newMeter.get());
     newMeter->setSkewFactor(1.5f);
+
     if (soundPlayerMode == SoundPlayer::Mode::KeyMap)
         keyMappedSoundboard->setBounds(getLocalBounds());
 
+    meter.removeMouseListener(this);
+    meter.setMouseClickGrabsKeyboardFocus(false);
+    loudnessBarComponent.setMouseClickGrabsKeyboardFocus(false);
+    addAndMakeVisible(&mainMeter);
+    mainMeter.setMouseClickGrabsKeyboardFocus(false);
 
+    addAndMakeVisible(timeLabel);
+    //timeLabel.setBounds(getParentWidth() - 200, 0, 200, topButtonsHeight);
+    timeLabel.setFont(juce::Font(30.00f, juce::Font::plain).withTypefaceStyle("Regular"));
 }
 
 SoundPlayer::~SoundPlayer()
@@ -187,12 +199,19 @@ void SoundPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     meterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
     cuemeterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
 
+    mainMeter.prepareToPlay(samplesPerBlockExpected, sampleRate);
     newMeter->prepareToPlay(samplesPerBlockExpected, sampleRate);
+    
 }
 
 void SoundPlayer::paint (juce::Graphics& g)
 {
+    //g.fillAll (juce::Colours::red);   // clear the background
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
+   /* g.setColour(juce::Colour(40, 134, 189));
+    g.drawRoundedRectangle(timeLabel.getBounds().toFloat(), 5, 2);
+    g.setColour(juce::Colour(229, 149, 0));
+    g.fillRoundedRectangle(timeLabel.getBounds().reduced(2).toFloat(), 5);*/
 }
 
 void SoundPlayer::resized()
@@ -259,12 +278,14 @@ void SoundPlayer::resized()
         }
         else if (Settings::audioOutputMode == 2)
         {
-            levelMeterHeight = std::min(getHeight() - playersStartHeightPosition, levelMeterMaximumHeight);
+            levelMeterHeight = std::min(getHeight() - playersStartHeightPosition - timeLabelHeight, levelMeterMaximumHeight);
             meter.setBounds(playlistViewport.getWidth(), getHeight() - levelMeterHeight,
-                80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
+                80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));        
+            /*mainMeter.setBounds(playlistViewport.getWidth(), getHeight() - levelMeterHeight,
+                80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));*/
             loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7,
                 getHeight() - levelMeterHeight, 25, levelMeterHeight);
-
+            timeLabel.setBounds(playlistViewport.getRight(), 0, timeLabelWidth, timeLabelHeight);
             //newMeter->setBounds(meter.getBounds());
         }
     }
@@ -292,6 +313,8 @@ void SoundPlayer::timerCallback()
         shortTermLoudness = 1;
     loudnessBarComponent.setLoudness(shortTermLoudness);
 
+    juce::Time* time = new juce::Time(time->getCurrentTime());
+    timeLabel.setText(time->toString(false, true, true, true), juce::NotificationType::dontSendNotification);
 
     //OSC SEND
     if (oscConnected)
@@ -1199,12 +1222,16 @@ void SoundPlayer::mouseDragDefinePlayer()
     }
     else if (soundPlayerMode == Mode::EightFaders)
     {
-        if (playlistDragDestination != -1)
+        if (playlistDragDestination != -1
+            && playlistDragSource != -1
+            && playerDragSource != -1
+            && playerMouseDragUp != -1)
         {
-            auto* playerSource = myPlaylists[playlistDragSource]->players[playerDragSource];
-            auto* playerDest = myPlaylists[playlistDragDestination]->players[playerMouseDragUp];
-            if (playerSource != nullptr && playerDest != nullptr)
+            if (myPlaylists[playlistDragSource]->players[playerDragSource] != nullptr 
+                && myPlaylists[playlistDragDestination]->players[playerMouseDragUp] != nullptr)
             {
+                auto* playerSource = myPlaylists[playlistDragSource]->players[playerDragSource];
+                auto* playerDest = myPlaylists[playlistDragDestination]->players[playerMouseDragUp];
                 if (playerSource->isFileLoaded()
                     && !playerDest->isFileLoaded()
                     && myPlaylists[playlistDragDestination]->fileDragPaintRectangle == true)
@@ -1530,6 +1557,15 @@ void SoundPlayer::metersInitialize()
         addAndMakeVisible(meter);
         meter.setMeterFlags(foleys::LevelMeter::MeterFlags::Default);
         removeChildComponent(&cuemeter);
+
+        //mainMeter.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+        /*mainMeter.shouldDrawScaleNumbers(true);
+        mainMeter.setMeterColour(juce::Colour(229, 149, 0));
+        mainMeter.setPeakColour(juce::Colours::red);
+        mainMeter.shouldDrawScale(true);
+        mainMeter.setSkewFactor(1.5f);
+        mainMeter.setRectangleRoundSize(10);
+        mainMeter.setMouseClickGrabsKeyboardFocus(false);*/
     }
 
     else if (audioMode == 3)
@@ -1956,4 +1992,182 @@ bool SoundPlayer::isPlaying()
             return true;
     }
     return false;
+}
+
+Player* SoundPlayer::getActivePlayer()
+{
+    auto* r = myPlaylists[Settings::draggedPlaylist]->players[Settings::draggedPlayer];
+    if (r != nullptr)
+        return r;
+}
+
+juce::ApplicationCommandTarget* SoundPlayer::getNextCommandTarget()
+{
+    return nullptr;
+}
+
+
+void SoundPlayer::getAllCommands(juce::Array<juce::CommandID>& commands)
+{
+    juce::Array<juce::CommandID> c{ CommandIDs::cuePlay,
+                                    CommandIDs::cueStart,
+                                    CommandIDs::cueEnd,
+                                    CommandIDs::setInMark,
+                                    CommandIDs::deleteInMark,
+                                    CommandIDs::setOutMark,
+                                    CommandIDs::deleteOutMark,
+                                    CommandIDs::toggleClipEffects,
+                                    CommandIDs::toggleClipEnveloppe,
+                                    CommandIDs::toggleClipLooping,
+                                    CommandIDs::toggleHPF,
+                                    CommandIDs::upOneDb,
+                                    CommandIDs::downOneDb,
+                                    CommandIDs::dummy };
+    commands.addArray(c);
+}
+
+void SoundPlayer::getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result)
+{
+    switch (commandID)
+    {
+    case CommandIDs::cuePlay:
+        result.setInfo("Cue play at playhead", "Cue Play", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('c', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::cueStart:
+        result.setInfo("Cue play from start", "Cue play from start", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('x', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::cueEnd:
+        result.setInfo("Cue play last 5 seconds", "Cue play end", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('v', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::setInMark:
+        result.setInfo("Set in mark", "Set in mark at cue position cursor", "Clip", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('i', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::deleteInMark:
+        result.setInfo("Delete in mark", "Delete in mark", "Clip", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('k', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::setOutMark:
+        result.setInfo("Set out mark", "Set out mark at cue position cursor", "Clip", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('o', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::deleteOutMark:
+        result.setInfo("Delete out mark", "Delete out mark", "Clip", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('l', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::toggleClipEffects:
+        result.setInfo("Enable / disable clip effects", "Enable / disable clip effects", "Clip", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('e', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::toggleClipEnveloppe:
+        result.setInfo("Enable / disable clip enveloppe", "Enable / disable clip enveloppe", "Clip", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('n', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::toggleClipLooping:
+        result.setInfo("Enable / disable clip looping", "Enable / disable clip looping", "Clip", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('l', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::toggleHPF:
+        result.setInfo("Enable / disable clip high pass filter", "Enable / disable clip high pass filter", "Clip", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('h', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::upOneDb:
+        result.setInfo("Increase clip trim volume by 1dB", "Increase clip trim volume by 1dB", "Clip", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::numberPadAdd, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::downOneDb:
+        result.setInfo("Decrease clip trim volume by 1dB", "Decrease clip trim volume by 1dB", "Clip", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress(juce::KeyPress::numberPadSubtract, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::dummy:
+        result.setInfo("dummy", "dummy", "Clip", 0);
+        result.setTicked(false);
+        break;
+    default:
+        break;
+    }
+}
+
+bool SoundPlayer::perform(const InvocationInfo& info)
+{
+    switch (info.commandID)
+    {
+    case CommandIDs::setInMark:
+        getActivePlayer()->setStart();
+        break;
+    case CommandIDs::deleteInMark:
+        getActivePlayer()->deleteStart();
+        break;
+    case CommandIDs::setOutMark:
+        getActivePlayer()->setStop();
+        break;
+    case CommandIDs::deleteOutMark:
+        getActivePlayer()->deleteStop();
+        break;
+    case CommandIDs::toggleClipEffects:
+        getActivePlayer()->bypassFX(getActivePlayer()->isFxEnabled(), true);
+        break;
+    case CommandIDs::toggleClipEnveloppe:
+        getActivePlayer()->setEnveloppeEnabled(!getActivePlayer()->isEnveloppeEnabled(), true, true);
+        break;
+    case CommandIDs::toggleClipLooping:
+        getActivePlayer()->setIsLooping(!getActivePlayer()->getIsLooping(), true);
+        break;
+    case CommandIDs::toggleHPF:
+        getActivePlayer()->enableHPF(!getActivePlayer()->isHpfEnabled(), false);
+        break;
+    case CommandIDs::upOneDb:
+        getActivePlayer()->handleMidiTrimMessage(true);
+        break;
+    case CommandIDs::downOneDb:
+        getActivePlayer()->handleMidiTrimMessage(false);
+        break;
+    case CommandIDs::cuePlay:
+        getActivePlayer()->cueButtonClicked();
+        break;
+    case CommandIDs::cueStart:
+        getActivePlayer()->cueTransport.setPosition(0);
+        getActivePlayer()->cueButtonClicked();
+        break;
+    case CommandIDs::cueEnd:
+        getActivePlayer()->cueTransport.setPosition(getActivePlayer()->stopTime - 6);
+        getActivePlayer()->cueButtonClicked();
+        break;
+    case CommandIDs::dummy:
+        break;
+    default:
+        return false;
+    }
+    return true;
+}
+
+void SoundPlayer::playPlayer(int playerID)
+{
+    if (soundPlayerMode == Mode::OnePlaylistOneCart)
+        myPlaylists[1]->playPlayer(playerID);
+    else if (soundPlayerMode == Mode::EightFaders)
+    {
+        if (playerID > 3)
+            myPlaylists[1]->playPlayer(playerID - 4);
+        else
+            myPlaylists[0]->playPlayer(playerID);
+    }
+    positionViewport(playerID);
+
 }

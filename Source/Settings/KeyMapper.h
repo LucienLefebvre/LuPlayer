@@ -21,6 +21,47 @@ class KeyMapper :
     public juce::KeyListener
 {
 public:
+    enum CommandDescription
+    {
+        playNextSOund = 1,
+        goToFirst,
+        goToNext,
+        goToPrevious,
+        cuePlayHead,
+        cueStart,
+        cueEnd,
+        setInMark,
+        deleteInMark,
+        setOutMark,
+        deleteOutMark,
+        launchRecord,
+        startTimer,
+        play1,
+        play2,
+        play3,
+        play4,
+        play5,
+        play6,
+        play7,
+        play8,
+        play9,
+        play10,
+        play11,
+        play12,
+        save,
+        open,
+        quit,
+        openSettings,
+        audioSettings,
+        keyboardMapping,
+        midiMapping,
+        tClipEffects,
+        tClipEnveloppe,
+        tClipLooping,
+        tHPF,
+        upOneDb,
+        downOneDb
+    };
 
     KeyMapper(Settings* s);
     ~KeyMapper() override;
@@ -42,9 +83,12 @@ public:
     bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
     bool getWantsKeyPress();
     void loadKeyMapping();
+    void setCommandManager(juce::ApplicationCommandManager* cm);
+    void loadMappingFile();
 private:
     //KeyMapping keyMap;
     juce::Array<int> keyMapping;
+    juce::Array<int> commandUIDS;
     juce::StringArray keyMapCommands
     {
         "Play next sound in playlist (playlist mode only) or start cue",// 0
@@ -78,7 +122,13 @@ private:
         "Open genral settings (Ctrl +)",                            // 28
         "Open audio & midi settings (Ctrl +)",                      // 29
         "Open keyboard shortcuts editor (Ctrl +)",                  // 30
-        "Open midi mapping editor (Ctrl +)"                         // 31
+        "Open midi mapping editor (Ctrl +)",                        // 31
+        "Enable / Disable clip effects",                            // 32
+        "Enable / Disable clip enveloppe",                          // 33
+        "Enable / Disable clip looping",                            // 34
+        "Increase clip trim volume by 1 dB",                        // 35
+        "Decrease clip trim volume by 1 dB",                        // 36
+        "Enable / Disable clip high pass filter"                    // 37
     };
     juce::Array<int> defaultMapping
     {
@@ -113,13 +163,20 @@ private:
         juce::KeyPress::createFromDescription("g").getKeyCode(),     // 28
         juce::KeyPress::createFromDescription("a").getKeyCode(),     // 29
         juce::KeyPress::createFromDescription("k").getKeyCode(),     // 30
-        juce::KeyPress::createFromDescription("m").getKeyCode()      // 31
+        juce::KeyPress::createFromDescription("m").getKeyCode(),     // 31
+        juce::KeyPress::createFromDescription("o").getKeyCode(),     // 32
+        juce::KeyPress::createFromDescription("q").getKeyCode(),     // 33
+        juce::KeyPress::createFromDescription("g").getKeyCode(),     // 34
+        juce::KeyPress::createFromDescription("a").getKeyCode(),     // 35
+        juce::KeyPress::createFromDescription("k").getKeyCode(),     // 36
+        juce::KeyPress::createFromDescription("m").getKeyCode()      // 37
     };
     std::unique_ptr<juce::TableListBox> table;
 
     bool wantsKeyPress = false;
     int commandToMap = 0;
-
+    int numRows = 0;
     Settings* settings;
+    juce::ApplicationCommandManager* commandManager;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMapper)
 };

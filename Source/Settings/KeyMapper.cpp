@@ -27,6 +27,9 @@ KeyMapper::KeyMapper(Settings* s)
     table->getHeader().addColumn("Action", 1, 400);
     table->getHeader().addColumn("Shortcut", 2, 190);
     table->getHeader().setColour(juce::TableHeaderComponent::ColourIds::backgroundColourId, juce::Colour(40, 134, 189));
+    table->removeKeyListener(this);
+    table->setWantsKeyboardFocus(false);
+    table->setMouseClickGrabsKeyboardFocus(false);
 }
 
 KeyMapper::~KeyMapper()
@@ -46,7 +49,7 @@ void KeyMapper::resized()
 
 int KeyMapper::getNumRows()
 {
-    return keyMapCommands.size();
+    return numRows;
 }
 
 void KeyMapper::paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected)
@@ -67,18 +70,21 @@ void KeyMapper::paintCell(juce::Graphics& g, int rowNumber, int columnId, int wi
 
     if (columnId == 1)
     {
-        g.drawText(keyMapCommands[rowNumber], 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+        juce::String cellstring = commandManager->getCommandForIndex(rowNumber)->description;
+        g.drawText(cellstring, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
     }
     if (columnId == 2)
     {
-        juce::String key = juce::KeyPress(keyMapping[rowNumber]).getTextDescription();
+        juce::String cellstring = commandManager->getKeyMappings()->getKeyPressesAssignedToCommand(commandUIDS[rowNumber])[0].getTextDescription();
         if (wantsKeyPress && table->getSelectedRow() == rowNumber)
         {
             g.setColour(juce::Colours::red);
             g.drawText("Press a key...", 2, 0, width - 4, height, juce::Justification::centredLeft, true);
         }
         else
-        g.drawText(key, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+        {
+            g.drawText(cellstring, 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+        }
     }
 }
 
@@ -117,11 +123,17 @@ bool KeyMapper::keyPressed(const juce::KeyPress& key, juce::Component* originati
 {
     if (wantsKeyPress)
     {
-        keyMapping.set(table->getSelectedRow(), key.getKeyCode());
+        commandManager->getKeyMappings()->removeKeyPress(key);
+        commandManager->getKeyMappings()->removeKeyPress(commandUIDS[table->getSelectedRow()], 0);
+        commandManager->getKeyMappings()->addKeyPress(commandUIDS[table->getSelectedRow()], key, 0);
+
         wantsKeyPress = false;
         table->updateContent();
         repaint();
-        settings->setKeyMapping(keyMapping, keyMapCommands);
+
+        std::unique_ptr<juce::XmlElement> xml = commandManager->getKeyMappings()->createXml(false);
+        juce::File keyboardMappingFile(juce::File::getCurrentWorkingDirectory().getChildFile("keyMapping.xml"));
+        xml->writeTo(keyboardMappingFile);
     }
     return false;
 }
@@ -136,4 +148,27 @@ void KeyMapper::loadKeyMapping()
     keyMapping = settings->getKeyMapping(keyMapCommands);
     if (keyMapping[0] == 0 && keyMapping[1] == 0)
         keyMapping = defaultMapping;
+}
+
+void KeyMapper::setCommandManager(juce::ApplicationCommandManager* cm)
+{
+    commandManager = cm;
+    juce::StringArray commandCategories = commandManager->getCommandCategories();
+    commandUIDS.clear();
+    for (auto categorie : commandCategories)
+    {
+        commandUIDS.addArray(commandManager->getCommandsInCategory(categorie));
+    }
+
+    numRows = commandManager->getNumCommands() - 1;
+}
+
+void KeyMapper::loadMappingFile()
+{
+    if (juce::File::getCurrentWorkingDirectory().getChildFile("keyMapping.xml").exists())
+    {
+        juce::XmlDocument xmlDoc(juce::File::getCurrentWorkingDirectory().getChildFile("keyMapping.xml"));
+        juce::XmlElement xml(*xmlDoc.getDocumentElement());
+        commandManager->getKeyMappings()->restoreFromXml(xml);
+    }
 }

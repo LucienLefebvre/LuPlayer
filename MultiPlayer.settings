@@ -23,9 +23,9 @@
   <VALUE name="Launchatzero" val="1"/>
   <VALUE name="Play next sound in playlist" val="32"/>
   <VALUE name="Go to first sound in playlist" val="27"/>
-  <VALUE name="Go to next sound in playlist" val="65570"/>
-  <VALUE name="Go to previous sound in playlist" val="65569"/>
-  <VALUE name="Cue play at playhead" val="67"/>
+  <VALUE name="Go to next sound in playlist" val="71"/>
+  <VALUE name="Go to previous sound in playlist" val="71"/>
+  <VALUE name="Cue play at playhead" val="71"/>
   <VALUE name="Cue play from start" val="88"/>
   <VALUE name="Cue play last 5 seconds" val="86"/>
   <VALUE name="Set in mark" val="73"/>
@@ -55,4 +55,10 @@
   <VALUE name="Open audio &amp; midi settings (Ctrl +)" val="65"/>
   <VALUE name="Open keyboard shortcuts editor (Ctrl +)" val="75"/>
   <VALUE name="Open midi mapping editor (Ctrl +)" val="77"/>
+  <VALUE name="Enable / Disable clip effects" val="0"/>
+  <VALUE name="Enable / Disable clip enveloppe" val="0"/>
+  <VALUE name="Enable / Disable clip looping" val="0"/>
+  <VALUE name="Increase clip trim volume by 1 dB" val="0"/>
+  <VALUE name="Decrease clip trim volume by 1 dB" val="0"/>
+  <VALUE name="Enable / Disable clip high pass filter" val="0"/>
 </PROPERTIES>

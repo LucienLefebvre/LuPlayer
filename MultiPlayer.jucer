@@ -16,6 +16,8 @@
       <GROUP id="{C446E222-F82A-C695-0D7B-5CADD47B4434}" name="Settings">
         <FILE id="jf39aT" name="KeyMapper.cpp" compile="1" resource="0" file="Source/Settings/KeyMapper.cpp"/>
         <FILE id="JCOhon" name="KeyMapper.h" compile="0" resource="0" file="Source/Settings/KeyMapper.h"/>
+        <FILE id="izlwXZ" name="MidiMapper.cpp" compile="1" resource="0" file="Source/Settings/MidiMapper.cpp"/>
+        <FILE id="iOodzk" name="MidiMapper.h" compile="0" resource="0" file="Source/Settings/MidiMapper.h"/>
       </GROUP>
       <FILE id="EnJnmP" name="StopWatch.h" compile="0" resource="0" file="Source/StopWatch.h"/>
       <FILE id="cif9Kn" name="DenoiseThread.h" compile="0" resource="0" file="Source/DenoiseThread.h"/>

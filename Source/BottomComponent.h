@@ -41,6 +41,7 @@ public:
     bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper);
     void setStart();
     void setStop();
+    void spaceBarPressed();
     AudioPlaybackDemo audioPlaybackDemo;
     Recorder recorderComponent;
     DataBaseBrowser dbBrowser;

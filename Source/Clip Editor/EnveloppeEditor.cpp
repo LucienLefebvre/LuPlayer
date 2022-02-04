@@ -606,6 +606,12 @@ void EnveloppeEditor::scaleButtonClicked()
     resized();
 }
 
+void EnveloppeEditor::spaceBarPressed()
+{
+    if (editedPlayer != nullptr)
+        editedPlayer->cueButtonClicked();
+}
+
 juce::Array<int> EnveloppeEditor::createTimeLines()
 {
     if (editedPlayer != nullptr)

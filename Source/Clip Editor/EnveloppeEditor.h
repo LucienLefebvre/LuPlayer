@@ -66,6 +66,7 @@ public:
     void timerCallback();
     void createDefaultEnveloppePath();
     void scaleButtonClicked();
+    void spaceBarPressed();
 private:
     void changeListenerCallback(juce::ChangeBroadcaster* source);
     juce::Array<int> createTimeLines();

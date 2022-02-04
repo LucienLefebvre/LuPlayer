@@ -135,7 +135,7 @@ public:
 
             //toFront(true);
             setWantsKeyboardFocus(true);
-
+            mainComponent.grabKeyboardFocus();
             //setAlwaysOnTop(true);
 
             //runModalLoop(); 

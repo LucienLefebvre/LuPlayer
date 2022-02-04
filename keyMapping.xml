@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<KEYMAPPINGS basedOnDefaults="0">
+  <MAPPING commandId="1" description="Start Timer" key="T"/>
+  <MAPPING commandId="2" description="Launch record" key="R"/>
+  <MAPPING commandId="3" description="Display sound browser" key="&amp;"/>
+  <MAPPING commandId="5" description="Display distant database browser"
+           key="&quot;"/>
+  <MAPPING commandId="6" description="Display database import" key="'"/>
+  <MAPPING commandId="7" description="Display recorder" key="("/>
+  <MAPPING commandId="a" description="Play" key="spacebar"/>
+  <MAPPING commandId="b" description="Go to first" key="escape"/>
+  <MAPPING commandId="c" description="Go to next" key="page down"/>
+  <MAPPING commandId="d" description="Go to previous" key="page up"/>
+  <MAPPING commandId="e" description="Play cart 1 (playlist) or player 1 (8 players mode)"
+           key="F1"/>
+  <MAPPING commandId="f" description="Play cart 1 (playlist) or player 1 (8 players mode)"
+           key="F2"/>
+  <MAPPING commandId="10" description="Play cart 1 (playlist) or player 1 (8 players mode)"
+           key="F3"/>
+  <MAPPING commandId="11" description="Play cart 1 (playlist) or player 1 (8 players mode)"
+           key="F4"/>
+  <MAPPING commandId="12" description="Play cart 1 (playlist) or player 1 (8 players mode)"
+           key="F5"/>
+  <MAPPING commandId="13" description="Play cart 1 (playlist) or player 1 (8 players mode)"
+           key="F6"/>
+  <MAPPING commandId="14" description="Play cart 1 (playlist) or player 1 (8 players mode)"
+           key="F7"/>
+  <MAPPING commandId="15" description="Play cart 1 (playlist) or player 1 (8 players mode)"
+           key="F8"/>
+  <MAPPING commandId="16" description="Play cart 9 (playlist)" key="F9"/>
+  <MAPPING commandId="17" description="Play cart 10 (playlist)" key="F10"/>
+  <MAPPING commandId="18" description="Play cart 11 (playlist)" key="F11"/>
+  <MAPPING commandId="19" description="Play cart 12 (playlist)" key="F12"/>
+  <MAPPING commandId="1a" description="Save" key="ctrl + S"/>
+  <MAPPING commandId="1b" description="Open" key="ctrl + O"/>
+  <MAPPING commandId="1c" description="Quit" key="ctrl + Q"/>
+  <MAPPING commandId="1d" description="Open Settings" key="ctrl + A"/>
+  <MAPPING commandId="1e" description="Open audio settings" key="ctrl + Z"/>
+  <MAPPING commandId="1f" description="Open keyboard mapping" key="ctrl + E"/>
+  <MAPPING commandId="20" description="Open midi mappings" key="ctrl + R"/>
+  <MAPPING commandId="21" description="Launch playlist mode" key="alt + F1"/>
+  <MAPPING commandId="22" description="Launch eight faders mode" key="alt + F2"/>
+  <MAPPING commandId="23" description="Launch key map mode" key="alt + F3"/>
+  <MAPPING commandId="64" description="Cue Play" key="C"/>
+  <MAPPING commandId="65" description="Cue play from start" key="X"/>
+  <MAPPING commandId="66" description="Cue play end" key="V"/>
+  <MAPPING commandId="67" description="Set in mark at cue position cursor"
+           key="I"/>
+  <MAPPING commandId="68" description="Delete in mark" key="K"/>
+  <MAPPING commandId="69" description="Set out mark at cue position cursor"
+           key="O"/>
+  <MAPPING commandId="6a" description="Delete out mark" key="L"/>
+  <MAPPING commandId="6b" description="Enable / disable clip effects" key="ctrl + E"/>
+  <MAPPING commandId="6c" description="Enable / disable clip enveloppe"
+           key="ctrl + N"/>
+  <MAPPING commandId="6d" description="Enable / disable clip looping" key="ctrl + L"/>
+  <MAPPING commandId="6e" description="Enable / disable clip high pass filter"
+           key="ctrl + H"/>
+  <MAPPING commandId="6f" description="Increase clip trim volume by 1dB"
+           key="ctrl + cursor up"/>
+  <MAPPING commandId="70" description="Decrease clip trim volume by 1dB"
+           key="ctrl + cursor down"/>
+  <MAPPING commandId="4" description="Display Netia database browser" key="#e9"/>
+  <MAPPING commandId="9" description="Display clip effect" key="#e8"/>
+</KEYMAPPINGS>

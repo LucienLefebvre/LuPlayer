@@ -175,3 +175,10 @@ void BottomComponent::setStop()
     recorderComponent.setStart();
     clipEditor.setStop();
 }
+
+void BottomComponent::spaceBarPressed()
+{
+    dbBrowser.play();
+    audioPlaybackDemo.spaceBarPressed();
+    clipEditor.spaceBarPressed();
+}

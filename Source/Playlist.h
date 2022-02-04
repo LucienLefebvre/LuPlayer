@@ -29,7 +29,8 @@ class Playlist  : public juce::Component,
     public juce::Timer,
     public juce::ChangeBroadcaster,
     public juce::ActionListener,
-    public juce::ActionBroadcaster
+    public juce::ActionBroadcaster,
+    public juce::ApplicationCommandTarget
 {
 public:
     Playlist(int splaylistType);
@@ -94,6 +95,12 @@ public:
     void resetFxEditedButtons();
 
     bool isPlaying();
+
+
+    juce::ApplicationCommandTarget* getNextCommandTarget();
+    void getAllCommands(juce::Array<juce::CommandID>& commands);
+    void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result);
+    bool perform(const InvocationInfo& info);
 
     bool eightPlayerMode = false;
     bool isEightPlayerSecondCart = false;

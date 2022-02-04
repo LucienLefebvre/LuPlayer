@@ -173,6 +173,12 @@ public:
         return true;
     }
 
+    void spaceBarPressed()
+    {
+        if (isVisible())
+            enveloppeEditor.spaceBarPressed();
+    }
+
     void buttonStateChanged(juce::Button* b)
     {
         auto& modifiers = juce::ModifierKeys::getCurrentModifiers();

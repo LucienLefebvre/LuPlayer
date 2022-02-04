@@ -17,6 +17,7 @@
 #include "SoundBoard/KeyboardMappedSoundboard.h"
 #include "StopWatch.h"
 #include "Settings/KeyMapper.h"
+#include "Settings/MidiMapper.h"
 //#include <MacrosAndJuceHeaders.h>
 //#include <SecondOrderIIRFilter.h>
 //==============================================================================
@@ -35,13 +36,52 @@ class MainComponent :   public juce::AudioAppComponent,
                         public juce::Slider::Listener,
                         public juce::ChangeBroadcaster,
                         public juce::ComboBox::Listener,
-                        public juce::MenuBarModel
+                        public juce::MenuBarModel,
+                        public juce::ApplicationCommandTarget
 {
 public:
     //==============================================================================
+    enum CommandIDs
+    {
+        startTimer = 1,
+        lanchRecord,
+        goToSoundBrowser,
+        goToDataBaseBrowser,
+        goToDistantDataBaseBrowser,
+        goToDatabaseImport,
+        goToRecorder,
+        goToClipEditor,
+        goToClipEffect,
+        spaceBarPlay,
+        goToFirst,
+        goToNext,
+        goToPrevious,
+        play1,
+        play2,
+        play3,
+        play4,
+        play5,
+        play6,
+        play7,
+        play8,
+        play9,
+        play10,
+        play11,
+        play12,
+        save,
+        open,
+        quit,
+        openSettings,
+        audioSettings,
+        keyboardMapping,
+        midiMapping,
+        launchPlaylist,
+        launch8Faders,
+        launchKeyMapped
+    };
     MainComponent();
 
-    static bool MainComponent::exitAnswered;
+
 
     ~MainComponent() override;
 
@@ -74,7 +114,7 @@ public:
     bool MainComponent::isPlayingOrRecording();
     void MainComponent::setCommandLine(juce::String commandLine);
     bool hasBeenSaved();
-
+    static bool MainComponent::exitAnswered;
 private:
     //==============================================================================
     // Your private member variables go here...
@@ -95,6 +135,7 @@ private:
     void MainComponent::settingsButtonClicked();
     void audioSettingsButtonClicked();
     void keyMapperButtonClicked();
+    void midiMapperButtonClicked();
     juce::AudioBuffer<float> outputBuffer;
 
     juce::AudioDeviceSelectorComponent audioSetupComp;
@@ -118,7 +159,8 @@ private:
 
 
     //GRAPHIC
-    int playersStartHeightPosition = 30;
+    int menuBarHeight = 25;
+    int playersStartHeightPosition = 25;
     int playerHeight = 100;
     int playerWidth = 670;
     int spaceBetweenPlayer = 5;
@@ -429,7 +471,14 @@ private:
     std::unique_ptr<juce::MenuBarComponent> menuBar;
 
     std::unique_ptr<KeyMapper> keyMapper;
+    std::unique_ptr<MidiMapper> midiMapper;
     //juce::MenuBarPosition menuBarPosition = juce::MenuBarPosition::window;
+
+    juce::ApplicationCommandManager commandManager;
+    juce::ApplicationCommandTarget* getNextCommandTarget();
+    void getAllCommands(juce::Array<juce::CommandID>& commands);
+    void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result);
+    bool perform(const InvocationInfo& info);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
 

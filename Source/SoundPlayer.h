@@ -24,6 +24,7 @@
 #include "Mixer/Meter.h"
 #include "Soundboard/KeyboardMappedSoundboard.h"
 #include "Settings/KeyMapper.h"
+#include "Mixer/Meter.h"
 //==============================================================================
 /*
 */
@@ -35,16 +36,32 @@ class SoundPlayer : public juce::Component,
                     private juce::OSCReceiver,
                     private juce::OSCReceiver::ListenerWithOSCAddress<juce::OSCReceiver::MessageLoopCallback>,
                     private juce::OSCReceiver::Listener<juce::OSCReceiver::MessageLoopCallback>,
-                    public juce::ActionListener
-                    //private juce::Button::Listener,
-                    //public juce::DragAndDropContainer
+                    public juce::ActionListener,
+                    public juce::ApplicationCommandTarget
 {
 public:
     enum  class Mode : int
     {
         OnePlaylistOneCart = 1,
-        EightFaders = 2,
-        KeyMap = 3
+        EightFaders,
+        KeyMap
+    };
+    enum CommandIDs
+    {
+        cuePlay = 100,
+        cueStart,
+        cueEnd,
+        setInMark,
+        deleteInMark,
+        setOutMark,
+        deleteOutMark,
+        toggleClipEffects,
+        toggleClipEnveloppe,
+        toggleClipLooping,
+        toggleHPF,
+        upOneDb,
+        downOneDb,
+        dummy
     };
     SoundPlayer(SoundPlayer::Mode m);
     ~SoundPlayer() override;
@@ -55,6 +72,9 @@ public:
 
     void paint (juce::Graphics&) override;
     void resized() override;
+
+    Player* getActivePlayer();
+    void playPlayer(int playerID);
 
     void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message);
     void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message);
@@ -100,6 +120,12 @@ public:
     void initializeKeyMapPlayer();
     SoundPlayer::Mode getSoundPlayerMode();
     bool isPlaying();
+
+    juce::ApplicationCommandTarget* getNextCommandTarget();
+    void getAllCommands(juce::Array<juce::CommandID>& commands);
+    void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result);
+    bool perform(const InvocationInfo& info);
+
 private:
     void SoundPlayer::timerCallback();
     void SoundPlayer::valueChanged(juce::Value& value);
@@ -130,7 +156,7 @@ private:
 
 
     //GRAPHIC
-    int playersStartHeightPosition = 30;
+    int playersStartHeightPosition = 10;
     int playerHeight = 100;
     int playerWidth = 670;
     int spaceBetweenPlayer = 5;
@@ -160,6 +186,8 @@ private:
     float shortTermLoudness = 0;
     float cueShortTermLoudness = 0;
 
+    Meter mainMeter{Meter::Mode::Stereo};
+
     //Buttons
     juce::TextButton playersResetPosition;
     juce::TextButton playersPreviousPosition;
@@ -169,6 +197,10 @@ private:
     juce::TextButton addPlayerCart;
     juce::TextButton removePlayerCart;
 
+    //Label
+    juce::Label timeLabel;
+    int timeLabelWidth = 120;
+    int timeLabelHeight = 35;
     //MIDI
     int midiMessageNumber;
     int midiMessageValue;

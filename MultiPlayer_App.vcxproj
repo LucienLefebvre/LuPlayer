@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClCompile Include="Source\Clip Editor\EnveloppeEditor.cpp"/>
     <ClCompile Include="Source\Settings\KeyMapper.cpp"/>
+    <ClCompile Include="Source\Settings\MidiMapper.cpp"/>
     <ClCompile Include="Source\convertObject.cpp"/>
     <ClCompile Include="Source\Mixer\FilterEditor.cpp"/>
     <ClCompile Include="Source\Mixer\FilterProcessor.cpp"/>
@@ -2233,6 +2234,7 @@
     <ClInclude Include="Source\Clip Editor\EnveloppeEditor.h"/>
     <ClInclude Include="Source\Clip Editor\EnveloppePoint.h"/>
     <ClInclude Include="Source\Settings\KeyMapper.h"/>
+    <ClInclude Include="Source\Settings\MidiMapper.h"/>
     <ClInclude Include="Source\StopWatch.h"/>
     <ClInclude Include="Source\DenoiseThread.h"/>
     <ClInclude Include="Source\batchConvertThread.h"/>

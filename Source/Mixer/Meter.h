@@ -28,7 +28,8 @@ public:
     {
         // In your constructor, you should add any child components, and
         // initialise any special settings that your component needs.
-        juce::Timer::startTimer(timerRateMs);
+        //juce::Timer::startTimer(timerRateMs);
+        juce::Timer::startTimerHz(timerRateHz);
         channelColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
         dataAvailable.store(false);
     }
@@ -254,6 +255,18 @@ public:
         peakLevelR.store(meterData.peakR);
     }
 
+    void setRMSMeterData(float l, float r)
+    {
+        rmsAverageL.store(l);
+        rmsAverageR.store(r);
+    }
+
+    void setPeakMeterDate(float l, float r)
+    {
+        peakLevelL.store(l);
+        peakLevelR.store(r);
+    }
+
     void resized() override
     {
         updateBarsSize();
@@ -415,6 +428,7 @@ private:
     float meterSkewFactor = 3.0f;
 
     int timerRateMs = 50;
+    int timerRateHz = 60;
     int rmsIntegrationTime = 50;
     
     int numberOfBlocksPerTicks;

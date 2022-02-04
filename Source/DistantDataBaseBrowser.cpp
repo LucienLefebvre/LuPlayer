@@ -51,6 +51,8 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
 
     table.addComponentListener(this);
     table.getHeader().addListener(this);
+    table.setWantsKeyboardFocus(false);
+    table.setMouseClickGrabsKeyboardFocus(false);
 
     addAndMakeVisible(&timeLabel);
     timeLabel.setFont(juce::Font(20.00f, juce::Font::plain).withTypefaceStyle("Regular"));

@@ -103,9 +103,15 @@ void ClipEffect::setName(std::string n)
 void ClipEffect::timerCallback()
 {
     if (editedPlayer != nullptr)
-        displayInputMeter.setMeterData(inputMeter->getMeterData());
+    {
+        displayInputMeter.setRMSMeterData(editedPlayer->meterSource.getRMSLevel(0), editedPlayer->meterSource.getRMSLevel(1));
+        displayInputMeter.setPeakMeterDate(editedPlayer->meterSource.getMaxLevel(0), editedPlayer->meterSource.getMaxLevel(1));
+    }
     if (editedPlayer != nullptr)
-        displayOutputMeter.setMeterData(outputMeter->getMeterData());
+    {
+        displayOutputMeter.setRMSMeterData(editedPlayer->outMeterSource.getRMSLevel(0), editedPlayer->outMeterSource.getRMSLevel(1));
+        displayOutputMeter.setPeakMeterDate(editedPlayer->outMeterSource.getMaxLevel(0), editedPlayer->outMeterSource.getMaxLevel(1));
+    }
     if (editedPlayer != nullptr)
         displayCompMeter.setReductionGain(compMeter->getReductionGain());
 }

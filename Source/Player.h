@@ -101,7 +101,7 @@ public:
     float getTrimVolume();
     void setTrimVolume(double trimVolume);
     bool getIsLooping();
-    void setIsLooping(bool isLooping);
+    void setIsLooping(bool isLooping, bool shouldSendMessage = false);
     std::string getName();
     bool getHasBeenNormalized();
     void setHasBeenNormalized(bool b);
@@ -177,7 +177,7 @@ public:
     void createDefaultEnveloppePath();
     juce::Path* getEnveloppePath();
     bool isEnveloppeEnabled();
-    void setEnveloppeEnabled(bool isEnabled, bool shouldSendMessage = true);
+    void setEnveloppeEnabled(bool isEnabled, bool shouldSendMessage = true, bool switchToEnveloppePanel = false);
 
     bool getIsCart();
 
@@ -281,7 +281,8 @@ public:
     juce::ChangeBroadcaster* playerInfoChangedBroadcaster;
     juce::ChangeBroadcaster* playerDeletedBroadcaster;
 
-
+    foleys::LevelMeterSource meterSource;
+    foleys::LevelMeterSource outMeterSource;
 private:
     enum TransportState
     {
@@ -478,5 +479,7 @@ private:
     bool enveloppeEnabled = false;
 
     std::atomic<bool> shouldRepaint = false;
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };

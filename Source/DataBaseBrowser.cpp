@@ -46,6 +46,8 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     table.getHeader().addColumn("Date", 3, 150);
     if (showFileColumn)
         table.getHeader().addColumn("File", 4, 50, juce::TableHeaderComponent::ColumnPropertyFlags::notResizableOrSortable);
+    table.setWantsKeyboardFocus(false);
+    table.setMouseClickGrabsKeyboardFocus(false);
 
     //table.getHeader().addColumn("File", 4, 200);
     table.addMouseListener(this, true);

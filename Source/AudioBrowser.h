@@ -429,9 +429,15 @@ public:
             int keyCode = key.getKeyCode();
             if (keyMapper->getKeyMapping(0) == keyCode)
             {
-                startOrStop();
+                //startOrStop();
             }
         }
+    }
+
+    void spaceBarPressed()
+    {
+        if (isVisible())
+            startOrStop();
     }
 
     juce::FileBrowserComponent* fileBrowser;

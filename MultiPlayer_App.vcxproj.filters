@@ -487,6 +487,9 @@
     <ClCompile Include="Source\Settings\KeyMapper.cpp">
       <Filter>MultiPlayer\Source\Settings</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Settings\MidiMapper.cpp">
+      <Filter>MultiPlayer\Source\Settings</Filter>
+    </ClCompile>
     <ClCompile Include="Source\convertObject.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
@@ -2782,6 +2785,9 @@
       <Filter>MultiPlayer\Clip Editor</Filter>
     </ClInclude>
     <ClInclude Include="Source\Settings\KeyMapper.h">
+      <Filter>MultiPlayer\Source\Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Settings\MidiMapper.h">
       <Filter>MultiPlayer\Source\Settings</Filter>
     </ClInclude>
     <ClInclude Include="Source\StopWatch.h">

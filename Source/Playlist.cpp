@@ -22,7 +22,7 @@ Playlist::Playlist(int splaylistType)
     playlistType = splaylistType;
     //if (playlistType == 1)
     juce::Timer::startTimer(100);
-
+    setMouseClickGrabsKeyboardFocus(false);
     if (playlistType == 1)
     {
         handleFader3(127);
@@ -919,6 +919,7 @@ void Playlist::addPlayer(int playerID)
     meters[idAddedPlayer]->setPeakColour(juce::Colours::red);
     meters[idAddedPlayer]->shouldDrawScale(true);
     meters[idAddedPlayer]->setRectangleRoundSize(2);
+    meters[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
 
     playersPositionLabels[idAddedPlayer]->setText(juce::String(idAddedPlayer + 1), juce::NotificationType::dontSendNotification);
     addAndMakeVisible(playersPositionLabels[idAddedPlayer]);
@@ -1762,7 +1763,11 @@ void Playlist::timerCallback()
     for (auto i = 0; i < players.size(); i++)
     {
         if (players[i] != nullptr && meters[i] != nullptr)
-            meters[i]->setMeterData(players[i]->getOutputMeter().getMeterData());
+        {
+            meters[i]->setRMSMeterData(players[i]->meterSource.getRMSLevel(0), players[i]->meterSource.getRMSLevel(1));
+            meters[i]->setPeakMeterDate(players[i]->meterSource.getMaxLevel(0), players[i]->meterSource.getMaxLevel(1));
+        }
+
     }
     if (playlistType == 1)
     {
@@ -1876,3 +1881,25 @@ bool Playlist::isPlaying()
     }
     return false;
 }
+
+juce::ApplicationCommandTarget* Playlist::getNextCommandTarget()
+{
+    return nullptr;
+}
+
+
+void Playlist::getAllCommands(juce::Array<juce::CommandID>& commands)
+{
+
+}
+
+void Playlist::getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result)
+{
+
+}
+
+bool Playlist::perform(const InvocationInfo& info)
+{
+    return true;
+}
+
