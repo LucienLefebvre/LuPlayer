@@ -42,6 +42,8 @@ public:
     void setStart();
     void setStop();
     void spaceBarPressed();
+    void setOrDeleteStart(bool setOrDelete);
+    void setOrDeleteStop(bool setOrDelete);
     AudioPlaybackDemo audioPlaybackDemo;
     Recorder recorderComponent;
     DataBaseBrowser dbBrowser;

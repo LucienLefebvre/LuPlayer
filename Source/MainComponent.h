@@ -78,12 +78,14 @@ public:
         midiMapping,
         launchPlaylist,
         launch8Faders,
-        launchKeyMapped
+        launchKeyMapped,
+        setInMark,
+        deleteInMark,
+        setOutMark,
+        deleteOutMark
     };
+
     MainComponent();
-
-
-
     ~MainComponent() override;
 
     //==============================================================================

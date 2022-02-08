@@ -162,6 +162,7 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
     timeLabel.setMouseClickGrabsKeyboardFocus(false);
 
     addChildComponent(&mainStopWatch);
+    mainStopWatch.setMouseClickGrabsKeyboardFocus(false);
 
     for (int i = 0; i < getNumChildComponents(); i++)
     {
@@ -2003,10 +2004,6 @@ void SoundPlayer::getAllCommands(juce::Array<juce::CommandID>& commands)
     juce::Array<juce::CommandID> c{ CommandIDs::cuePlay,
                                     CommandIDs::cueStart,
                                     CommandIDs::cueEnd,
-                                    CommandIDs::setInMark,
-                                    CommandIDs::deleteInMark,
-                                    CommandIDs::setOutMark,
-                                    CommandIDs::deleteOutMark,
                                     CommandIDs::toggleClipEffects,
                                     CommandIDs::toggleClipEnveloppe,
                                     CommandIDs::toggleClipLooping,
@@ -2035,26 +2032,6 @@ void SoundPlayer::getCommandInfo(juce::CommandID commandID, juce::ApplicationCom
         result.setInfo("Cue play last 5 seconds", "Cue play end", "Menu", 0);
         result.setTicked(false);
         result.addDefaultKeypress('v', juce::ModifierKeys::noModifiers);
-        break;
-    case CommandIDs::setInMark:
-        result.setInfo("Set in mark", "Set in mark at cue position cursor", "Clip", 0);
-        result.setTicked(false);
-        result.addDefaultKeypress('i', juce::ModifierKeys::noModifiers);
-        break;
-    case CommandIDs::deleteInMark:
-        result.setInfo("Delete in mark", "Delete in mark", "Clip", 0);
-        result.setTicked(false);
-        result.addDefaultKeypress('k', juce::ModifierKeys::noModifiers);
-        break;
-    case CommandIDs::setOutMark:
-        result.setInfo("Set out mark", "Set out mark at cue position cursor", "Clip", 0);
-        result.setTicked(false);
-        result.addDefaultKeypress('o', juce::ModifierKeys::noModifiers);
-        break;
-    case CommandIDs::deleteOutMark:
-        result.setInfo("Delete out mark", "Delete out mark", "Clip", 0);
-        result.setTicked(false);
-        result.addDefaultKeypress('l', juce::ModifierKeys::noModifiers);
         break;
     case CommandIDs::toggleClipEffects:
         result.setInfo("Enable / disable clip effects", "Enable / disable clip effects", "Clip", 0);
@@ -2099,18 +2076,6 @@ bool SoundPlayer::perform(const InvocationInfo& info)
 {
     switch (info.commandID)
     {
-    case CommandIDs::setInMark:
-        getActivePlayer()->setStart();
-        break;
-    case CommandIDs::deleteInMark:
-        getActivePlayer()->deleteStart();
-        break;
-    case CommandIDs::setOutMark:
-        getActivePlayer()->setStop();
-        break;
-    case CommandIDs::deleteOutMark:
-        getActivePlayer()->deleteStop();
-        break;
     case CommandIDs::toggleClipEffects:
         getActivePlayer()->bypassFX(getActivePlayer()->isFxEnabled(), true);
         break;

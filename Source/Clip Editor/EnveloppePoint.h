@@ -105,6 +105,7 @@ public:
     void setCanMoveTime(bool b)
     {
         canMoveTime = b;
+        pointColour = juce::Colours::darkred;
     }
 
     bool getCanMoveTime()
@@ -115,6 +116,11 @@ public:
     void setPointColour(juce::Colour c)
     {
         pointColour = c;
+    }
+
+    void setFixedPoint()
+    {
+        setCanMoveTime(false);
     }
 private:
     float xPos = 0.0;

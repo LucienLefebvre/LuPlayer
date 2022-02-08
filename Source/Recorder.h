@@ -41,7 +41,10 @@ public:
     void Recorder::recordButtonClicked();
     bool Recorder::isRecording();
     void Recorder::setStart();
+    void setOrDeleteStop(bool setOrDelete);
+    void setOrDeleteStart(bool setOrDelete);
     void Recorder::setStop();
+    void Recorder::cueButtonClicked();
 
     juce::ToggleButton enabledButton;
     juce::ToggleButton enableMonitoring;
@@ -74,7 +77,6 @@ private:
     bool Recorder::loadFile(const juce::String& path);
     void Recorder::deleteStart();
     void Recorder::deleteStop();
-    void Recorder::cueButtonClicked();
     void Recorder::valueChanged(juce::Value& value);
 
 

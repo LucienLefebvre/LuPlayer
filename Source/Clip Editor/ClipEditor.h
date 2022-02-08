@@ -318,7 +318,10 @@ public:
         if (editedPlayer != nullptr)
         {
             if (rightClickDown)
+            {
                 editedPlayer->setEnveloppeEnabled(!editedPlayer->isEnveloppeEnabled());
+                updateInfos();
+            }
             else
                 editedPlayer->envButtonClicked();
         }
@@ -330,7 +333,10 @@ public:
         if (editedPlayer != nullptr)
         {
             if (rightClickDown)
-                editedPlayer->bypassFX(editedPlayer->isFxEnabled());
+            {
+                editedPlayer->bypassFX(editedPlayer->isFxEnabled(), false);
+                updateInfos();
+            }
             else
                 editedPlayer->fxButtonClicked();
         }
@@ -381,6 +387,11 @@ public:
     {
         if (isVisible() && editedPlayer != nullptr)
             editedPlayer->cueButtonClicked();
+    }
+
+    EnveloppeEditor* getEnveloppeEditor()
+    {
+        return &enveloppeEditor;
     }
 private:
     EnveloppeEditor enveloppeEditor;

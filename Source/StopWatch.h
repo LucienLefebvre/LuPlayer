@@ -29,11 +29,13 @@ public:
     {
         timeLabel.reset(new juce::Label());
         addAndMakeVisible(timeLabel.get());
+        timeLabel->setMouseClickGrabsKeyboardFocus(false);
 
         startStopButton.reset(new juce::TextButton());
         addAndMakeVisible(startStopButton.get());
         startStopButton->setButtonText("Start");
         startStopButton->onClick = [this] {startStopButtonClicked(); };
+        startStopButton->setMouseClickGrabsKeyboardFocus(false);
     }
 
     ~StopWatch() override
@@ -43,8 +45,6 @@ public:
     void paint (juce::Graphics& g) override
     {
         g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-        //g.fillAll (juce::Colours::red);   // clear the background
-
     }
 
     void resized() override

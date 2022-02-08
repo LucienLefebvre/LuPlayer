@@ -7,12 +7,6 @@
 //==============================================================================
 EnveloppeEditor::EnveloppeEditor()
 {
-    /*addPoint(juce::Point<float>(0.0, 0.0));
-    myPoints.getLast()->setCanMoveTime(false);
-    addPoint(juce::Point<float>(1.0, 0.0));
-    myPoints.getLast()->setCanMoveTime(false);*/
-
-    //setSize(600, 400);
     constrainer.setMinimumOnscreenAmounts(2, 2, 2, 2);
 
     addAndMakeVisible(&playHead);
@@ -147,6 +141,10 @@ void EnveloppeEditor::resized()
     {
         point->setCentrePosition(getPointPosition(*point));
     }
+    if (myPoints.getFirst() != nullptr)
+        myPoints.getFirst()->setFixedPoint();
+    if (myPoints.getLast() != nullptr)
+        myPoints.getLast()->setFixedPoint();
     cuePlayHead.setSize(2, getHeight());
     playHead.setSize(2, getHeight());
     inMark.setSize(2, getHeight());
@@ -305,8 +303,11 @@ void EnveloppeEditor::mouseDown(const juce::MouseEvent& e)
         {
             if (e.mods.isRightButtonDown())
             {
-                deletePoint(myPoints[i]);
-                break;
+                if (myPoints[i]->getCanMoveTime())
+                {
+                    deletePoint(myPoints[i]);
+                    break;
+                }
             }
             else
                 draggedComponent = myPoints[i];
@@ -486,6 +487,7 @@ void EnveloppeEditor::deletePoint(EnveloppePoint* point)
 void EnveloppeEditor::sortPoints()
 {//sort points in the owned array by x position
     myPoints.sort(comparator, true);
+
     createEnveloppePath();
     resized();
 }
@@ -539,6 +541,10 @@ void EnveloppeEditor::createEnveloppePath()
         }
         editedPlayer->getEnveloppePath()->closeSubPath();
     }
+    if (myPoints.getFirst() != nullptr)
+        myPoints.getFirst()->setFixedPoint();
+    if (myPoints.getLast() != nullptr)
+        myPoints.getLast()->setFixedPoint();
     /*if (editedPlayer != nullptr)
         editedPlayer->setEnveloppePath(enveloppePath);*/
 }
@@ -561,10 +567,15 @@ void EnveloppeEditor::createPointsFromPath(juce::Path* p)
         }
         else if (iterator.elementType == juce::Path::Iterator::PathElementType::closePath)
         {
+            if (myPoints.getFirst() != nullptr)
+                myPoints.getFirst()->setFixedPoint();
+            if (myPoints.getLast() != nullptr)
+                myPoints.getLast()->setFixedPoint();
             resized();
             return;
         }
     }
+
 }
 
 void EnveloppeEditor::setNullPlayer()
@@ -623,7 +634,6 @@ juce::Array<int> EnveloppeEditor::createTimeLines()
         {
             timeLines.add(i);
             i += 1;
-            DBG("time line created : " << timeLines.getLast());
         }
     }
     return timeLines;
@@ -651,5 +661,27 @@ void EnveloppeEditor::setPointsColour(juce::Colour c)
     for (auto* p : myPoints)
     {
         p->setPointColour(c);
+    }
+}
+
+void EnveloppeEditor::setOrDeleteStart(bool setOrDelete)
+{
+    if (editedPlayer != nullptr)
+    {
+        if (setOrDelete)
+            editedPlayer->setStart();
+        else
+            editedPlayer->deleteStart();
+    }
+}
+
+void EnveloppeEditor::setOrDeleteStop(bool setOrDelete)
+{
+    if (editedPlayer != nullptr)
+    {
+        if (setOrDelete)
+            editedPlayer->setStop();
+        else
+            editedPlayer->deleteStop();
     }
 }

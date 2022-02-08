@@ -67,12 +67,17 @@ public:
     void createDefaultEnveloppePath();
     void scaleButtonClicked();
     void spaceBarPressed();
+    void setOrDeleteStart(bool setOrDelete);
+
+    void setOrDeleteStop(bool setOrDelete);
+
 private:
     void changeListenerCallback(juce::ChangeBroadcaster* source);
     juce::Array<int> createTimeLines();
     juce::String secondsToMMSS(int seconds);
     float getRangeInSeconds(juce::Range<double>& r);
     void setPointsColour(juce::Colour c);
+
     Player* editedPlayer = nullptr;
 
     juce::OwnedArray<EnveloppePoint> myPoints;

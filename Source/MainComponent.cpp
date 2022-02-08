@@ -1363,7 +1363,11 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
                                     CommandIDs::midiMapping,
                                     CommandIDs::launchPlaylist,
                                     CommandIDs::launch8Faders,
-                                    CommandIDs::launchKeyMapped};
+                                    CommandIDs::launchKeyMapped,
+                                    CommandIDs::setInMark,
+                                    CommandIDs::deleteInMark,
+                                    CommandIDs::setOutMark,
+                                    CommandIDs::deleteOutMark };
     commands.addArray(c);
 }
 
@@ -1551,6 +1555,26 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setTicked(soundPlayers[0]->getSoundPlayerMode() == SoundPlayer::Mode::KeyMap ? true : false);
         result.addDefaultKeypress(juce::KeyPress::F3Key, juce::ModifierKeys::altModifier);
         break;
+    case CommandIDs::setInMark:
+        result.setInfo("Set in mark", "Set in mark at cue position cursor", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('i', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::deleteInMark:
+        result.setInfo("Delete in mark", "Delete in mark", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('k', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::setOutMark:
+        result.setInfo("Set out mark", "Set out mark at cue position cursor", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('o', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::deleteOutMark:
+        result.setInfo("Delete out mark", "Delete out mark", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('l', juce::ModifierKeys::noModifiers);
+        break;
     default:
         break;
     }
@@ -1594,9 +1618,7 @@ bool MainComponent::perform(const InvocationInfo& info)
         if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
             soundPlayers[0]->myPlaylists[0]->spaceBarPressed();
         else
-        {
             bottomComponent.spaceBarPressed();
-        }
         break;
     case CommandIDs::goToPrevious:
         if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
@@ -1692,9 +1714,20 @@ bool MainComponent::perform(const InvocationInfo& info)
             grabKeyboardFocus();
         }
         break;
+    case CommandIDs::setInMark:
+        bottomComponent.setOrDeleteStart(true);
+        break;
+    case CommandIDs::deleteInMark:
+        bottomComponent.setOrDeleteStart(false);
+        break;
+    case CommandIDs::setOutMark:
+        bottomComponent.setOrDeleteStop(true);
+        break;
+    case CommandIDs::deleteOutMark:
+        bottomComponent.setOrDeleteStop(false);
+        break;
     default:
         return false;
     }
-
     return true;
 }

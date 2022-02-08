@@ -126,6 +126,7 @@ Recorder::~Recorder()
 {
     backgroundThread.stopThread(1000);
     thumbnail.clear();
+    editingThumbnail.clear();
     lastRecording.deleteFile();
     cueTransport.setSource(nullptr);
     delete mouseDragInRecorder;
@@ -429,9 +430,16 @@ void Recorder::startRecording()
 
     lastRecording = parentDir.getNonexistentChildFile("Temp Recording File", ".wav");
 
+    if (cueTransport.isPlaying())
+    {
+        cueTransport.stop();
+        cueButton.setButtonText("Play");
+        cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    }
+
     start(lastRecording);
 
-    recordButton.setButtonText("Stop");
+
     //recordingThumbnail.setDisplayFullThumbnail(false);
 }
 
@@ -776,6 +784,14 @@ void Recorder::mouseUp(const juce::MouseEvent& event)
 
 }
 
+void Recorder::setOrDeleteStart(bool setOrDelete)
+{
+    if (setOrDelete)
+        setStart();
+    else
+        deleteStart();
+}
+
 void Recorder::setStart()
 {
     if (isVisible())
@@ -796,6 +812,14 @@ void Recorder::setStart()
         }
     }
 
+}
+
+void Recorder::setOrDeleteStop(bool setOrDelete)
+{
+    if (setOrDelete)
+        setStop();
+    else
+        deleteStop();
 }
 
 void Recorder::setStop()
@@ -867,20 +891,20 @@ bool Recorder::keyPressed(const juce::KeyPress& key, KeyMapper* keyMapper)
 
 void Recorder::cueButtonClicked()
 {
-    if (cueTransport.isPlaying())
+    if (!isRecording())
     {
-        cueTransport.stop();
-        cueButton.setButtonText("Play");
-        //enableMonitoring.setToggleState(true, juce::NotificationType::dontSendNotification);
-        cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-    }
-    else
-    {
-        cueTransport.setPosition(startTime);
-        cueTransport.start();
-        cueButton.setButtonText("Stop");
-        //enableMonitoring.setToggleState(false, juce::NotificationType::dontSendNotification);
-        cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::green);
+        if (cueTransport.isPlaying())
+        {
+            cueTransport.stop();
+            cueButton.setButtonText("Play");
+            cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        }
+        else
+        {
+            cueTransport.start();
+            cueButton.setButtonText("Stop");
+            cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::green);
+        }
     }
 }
 

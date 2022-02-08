@@ -185,4 +185,24 @@ void BottomComponent::spaceBarPressed()
         dbBrowser.play();
     else if (selectedTab.equalsIgnoreCase("Clip Editor"))
      clipEditor.spaceBarPressed();
+    else if (selectedTab.equalsIgnoreCase("Recorder"))
+        recorderComponent.cueButtonClicked();
+}
+
+void BottomComponent::setOrDeleteStart(bool setOrDelete)
+{
+    juce::String selectedTab = getTabbedButtonBar().getCurrentTabName();
+    if (selectedTab.equalsIgnoreCase("Clip Editor"))
+        clipEditor.getEnveloppeEditor()->setOrDeleteStart(setOrDelete);
+    else if (selectedTab.equalsIgnoreCase("Recorder"))
+        recorderComponent.setOrDeleteStart(setOrDelete);
+}
+
+void BottomComponent::setOrDeleteStop(bool setOrDelete)
+{
+    juce::String selectedTab = getTabbedButtonBar().getCurrentTabName();
+    if (selectedTab.equalsIgnoreCase("Clip Editor"))
+        clipEditor.getEnveloppeEditor()->setOrDeleteStop(setOrDelete);
+    else if (selectedTab.equalsIgnoreCase("Recorder"))
+        recorderComponent.setOrDeleteStop(setOrDelete);
 }

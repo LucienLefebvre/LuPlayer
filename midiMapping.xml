@@ -24,10 +24,10 @@
   <CommandMapping Description="Fader 5 trim relative" CommandID="220" MidiCC="58"/>
   <CommandMapping Description="Fader 6 trim relative" CommandID="221" MidiCC="59"/>
   <CommandMapping Description="Fader 7 trim relative" CommandID="222" MidiCC="60"/>
-  <CommandMapping Description="Fader 8 trim relative" CommandID="223" MidiCC="61"/>
-  <CommandMapping Description="Start Timer" CommandID="1" MidiCC="46"/>
+  <CommandMapping Description="Fader 8 trim relative" CommandID="223" MidiCC="-1"/>
+  <CommandMapping Description="Start Timer" CommandID="1" MidiCC="-1"/>
   <CommandMapping Description="Show / hide timer" CommandID="2" MidiCC="-1"/>
-  <CommandMapping Description="Launch record" CommandID="3" MidiCC="45"/>
+  <CommandMapping Description="Launch record" CommandID="3" MidiCC="-1"/>
   <CommandMapping Description="Display sound browser" CommandID="4" MidiCC="-1"/>
   <CommandMapping Description="Display Netia database browser" CommandID="5" MidiCC="-1"/>
   <CommandMapping Description="Display distant database browser" CommandID="6"
@@ -73,21 +73,21 @@
   <CommandMapping Description="Cue Play" CommandID="100" MidiCC="-1"/>
   <CommandMapping Description="Cue play from start" CommandID="101" MidiCC="-1"/>
   <CommandMapping Description="Cue play end" CommandID="102" MidiCC="-1"/>
-  <CommandMapping Description="Set in mark at cue position cursor" CommandID="103"
+  <CommandMapping Description="Set in mark at cue position cursor" CommandID="37"
+                  MidiCC="61"/>
+  <CommandMapping Description="Delete in mark" CommandID="38" MidiCC="-1"/>
+  <CommandMapping Description="Set out mark at cue position cursor" CommandID="39"
+                  MidiCC="62"/>
+  <CommandMapping Description="Delete out mark" CommandID="40" MidiCC="-1"/>
+  <CommandMapping Description="Enable / disable clip effects" CommandID="103" MidiCC="-1"/>
+  <CommandMapping Description="Enable / disable clip enveloppe" CommandID="104"
                   MidiCC="-1"/>
-  <CommandMapping Description="Delete in mark" CommandID="104" MidiCC="-1"/>
-  <CommandMapping Description="Set out mark at cue position cursor" CommandID="105"
+  <CommandMapping Description="Enable / disable clip looping" CommandID="105" MidiCC="-1"/>
+  <CommandMapping Description="Enable / disable clip high pass filter" CommandID="106"
                   MidiCC="-1"/>
-  <CommandMapping Description="Delete out mark" CommandID="106" MidiCC="-1"/>
-  <CommandMapping Description="Enable / disable clip effects" CommandID="107" MidiCC="-1"/>
-  <CommandMapping Description="Enable / disable clip enveloppe" CommandID="108"
+  <CommandMapping Description="Increase clip trim volume by 1dB" CommandID="107"
                   MidiCC="-1"/>
-  <CommandMapping Description="Enable / disable clip looping" CommandID="109" MidiCC="-1"/>
-  <CommandMapping Description="Enable / disable clip high pass filter" CommandID="110"
+  <CommandMapping Description="Decrease clip trim volume by 1dB" CommandID="108"
                   MidiCC="-1"/>
-  <CommandMapping Description="Increase clip trim volume by 1dB" CommandID="111"
-                  MidiCC="-1"/>
-  <CommandMapping Description="Decrease clip trim volume by 1dB" CommandID="112"
-                  MidiCC="-1"/>
-  <CommandMapping Description="dummy" CommandID="113" MidiCC="-1"/>
+  <CommandMapping Description="dummy" CommandID="109" MidiCC="-1"/>
 </MIDIMAPPING>

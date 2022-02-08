@@ -143,13 +143,6 @@ bool KeyMapper::getWantsKeyPress()
     return wantsKeyPress;
 }
 
-void KeyMapper::loadKeyMapping()
-{
-    keyMapping = settings->getKeyMapping(keyMapCommands);
-    if (keyMapping[0] == 0 && keyMapping[1] == 0)
-        keyMapping = defaultMapping;
-}
-
 void KeyMapper::setCommandManager(juce::ApplicationCommandManager* cm)
 {
     commandManager = cm;
@@ -170,5 +163,9 @@ void KeyMapper::loadMappingFile()
         juce::XmlDocument xmlDoc(juce::File::getCurrentWorkingDirectory().getChildFile("keyMapping.xml"));
         juce::XmlElement xml(*xmlDoc.getDocumentElement());
         commandManager->getKeyMappings()->restoreFromXml(xml);
+    }
+    else
+    {
+
     }
 }
