@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "../Player.h"
+#include "../PlayHead.h"
 //==============================================================================
 /*
 */
@@ -65,6 +66,8 @@ private:
     std::unique_ptr<juce::Label> nameLabel;
     std::unique_ptr<juce::Slider> volumeSlider;
     std::unique_ptr<juce::TextButton> editButton;
+    std::unique_ptr<PlayHead> playHead;
+
     int editButtonWidth = 0;
     juce::String shortcutKey;
 

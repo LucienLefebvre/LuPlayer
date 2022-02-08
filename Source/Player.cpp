@@ -941,6 +941,12 @@ void Player::play(bool launchedByMidi)
     soundEditedBroadcaster->sendChangeMessage();
 }
 
+void Player::launch()
+{
+    transport.setPosition(startTime);
+    transport.start();
+}
+
 void Player::stop()
 {
     const juce::MessageManagerLock mmLock;
@@ -1768,6 +1774,11 @@ std::string Player::getFilePath()
 float Player::getVolume()
 {
     return volumeSlider.getValue();
+}
+
+void Player::setGain(float g)
+{
+    bufferGain.store(g);
 }
 
 

@@ -36,7 +36,6 @@ void KeyboardMappedSoundboard::resized()
     playerWidth = (getWidth() - spaceBetweenPlayers * 11) / 10 ;
     playerHeight = getHeight() / 3 - spaceBetweenPlayers * 4;
     int playerIdInLine = 0;
-    DBG("mapped players size" << mappedPlayers.size());
     for (int i = 0; i < mappedPlayers.size(); i++)
     {
         int line = i / 10;
@@ -50,7 +49,6 @@ void KeyboardMappedSoundboard::resized()
 
 void KeyboardMappedSoundboard::fileDragMove(const juce::StringArray& files, int x, int y)
 {
-    DBG("X : " << x << "Y : " << y);
     juce::Point<int> mousePosition(x, y);
     for (auto* player : mappedPlayers)
     {
@@ -100,9 +98,9 @@ void KeyboardMappedSoundboard::addPlayer(Player* p)
     mappedPlayers.add(new KeyMappedPlayer());
     addAndMakeVisible(*mappedPlayers.getLast());
     mappedPlayers.getLast()->setPlayer(p);
+    mappedPlayers.getLast()->setMouseClickGrabsKeyboardFocus(false);
     mappedPlayers.getLast()->repaint();
     //resized();
-    DBG("players size" << mappedPlayers.size());
 }
 
 void KeyboardMappedSoundboard::setShortcutKeys()
@@ -121,7 +119,6 @@ bool KeyboardMappedSoundboard::keyPressed(const juce::KeyPress& key, juce::Compo
         {
             mappedPlayers[i]->shortcutKeyPressed();
         }
-
     }
     return false;
 }

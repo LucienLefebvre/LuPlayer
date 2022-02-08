@@ -24,34 +24,45 @@ KeyMappedPlayer::KeyMappedPlayer()
     addAndMakeVisible(shortcutLabel.get());
     shortcutLabel->setAlpha(0.32);
     shortcutLabel->setColour(juce::Label::ColourIds::textColourId, ORANGE);
+    shortcutLabel->setMouseClickGrabsKeyboardFocus(false);
 
     nameLabel.reset(new juce::Label());
     addAndMakeVisible(nameLabel.get());
     nameLabel->setFont(juce::Font(20.00f, juce::Font::plain).withTypefaceStyle("Regular"));
     nameLabel->setMinimumHorizontalScale(0.5);
+    nameLabel->setMouseClickGrabsKeyboardFocus(false);
 
     elapsedTimeLabel.reset(new juce::Label());
     addChildComponent(elapsedTimeLabel.get());
     elapsedTimeLabel->setFont(juce::Font(20.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+    elapsedTimeLabel->setMouseClickGrabsKeyboardFocus(false);
 
     volumeSlider.reset(new juce::Slider());
     addChildComponent(volumeSlider.get());
     volumeSlider->setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
-    volumeSlider->setRange(0., 1., 0.01);
-    volumeSlider->setValue(1.0);
+    juce::NormalisableRange<double> range(-80, +12, 0.5, 2);
+    volumeSlider->setNormalisableRange(range);
+    //volumeSlider->setRange(0., 2., 0.01);
+    volumeSlider->setValue(0.0);
+    volumeSlider->setTextValueSuffix("dB");
     volumeSlider->addListener(this);
-    volumeSlider->setSkewFactor(0.5, false);
     volumeSlider->setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 15);
     volumeSlider->setNumDecimalPlacesToDisplay(2);
     volumeSlider->setWantsKeyboardFocus(false);
-    volumeSlider->setDoubleClickReturnValue(true, 1.);
-    if (!Settings::mouseWheelControlVolume)
-        volumeSlider->setScrollWheelEnabled(false);
+    volumeSlider->setDoubleClickReturnValue(true, 0.0);
+    volumeSlider->setPopupDisplayEnabled(true, true, nullptr);
+    volumeSlider->setScrollWheelEnabled(true);
+    volumeSlider->setMouseClickGrabsKeyboardFocus(false);
 
     editButton.reset(new juce::TextButton());
     addChildComponent(editButton.get());
     editButton->setButtonText("Edit");
     editButton->onClick = [this] {editButtonClicked(); };
+    editButton->setMouseClickGrabsKeyboardFocus(false);
+
+    playHead.reset(new PlayHead());
+    addAndMakeVisible(playHead.get());
+    playHead->setMouseClickGrabsKeyboardFocus(false);
 }
 
 KeyMappedPlayer::~KeyMappedPlayer()
@@ -99,6 +110,8 @@ void KeyMappedPlayer::resized()
     
     thumbnailHeight = getHeight() * 3 / 5;
     thumbnailBounds.setBounds(0, 2*nameLabelHeight, getWidth(), thumbnailHeight);
+
+    playHead->setSize(1, thumbnailHeight);
 
     elapsedTimeWidth = getWidth() * 3 / 5;
     elapsedTimeHeight = getHeight() / 5;
@@ -213,7 +226,7 @@ void KeyMappedPlayer::startOrStop()
     if (soundPlayer != nullptr)
     {
         if (!soundPlayer->isPlayerPlaying())
-            soundPlayer->play();
+            soundPlayer->launch();
         else
             soundPlayer->stop();
     }
@@ -221,16 +234,20 @@ void KeyMappedPlayer::startOrStop()
 
 void KeyMappedPlayer::mouseDown(const juce::MouseEvent& event)
 {
-    if (event.originalComponent != volumeSlider.get()
+    /*if (event.originalComponent != volumeSlider.get()
         && event.originalComponent != editButton.get())
-        startOrStop();
+        startOrStop();*/
+    //getTopLevelComponent()->grabKeyboardFocus();
 }
 
 void KeyMappedPlayer::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == volumeSlider.get())
     {
-
+        if (soundPlayer != nullptr)
+        {
+            soundPlayer->setGain(juce::Decibels::decibelsToGain(volumeSlider->getValue()));
+        }
     }
 }
 
@@ -245,7 +262,18 @@ void KeyMappedPlayer::timerCallback(int timerID)
             {
                 elapsedTimeLabel->setText(soundPlayer->getRemainingTimeAsString(), juce::NotificationType::dontSendNotification);
             }
+            if (soundPlayer->isPlayerPlaying())
+            {
+                playHead->setVisible(true);
+                int playHeadPosition = (soundPlayer->transport.getCurrentPosition() / soundPlayer->getLenght()) * getWidth();
+                playHead->setTopLeftPosition(playHeadPosition, thumbnailBounds.getY());
+            }
+            else
+                playHead->setVisible(false);
         }
+        else
+            playHead->setVisible(false);
+
         //repaint();
         break;
     case 1:

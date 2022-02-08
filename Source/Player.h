@@ -78,6 +78,7 @@ public:
     void assignNextPlayer();
 
     void play(bool launchedByMidi = false);
+    void launch();
     void stop();
     void playButtonClicked();
     void stopButtonClicked();
@@ -97,6 +98,7 @@ public:
     Player::PlayerInfo getPlayerInfo();
     std::string getFilePath();
 
+    void setGain(float g);
     float getVolume();
     float getTrimVolume();
     void setTrimVolume(double trimVolume);
