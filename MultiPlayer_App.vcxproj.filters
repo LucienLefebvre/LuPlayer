@@ -17,6 +17,9 @@
     <Filter Include="MultiPlayer\Source\nanodbc">
       <UniqueIdentifier>{F301E40E-967D-7851-CC8A-0D7A5E4BB715}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MultiPlayer\Source\sqlite">
+      <UniqueIdentifier>{3B2B277A-4F96-0C8E-746D-7FF396CB0FAB}</UniqueIdentifier>
+    </Filter>
     <Filter Include="MultiPlayer\Source">
       <UniqueIdentifier>{D97AFB6E-72B4-CF12-39E0-CD91D87EAF80}</UniqueIdentifier>
     </Filter>
@@ -484,6 +487,9 @@
     <ClCompile Include="Source\Clip Editor\EnveloppeEditor.cpp">
       <Filter>MultiPlayer\Clip Editor</Filter>
     </ClCompile>
+    <ClCompile Include="Source\DataBaseFeeder.cpp">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Settings\KeyMapper.cpp">
       <Filter>MultiPlayer\Source\Settings</Filter>
     </ClCompile>
@@ -528,6 +534,12 @@
     </ClCompile>
     <ClCompile Include="Source\nanodbc-master\nanodbc\nanodbc.cpp">
       <Filter>MultiPlayer\Source\nanodbc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\sqlite\shell.c">
+      <Filter>MultiPlayer\Source\sqlite</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\sqlite\sqlite3.c">
+      <Filter>MultiPlayer\Source\sqlite</Filter>
     </ClCompile>
     <ClCompile Include="Source\AudioBrowser.cpp">
       <Filter>MultiPlayer\Source</Filter>
@@ -2784,6 +2796,9 @@
     <ClInclude Include="Source\Clip Editor\EnveloppePoint.h">
       <Filter>MultiPlayer\Clip Editor</Filter>
     </ClInclude>
+    <ClInclude Include="Source\DataBaseFeeder.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
     <ClInclude Include="Source\Settings\KeyMapper.h">
       <Filter>MultiPlayer\Source\Settings</Filter>
     </ClInclude>
@@ -2877,6 +2892,12 @@
     <ClInclude Include="Source\nanodbc-master\nanodbc\nanodbc.h">
       <Filter>MultiPlayer\Source\nanodbc</Filter>
     </ClInclude>
+    <ClInclude Include="Source\sqlite\sqlite3.h">
+      <Filter>MultiPlayer\Source\sqlite</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\sqlite\sqlite3ext.h">
+      <Filter>MultiPlayer\Source\sqlite</Filter>
+    </ClInclude>
     <ClInclude Include="Source\AudioBrowser.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
@@ -2935,6 +2956,9 @@
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\Denoiser.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FeedThread.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\R128IntegratedThread.h">

@@ -13,6 +13,10 @@
             file="Source/Clip Editor/EnveloppePoint.h"/>
     </GROUP>
     <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
+      <FILE id="s1p0Sn" name="DataBaseFeeder.cpp" compile="1" resource="0"
+            file="Source/DataBaseFeeder.cpp"/>
+      <FILE id="xDznNF" name="DataBaseFeeder.h" compile="0" resource="0"
+            file="Source/DataBaseFeeder.h"/>
       <GROUP id="{C446E222-F82A-C695-0D7B-5CADD47B4434}" name="Settings">
         <FILE id="jf39aT" name="KeyMapper.cpp" compile="1" resource="0" file="Source/Settings/KeyMapper.cpp"/>
         <FILE id="JCOhon" name="KeyMapper.h" compile="0" resource="0" file="Source/Settings/KeyMapper.h"/>
@@ -84,6 +88,12 @@
         <FILE id="FuaZkG" name="nanodbc.cpp" compile="1" resource="0" file="Source/nanodbc-master/nanodbc/nanodbc.cpp"/>
         <FILE id="LIqIHp" name="nanodbc.h" compile="0" resource="0" file="Source/nanodbc-master/nanodbc/nanodbc.h"/>
       </GROUP>
+      <GROUP id="{983390AC-4C7E-7A9B-DCA4-5A5711B51A62}" name="sqlite">
+        <FILE id="ArEhg9" name="shell.c" compile="1" resource="0" file="Source/sqlite/shell.c"/>
+        <FILE id="IZvp8c" name="sqlite3.c" compile="1" resource="0" file="Source/sqlite/sqlite3.c"/>
+        <FILE id="k1OoFp" name="sqlite3.h" compile="0" resource="0" file="Source/sqlite/sqlite3.h"/>
+        <FILE id="DQgdra" name="sqlite3ext.h" compile="0" resource="0" file="Source/sqlite/sqlite3ext.h"/>
+      </GROUP>
       <FILE id="Ck1or0" name="AudioBrowser.cpp" compile="1" resource="0"
             file="Source/AudioBrowser.cpp"/>
       <FILE id="MArcpb" name="AudioBrowser.h" compile="0" resource="0" file="Source/AudioBrowser.h"/>
@@ -138,6 +148,7 @@
       <FILE id="xsAOp3" name="ClipEffect.h" compile="0" resource="0" file="Source/ClipEffect.h"/>
       <FILE id="BERWeG" name="Denoiser.cpp" compile="1" resource="0" file="Source/Denoiser.cpp"/>
       <FILE id="PeXVTX" name="Denoiser.h" compile="0" resource="0" file="Source/Denoiser.h"/>
+      <FILE id="Zr8s17" name="FeedThread.h" compile="0" resource="0" file="Source/FeedThread.h"/>
       <FILE id="pCSuVZ" name="R128IntegratedThread.h" compile="0" resource="0"
             file="Source/R128IntegratedThread.h"/>
     </GROUP>

@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Clip Editor\EnveloppeEditor.cpp"/>
+    <ClCompile Include="Source\DataBaseFeeder.cpp"/>
     <ClCompile Include="Source\Settings\KeyMapper.cpp"/>
     <ClCompile Include="Source\Settings\MidiMapper.cpp"/>
     <ClCompile Include="Source\convertObject.cpp"/>
@@ -167,6 +168,8 @@
     <ClCompile Include="Source\Soundboard\PlayerProcessor.cpp"/>
     <ClCompile Include="Source\SoundBoard\SoundBoard.cpp"/>
     <ClCompile Include="Source\nanodbc-master\nanodbc\nanodbc.cpp"/>
+    <ClCompile Include="Source\sqlite\shell.c"/>
+    <ClCompile Include="Source\sqlite\sqlite3.c"/>
     <ClCompile Include="Source\AudioBrowser.cpp"/>
     <ClCompile Include="Source\BottomComponent.cpp"/>
     <ClCompile Include="Source\LUFSMeter\Ebu128LoudnessMeter.cpp"/>
@@ -2233,6 +2236,7 @@
     <ClInclude Include="Source\Clip Editor\ClipEditor.h"/>
     <ClInclude Include="Source\Clip Editor\EnveloppeEditor.h"/>
     <ClInclude Include="Source\Clip Editor\EnveloppePoint.h"/>
+    <ClInclude Include="Source\DataBaseFeeder.h"/>
     <ClInclude Include="Source\Settings\KeyMapper.h"/>
     <ClInclude Include="Source\Settings\MidiMapper.h"/>
     <ClInclude Include="Source\StopWatch.h"/>
@@ -2264,6 +2268,8 @@
     <ClInclude Include="Source\Soundboard\PlayerProcessor.h"/>
     <ClInclude Include="Source\SoundBoard\SoundBoard.h"/>
     <ClInclude Include="Source\nanodbc-master\nanodbc\nanodbc.h"/>
+    <ClInclude Include="Source\sqlite\sqlite3.h"/>
+    <ClInclude Include="Source\sqlite\sqlite3ext.h"/>
     <ClInclude Include="Source\AudioBrowser.h"/>
     <ClInclude Include="Source\ODBCManager.h"/>
     <ClInclude Include="Source\BottomComponent.h"/>
@@ -2284,6 +2290,7 @@
     <ClInclude Include="Source\DataBaseImport.h"/>
     <ClInclude Include="Source\ClipEffect.h"/>
     <ClInclude Include="Source\Denoiser.h"/>
+    <ClInclude Include="Source\FeedThread.h"/>
     <ClInclude Include="Source\R128IntegratedThread.h"/>
     <ClInclude Include="ff_meters\ff_meters\LevelMeter\LevelMeter.h"/>
     <ClInclude Include="ff_meters\ff_meters\LevelMeter\LevelMeterSource.h"/>

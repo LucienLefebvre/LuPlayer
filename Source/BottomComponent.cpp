@@ -48,6 +48,7 @@ BottomComponent::BottomComponent()
     addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
     addTab("Clip Editor", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &clipEditor, false);
     addTab("Clip Effect", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &clipEffect, false);
+    addTab("Database Feeder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &dataBaseFeeder, false);
     setTabBarDepth(tabBarHeight);
     setCurrentTabIndex(1);
     getTabbedButtonBar().setWantsKeyboardFocus(false);
