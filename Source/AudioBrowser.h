@@ -259,8 +259,8 @@ public:
         cuePlay = new juce::ChangeBroadcaster();
         // add browser compoenent to form and add us as a listener
         addAndMakeVisible(*fileBrowser);
-        fileBrowser->setColour(juce::FileBrowserComponent::ColourIds::filenameBoxTextColourId, juce::Colours::white);
-
+        getLookAndFeel().setColour(juce::DirectoryContentsDisplayComponent::ColourIds::highlightColourId, juce::Colour(40, 134, 189));
+        getLookAndFeel().setColour(juce::DirectoryContentsDisplayComponent::ColourIds::highlightedTextColourId, juce::Colours::black);
         fileBrowser->addListener(this);
         fileBrowser->addMouseListener(this, false);
         addMouseListener(this, true);

@@ -56,7 +56,7 @@ public:
 
         attackSlider->setBounds(0, 80, 60, 60);
 
-        thresholdValueLabel.reset(new juce::Label("thresholdValueLabel"));
+        thresholdValueLabel.reset(new juce::Label("thresholdValueLabel", "0dB"));
         addAndMakeVisible(thresholdValueLabel.get());
         thresholdValueLabel->setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
         thresholdValueLabel->setJustificationType(juce::Justification::centred);
@@ -165,7 +165,7 @@ public:
         gainSlider->setBounds(37, 150, 60, 60);
 
         gainValueLabel.reset(new juce::Label("gainValueLabel",
-            TRANS("1.0\n")));
+            TRANS("0dB\n")));
         addAndMakeVisible(gainValueLabel.get());
         gainValueLabel->setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
         gainValueLabel->setJustificationType(juce::Justification::centred);

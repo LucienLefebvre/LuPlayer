@@ -540,6 +540,7 @@ void EnveloppeEditor::createEnveloppePath()
             editedPlayer->getEnveloppePath()->lineTo(point->getPos());
         }
         editedPlayer->getEnveloppePath()->closeSubPath();
+        editedPlayer->repaint();
     }
     if (myPoints.getFirst() != nullptr)
         myPoints.getFirst()->setFixedPoint();

@@ -50,9 +50,10 @@ void KeyboardMappedSoundboard::resized()
 void KeyboardMappedSoundboard::fileDragMove(const juce::StringArray& files, int x, int y)
 {
     juce::Point<int> mousePosition(x, y);
+    auto pointOnTopLevel = getLocalPoint(getTopLevelComponent(), mousePosition);
     for (auto* player : mappedPlayers)
     {
-        if (player->getBounds().contains(mousePosition))
+        if (player->getBounds().contains(pointOnTopLevel))
         {
             player->isDraggedOver(true);
         }
@@ -63,9 +64,10 @@ void KeyboardMappedSoundboard::fileDragMove(const juce::StringArray& files, int 
 
 void KeyboardMappedSoundboard::setDroppedFile(juce::Point<int> p,juce::String path,juce::String name)
 {
+    auto pointOnTopLevel = getLocalPoint(getTopLevelComponent(), p);
     for (auto* player : mappedPlayers)
     {
-        if (player->getBounds().contains(p))
+        if (player->getBounds().contains(pointOnTopLevel))
         {
             player->loadFile(path, name);
         }

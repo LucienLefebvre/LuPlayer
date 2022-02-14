@@ -35,7 +35,6 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
         Settings::sampleRate = deviceManager.getAudioDeviceSetup().sampleRate;
     } 
 
-
     menuBar.reset(new juce::MenuBarComponent(this));
     addAndMakeVisible(menuBar.get());
     menuBar->setWantsKeyboardFocus(false);
@@ -55,6 +54,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
 
     deviceManager.addChangeListener(this);
     Settings::audioOutputModeValue.addListener(this);
+    Settings::showMeterValue.addListener(this);
 
     timerSlider.setRange(10, 1000);
     timerSlider.addListener(this);
@@ -199,38 +199,51 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
     else if (source == bottomComponent.audioPlaybackDemo.fileDraggedFromBrowser) 
     {
-
-        int cartPosition = soundPlayers[0]->playlistbisViewport.getPosition().getX();
-        int playlistScrollPosition = soundPlayers[0]->playlistViewport.getViewPositionY();
-        int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
         std::unique_ptr<juce::StringArray> null = std::make_unique<juce::StringArray >();
-
-        if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
-            soundPlayers[0]->myPlaylists[0]->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY() - 60 + playlistScrollPosition);
-        else if (getMouseXYRelative().getX() > cartPosition)
-            soundPlayers[0]->myPlaylists[1]->fileDragMove(*null, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - 60 + cartScrollPoisiton);
+        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
+        {
+            soundPlayers[0]->keyMappedSoundboard->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY());
+        }
         else
         {
-            soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
-            soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
+            int cartPosition = soundPlayers[0]->playlistbisViewport.getPosition().getX();
+            int playlistScrollPosition = soundPlayers[0]->playlistViewport.getViewPositionY();
+            int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
+
+            if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
+                soundPlayers[0]->myPlaylists[0]->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
+            else if (getMouseXYRelative().getX() > cartPosition)
+                soundPlayers[0]->myPlaylists[1]->fileDragMove(*null, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
+            else
+            {
+                soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
+                soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
+            }
         }
-
-
     }
     else if (source == bottomComponent.audioPlaybackDemo.fileDroppedFromBrowser)
     {
         //std::unique_ptr<Settings> settings = std::make_unique<Settings>();
+
         int cartPosition = soundPlayers[0]->playlistbisViewport.getPosition().getX();
         int playlistScrollPosition = soundPlayers[0]->playlistViewport.getViewPositionY();
         int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
         std::unique_ptr<juce::StringArray> null = std::make_unique<juce::StringArray >();
         std::unique_ptr<juce::File> myFile = std::make_unique<juce::File>(bottomComponent.audioPlaybackDemo.fileBrowser->getSelectedFile(0));
-        if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
-            soundPlayers[0]->myPlaylists[0]->filesDropped(myFile->getFullPathName(), getMouseXYRelative().getX(), getMouseXYRelative().getY() - 30 + playlistScrollPosition);
-        else if (getMouseXYRelative().getX() > cartPosition)
-            soundPlayers[0]->myPlaylists[1]->filesDropped(myFile->getFullPathName(), getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - 30 + cartScrollPoisiton);
-        soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
-        soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
+        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
+        {
+            soundPlayers[0]->keyMappedSoundboard->setDroppedFile(getMouseXYRelative(), myFile->getFullPathName(), myFile->getFileNameWithoutExtension());
+            soundPlayers[0]->keyMappedSoundboard->fileDragExit();
+        }
+        else
+        {
+            if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
+                soundPlayers[0]->myPlaylists[0]->filesDropped(myFile->getFullPathName(), getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
+            else if (getMouseXYRelative().getX() > cartPosition)
+                soundPlayers[0]->myPlaylists[1]->filesDropped(myFile->getFullPathName(), getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
+            soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
+            soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
+        }
     }
     else if (source == bottomComponent.dbBrowser.fileDraggedFromDataBase)
     {
@@ -247,9 +260,9 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
             int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
 
             if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
-                soundPlayers[0]->myPlaylists[0]->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY() - 30 + playlistScrollPosition);
+                soundPlayers[0]->myPlaylists[0]->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
             else if (getMouseXYRelative().getX() > cartPosition)
-                soundPlayers[0]->myPlaylists[1]->fileDragMove(*null, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - 30 + cartScrollPoisiton);
+                soundPlayers[0]->myPlaylists[1]->fileDragMove(*null, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
             else
             {
                 soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
@@ -280,13 +293,13 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
             if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
             {
                 soundPlayers[0]->myPlaylists[0]->setDroppedSoundName(selectedSoundName);
-                soundPlayers[0]->myPlaylists[0]->filesDropped(fullPathName, getMouseXYRelative().getX(), getMouseXYRelative().getY() - 30 + playlistScrollPosition);
+                soundPlayers[0]->myPlaylists[0]->filesDropped(fullPathName, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
 
             }
             else if (getMouseXYRelative().getX() > cartPosition)
             {
                 soundPlayers[0]->myPlaylists[1]->setDroppedSoundName(selectedSoundName);
-                soundPlayers[0]->myPlaylists[1]->filesDropped(fullPathName, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - 30 + cartScrollPoisiton);
+                soundPlayers[0]->myPlaylists[1]->filesDropped(fullPathName, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
             }
             soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
             soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
@@ -309,9 +322,9 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
             int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
 
             if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
-                soundPlayers[0]->myPlaylists[0]->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY() - 30 + playlistScrollPosition);
+                soundPlayers[0]->myPlaylists[0]->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
             else if (getMouseXYRelative().getX() > cartPosition)
-                soundPlayers[0]->myPlaylists[1]->fileDragMove(*null, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - 30 + cartScrollPoisiton);
+                soundPlayers[0]->myPlaylists[1]->fileDragMove(*null, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
             else
             {
                 soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
@@ -341,13 +354,13 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
             if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
             {
                 soundPlayers[0]->myPlaylists[0]->setDroppedSoundName(selectedSoundName);
-                soundPlayers[0]->myPlaylists[0]->filesDropped(fullPathName, getMouseXYRelative().getX(), getMouseXYRelative().getY() - 30 + playlistScrollPosition);
+                soundPlayers[0]->myPlaylists[0]->filesDropped(fullPathName, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
 
             }
             else if (getMouseXYRelative().getX() > cartPosition)
             {
                 soundPlayers[0]->myPlaylists[1]->setDroppedSoundName(selectedSoundName);
-                soundPlayers[0]->myPlaylists[1]->filesDropped(fullPathName, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - 30 + cartScrollPoisiton);
+                soundPlayers[0]->myPlaylists[1]->filesDropped(fullPathName, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
             }
             soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
             soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
@@ -460,13 +473,13 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
         soundPlayers[0]->getNextAudioBlock(bufferToFill);
         if (Settings::audioOutputMode == 3 && (bufferToFill.buffer->getNumChannels() > 3))
         {
-            juce::AudioBuffer<float>* inputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
+            inputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
             inputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
             inputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
             bufferToFill.clearActiveBufferRegion();
-            juce::AudioBuffer<float>* outputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
-            juce::AudioSourceChannelInfo* playAudioSource = new juce::AudioSourceChannelInfo(*outputBuffer);
-            juce::AudioSourceChannelInfo* cueAudioSource = new juce::AudioSourceChannelInfo(*outputBuffer);
+            outputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
+            playAudioSource.reset(new juce::AudioSourceChannelInfo(*outputBuffer));
+            cueAudioSource.reset(new juce::AudioSourceChannelInfo(*outputBuffer));
 
             myCueMixer.getNextAudioBlock(*cueAudioSource);
             bufferToFill.buffer->copyFrom(2, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
@@ -476,21 +489,23 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             myMixer.getNextAudioBlock(*playAudioSource);
             if (bottomComponent.recorderComponent.isEnabled())
             {
-                juce::AudioBuffer<float>* newOutputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
-                bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer, inputBuffer, newOutputBuffer, 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
+                newOutputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
+                bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer.get(), inputBuffer.get(), newOutputBuffer.get(), 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
 
                 //bufferToFill.clearActiveBufferRegion();
                 bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                 bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
-                soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
-                soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
+                if (soundPlayers[0] != nullptr)
+                    soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
+                if (soundPlayers[0] != nullptr)
+                    soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
                 if (bottomComponent.recorderComponent.enableMonitoring.getToggleState())
                 {
                     bufferToFill.buffer->copyFrom(2, 0, *newOutputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                     bufferToFill.buffer->copyFrom(3, 0, *newOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
                 }
 
-                delete newOutputBuffer;
+                //delete newOutputBuffer;
             }
             else
             {
@@ -499,30 +514,32 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 //soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
                 //soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
             }
-            delete(inputBuffer);
+            /*delete(inputBuffer);
             delete(outputBuffer);
-            delete(playAudioSource);
+            delete(playAudioSource);*/
         }
         else if (Settings::audioOutputMode == 1)
         {
-            juce::AudioBuffer<float>* inputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
+            inputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
             inputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
-            juce::AudioBuffer<float>* outputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
-            juce::AudioSourceChannelInfo* playAudioSource = new juce::AudioSourceChannelInfo(*outputBuffer);
+            outputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
+            playAudioSource.reset(new juce::AudioSourceChannelInfo(*outputBuffer));
             myMixer.getNextAudioBlock(*playAudioSource);
 
 
             bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
             if (!bottomComponent.recorderComponent.isEnabled())
             {
-                soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
-                soundPlayers[0]->meterSource.measureBlock(*bufferToFill.buffer);
+                if (soundPlayers[0] != nullptr)
+                    soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
+                if (soundPlayers[0] != nullptr)
+                    soundPlayers[0]->meterSource.measureBlock(*bufferToFill.buffer);
             }
 
             if (bottomComponent.recorderComponent.isEnabled())
             {
-                juce::AudioBuffer<float>* newOutputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
-                bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer, inputBuffer, newOutputBuffer, 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
+                newOutputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
+                bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer.get(), inputBuffer.get(), newOutputBuffer.get(), 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
                 if (bottomComponent.recorderComponent.enableMonitoring.getToggleState())
                 {
                     myCueMixer.getNextAudioBlock(*playAudioSource);
@@ -541,7 +558,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                     soundPlayers[0]->cueloudnessMeter.processBlock(*outputBuffer);
                     soundPlayers[0]->cuemeterSource.measureBlock(*bufferToFill.buffer);
                 }
-                delete newOutputBuffer;
+                //delete newOutputBuffer;
             }
             else
             {
@@ -550,13 +567,13 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                 soundPlayers[0]->cuemeterSource.measureBlock(*bufferToFill.buffer);
             }
-            delete(outputBuffer);
-            delete(inputBuffer);
-            delete(playAudioSource);
+            //delete(outputBuffer);
+            //delete(inputBuffer);
+            //delete(playAudioSource);
         }
         else if (Settings::audioOutputMode == 2 || Settings::audioOutputMode == 3)
         {
-            juce::AudioBuffer<float>* inputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
+            inputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
             inputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
             inputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
 
@@ -566,8 +583,8 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             //
 
             bufferToFill.clearActiveBufferRegion();
-            juce::AudioBuffer<float>* outputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
-            juce::AudioSourceChannelInfo* playAudioSource = new juce::AudioSourceChannelInfo(*outputBuffer);
+            outputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
+            playAudioSource.reset(new juce::AudioSourceChannelInfo(*outputBuffer));
             myMixer.getNextAudioBlock(*playAudioSource);
             bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
             bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
@@ -588,12 +605,12 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 if (soundPlayers[0] != nullptr)
                     soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
                 if (soundPlayers[0] != nullptr)
-                    soundPlayers[0]->newMeter->measureBlock(outputBuffer);
+                    soundPlayers[0]->newMeter->measureBlock(outputBuffer.get());
             }
             if (bottomComponent.recorderComponent.isEnabled() && soundPlayers[0] != nullptr)
             {
-                juce::AudioBuffer<float>* newOutputBuffer = new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples());
-                bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer, inputBuffer, newOutputBuffer, 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
+                newOutputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
+                bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer.get(), inputBuffer.get(), newOutputBuffer.get(), 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
                 bufferToFill.clearActiveBufferRegion();
                 bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                 bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
@@ -604,12 +621,12 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                     bufferToFill.buffer->copyFrom(0, 0, *newOutputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                     bufferToFill.buffer->copyFrom(1, 0, *newOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
                 }
-                delete newOutputBuffer;
+                //delete newOutputBuffer;
             }
             //delete(mixerOutputBuffer);
-            delete(inputBuffer);
-            delete(outputBuffer);
-            delete(playAudioSource);
+            //delete(inputBuffer);
+            //delete(outputBuffer);
+            //delete(playAudioSource);
         }
     }
 }
@@ -958,6 +975,13 @@ void MainComponent::valueChanged(juce::Value& value)
     {
         channelsMapping();
     }
+    else if (value.refersToSameSourceAs(Settings::showMeterValue))
+    {
+        if (soundPlayers[0]->myPlaylists[0] != nullptr)
+            soundPlayers[0]->myPlaylists[0]->shouldShowMeters(Settings::showMeterValue.getValue());
+        if (soundPlayers[0]->myPlaylists[1] != nullptr)
+            soundPlayers[0]->myPlaylists[1]->shouldShowMeters(Settings::showMeterValue.getValue());
+    }
 }
 
 
@@ -1260,7 +1284,7 @@ void MainComponent::stopWatchShortcuPressed()
 
 juce::StringArray MainComponent::getMenuBarNames()
 {
-    return { "File", "Settings", "Soundplayer Mode", "Help" };
+    return { "File", "Settings", "View", "Soundplayer Mode", "Help" };
 }
 
 juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String& menuName)
@@ -1283,11 +1307,17 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
     }
     else if (menuIndex == 2)
     {
+        menu.addCommandItem(&commandManager, CommandIDs::showIndividualMeters, "Show individuals meters");
+        menu.addCommandItem(&commandManager, CommandIDs::showTimer, "Show timer");
+        menu.addCommandItem(&commandManager, CommandIDs::showEnveloppe, "Show enveloppe on clip");
+    }
+    else if (menuIndex == 3)
+    {
         menu.addCommandItem(&commandManager, CommandIDs::launchPlaylist, "One playlist, one cart");
         menu.addCommandItem(&commandManager, CommandIDs::launch8Faders, "Eight faders");
         menu.addCommandItem(&commandManager, CommandIDs::launchKeyMapped, "Keyboard Mapped");
     }
-    else if (menuIndex == 3)
+    else if (menuIndex == 4)
     {
         menu.addItem(1, "Documentation");
         menu.addItem(2, "About");
@@ -1342,6 +1372,8 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
 {
     juce::Array<juce::CommandID> c{ CommandIDs::startTimer,
                                     CommandIDs::showTimer,
+                                    CommandIDs::showIndividualMeters,
+                                    CommandIDs::showEnveloppe,
                                     CommandIDs::lanchRecord,
                                     CommandIDs::goToSoundBrowser,
                                     CommandIDs::goToDataBaseBrowser,
@@ -1587,6 +1619,14 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setTicked(false);
         result.addDefaultKeypress('l', juce::ModifierKeys::noModifiers);
         break;
+    case CommandIDs::showIndividualMeters:
+        result.setInfo("Show individuals meters", "Show meter", "Menu", 0);
+        result.setTicked(false);
+        break;
+    case CommandIDs::showEnveloppe:
+        result.setInfo("Show enveloppes on clip", "Show enveloppe", "Menu", 0);
+        result.setTicked(false);
+        break;
     default:
         break;
     }
@@ -1738,8 +1778,26 @@ bool MainComponent::perform(const InvocationInfo& info)
     case CommandIDs::deleteOutMark:
         bottomComponent.setOrDeleteStop(false);
         break;
+    case CommandIDs::showIndividualMeters:
+        Settings::showMeter = !Settings::showMeter;
+        Settings::showMeterValue = Settings::showMeter;
+        settings->saveOptions();
+        break;
+    case CommandIDs::showEnveloppe:
+        Settings::showEnveloppe = !Settings::showEnveloppe;
+        if (soundPlayers[0]->myPlaylists[0] != nullptr)
+            soundPlayers[0]->myPlaylists[0]->rearrangePlayers();
+        if (soundPlayers[0]->myPlaylists[1] != nullptr)
+            soundPlayers[0]->myPlaylists[1]->rearrangePlayers();
+        settings->saveOptions();
+        break;
     default:
         return false;
     }
     return true;
+}
+
+void MainComponent::focusLost(juce::Component::FocusChangeType cause)
+{
+    grabKeyboardFocus();
 }

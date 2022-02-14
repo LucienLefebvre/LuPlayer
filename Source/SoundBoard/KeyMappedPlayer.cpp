@@ -63,6 +63,9 @@ KeyMappedPlayer::KeyMappedPlayer()
     playHead.reset(new PlayHead());
     addAndMakeVisible(playHead.get());
     playHead->setMouseClickGrabsKeyboardFocus(false);
+
+    dBLabel.reset(new juce::Label());
+    addChildComponent(dBLabel.get());
 }
 
 KeyMappedPlayer::~KeyMappedPlayer()
@@ -104,10 +107,10 @@ void KeyMappedPlayer::resized()
     nameLabelTextTotalWidth = nameLabel->getFont().getStringWidth(nameLabel->getText());
     nameLabel->setSize(nameLabelTextTotalWidth, nameLabelHeight);
 
-    volumeSliderWidth = getWidth();
+    /*volumeSliderWidth = getWidth();
     volumeSliderHeight = getHeight() / 5;
     volumeSlider->setBounds(0, getHeight() * 3 / 5, volumeSliderWidth, volumeSliderHeight);
-    
+    */
     thumbnailHeight = getHeight() * 3 / 5;
     thumbnailBounds.setBounds(0, 2*nameLabelHeight, getWidth(), thumbnailHeight);
 
@@ -127,6 +130,13 @@ void KeyMappedPlayer::resized()
 
     editButtonWidth = 3 * getWidth() / 10;
     editButton->setBounds(elapsedTimeWidth, elapsedTimeHeight, editButtonWidth, elapsedTimeHeight);
+
+    dBLabel->setCentrePosition(thumbnailBounds.getCentre());
+    int dBLabelHeight = nameLabelHeight;
+    dBLabel->setSize(getWidth(), dBLabelHeight);
+    dBLabel->setFont(juce::Font(dBLabelHeight, juce::Font::plain).withTypefaceStyle("Regular"));
+    dBLabel->setJustificationType(juce::Justification::centred);
+    dBLabel->setColour(juce::Label::ColourIds::textColourId, ORANGE);
 }
 
 void KeyMappedPlayer::setPlayer(Player* p)
@@ -167,32 +177,38 @@ void KeyMappedPlayer::loadFile(juce::String path, juce::String name)
 
 void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
-    if (source == soundPlayer->playerInfoChangedBroadcaster)
+    if (soundPlayer != nullptr)
     {
-        updatePlayerInfo();
-        if (soundPlayer->isFileLoaded())
+        if (source == soundPlayer->playerInfoChangedBroadcaster)
         {
-            volumeSlider->setVisible(true);
-            elapsedTimeLabel->setVisible(true);
-            editButton->setVisible(true);
+            updatePlayerInfo();
+            if (soundPlayer->isFileLoaded())
+            {
+                volumeSlider->setVisible(true);
+                elapsedTimeLabel->setVisible(true);
+                editButton->setVisible(true);
+            }
         }
-    }
-    else if (source == thumbnail)
-    {
-        repaint();
-    }
-    else if (source == soundPlayer->remainingTimeBroadcaster)
-    {
-        setPlayerColours(juce::Colours::red);
-    }
-    else if (source == soundPlayer->soundEditedBroadcaster)
-    {
-        updatePlayerInfo();
-    }
-    else if (source == soundPlayer->playerDeletedBroadcaster)
-    {
-        soundPlayer = nullptr;
-        thumbnail = nullptr;
+        else if (source == thumbnail)
+        {
+            repaint();
+        }
+        else if (source == soundPlayer->remainingTimeBroadcaster)
+        {
+            setPlayerColours(juce::Colours::red);
+        }
+        else if (source == soundPlayer->soundEditedBroadcaster)
+        {
+            updatePlayerInfo();
+        }
+        else if (source == soundPlayer->playerDeletedBroadcaster)
+        {
+            /*soundPlayer = nullptr;
+            thumbnail = nullptr;*/
+            volumeSlider->setVisible(false);
+            elapsedTimeLabel->setVisible(false);
+            editButton->setVisible(false);
+        }
     }
 }
 
@@ -234,10 +250,63 @@ void KeyMappedPlayer::startOrStop()
 
 void KeyMappedPlayer::mouseDown(const juce::MouseEvent& event)
 {
-    /*if (event.originalComponent != volumeSlider.get()
-        && event.originalComponent != editButton.get())
-        startOrStop();*/
-    //getTopLevelComponent()->grabKeyboardFocus();
+    dBLabel->setVisible(true);
+
+    if (soundPlayer != nullptr)
+    {
+        if (event.getNumberOfClicks() == 2)
+        {
+            soundPlayer->setGain(juce::Decibels::decibelsToGain(0));
+        }
+        if (soundPlayer->isFileLoaded())
+            setDBText();
+        gainAtDragStart = juce::Decibels::gainToDecibels(soundPlayer->getVolume());
+        gainTimeStartDisplay = juce::Time::getMillisecondCounter();
+    }
+}
+
+void KeyMappedPlayer::mouseDrag(const juce::MouseEvent& event)
+{
+    if (soundPlayer != nullptr)
+    {
+        if (soundPlayer->isFileLoaded())
+        {
+            float gain = gainAtDragStart - event.getDistanceFromDragStartY() / 10 + event.getDistanceFromDragStartX() / 10;
+            soundPlayer->setGain(juce::Decibels::decibelsToGain(gain));
+            setDBText();
+            gainTimeStartDisplay = juce::Time::getMillisecondCounter();
+        }
+    }
+}
+
+void KeyMappedPlayer::mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel)
+{
+    if (soundPlayer != nullptr)
+    {
+        if (soundPlayer->isFileLoaded())
+        {
+            float playerGain = juce::Decibels::gainToDecibels(soundPlayer->getVolume());
+            float gain = 0.0f;
+            if (wheel.deltaY > 0)
+                gain = 0.5;
+            else if (wheel.deltaY < 0)
+                gain = -0.5f;
+            soundPlayer->setGain(juce::Decibels::decibelsToGain(playerGain + gain));
+            dBLabel->setVisible(true);
+            setDBText();
+            gainTimeStartDisplay = juce::Time::getMillisecondCounter();
+        }
+    }
+}
+
+
+void KeyMappedPlayer::setDBText()
+{
+    dBLabel->setText(juce::String(round(juce::Decibels::gainToDecibels(soundPlayer->getVolume()))) + "dB", juce::dontSendNotification);
+}
+void KeyMappedPlayer::mouseUp(const juce::MouseEvent& event)
+{
+    //dBLabel->setVisible(false);
 }
 
 void KeyMappedPlayer::sliderValueChanged(juce::Slider* slider)
@@ -270,6 +339,11 @@ void KeyMappedPlayer::timerCallback(int timerID)
             }
             else
                 playHead->setVisible(false);
+            if (dBLabel->isVisible())
+            {
+                if (juce::Time::getMillisecondCounter() - gainTimeStartDisplay > gainDisplayTimeMs)
+                    dBLabel->setVisible(false);
+            }
         }
         else
             playHead->setVisible(false);

@@ -101,6 +101,9 @@ public:
     static bool Settings::mouseWheelControlVolume;
     static bool Settings::autoNormalize;
     static bool Settings::showMeter;
+    static juce::Value Settings::showMeterValue;
+
+    static bool Settings::showEnveloppe;
 
     static int Settings::draggedPlaylist;
     static int Settings::draggedPlayer;
@@ -108,6 +111,7 @@ public:
     static int Settings::editedPlaylist;
 
     static int Settings::preferedSoundPlayerMode;
+
 
 private:
 

@@ -45,6 +45,8 @@ public:
     {
         startTimer = 1,
         showTimer,
+        showIndividualMeters,
+        showEnveloppe,
         lanchRecord,
         goToSoundBrowser,
         goToDataBaseBrowser,
@@ -135,10 +137,11 @@ private:
     //juce::OwnedArray<juce::AudioBuffer> myBuffers;
 
     void MainComponent::settingsButtonClicked();
+    void focusLost(juce::Component::FocusChangeType cause);
     void audioSettingsButtonClicked();
     void keyMapperButtonClicked();
     void midiMapperButtonClicked();
-    juce::AudioBuffer<float> outputBuffer;
+    //juce::AudioBuffer<float> outputBuffer;
 
     juce::AudioDeviceSelectorComponent audioSetupComp;
     juce::AudioDeviceManager::AudioDeviceSetup deviceSetup;
@@ -181,7 +184,7 @@ private:
     int topButtonsYStart = 1;
     int topButtonsWidth = 100;
     int topButtonsHeight = 25;
-
+    int playlistStartY = 30;
 
     int bottomHeight = 100;
     //int upDownButtonsHeight = 100;
@@ -479,6 +482,12 @@ private:
     void getAllCommands(juce::Array<juce::CommandID>& commands);
     void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result);
     bool perform(const InvocationInfo& info);
+
+    std::unique_ptr<juce::AudioBuffer<float>> inputBuffer;
+    std::unique_ptr<juce::AudioBuffer<float>> outputBuffer;
+    std::unique_ptr<juce::AudioBuffer<float>> newOutputBuffer;
+    std::unique_ptr<juce::AudioSourceChannelInfo> playAudioSource;
+    std::unique_ptr<juce::AudioSourceChannelInfo> cueAudioSource;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
 

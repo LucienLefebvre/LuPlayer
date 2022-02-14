@@ -46,6 +46,14 @@ public:
 
     void mouseDown(const juce::MouseEvent& event);
 
+    void mouseDrag(const juce::MouseEvent& event);
+
+    void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel);
+
+    void setDBText();
+
+    void mouseUp(const juce::MouseEvent& event);
+
     void sliderValueChanged(juce::Slider* slider);
 
     void timerCallback(int timerID);
@@ -66,6 +74,7 @@ private:
     std::unique_ptr<juce::Label> nameLabel;
     std::unique_ptr<juce::Slider> volumeSlider;
     std::unique_ptr<juce::TextButton> editButton;
+    std::unique_ptr<juce::Label> dBLabel;
     std::unique_ptr<PlayHead> playHead;
 
     int editButtonWidth = 0;
@@ -92,5 +101,10 @@ private:
     int startTickScrollTimer = 0;
     int endTickScrollTimer = 0;
     bool scrollLabel = false;
+
+    //Drag gain
+    float gainAtDragStart = 0.0f;
+    juce::uint32 gainTimeStartDisplay = 0;
+    int gainDisplayTimeMs = 2000;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappedPlayer)
 };

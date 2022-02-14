@@ -15,6 +15,6 @@
   <VALUE name="useDefaultInputChannels" val="1"/>
   <VALUE name="outputChannels" val="3"/>
   <VALUE name="useDefaultOutputsChannels" val="1"/>
-  <VALUE name="PreferedSoundPlayerMode" val="2"/>
+  <VALUE name="PreferedSoundPlayerMode" val="1"/>
   <VALUE name="ShowMeter" val="1"/>
 </PROPERTIES>

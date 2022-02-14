@@ -237,6 +237,8 @@ private:
     int mouseDragged;
     int dragZoneWidth = 20;
     bool insertTop = false;
+
+    //Dragged sound infos
     std::string draggedPath;
     float draggedTrim;
     bool draggedLooping;
@@ -250,6 +252,9 @@ private:
     int playlistSourceLatch;
     bool draggedNormalized;
     FilterProcessor::GlobalParameters draggedFilterParameters{FilterProcessor::makeDefaultFilter()};
+    juce::Array<float> draggedEnveloppeXArray;
+    juce::Array<float> draggedEnveloppeYArray;
+    bool draggedEnveloppeEnabled;
     bool draggedFxBypassed;
 
     LoudnessBar loudnessBarComponent;

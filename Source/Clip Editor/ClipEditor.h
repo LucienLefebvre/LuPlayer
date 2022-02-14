@@ -64,6 +64,7 @@ public:
         addAndMakeVisible(inButton.get());
         inButton->setButtonText("IN");
         inButton->onClick = [this] {inButtonClicked(); };
+        inButton->addListener(this);
         //In Label
         inLabel.reset(new juce::Label());
         addAndMakeVisible(inLabel.get());
@@ -73,6 +74,7 @@ public:
         addAndMakeVisible(outButton.get());
         outButton->setButtonText("OUT");
         outButton->onClick = [this] {outButtonClicked(); };
+        outButton->addListener(this);
         //Out Label
         outLabel.reset(new juce::Label());
         addAndMakeVisible(outLabel.get());
@@ -104,6 +106,16 @@ public:
         addAndMakeVisible(denoiseButton.get());
         denoiseButton->setButtonText("Denoiser");
         denoiseButton->onClick = [this] {if (editedPlayer != nullptr) editedPlayer->denoiseButtonClicked(); };
+        //Open Button
+        openButton.reset(new juce::TextButton());
+        addAndMakeVisible(openButton.get());
+        openButton->setButtonText("Open");
+        openButton->onClick = [this] {if (editedPlayer != nullptr) editedPlayer->openButtonClicked(); };
+        //Delete Button
+        deleteButton.reset(new juce::TextButton());
+        addAndMakeVisible(deleteButton.get());
+        deleteButton->setButtonText("Delete");
+        deleteButton->onClick = [this] {if (editedPlayer != nullptr) editedPlayer->deleteFile(); };
 
         enableButttons(false);
     }
@@ -122,11 +134,21 @@ public:
 
     void resized() override
     {
+
+
         inOutButtonWidth = getWidth() / 24;
         enveloppeEditor.setBounds(getWidth() / 4, 0, getWidth() * 3 / 4, getHeight());
         nameLabel->setBounds(0, 0, getWidth() / 4 - dividerBarWidth, 25);
-        trimVolumeSlider->setBounds(getWidth() / 4 - dividerBarWidth - volumeSliderWidth, nameLabel->getBottom(), volumeSliderWidth, volumeSliderWidth);
-        cueButton->setBounds(2, nameLabel->getBottom() + 10, volumeSliderWidth, volumeSliderWidth - 10);
+
+        int openButtonWidth = getWidth() / 4 / 3;
+        int openButtonHeight = 25;
+        openButton->setSize(openButtonWidth, openButtonHeight);
+        openButton->setCentrePosition(getWidth() / 16, nameLabel->getBottom() + openButtonHeight / 2 + 3);
+        deleteButton->setSize(openButtonWidth, openButtonHeight);
+        deleteButton->setCentrePosition(3 * getWidth() / 16, nameLabel->getBottom() + openButtonHeight / 2 + 3);
+
+        trimVolumeSlider->setBounds(getWidth() / 4 - dividerBarWidth - volumeSliderWidth, openButton->getBottom(), volumeSliderWidth, volumeSliderWidth);
+        cueButton->setBounds(2, openButton->getBottom() + 10, volumeSliderWidth, volumeSliderWidth - 10);
         cueTimeLabel->setBounds(cueButton->getRight() + 2, nameLabel->getBottom() + 5,
             trimVolumeSlider->getPosition().getX() - cueButton->getRight() - 4, 80);
         inButton->setBounds(0, cueButton->getBottom() + 10, inOutButtonWidth, 25);
@@ -134,10 +156,11 @@ public:
         outButton->setBounds(inOutButtonWidth * 4, cueButton->getBottom() + 10, inOutButtonWidth, 25);
         outLabel->setBounds(outButton->getRight(), inButton->getY(), inOutButtonWidth, 25);
         loopButton->setBounds(getWidth() / 8 - inOutButtonWidth / 2, inButton->getY(), inOutButtonWidth, 25);
-        int buttonsYPosition = loopButton->getBottom() + ((getHeight() - 25 - loopButton->getBottom()) / 4);
-        int buttonsBisYPosition = loopButton->getBottom() + 3 * ((getHeight() - 25 - loopButton->getBottom()) / 4);
+
         int buttonsHeight = (getHeight() - 25 - loopButton->getBottom()) / 3;
         int buttonsWidth = getWidth() / 4 / 3;
+        int buttonsYPosition = loopButton->getBottom() + ((getHeight() - 25 - loopButton->getBottom()) / 4);
+        int buttonsBisYPosition = loopButton->getBottom() + 3 * ((getHeight() - 25 - loopButton->getBottom()) / 4);
         enveloppeButton->setCentrePosition(getWidth() / 16, buttonsYPosition);
         fxButton->setCentrePosition(3 * getWidth() / 16, buttonsYPosition);
         normButton->setCentrePosition(getWidth() / 16, buttonsBisYPosition);
@@ -301,7 +324,13 @@ public:
     {
         if (editedPlayer != nullptr)
         {
-            editedPlayer->setTimeClicked();
+            if (rightClickDown)
+            {
+                editedPlayer->deleteStart();
+                rightClickDown = false;
+            }
+            else
+                editedPlayer->setTimeClicked();
         }
     }
 
@@ -309,7 +338,13 @@ public:
     {
         if (editedPlayer != nullptr)
         {
-            editedPlayer->stopTimeClicked();
+            if (rightClickDown)
+            {
+                editedPlayer->deleteStop();
+                rightClickDown = false;
+            }
+            else
+                editedPlayer->stopTimeClicked();
         }
     }
 
@@ -393,6 +428,7 @@ public:
     {
         return &enveloppeEditor;
     }
+
 private:
     EnveloppeEditor enveloppeEditor;
     Player* editedPlayer = nullptr;
@@ -416,5 +452,7 @@ private:
     std::unique_ptr<juce::TextButton> fxButton;
     std::unique_ptr<juce::TextButton> normButton;
     std::unique_ptr<juce::TextButton> denoiseButton;
+    std::unique_ptr<juce::TextButton> openButton;
+    std::unique_ptr<juce::TextButton> deleteButton;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipEditor)
 };

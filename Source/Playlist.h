@@ -158,7 +158,7 @@ public:
     bool scrollbarShown = false;
 
     void Playlist::setTimerTime(int timertime);
-
+    void Playlist::shouldShowMeters(bool b);
     juce::ChangeBroadcaster* playBroadcaster;
     juce::ChangeBroadcaster* cuePlaylistBroadcaster;
     juce::ActionBroadcaster* cuePlaylistActionBroadcaster;

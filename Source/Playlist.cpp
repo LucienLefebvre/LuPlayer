@@ -882,93 +882,98 @@ void Playlist::addPlayer(int playerID)
 {
     int idAddedPlayer = playerID + 1;
     players.insert(idAddedPlayer, new Player(idAddedPlayer));
-    if (eightPlayerMode)
-        players.getLast()->setEightPlayerMode(true);
-    players[idAddedPlayer]->playerPrepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
-    playlistMixer.addInputSource(players[idAddedPlayer]->outputSource.get(), false);
-    playlistCueMixer.addInputSource(players[idAddedPlayer]->cueOutputSource.get(), false);
-
-    players[idAddedPlayer]->fileName.addListener(this);
-    players[idAddedPlayer]->playerPositionLabel.addListener(this);
-    players[idAddedPlayer]->draggedPlayer.addListener(this);
-    players[idAddedPlayer]->cueStopped.addListener(this);
-    players[idAddedPlayer]->transport.addChangeListener(this);
-    players[idAddedPlayer]->cueTransport.addChangeListener(this);
-    players[idAddedPlayer]->cueBroadcaster->addActionListener(this);
-    players[idAddedPlayer]->playBroadcaster->addActionListener(this);
-    players[idAddedPlayer]->fxButtonBroadcaster->addChangeListener(this);
-    players[idAddedPlayer]->envButtonBroadcaster->addChangeListener(this);
-
-    playersPositionLabels.insert(idAddedPlayer, new juce::Label);
-
-    meters.insert(idAddedPlayer, new Meter(Meter::Mode::Stereo));
-    meters[idAddedPlayer]->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
-    meters[idAddedPlayer]->shouldDrawScaleNumbers(false);
-    meters[idAddedPlayer]->setMeterColour(juce::Colour(229, 149, 0));
-    meters[idAddedPlayer]->setPeakColour(juce::Colours::red);
-    meters[idAddedPlayer]->shouldDrawScale(true);
-    meters[idAddedPlayer]->setRectangleRoundSize(2);
-    meters[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
-
-    playersPositionLabels[idAddedPlayer]->setText(juce::String(idAddedPlayer + 1), juce::NotificationType::dontSendNotification);
-    addAndMakeVisible(playersPositionLabels[idAddedPlayer]);
-    playersPositionLabels[idAddedPlayer]->setInterceptsMouseClicks(false, false);
-  
-    if (playlistType == 0)
+    if (players[idAddedPlayer] != nullptr)
     {
-        removePlayersButtons.insert(idAddedPlayer, new juce::TextButton());
-        removePlayersButtons[idAddedPlayer]->setButtonText("-");
-        removePlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { removePlayer(idAddedPlayer); };
-        removePlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
+        if (eightPlayerMode)
+            players.getLast()->setEightPlayerMode(true);
+        players[idAddedPlayer]->playerPrepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+        playlistMixer.addInputSource(players[idAddedPlayer]->outputSource.get(), false);
+        playlistCueMixer.addInputSource(players[idAddedPlayer]->cueOutputSource.get(), false);
 
-        addPlayersButtons.insert(idAddedPlayer, new juce::TextButton());
-        addPlayersButtons[idAddedPlayer]->setButtonText("+");
-        addPlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { addPlayer(idAddedPlayer); };
-        addPlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
+        players[idAddedPlayer]->fileName.addListener(this);
+        players[idAddedPlayer]->playerPositionLabel.addListener(this);
+        players[idAddedPlayer]->draggedPlayer.addListener(this);
+        players[idAddedPlayer]->cueStopped.addListener(this);
+        players[idAddedPlayer]->transport.addChangeListener(this);
+        players[idAddedPlayer]->cueTransport.addChangeListener(this);
+        players[idAddedPlayer]->cueBroadcaster->addActionListener(this);
+        players[idAddedPlayer]->playBroadcaster->addActionListener(this);
+        players[idAddedPlayer]->fxButtonBroadcaster->addChangeListener(this);
+        players[idAddedPlayer]->envButtonBroadcaster->addChangeListener(this);
 
-        playersPositionLabels[idAddedPlayer]->setBounds(2, (105 * idAddedPlayer) + 30, 40, 40);
-        playersPositionLabels[idAddedPlayer]->setFont(juce::Font(40.00f, juce::Font::plain).withTypefaceStyle("Regular"));
-        playersPositionLabels[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
+        playersPositionLabels.insert(idAddedPlayer, new juce::Label);
+
+        meters.insert(idAddedPlayer, new Meter(Meter::Mode::Stereo));
+        meters[idAddedPlayer]->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+        meters[idAddedPlayer]->shouldDrawScaleNumbers(false);
+        meters[idAddedPlayer]->setMeterColour(juce::Colour(229, 149, 0));
+        meters[idAddedPlayer]->setPeakColour(juce::Colours::red);
+        meters[idAddedPlayer]->shouldDrawScale(true);
+        meters[idAddedPlayer]->setRectangleRoundSize(2);
+        meters[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
+
+        playersPositionLabels[idAddedPlayer]->setText(juce::String(idAddedPlayer + 1), juce::NotificationType::dontSendNotification);
+        addAndMakeVisible(playersPositionLabels[idAddedPlayer]);
+        playersPositionLabels[idAddedPlayer]->setInterceptsMouseClicks(false, false);
+
+        if (playlistType == 0)
+        {
+            removePlayersButtons.insert(idAddedPlayer, new juce::TextButton());
+            removePlayersButtons[idAddedPlayer]->setButtonText("-");
+            removePlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { removePlayer(idAddedPlayer); };
+            removePlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
+
+            addPlayersButtons.insert(idAddedPlayer, new juce::TextButton());
+            addPlayersButtons[idAddedPlayer]->setButtonText("+");
+            addPlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { addPlayer(idAddedPlayer); };
+            addPlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
+
+            playersPositionLabels[idAddedPlayer]->setBounds(2, (105 * idAddedPlayer) + 30, 40, 40);
+            playersPositionLabels[idAddedPlayer]->setFont(juce::Font(40.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+            playersPositionLabels[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
+        }
+        else if (playlistType == 1)
+        {
+            assignLeftFaderButtons.insert(idAddedPlayer, new juce::TextButton());
+            assignLeftFaderButtons[idAddedPlayer]->setButtonText("");
+            assignLeftFaderButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { assignLeftFader(idAddedPlayer); };
+            assignLeftFaderButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
+
+            assignRightFaderButtons.insert(idAddedPlayer, new juce::TextButton());
+            assignRightFaderButtons[idAddedPlayer]->setButtonText("");
+            assignRightFaderButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { assignRightFader(idAddedPlayer); };
+            assignRightFaderButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
+
+            playersPositionLabels[idAddedPlayer]->setBounds(getParentWidth() - 36, (105 * idAddedPlayer) + 30, 40, 40);
+            playersPositionLabels[idAddedPlayer]->setFont(juce::Font(40.00f, juce::Font::plain).withTypefaceStyle("Regular"));
+
+            removePlayersButtons.insert(idAddedPlayer, new juce::TextButton());
+            removePlayersButtons[idAddedPlayer]->setButtonText("-");
+            removePlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { removePlayer(idAddedPlayer); };
+            removePlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
+
+            addPlayersButtons.insert(idAddedPlayer, new juce::TextButton());
+            addPlayersButtons[idAddedPlayer]->setButtonText("+");
+            addPlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { addPlayer(idAddedPlayer); };
+            addPlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
+        }
+        playerNumber = players.size();
+        rearrangePlayers();
+        updateNextPlayer();
+        setOptions();
+        repaint();
     }
-    else if (playlistType == 1)
-    {
-        assignLeftFaderButtons.insert(idAddedPlayer, new juce::TextButton());
-        assignLeftFaderButtons[idAddedPlayer]->setButtonText("");
-        assignLeftFaderButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { assignLeftFader(idAddedPlayer); };
-        assignLeftFaderButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
-
-        assignRightFaderButtons.insert(idAddedPlayer, new juce::TextButton());
-        assignRightFaderButtons[idAddedPlayer]->setButtonText("");
-        assignRightFaderButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { assignRightFader(idAddedPlayer); };
-        assignRightFaderButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
-
-        playersPositionLabels[idAddedPlayer]->setBounds(getParentWidth() - 36, (105 * idAddedPlayer) + 30, 40, 40);
-        playersPositionLabels[idAddedPlayer]->setFont(juce::Font(40.00f, juce::Font::plain).withTypefaceStyle("Regular"));
-
-        removePlayersButtons.insert(idAddedPlayer, new juce::TextButton());
-        removePlayersButtons[idAddedPlayer]->setButtonText("-");
-        removePlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { removePlayer(idAddedPlayer); };
-        removePlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
-
-        addPlayersButtons.insert(idAddedPlayer, new juce::TextButton());
-        addPlayersButtons[idAddedPlayer]->setButtonText("+");
-        addPlayersButtons[idAddedPlayer]->onClick = [idAddedPlayer, this] { addPlayer(idAddedPlayer); };
-        addPlayersButtons[idAddedPlayer]->setMouseClickGrabsKeyboardFocus(false);
-    }
-    playerNumber = players.size();
-    rearrangePlayers();
-    updateNextPlayer();
-    setOptions();
-    repaint();
 }
 
 void Playlist::removePlayer(int playerID)
 {
     if (playlistType == 0)
     {
-            if (players.size() > 1)
+        if (players.size() > 1)
+        {
+            if (players[playerID] != nullptr)
             {
-                if (players[playerID] != nullptr)
+                if (!players[playerID]->isThreadRunning())
                 {
                     players[playerID]->stopButtonClicked();
                     playlistMixer.removeInputSource(&players[playerID]->mixer);
@@ -980,6 +985,7 @@ void Playlist::removePlayer(int playerID)
                     players[playerID]->cueBroadcaster->removeActionListener(this);
                     players[playerID]->fxButtonBroadcaster->removeChangeListener(this);
                     players[playerID]->envButtonBroadcaster->removeChangeListener(this);
+                    players[playerID]->killThreads();
 
                     players.remove(playerID);
                     playersPositionLabels.remove(playerID);
@@ -992,12 +998,15 @@ void Playlist::removePlayer(int playerID)
                     rearrangePlayers();
                 }
             }
+        }
     }
     else if (playlistType == 1)
     {
-            if (players.size() > 1)
+        if (players.size() > 1)
+        {
+            if (players[playerID] != nullptr)
             {
-                if (players[playerID] != nullptr)
+                if (!players[playerID]->isThreadRunning())
                 {
                     players[playerID]->stopButtonClicked();
                     playlistMixer.removeInputSource(&players[playerID]->mixer);
@@ -1010,6 +1019,7 @@ void Playlist::removePlayer(int playerID)
                     players[playerID]->cueBroadcaster->removeActionListener(this);
                     players[playerID]->fxButtonBroadcaster->removeChangeListener(this);
                     players[playerID]->envButtonBroadcaster->removeChangeListener(this);
+                    players[playerID]->killThreads();
                     players.remove(playerID);
                     playersPositionLabels.remove(playerID);
                     assignLeftFaderButtons.remove(playerID);
@@ -1020,6 +1030,7 @@ void Playlist::removePlayer(int playerID)
                     rearrangePlayers();
                 }
             }
+        }
     }
     grabFocusBroadcaster->sendChangeMessage();
 }
@@ -1760,13 +1771,13 @@ void Playlist::timerCallback()
     {
         for (auto i = 0; i < players.size(); i++)
         {
-            if (i != fader1Player)
+            if (i != fader1Player && assignLeftFaderButtons[i] != nullptr)
             {
                 assignLeftFaderButtons[i]->setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
             }
             else
                 assignLeftFaderButtons[i]->setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::red);
-            if (i != fader2Player)
+            if (i != fader2Player && assignRightFaderButtons[i] != nullptr)
             {
                 assignRightFaderButtons[i]->setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
             }
@@ -1890,3 +1901,11 @@ bool Playlist::perform(const InvocationInfo& info)
     return true;
 }
 
+void Playlist::shouldShowMeters(bool b)
+{
+    if (b)
+        meterWidth = 20;
+    else
+        meterWidth = 0;
+    rearrangePlayers();
+}

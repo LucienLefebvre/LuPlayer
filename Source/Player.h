@@ -99,6 +99,7 @@ public:
     std::string getFilePath();
 
     void setGain(float g);
+    void nudgeGain(float g);
     float getVolume();
     float getTrimVolume();
     void setTrimVolume(double trimVolume);
@@ -195,6 +196,9 @@ public:
     static juce::Path createEnveloppePathFromArrays(juce::Array<float> xArray, juce::Array<float> yArray);
 
     juce::String secondsToMMSS(int seconds);
+
+    bool isThreadRunning();
+    void openButtonClicked();
 
     std::unique_ptr<juce::AudioFormatReaderSource> playSource;
     juce::AudioTransportSource transport;
@@ -294,7 +298,6 @@ private:
         Playing
     };
 
-    void openButtonClicked();
     void cueStopButtonClicked();
     void optionButtonClicked();
     void setStereoMapping(int mappingSelected);
@@ -325,6 +328,9 @@ private:
     const juce::String startFFmpeg(std::string filePath);
     void handleAudioTags(std::string filePath);
     std::string extactName(std::string Filepath);
+
+
+    juce::Point<int> getPointPosition(float x, float y);
 
     TransportState state;
     TransportState newState;
@@ -391,6 +397,8 @@ private:
     int cartButtonsControlWidth = 30;
 
     int dragZoneWidth = 40;
+
+    bool drawEnveloppe = true;
     //AUDIO
     juce::AudioFormatManager formatManager;
 

@@ -992,6 +992,9 @@ void SoundPlayer::mouseDragGetInfos(int playlistSource, int playerID)
         draggedStopTimeSet = player->stopTimeSet;
         draggedStartTime = player->getStart();
         draggedStopTime = player->getStop();
+        draggedEnveloppeXArray = player->getEnveloppeXArray();
+        draggedEnveloppeYArray = player->getEnveloppeYArray();
+        draggedEnveloppeEnabled = player->isEnveloppeEnabled();
         mouseDragged = true;
     }
 }
@@ -1369,6 +1372,8 @@ void SoundPlayer::setSoundInfos(int playlistDestination, int playerIdDestination
         player->setStopTime(draggedStopTime);
     player->setFilterParameters(draggedFilterParameters);
     player->bypassFX(draggedFxBypassed, false);
+    player->setEnveloppePath(Player::createEnveloppePathFromArrays(draggedEnveloppeXArray, draggedEnveloppeYArray));
+    player->setEnveloppeEnabled(draggedEnveloppeEnabled, false, false);
     clearDragInfos();
 }
 
@@ -1828,11 +1833,16 @@ void SoundPlayer::loadPlaylist()
             myPlaylists[0]->resized();
             myPlaylists[0]->resized();
 
+            if (soundPlayerMode == SoundPlayer::Mode::EightFaders)
+            {
+                while (myPlaylists[0]->players.size() < 4)
+                    myPlaylists[0]->addPlayer(myPlaylists[0]->players.size() - 1);
+                while (myPlaylists[1]->players.size() < 4)
+                    myPlaylists[1]->addPlayer(myPlaylists[1]->players.size() - 1);
+            }
+
             playlistLoadedBroadcaster->sendChangeMessage();
-            /*while (myPlaylists[0]->players.size() < 4)
-                myPlaylists[0]->addPlayer(myPlaylists[0]->players.size() - 1);
-            while (myPlaylists[1]->players.size() < 4)
-                myPlaylists[1]->addPlayer(myPlaylists[1]->players.size() - 1);*/
+
             Settings::draggedPlayer = -1;
         }
     }
@@ -1988,9 +1998,13 @@ bool SoundPlayer::isPlaying()
 
 Player* SoundPlayer::getActivePlayer()
 {
-    auto* r = myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
-    if (r != nullptr)
+    if (myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer] != nullptr)
+    {
+        auto* r = myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
         return r;
+    }
+    else
+        return nullptr;
 }
 
 juce::ApplicationCommandTarget* SoundPlayer::getNextCommandTarget()
@@ -2077,33 +2091,46 @@ bool SoundPlayer::perform(const InvocationInfo& info)
     switch (info.commandID)
     {
     case CommandIDs::toggleClipEffects:
-        getActivePlayer()->bypassFX(getActivePlayer()->isFxEnabled(), true);
+        if (getActivePlayer() != nullptr)
+            getActivePlayer()->bypassFX(getActivePlayer()->isFxEnabled(), true);
         break;
     case CommandIDs::toggleClipEnveloppe:
-        getActivePlayer()->setEnveloppeEnabled(!getActivePlayer()->isEnveloppeEnabled(), true, true);
+        if (getActivePlayer() != nullptr)
+            getActivePlayer()->setEnveloppeEnabled(!getActivePlayer()->isEnveloppeEnabled(), true, true);
         break;
     case CommandIDs::toggleClipLooping:
-        getActivePlayer()->setIsLooping(!getActivePlayer()->getIsLooping(), true);
+        if (getActivePlayer() != nullptr)
+            getActivePlayer()->setIsLooping(!getActivePlayer()->getIsLooping(), true);
         break;
     case CommandIDs::toggleHPF:
-        getActivePlayer()->enableHPF(!getActivePlayer()->isHpfEnabled(), false);
+        if (getActivePlayer() != nullptr)
+            getActivePlayer()->enableHPF(!getActivePlayer()->isHpfEnabled(), false);
         break;
     case CommandIDs::upOneDb:
-        getActivePlayer()->handleMidiTrimMessage(true);
+        if (getActivePlayer() != nullptr)
+            getActivePlayer()->handleMidiTrimMessage(true);
         break;
     case CommandIDs::downOneDb:
-        getActivePlayer()->handleMidiTrimMessage(false);
+        if (getActivePlayer() != nullptr)
+            getActivePlayer()->handleMidiTrimMessage(false);
         break;
     case CommandIDs::cuePlay:
-        getActivePlayer()->cueButtonClicked();
+        if (getActivePlayer() != nullptr)
+            getActivePlayer()->cueButtonClicked();
         break;
     case CommandIDs::cueStart:
-        getActivePlayer()->cueTransport.setPosition(0);
-        getActivePlayer()->cueButtonClicked();
+        if (getActivePlayer() != nullptr)
+        {
+            getActivePlayer()->cueTransport.setPosition(0);
+            getActivePlayer()->cueButtonClicked();
+        }
         break;
     case CommandIDs::cueEnd:
-        getActivePlayer()->cueTransport.setPosition(getActivePlayer()->stopTime - 6);
-        getActivePlayer()->cueButtonClicked();
+        if (getActivePlayer() != nullptr)
+        {
+            getActivePlayer()->cueTransport.setPosition(getActivePlayer()->stopTime - 6);
+            getActivePlayer()->cueButtonClicked();
+        }
         break;
     case CommandIDs::dummy:
         break;

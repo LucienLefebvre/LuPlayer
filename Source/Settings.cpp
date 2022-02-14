@@ -44,7 +44,7 @@ bool Settings::lauchAtZeroDB;
 bool Settings::mouseWheelControlVolume;
 bool Settings::autoNormalize;
 bool Settings::showMeter;
-
+juce::Value Settings::showMeterValue;
 int Settings::outputChannelsNumber;
 juce::Value Settings::sampleRateValue;
 
@@ -55,6 +55,8 @@ int Settings::draggedPlayer;
 int Settings::editedPlayer;
 int Settings::editedPlaylist;
 int Settings::preferedSoundPlayerMode;
+
+bool Settings::showEnveloppe;
 //==============================================================================
 Settings::Settings() : settingsFile(options)
 {
@@ -654,6 +656,7 @@ void Settings::buttonClicked(juce::Button* button)
     else if (button == &meterButton)
     {
         Settings::showMeter = button->getToggleState();
+        Settings::showMeterValue = button->getToggleState();
         properties.getUserSettings()->setValue("ShowMeter", (int)Settings::showMeter);
         properties.saveIfNeeded();
         settingsFile.save();
