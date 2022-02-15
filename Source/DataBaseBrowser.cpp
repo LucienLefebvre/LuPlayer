@@ -26,6 +26,9 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     Settings::sampleRateValue.addListener(this);
     juce::Timer::startTimer(40);
 
+    setWantsKeyboardFocus(false);
+    setMouseClickGrabsKeyboardFocus(false);
+
     addAndMakeVisible(&searchLabel);
     searchLabel.setBounds(100, 1, 300, 25);
     searchLabel.setEditable(true, true, false);
@@ -56,6 +59,7 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     table.addComponentListener(this);
     table.getHeader().addListener(this);
 
+
     addChildComponent(&timeLabel);
     timeLabel.setFont(juce::Font(25.0f, juce::Font::plain).withTypefaceStyle("Regular"));
     timeLabel.setJustificationType(juce::Justification::centred);
@@ -70,6 +74,8 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     startStopButton.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
     startStopButton.onClick = [this] { startOrStop(); };
     startStopButton.setEnabled(false);
+    startStopButton.setMouseClickGrabsKeyboardFocus(false);
+    startStopButton.setWantsKeyboardFocus(false);
 
     addAndMakeVisible(&autoPlayButton);
     autoPlayButton.setToggleState(false, juce::NotificationType::dontSendNotification);
@@ -85,7 +91,7 @@ DataBaseBrowser::DataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatMan
     todayButton.onClick = [this] {todayButtonClicked(); };
     todayButton.setToggleState(false, juce::NotificationType::dontSendNotification);
 
-    addAndMakeVisible(&batchConvertButton);
+    //addAndMakeVisible(&batchConvertButton);
     batchConvertButton.onClick = [this] { batchConvertButtonClicked(); };
     batchConvertButton.setBounds(489, 3, 64, 21);
     batchConvertButton.setButtonText("Convert");
@@ -597,8 +603,6 @@ bool DataBaseBrowser::loadFile(const juce::String& path)
     //deleteFile();
     if (juce::AudioFormatReader* reader = formatManager.createReaderFor(file))
     {
-
-        //transport
         std::unique_ptr<juce::AudioFormatReaderSource> tempSource(new juce::AudioFormatReaderSource(reader, true));
         transport.setSource(tempSource.get());
         transport.addChangeListener(this);
@@ -789,6 +793,8 @@ bool DataBaseBrowser::checkAndConvert(int rowNumber)
         myConvertObjects.add(new convertObject(filePath, soundDuration, rowNumber));
         convertObjectIndex++;
         addAndMakeVisible(myConvertObjects.getLast());
+        myConvertObjects.getLast()->setWantsKeyboardFocus(false);
+        myConvertObjects.getLast()->setMouseClickGrabsKeyboardFocus(false);
         convertProgress.setVisible(true);
         isConverting = true;
         myConvertObjects.getLast()->finishedBroadcaster->addChangeListener(this);
@@ -837,18 +843,19 @@ void DataBaseBrowser::batchConvert()
     }
 }
 
-bool DataBaseBrowser::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
-{
-    if (isVisible())
-    {
-        int keyCode = key.getKeyCode();
-        if (keyMapper->getKeyMapping(0) == keyCode)
-        {
-            play();
-            return false;
-        }
-    }
-}
+//bool DataBaseBrowser::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
+//{
+//    if (isVisible())
+//    {
+//        int keyCode = key.getKeyCode();
+//        if (keyMapper->getKeyMapping(0) == keyCode)
+//        {
+//            play();
+//            return false;
+//        }
+//    }
+//    getTopLevelComponent()->keyPressed(key);
+//}
 
 void DataBaseBrowser::play()
 {

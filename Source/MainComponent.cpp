@@ -24,7 +24,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     }
 
     juce::MultiTimer::startTimer(0, 50);
-    juce::MultiTimer::startTimer(1, 5000);
+    juce::MultiTimer::startTimer(1, 3000);
 
     tryPreferedAudioDevice(2);
     deviceManager.initialise(2, 2, nullptr, true);
@@ -34,6 +34,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
         settings = std::make_unique<Settings>();
         Settings::sampleRate = deviceManager.getAudioDeviceSetup().sampleRate;
     } 
+
 
     menuBar.reset(new juce::MenuBarComponent(this));
     addAndMakeVisible(menuBar.get());
@@ -69,7 +70,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     horizontalDividerBar.reset(new juce::StretchableLayoutResizerBar(&myLayout, 1, false));
     addAndMakeVisible(horizontalDividerBar.get());
 
-    addKeyListener(this);
+
     start1 = juce::Time::currentTimeMillis();
 
     juce::File convFile(Settings::convertedSoundsPath.toStdString());
@@ -102,13 +103,15 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     commandManager.getKeyMappings()->resetToDefaultMappings();
 
 
-    setWantsKeyboardFocus(true);
 
     keyMapper->setCommandManager(&commandManager);
     keyMapper->loadMappingFile();
     midiMapper->setCommandManager(&commandManager);
     midiMapper->loadMappingFile();
     setMouseClickGrabsKeyboardFocus(true);
+    addKeyListener(this);
+    setWantsKeyboardFocus(true);
+
 }
 
 void MainComponent::settingsButtonClicked()
@@ -194,7 +197,6 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
             //bottomComponent.mixerPanel.inputPanel.channelEditor.setDeviceManagerInfos(deviceManager);
             mixer.prepareToPlay(deviceManager.getAudioDeviceSetup().bufferSize, deviceManager.getAudioDeviceSetup().sampleRate);
             mixer.inputPanel.channelEditor.setDeviceManagerInfos(deviceManager);
-
         }
     }
     else if (source == bottomComponent.audioPlaybackDemo.fileDraggedFromBrowser) 
@@ -220,6 +222,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
                 soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
             }
         }
+        grabKeyboardFocus();
     }
     else if (source == bottomComponent.audioPlaybackDemo.fileDroppedFromBrowser)
     {
@@ -244,6 +247,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
             soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
             soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
         }
+        grabKeyboardFocus();
     }
     else if (source == bottomComponent.dbBrowser.fileDraggedFromDataBase)
     {
@@ -269,7 +273,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
                 soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
             }
         }
-
+        grabKeyboardFocus();
     }
     else if (source == bottomComponent.dbBrowser.fileDroppedFromDataBase)
     {
@@ -304,7 +308,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
             soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
             soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
         }
-
+        grabKeyboardFocus();
     }
     else if (source == bottomComponent.distantDbBrowser.fileDraggedFromDataBase)
     {
@@ -331,7 +335,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
                 soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
             }
         }
-
+        grabKeyboardFocus();
     }
     else if (source == bottomComponent.distantDbBrowser.fileDroppedFromDataBase)
     {
@@ -365,6 +369,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
             soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
             soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
         }
+        grabKeyboardFocus();
     }
     else if (source == bottomComponent.recorderComponent.mouseDragInRecorder)//when mouse is dragged in recorder, desactivate shortcuts keys for players
     {
@@ -426,6 +431,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         grabKeyboardFocus();
     }
+
 }
 
 MainComponent::~MainComponent()
@@ -463,6 +469,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     actualSampleRate = sampleRate;
 
     mixerOutputBuffer = std::make_unique<juce::AudioBuffer<float>>(2, samplesPerBlockExpected);
+
 }
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
@@ -621,12 +628,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                     bufferToFill.buffer->copyFrom(0, 0, *newOutputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                     bufferToFill.buffer->copyFrom(1, 0, *newOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
                 }
-                //delete newOutputBuffer;
             }
-            //delete(mixerOutputBuffer);
-            //delete(inputBuffer);
-            //delete(outputBuffer);
-            //delete(playAudioSource);
         }
     }
 }
@@ -665,7 +667,7 @@ void MainComponent::resized()
         myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - mixerHeight - 4, true, false);
     else
         myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - 4, true, false);
-    //grabKeyboardFocus();
+    
 }
 
 
@@ -673,6 +675,8 @@ void MainComponent::timerCallback(int timerID)
 {
     if (timerID == 0)
     {
+
+
         //grabKeyboardFocus();
         /*juce::Time* time = new juce::Time(time->getCurrentTime());
         timeLabel.setText(time->toString(false, true, true, true), juce::NotificationType::dontSendNotification);
@@ -680,6 +684,11 @@ void MainComponent::timerCallback(int timerID)
     }
     else if (timerID == 1)
     {
+        if (initializationFocusGained == false)
+        {
+            grabKeyboardFocus();
+            initializationFocusGained = true;
+        }
     }
 }
 
@@ -778,7 +787,8 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
 
 bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* originatingComponent)
 {
-    grabKeyboardFocus();
+    auto command = commandManager.getKeyMappings()->findCommandForKeyPress(key);
+    commandManager.invokeDirectly(command, true);
     if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap
         && soundPlayers[0]->keyMappedSoundboard != nullptr)
     {
@@ -1214,8 +1224,8 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     }
     else
     {
-        getTopLevelComponent()->addKeyListener(commandManager.getKeyMappings());
-        addKeyListener(commandManager.getKeyMappings());
+        //getTopLevelComponent()->addKeyListener(commandManager.getKeyMappings());
+        //addKeyListener(commandManager.getKeyMappings());
     }
 
     soundPlayers[0]->playerSelectionChanged->addChangeListener(this);
@@ -1799,5 +1809,10 @@ bool MainComponent::perform(const InvocationInfo& info)
 
 void MainComponent::focusLost(juce::Component::FocusChangeType cause)
 {
-    grabKeyboardFocus();
+    //grabKeyboardFocus();
+}
+
+void MainComponent::globalFocusChanged(juce::Component* focusedComponent)
+{
+
 }

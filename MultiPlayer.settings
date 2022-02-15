@@ -6,8 +6,8 @@
   <VALUE name="Audio Output Mode" val="2"/>
   <VALUE name="Converted Sound Path" val="D:\MultiPlayer\Sounds"/>
   <VALUE name="Audio Device Type" val="Windows Audio"/>
-  <VALUE name="audioDeviceName" val="Speakers (Realtek(R) Audio)"/>
-  <VALUE name="outputDeviceName" val="Speakers (Realtek(R) Audio)"/>
+  <VALUE name="audioDeviceName" val="Haut-parleurs (Tieline G5 ViA Digital Audio)"/>
+  <VALUE name="outputDeviceName" val="Haut-parleurs (Tieline G5 ViA Digital Audio)"/>
   <VALUE name="inputDeviceName" val="Microphone Array (Realtek(R) Audio)"/>
   <VALUE name="sampleRate" val="48000.0"/>
   <VALUE name="bufferSize" val="480"/>
@@ -16,5 +16,4 @@
   <VALUE name="outputChannels" val="3"/>
   <VALUE name="useDefaultOutputsChannels" val="1"/>
   <VALUE name="PreferedSoundPlayerMode" val="1"/>
-  <VALUE name="ShowMeter" val="1"/>
 </PROPERTIES>

@@ -48,7 +48,7 @@ BottomComponent::BottomComponent()
     addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
     addTab("Clip Editor", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &clipEditor, false);
     addTab("Clip Effect", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &clipEffect, false);
-    addTab("Database Feeder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &dataBaseFeeder, false);
+    //addTab("Database Feeder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &dataBaseFeeder, false);
     setTabBarDepth(tabBarHeight);
     setCurrentTabIndex(1);
     getTabbedButtonBar().setWantsKeyboardFocus(false);
@@ -111,7 +111,6 @@ void BottomComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRa
 
 void BottomComponent::tabSelected()
 {
-
     unfocusAllComponents();
     setWantsKeyboardFocus(false);
 }
@@ -152,18 +151,10 @@ void BottomComponent::stopCue() //stop cues on this panel when a cue is launched
     dbBrowser.transport.stop();
 }
 
-bool BottomComponent::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
-{
-    int keyCode = key.getKeyCode();
-
-    if (keyMapper->getKeyMapping(0) == keyCode)
-    {
-        dbBrowser.keyPressed(key, originatingComponent, keyMapper);
-        audioPlaybackDemo.keyPressed(key, originatingComponent, keyMapper);
-        clipEditor.keyPressed(key, originatingComponent, keyMapper);
-    }
-    return false;
-}
+//bool BottomComponent::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
+//{
+//
+//}
 
 void BottomComponent::setStart()
 {

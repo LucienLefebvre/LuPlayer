@@ -422,17 +422,17 @@ public:
         }
     }
 
-    void keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
-    {
-        if (isVisible())
-        {
-            int keyCode = key.getKeyCode();
-            if (keyMapper->getKeyMapping(0) == keyCode)
-            {
-                //startOrStop();
-            }
-        }
-    }
+    //void keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
+    //{
+    //    if (isVisible())
+    //    {
+    //        int keyCode = key.getKeyCode();
+    //        if (keyMapper->getKeyMapping(0) == keyCode)
+    //        {
+    //            //startOrStop();
+    //        }
+    //    }
+    //}
 
     void spaceBarPressed()
     {

@@ -44,7 +44,7 @@ public:
     void paintRowBackground(juce::Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected) override;
     void paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool /*rowIsSelected*/) override;
     void DataBaseBrowser::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
-    bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper);
+    //bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper);
     void play();
     juce::File DataBaseBrowser::getSelectedFile();
     juce::String DataBaseBrowser::getSelectedSoundName();

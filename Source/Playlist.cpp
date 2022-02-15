@@ -1523,6 +1523,7 @@ void Playlist::filesDropped(const juce::StringArray& files, int x, int y)
     fileDragPaintRectangle = false;
     fileDragPaintLine = false;
     repaint();
+    //getTopLevelComponent()->grabKeyboardFocus();
 }
 
 void Playlist::fileDragEnter(const juce::StringArray& files, int x, int y)

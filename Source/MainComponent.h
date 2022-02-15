@@ -37,7 +37,8 @@ class MainComponent :   public juce::AudioAppComponent,
                         public juce::ChangeBroadcaster,
                         public juce::ComboBox::Listener,
                         public juce::MenuBarModel,
-                        public juce::ApplicationCommandTarget
+                        public juce::ApplicationCommandTarget,
+    public juce::FocusChangeListener
 {
 public:
     //==============================================================================
@@ -482,12 +483,15 @@ private:
     void getAllCommands(juce::Array<juce::CommandID>& commands);
     void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result);
     bool perform(const InvocationInfo& info);
+    void globalFocusChanged(juce::Component* focusedComponent);
 
     std::unique_ptr<juce::AudioBuffer<float>> inputBuffer;
     std::unique_ptr<juce::AudioBuffer<float>> outputBuffer;
     std::unique_ptr<juce::AudioBuffer<float>> newOutputBuffer;
     std::unique_ptr<juce::AudioSourceChannelInfo> playAudioSource;
     std::unique_ptr<juce::AudioSourceChannelInfo> cueAudioSource;
+
+    bool initializationFocusGained = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
 

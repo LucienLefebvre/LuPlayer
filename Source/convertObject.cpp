@@ -99,3 +99,8 @@ double convertObject::getProgression()
 {
     return convertProgress;
 }
+
+ffmpegConvert* convertObject::getThread()
+{
+    return &convertThread;
+}

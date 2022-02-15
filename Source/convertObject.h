@@ -31,6 +31,8 @@ public:
     int getId();
 
     double getProgression();
+
+    ffmpegConvert* getThread();
     
     juce::ChangeBroadcaster* finishedBroadcaster;
 

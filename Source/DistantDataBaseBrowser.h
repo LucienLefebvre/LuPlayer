@@ -96,7 +96,7 @@ private:
 
     void unmapDistantDrive();
 
-    void keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
+    //void keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
 
     bool mouseDragged = false;
     bool startDrag = false;

@@ -44,7 +44,7 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
     table.getHeader().addColumn("Name", 1, 400);
     table.getHeader().addColumn("Duration", 2, 100);
     table.getHeader().addColumn("Date", 3, 200);
-    table.getHeader().addColumn("File", 4, 50, juce::TableHeaderComponent::ColumnPropertyFlags::notResizableOrSortable);
+    //table.getHeader().addColumn("File", 4, 50, juce::TableHeaderComponent::ColumnPropertyFlags::notResizableOrSortable);
 
 
     table.addMouseListener(this, true);
@@ -78,7 +78,7 @@ DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(
     todayButton.onClick = [this] {todayButtonClicked(); };
     todayButton.setToggleState(false, juce::NotificationType::dontSendNotification);
 
-    addAndMakeVisible(&batchConvertButton);
+    //addAndMakeVisible(&batchConvertButton);
     batchConvertButton.onClick = [this] { batchConvertButtonClicked(); };
     batchConvertButton.setBounds(489, 3, 64, 21);
     batchConvertButton.setButtonText("Convert");
@@ -986,6 +986,16 @@ void DistantDataBaseBrowser::connectButtonClicked()
             numRows = 0;
             table.updateContent();
             connectButton.setButtonText("Connect");
+            for (auto* c : myConvertObjects)
+            {
+                c->getThread()->killThread();
+            }
+            myConvertObjects.clear();
+            convertProgress.setVisible(false);
+            thumbnail.setSource(nullptr);
+            transport.setSource(nullptr);
+            startStopButton.setEnabled(false);
+            startStopButton.setColour(juce::TextButton::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
             updateButtonStates();
         }
         else if (isConnecting == false)
@@ -1056,7 +1066,3 @@ void DistantDataBaseBrowser::unmapDistantDrive()
     }*/
 }
 
-void DistantDataBaseBrowser::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
-{
-    DBG("key pressed");
-}

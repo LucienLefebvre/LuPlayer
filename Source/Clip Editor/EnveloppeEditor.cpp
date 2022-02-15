@@ -174,17 +174,6 @@ void EnveloppeEditor::setEditedPlayer(Player* p)
     resized();
 }
 
-bool EnveloppeEditor::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent, KeyMapper* keyMapper)
-{
-    int keyCode = key.getKeyCode();
-    if (keyMapper->getKeyMapping(0) == keyCode && editedPlayer != nullptr)
-    {
-        editedPlayer->cueButtonClicked();
-    }
-    return true;
-}
-
-
 void EnveloppeEditor::timerCallback()
 {
     if (editedPlayer != nullptr)
