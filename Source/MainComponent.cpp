@@ -1436,7 +1436,7 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         break;
     case CommandIDs::showTimer:
         result.setInfo("Show / hide timer", "Show / hide timer", "Menu", 0);
-        result.setTicked(false);
+        result.setTicked(soundPlayers[0]->mainStopWatch.isVisible());
         result.addDefaultKeypress('t', juce::ModifierKeys::commandModifier);
         break;
     case CommandIDs::lanchRecord:
@@ -1631,11 +1631,11 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         break;
     case CommandIDs::showIndividualMeters:
         result.setInfo("Show individuals meters", "Show meter", "Menu", 0);
-        result.setTicked(false);
+        result.setTicked(Settings::showMeter);
         break;
     case CommandIDs::showEnveloppe:
         result.setInfo("Show enveloppes on clip", "Show enveloppe", "Menu", 0);
-        result.setTicked(false);
+        result.setTicked(Settings::showEnveloppe);
         break;
     default:
         break;

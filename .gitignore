@@ -11,10 +11,6 @@
 /ffmpeg.exe
 /lame
 /*.exe
-/ff_meters
-/Source/LUFSMeter
-/Source/nanodbc
-/Source/nanodbc-master
 /odbc
 /OLD
 /MultiPlayer.jucer

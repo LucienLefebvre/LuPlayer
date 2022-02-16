@@ -482,14 +482,16 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
         thumbnailZoomValue);                                  // vertical zoom
     
 
-    if (Settings::showEnveloppe)
+    if (Settings::showEnveloppe && isEnveloppeEnabled())
     {
         g.setColour(juce::Colours::white); //X AXIS
+        g.setOpacity(0.5);
         juce::Point<int> xAxisStart = getPointPosition(0, 0);
         juce::Point<int> xAxisEnd = getPointPosition(1, 0);
         g.drawLine(xAxisStart.x, xAxisStart.y, xAxisEnd.x, xAxisEnd.y);
 
         g.setColour(juce::Colours::red);
+        g.setOpacity(0.6);
         juce::Path::Iterator iterator(enveloppePath);
         float x1, x2, y1, y2;
         float oldx1, oldx2, oldy1, oldy2;
@@ -991,6 +993,8 @@ void Player::deleteFile()
 {
     if (!transport.isPlaying())
     {
+        loopButton.setToggleState(false, juce::dontSendNotification);
+        setIsLooping(false, false);
         cuePlayHead.setVisible(false);
         transport.releaseResources();
         thumbnail.setSource(nullptr);
@@ -2381,6 +2385,7 @@ void Player::setEnveloppeEnabled(bool b, bool shouldSendMessage, bool switchToEn
         soundEditedBroadcaster->sendChangeMessage();
     if (switchToEnveloppePanel)
         envButtonBroadcaster->sendChangeMessage();
+    repaint();
 }
 
 bool Player::isFxEnabled()
