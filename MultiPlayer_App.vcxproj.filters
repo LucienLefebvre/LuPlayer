@@ -2,6 +2,9 @@
 
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="MultiPlayer\Others">
+      <UniqueIdentifier>{04480EAE-95FB-41B7-A7CD-5585CEBE70B8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="MultiPlayer\Clip Editor">
       <UniqueIdentifier>{19001706-B176-1299-8A1D-4C7F12CE8697}</UniqueIdentifier>
     </Filter>
@@ -5390,8 +5393,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Users\DPR\Downloads\logo sens.png">
-      <Filter>MultiPlayer\Source</Filter>
+    <None Include="logo sens.png">
+      <Filter>MultiPlayer\Others</Filter>
     </None>
     <None Include="ff_meters\ff_meters\LICENSE.md">
       <Filter>JUCE Modules\ff_meters</Filter>

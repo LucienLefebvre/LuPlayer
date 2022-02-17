@@ -3,6 +3,9 @@
 <JUCERPROJECT id="tfw8KZ" name="MultiPlayer" projectType="guiapp" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="xbXPa2" name="MultiPlayer">
+    <GROUP id="{1768BD6A-1763-693F-2E07-6CF180C5BCA1}" name="Others">
+      <FILE id="o5AHwb" name="logo sens.png" compile="0" resource="1" file="logo sens.png"/>
+    </GROUP>
     <GROUP id="{3C322B62-9274-4FE4-A3DF-EF440CA830B5}" name="Clip Editor">
       <FILE id="NVw8ph" name="ClipEditor.h" compile="0" resource="0" file="Source/Clip Editor/ClipEditor.h"/>
       <FILE id="BPgE3W" name="EnveloppeEditor.cpp" compile="1" resource="0"
@@ -125,7 +128,6 @@
       <FILE id="DaU4l3" name="Settings.cpp" compile="1" resource="0" file="Source/Settings.cpp"/>
       <FILE id="RlP1VN" name="Settings.h" compile="0" resource="0" file="Source/Settings.h"/>
       <FILE id="hy5idU" name="SoundPlayer.cpp" compile="1" resource="0" file="Source/SoundPlayer.cpp"/>
-      <FILE id="XTYVTJ" name="logo sens.png" compile="0" resource="1" file="../../Users/DPR/Downloads/logo sens.png"/>
       <FILE id="gE64MG" name="SoundPlayer.h" compile="0" resource="0" file="Source/SoundPlayer.h"/>
       <FILE id="sECmoQ" name="PlayHead.cpp" compile="1" resource="0" file="Source/PlayHead.cpp"/>
       <FILE id="Oih2Gw" name="PlayHead.h" compile="0" resource="0" file="Source/PlayHead.h"/>
@@ -157,7 +159,7 @@
                JUCE_ASIO="1" JUCE_USE_LAME_AUDIO_FORMAT="1"/>
   <EXPORTFORMATS>
     <VS2019 externalLibraries="ffmpeg-cpp.lib" targetFolder="C:/Juce/Projects"
-            smallIcon="XTYVTJ" bigIcon="XTYVTJ">
+            smallIcon="o5AHwb" bigIcon="o5AHwb">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="MultiPlayer" libraryPath="C:\local\include\ffmpeg-cpp-master\lib\x64\Debug&#10;C:\local\lib\debug"
                        headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3&#10;C:\local\include\nanodbc&#10;C:\local\include\LUFSMeter&#10;C:\local\include\fxobjects&#10;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp&#10;C:\local\include\ffmpeg-cpp-master\ffmpeg\include&#10;C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;C:\local\include\ffmpeg-cpp-master\include"/>

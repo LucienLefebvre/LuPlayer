@@ -3102,7 +3102,7 @@
     <ClInclude Include="JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Users\DPR\Downloads\logo sens.png"/>
+    <None Include="logo sens.png"/>
     <None Include="ff_meters\ff_meters\LICENSE.md"/>
     <None Include="ff_meters\ff_meters\README.md"/>
     <None Include="..\modules\juce_audio_devices\native\oboe\CMakeLists.txt"/>
