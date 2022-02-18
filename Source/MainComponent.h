@@ -48,6 +48,7 @@ public:
         showTimer,
         showIndividualMeters,
         showEnveloppe,
+        viewLastPlayedSound,
         lanchRecord,
         goToSoundBrowser,
         goToDataBaseBrowser,

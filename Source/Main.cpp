@@ -90,7 +90,6 @@ public:
 
 
     }
-
     void anotherInstanceStarted (const juce::String& commandLine) override
     {
         // When another instance of the app is launched while this one is running,
@@ -153,7 +152,6 @@ public:
             juce::JUCEApplication::getInstance()->systemRequestedQuit();
 
         }
-        
         MainComponent mainComponent;
     private:
 

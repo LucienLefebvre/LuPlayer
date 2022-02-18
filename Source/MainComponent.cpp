@@ -35,6 +35,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
         Settings::sampleRate = deviceManager.getAudioDeviceSetup().sampleRate;
     } 
 
+    setWantsKeyboardFocus(true);
 
     menuBar.reset(new juce::MenuBarComponent(this));
     addAndMakeVisible(menuBar.get());
@@ -421,6 +422,14 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         bottomComponent.clipEffect.setPlayer(player);
         bottomComponent.setCurrentTabIndex(5);
     }
+    else if (source == soundPlayers[0]->myPlaylists[0]->playerLaunchedBroadcaster.get()
+    || source == soundPlayers[0]->myPlaylists[1]->playerLaunchedBroadcaster.get())
+    {
+        auto* player = soundPlayers[0]->myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
+        bottomComponent.clipEditor.setPlayer(player);
+        bottomComponent.clipEffect.setPlayer(player);
+        bottomComponent.setCurrentTabIndex(5);
+    }
     else if (source == soundPlayers[0]->playlistLoadedBroadcaster)
     {
         juce::Time::waitForMillisecondCounter(juce::Time::getMillisecondCounter() + 1000);
@@ -431,7 +440,10 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         grabKeyboardFocus();
     }
-
+    else if (source == bottomComponent.clipEditor.grabFocusBroadcaster.get())
+    {
+        grabKeyboardFocus();
+    }
 }
 
 MainComponent::~MainComponent()
@@ -675,7 +687,8 @@ void MainComponent::timerCallback(int timerID)
 {
     if (timerID == 0)
     {
-
+        if (hasKeyboardFocus(false))
+            DBG("keyboard focus !");
 
         //grabKeyboardFocus();
         /*juce::Time* time = new juce::Time(time->getCurrentTime());
@@ -1184,6 +1197,7 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     soundPlayers.add(new SoundPlayer(m));
     addAndMakeVisible(soundPlayers[0]);
     soundPlayers[0]->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
+    soundPlayers[0]->setWantsKeyboardFocus(false);
     myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
     myCueMixer.addInputSource(&soundPlayers[0]->myCueMixer, false);
 
@@ -1209,6 +1223,9 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
             soundPlayers[0]->myPlaylists[0]->addPlayer(i);
             soundPlayers[0]->myPlaylists[1]->addPlayer(i);
         }
+        //for (auto player : myPlaylists[0]->players)
+        //    player->setPlayerColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+
         soundPlayers[0]->myPlaylists[1]->assignLeftFader(-1);
         soundPlayers[0]->myPlaylists[1]->assignLeftFader(0);
         soundPlayers[0]->myPlaylists[1]->assignRightFader(-1);
@@ -1240,6 +1257,8 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     soundPlayers[0]->myPlaylists[1]->envButtonBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[0]->grabFocusBroadcaster->addChangeListener(this);
     soundPlayers[0]->myPlaylists[1]->grabFocusBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[0]->playerLaunchedBroadcaster->addChangeListener(this);
+    soundPlayers[0]->myPlaylists[1]->playerLaunchedBroadcaster->addChangeListener(this);
 
     soundPlayers[0]->setMouseClickGrabsKeyboardFocus(false);
 
@@ -1320,6 +1339,7 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
         menu.addCommandItem(&commandManager, CommandIDs::showIndividualMeters, "Show individuals meters");
         menu.addCommandItem(&commandManager, CommandIDs::showTimer, "Show timer");
         menu.addCommandItem(&commandManager, CommandIDs::showEnveloppe, "Show enveloppe on clip");
+        menu.addCommandItem(&commandManager, CommandIDs::viewLastPlayedSound, "Show last played sound in panel");
     }
     else if (menuIndex == 3)
     {
@@ -1361,10 +1381,11 @@ void MainComponent::initializeBottomComponent()
     bottomComponent.recorderComponent.mouseDragInRecorder->addChangeListener(this);
     bottomComponent.recorderComponent.spaceBarKeyPressed->addChangeListener(this);
     bottomComponent.cuePlay->addChangeListener(this);
+    bottomComponent.clipEditor.grabFocusBroadcaster->addChangeListener(this);
+
     bottomComponent.setName("bottom component");
     bottomComponent.setWantsKeyboardFocus(false);
     bottomComponent.getTabbedButtonBar().addChangeListener(this);
-
     bottomComponent.getTabbedButtonBar().getTabButton(0)->addMouseListener(this, false);
     bottomComponent.getTabbedButtonBar().getTabButton(1)->addMouseListener(this, false);
     bottomComponent.getTabbedButtonBar().getTabButton(2)->addMouseListener(this, false);
@@ -1384,6 +1405,7 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
                                     CommandIDs::showTimer,
                                     CommandIDs::showIndividualMeters,
                                     CommandIDs::showEnveloppe,
+                                    CommandIDs::viewLastPlayedSound,
                                     CommandIDs::lanchRecord,
                                     CommandIDs::goToSoundBrowser,
                                     CommandIDs::goToDataBaseBrowser,
@@ -1637,6 +1659,10 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setInfo("Show enveloppes on clip", "Show enveloppe", "Menu", 0);
         result.setTicked(Settings::showEnveloppe);
         break;
+    case CommandIDs::viewLastPlayedSound:
+        result.setInfo("Automatic show last played sound in bottom panel", "View last played sound", "Menu", 0);
+        result.setTicked(Settings::viewLastPlayedSound);
+        break;
     default:
         break;
     }
@@ -1800,6 +1826,9 @@ bool MainComponent::perform(const InvocationInfo& info)
         if (soundPlayers[0]->myPlaylists[1] != nullptr)
             soundPlayers[0]->myPlaylists[1]->rearrangePlayers();
         settings->saveOptions();
+        break;
+    case CommandIDs::viewLastPlayedSound:
+        Settings::viewLastPlayedSound = !Settings::viewLastPlayedSound;
         break;
     default:
         return false;

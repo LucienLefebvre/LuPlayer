@@ -9,6 +9,8 @@ EnveloppeEditor::EnveloppeEditor()
 {
     constrainer.setMinimumOnscreenAmounts(2, 2, 2, 2);
 
+    soundColour = BLUE;
+
     addAndMakeVisible(&playHead);
     playHead.setColour(juce::Colours::green);
 
@@ -26,7 +28,7 @@ EnveloppeEditor::EnveloppeEditor()
     /*addAndMakeVisible(&scaleButton);
     scaleButton.setButtonText("+-12dB");
     scaleButton.onClick = [this] {scaleButtonClicked(); };*/
-    //addMouseListener(this, true);
+    //addMouseListener(this, false);
 }
 
 EnveloppeEditor::~EnveloppeEditor()
@@ -45,7 +47,7 @@ void EnveloppeEditor::paint(juce::Graphics& g)
         g.setColour(juce::Colours::white);
         g.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2, 2);
         //Draw Thumbnail
-        g.setColour(BLUE);
+        g.setColour(soundColour);
         thumbnail->drawChannels(g, thumbnailBounds,
             juce::jlimit<double>(0, thumbnail->getTotalLength(), thumbnailRange.getStart() * thumbnail->getTotalLength()),
             juce::jlimit<double>(0, thumbnail->getTotalLength(), thumbnailRange.getEnd() * thumbnail->getTotalLength()),
@@ -67,19 +69,19 @@ void EnveloppeEditor::paint(juce::Graphics& g)
         g.setColour(juce::Colours::white);
         for (int i = 1; i < timeLines.size(); i++)
         {
-            if (getRangeInSeconds(thumbnailRange) > 1000)
+            if (getRangeInSeconds(thumbnailRange) > 500)
             {
                 drawTimeLines(g, i * 300);
             }
-            else if (getRangeInSeconds(thumbnailRange) > 200)
+            else if (getRangeInSeconds(thumbnailRange) > 100)
             {
                 drawTimeLines(g, i * 60);
             }
-            else if (getRangeInSeconds(thumbnailRange) > 20)
+            else if (getRangeInSeconds(thumbnailRange) > 30)
             {
                 drawTimeLines(g, i * 10);
             }
-            else if (getRangeInSeconds(thumbnailRange) < 20)
+            else if (getRangeInSeconds(thumbnailRange) < 30)
             {
                 drawTimeLines(g, i);
             }
@@ -274,15 +276,14 @@ int EnveloppeEditor::gainToY(float gain)
     return (getHeight() * (1 - gain)) / 2;
 }
 
-void EnveloppeEditor::mouseDoubleClick(const juce::MouseEvent& e)
-{
-    thumbnailHorizontalZoom = 1.0;
-    thumbnailRange = thumbnailRange.withStartAndLength(0.0, 1.0);
-    resized();
-}
-
 void EnveloppeEditor::mouseDown(const juce::MouseEvent& e)
 {
+    if (e.mods.isAltDown())
+    {
+        thumbnailHorizontalZoom = 1.0;
+        thumbnailRange = thumbnailRange.withStartAndLength(0.0, 1.0);
+        resized();
+    }
     draggedComponent = nullptr;
     thumbnailDragStart = getMouseXYRelative().getX();
     juce::Point<int> mousePos = e.getEventRelativeTo(this).getPosition();
@@ -319,6 +320,7 @@ void EnveloppeEditor::mouseDown(const juce::MouseEvent& e)
             double position = editedPlayer->cueTransport.getLengthInSeconds() * getXValue(mousePos.getX());
             editedPlayer->cueTransport.setPosition(position);
             lastPositionClickedorDragged = editedPlayer->cueTransport.getCurrentPosition() / editedPlayer->cueTransport.getLengthInSeconds();
+            editedPlayer->updateCuePlayHeadPosition(true);
         }
     }
 }
@@ -386,6 +388,7 @@ void EnveloppeEditor::mouseDrag(const juce::MouseEvent& e)
                 double position = editedPlayer->cueTransport.getLengthInSeconds() * getXValue(mousePos.getX());
                 lastPositionClickedorDragged = editedPlayer->cueTransport.getCurrentPosition() / editedPlayer->cueTransport.getLengthInSeconds();
                 editedPlayer->cueTransport.setPosition(juce::jlimit<double>(0.0, editedPlayer->cueTransport.getLengthInSeconds(), position));
+                editedPlayer->updateCuePlayHeadPosition(true);
             }
         }
     }
@@ -674,4 +677,10 @@ void EnveloppeEditor::setOrDeleteStop(bool setOrDelete)
         else
             editedPlayer->deleteStop();
     }
+}
+
+void EnveloppeEditor::setSoundColour(juce::Colour c)
+{
+    soundColour = c;
+    repaint();
 }

@@ -49,7 +49,6 @@ public:
         {
             {
                 //DRAW RMS
-
                 float limitedRmsLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(rmsL));
                 float rangedRmsLevel = range.convertTo0to1(limitedRmsLevel);
                 int rectHeight = rangedRmsLevel * getHeight();
@@ -60,7 +59,7 @@ public:
                 {
                     int orangeRectYStart = range.convertTo0to1(-9.0f) * getHeight();
                     int orangeRextHeight = rectHeight - orangeRectYStart;
-                    g.setColour(juce::Colours::orange);
+                    g.setColour(meterColour);
                     g.fillRect(0, getHeight() - orangeRectYStart - orangeRextHeight - 1, meterWidth - 2, orangeRextHeight);
                 }
 
@@ -111,7 +110,7 @@ public:
                 {
                     int orangeRectYStart = range.convertTo0to1(-9.0f) * getHeight();
                     int orangeRextHeight = rectHeight - orangeRectYStart;
-                    g.setColour(juce::Colours::blue);
+                    g.setColour(meterColour);
                     g.fillRect(meterWidth + 1, getHeight() - orangeRectYStart - orangeRextHeight - 1, meterWidth - 1, 2);
                 }
                 //DRAW PEAK HOLD

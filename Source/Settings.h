@@ -102,7 +102,7 @@ public:
     static bool Settings::autoNormalize;
     static bool Settings::showMeter;
     static juce::Value Settings::showMeterValue;
-
+    static bool Settings::viewLastPlayedSound;
     static bool Settings::showEnveloppe;
 
     static int Settings::draggedPlaylist;

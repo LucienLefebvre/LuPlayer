@@ -18,7 +18,7 @@
 
 using namespace std;
 using namespace nanodbc;
-//TODO tester le comportement quand on enlève le pc distant du réseau
+//TODO tester le comportement quand on enlÃ¨ve le pc distant du rÃ©seau
 //==============================================================================
 DistantDataBaseBrowser::DistantDataBaseBrowser() : thumbnailCache(5), thumbnail(521, formatManager, thumbnailCache), resampledSource(&transport, false, 2), convertProgress(progression)
 {

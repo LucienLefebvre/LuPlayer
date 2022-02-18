@@ -19,6 +19,7 @@ KeyMappedPlayer::KeyMappedPlayer()
 
     addMouseListener(this, true);
     
+    defaultColour = BLUE;
 
     shortcutLabel.reset(new juce::Label());
     addAndMakeVisible(shortcutLabel.get());
@@ -92,8 +93,14 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
         g.setColour(juce::Colours::red);
     g.drawRoundedRectangle(getLocalBounds().toFloat(), 15, 2);
 
-    //DRAW THUMBNAIL
+    if (soundPlayer != nullptr && soundPlayer->isPlayerPlaying())
+    {
+        g.setColour(defaultColour);
+        g.setOpacity(0.3f);
+        g.fillRoundedRectangle(getLocalBounds().reduced(1).toFloat(), 15);
+    }
 
+    //DRAW THUMBNAIL
     g.setColour(currentColour);
     if (thumbnail != nullptr)
         thumbnail->drawChannels(g, thumbnailBounds, 0.0, thumbnail->getTotalLength(), juce::Decibels::decibelsToGain(playerInfos.trimVolume) * 2.0f);
@@ -221,13 +228,16 @@ void KeyMappedPlayer::updatePlayerInfo()
     if (soundPlayer->isPlayerPlaying())
         setPlayerColours(juce::Colours::green);
     else
-        setPlayerColours(BLUE);
+        setPlayerColours(defaultColour);
 
     if (soundPlayer->isEditedPlayer())
         editButton->setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::red);
     else
         editButton->setColour(juce::TextButton::ColourIds::buttonColourId,
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+
+    defaultColour = soundPlayer->getPlayerColour();
+
     resized();
     repaint();
 }
@@ -336,9 +346,14 @@ void KeyMappedPlayer::timerCallback(int timerID)
                 playHead->setVisible(true);
                 int playHeadPosition = (soundPlayer->transport.getCurrentPosition() / soundPlayer->getLenght()) * getWidth();
                 playHead->setTopLeftPosition(playHeadPosition, thumbnailBounds.getY());
+                nameLabel->setColour(juce::Label::ColourIds::textColourId, currentColour); 
+                elapsedTimeLabel->setColour(juce::Label::ColourIds::textColourId, currentColour); 
             }
             else
+            {
                 playHead->setVisible(false);
+            }
+
             if (dBLabel->isVisible())
             {
                 if (juce::Time::getMillisecondCounter() - gainTimeStartDisplay > gainDisplayTimeMs)
@@ -407,4 +422,14 @@ void KeyMappedPlayer::editButtonClicked()
 {
     if (soundPlayer != nullptr)
         soundPlayer->envButtonClicked();
+}
+
+void KeyMappedPlayer::setPlayerDefaultColour(juce::Colour c)
+{
+    defaultColour = c;
+}
+
+juce::Colour KeyMappedPlayer::getPlayerDefaultColour()
+{
+    return defaultColour;
 }

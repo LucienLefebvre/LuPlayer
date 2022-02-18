@@ -44,7 +44,8 @@ class Player : public juce::Component,
     public juce::Button::Listener,
     public juce::Value::Listener,
     public juce::ChangeBroadcaster,
-    public juce::ActionBroadcaster
+    public juce::ActionBroadcaster,
+    public juce::Label::Listener
 {
 public:
     struct PlayerInfo
@@ -108,7 +109,7 @@ public:
     std::string getName();
     bool getHasBeenNormalized();
     void setHasBeenNormalized(bool b);
-    void setName(std::string Name);
+    void setName(std::string Name, bool sendMessage = false);
     bool isStartTimeSet();
     bool isStopTimeSet();
     void enableHPF(bool shouldBeEnabled, bool shouldSendMessage = true);
@@ -200,6 +201,17 @@ public:
     bool isThreadRunning();
     void openButtonClicked();
 
+    void updateCuePlayHeadPosition(bool forceUpdate = false);
+    void updatePlayHeadPosition();
+    void updateInOutMarkPosition();
+
+    void setDenoisedFile(bool loadDenoisedFile);
+    bool getDenoisedFileLoaded();
+
+    void setPlayerColour(juce::Colour c);
+    juce::Colour getPlayerColour();
+    bool getColourHasChanged();
+
     std::unique_ptr<juce::AudioFormatReaderSource> playSource;
     juce::AudioTransportSource transport;
     juce::ResamplingAudioSource resampledSource                     { &transport, false, 2 };
@@ -286,6 +298,7 @@ public:
 
     juce::ChangeBroadcaster* playerInfoChangedBroadcaster;
     juce::ChangeBroadcaster* playerDeletedBroadcaster;
+    std::unique_ptr<juce::ChangeBroadcaster> playerLaunchedBroadcaster;
 
     foleys::LevelMeterSource meterSource;
     foleys::LevelMeterSource outMeterSource;
@@ -328,6 +341,8 @@ private:
     const juce::String startFFmpeg(std::string filePath);
     void handleAudioTags(std::string filePath);
     std::string extactName(std::string Filepath);
+    void labelTextChanged(juce::Label* labelThatHasChanged);
+
 
 
     juce::Point<int> getPointPosition(float x, float y);
@@ -491,5 +506,8 @@ private:
     std::atomic<bool> shouldRepaint = false;
 
     std::atomic<float> bufferGain = 0.0f;
+
+    juce::Colour playerColour;
+    bool colourHasChanged = false;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };

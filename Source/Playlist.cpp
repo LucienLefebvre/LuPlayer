@@ -7,7 +7,7 @@
 
   ==============================================================================
 */
-//TODO résoudre bug glisser en haut
+//TODO rÃ©soudre bug glisser en haut
 
 #include <JuceHeader.h>
 #include "Playlist.h"
@@ -41,6 +41,7 @@ Playlist::Playlist(int splaylistType)
     fxButtonBroadcaster = new juce::ChangeBroadcaster();
     envButtonBroadcaster = new juce::ChangeBroadcaster();
     grabFocusBroadcaster = new juce::ChangeBroadcaster();
+    playerLaunchedBroadcaster.reset(new juce::ChangeBroadcaster());
     //addPlayer(1);
 
     //addKeyListener(this);
@@ -900,6 +901,7 @@ void Playlist::addPlayer(int playerID)
         players[idAddedPlayer]->playBroadcaster->addActionListener(this);
         players[idAddedPlayer]->fxButtonBroadcaster->addChangeListener(this);
         players[idAddedPlayer]->envButtonBroadcaster->addChangeListener(this);
+        players[idAddedPlayer]->playerLaunchedBroadcaster->addChangeListener(this);
 
         playersPositionLabels.insert(idAddedPlayer, new juce::Label);
 
@@ -1368,6 +1370,20 @@ void Playlist::changeListenerCallback(juce::ChangeBroadcaster* source)
                 }
                 envButtonBroadcaster->sendChangeMessage();
             }
+            else if (source == players[i]->playerLaunchedBroadcaster.get())
+            {
+                if (playlistPosition == 0)
+                {
+                    Settings::editedPlaylist = 0;
+                    Settings::editedPlayer = i;
+                }
+                else if (playlistPosition == 1)
+                {
+                    Settings::editedPlaylist = 1;
+                    Settings::editedPlayer = i;
+                }
+                playerLaunchedBroadcaster->sendChangeMessage();
+            }
         }
     }
 }
@@ -1763,8 +1779,8 @@ void Playlist::timerCallback()
     {
         if (players[i] != nullptr && meters[i] != nullptr)
         {
-            meters[i]->setRMSMeterData(players[i]->meterSource.getRMSLevel(0), players[i]->meterSource.getRMSLevel(1));
-            meters[i]->setPeakMeterDate(players[i]->meterSource.getMaxLevel(0), players[i]->meterSource.getMaxLevel(1));
+            meters[i]->setRMSMeterData(players[i]->outMeterSource.getRMSLevel(0), players[i]->outMeterSource.getRMSLevel(1));
+            meters[i]->setPeakMeterDate(players[i]->outMeterSource.getMaxLevel(0), players[i]->outMeterSource.getMaxLevel(1));
         }
 
     }

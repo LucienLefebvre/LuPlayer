@@ -6,34 +6,56 @@
     <GROUP id="{1768BD6A-1763-693F-2E07-6CF180C5BCA1}" name="Others">
       <FILE id="o5AHwb" name="logo sens.png" compile="0" resource="1" file="logo sens.png"/>
     </GROUP>
-    <GROUP id="{3C322B62-9274-4FE4-A3DF-EF440CA830B5}" name="Clip Editor">
-      <FILE id="NVw8ph" name="ClipEditor.h" compile="0" resource="0" file="Source/Clip Editor/ClipEditor.h"/>
-      <FILE id="BPgE3W" name="EnveloppeEditor.cpp" compile="1" resource="0"
-            file="Source/Clip Editor/EnveloppeEditor.cpp"/>
-      <FILE id="nW4iAM" name="EnveloppeEditor.h" compile="0" resource="0"
-            file="Source/Clip Editor/EnveloppeEditor.h"/>
-      <FILE id="hM1J9a" name="EnveloppePoint.h" compile="0" resource="0"
-            file="Source/Clip Editor/EnveloppePoint.h"/>
-    </GROUP>
     <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
-      <FILE id="s1p0Sn" name="DataBaseFeeder.cpp" compile="1" resource="0"
-            file="Source/DataBaseFeeder.cpp"/>
-      <FILE id="xDznNF" name="DataBaseFeeder.h" compile="0" resource="0"
-            file="Source/DataBaseFeeder.h"/>
-      <GROUP id="{C446E222-F82A-C695-0D7B-5CADD47B4434}" name="Settings">
-        <FILE id="jf39aT" name="KeyMapper.cpp" compile="1" resource="0" file="Source/Settings/KeyMapper.cpp"/>
-        <FILE id="JCOhon" name="KeyMapper.h" compile="0" resource="0" file="Source/Settings/KeyMapper.h"/>
-        <FILE id="izlwXZ" name="MidiMapper.cpp" compile="1" resource="0" file="Source/Settings/MidiMapper.cpp"/>
-        <FILE id="iOodzk" name="MidiMapper.h" compile="0" resource="0" file="Source/Settings/MidiMapper.h"/>
+      <GROUP id="{C809C04D-7425-4F57-E18C-5B2CFC41814A}" name="Bottom Panel">
+        <FILE id="NVw8ph" name="ClipEditor.h" compile="0" resource="0" file="Source/Clip Editor/ClipEditor.h"/>
+        <FILE id="BPgE3W" name="EnveloppeEditor.cpp" compile="1" resource="0"
+              file="Source/Clip Editor/EnveloppeEditor.cpp"/>
+        <FILE id="nW4iAM" name="EnveloppeEditor.h" compile="0" resource="0"
+              file="Source/Clip Editor/EnveloppeEditor.h"/>
+        <FILE id="hM1J9a" name="EnveloppePoint.h" compile="0" resource="0"
+              file="Source/Clip Editor/EnveloppePoint.h"/>
+        <GROUP id="{3C322B62-9274-4FE4-A3DF-EF440CA830B5}" name="Clip Editor"/>
+        <FILE id="Ck1or0" name="AudioBrowser.cpp" compile="1" resource="0"
+              file="Source/AudioBrowser.cpp"/>
+        <FILE id="MArcpb" name="AudioBrowser.h" compile="0" resource="0" file="Source/AudioBrowser.h"/>
+        <FILE id="JPdFqd" name="BottomComponent.cpp" compile="1" resource="0"
+              file="Source/BottomComponent.cpp"/>
+        <FILE id="RCdBfj" name="BottomComponent.h" compile="0" resource="0"
+              file="Source/BottomComponent.h"/>
+        <FILE id="e0lFg9" name="ClipEffect.cpp" compile="1" resource="0" file="Source/ClipEffect.cpp"/>
+        <FILE id="xsAOp3" name="ClipEffect.h" compile="0" resource="0" file="Source/ClipEffect.h"/>
+        <FILE id="sylIhd" name="DataBaseBrowser.cpp" compile="1" resource="0"
+              file="Source/DataBaseBrowser.cpp"/>
+        <FILE id="Zd4WzE" name="DataBaseBrowser.h" compile="0" resource="0"
+              file="Source/DataBaseBrowser.h"/>
+        <FILE id="s1p0Sn" name="DataBaseFeeder.cpp" compile="1" resource="0"
+              file="Source/DataBaseFeeder.cpp"/>
+        <FILE id="xDznNF" name="DataBaseFeeder.h" compile="0" resource="0"
+              file="Source/DataBaseFeeder.h"/>
+        <FILE id="ca9F8r" name="DataBaseImport.cpp" compile="1" resource="0"
+              file="Source/DataBaseImport.cpp"/>
+        <FILE id="hNkghM" name="DataBaseImport.h" compile="0" resource="0"
+              file="Source/DataBaseImport.h"/>
+        <FILE id="R9cz7D" name="DistantDataBaseBrowser.cpp" compile="1" resource="0"
+              file="Source/DistantDataBaseBrowser.cpp"/>
+        <FILE id="pw1chJ" name="DistantDataBaseBrowser.h" compile="0" resource="0"
+              file="Source/DistantDataBaseBrowser.h"/>
+        <FILE id="Elc1Ju" name="Recorder.cpp" compile="1" resource="0" file="Source/Recorder.cpp"/>
+        <FILE id="Wcxw5n" name="Recorder.h" compile="0" resource="0" file="Source/Recorder.h"/>
       </GROUP>
-      <FILE id="EnJnmP" name="StopWatch.h" compile="0" resource="0" file="Source/StopWatch.h"/>
-      <FILE id="cif9Kn" name="DenoiseThread.h" compile="0" resource="0" file="Source/DenoiseThread.h"/>
-      <FILE id="TV1izO" name="batchConvertThread.h" compile="0" resource="0"
-            file="Source/batchConvertThread.h"/>
-      <FILE id="fcnpvs" name="convertObject.cpp" compile="1" resource="0"
-            file="Source/convertObject.cpp"/>
-      <FILE id="nsyiKm" name="convertObject.h" compile="0" resource="0" file="Source/convertObject.h"/>
-      <FILE id="Od2CAb" name="ffmpegConvert.h" compile="0" resource="0" file="Source/ffmpegConvert.h"/>
+      <GROUP id="{CFB53DD4-4BFC-BDF7-9843-390000049512}" name="LUFS Meter">
+        <FILE id="zOzmFO" name="Ebu128LoudnessMeter.cpp" compile="1" resource="0"
+              file="Source/LUFSMeter/Ebu128LoudnessMeter.cpp"/>
+        <FILE id="fCKeMC" name="Ebu128LoudnessMeter.h" compile="0" resource="0"
+              file="Source/LUFSMeter/Ebu128LoudnessMeter.h"/>
+        <FILE id="SOtmgk" name="MacrosAndJuceHeaders.h" compile="0" resource="0"
+              file="Source/LUFSMeter/MacrosAndJuceHeaders.h"/>
+        <FILE id="eptmtT" name="SecondOrderIIRFilter.cpp" compile="1" resource="0"
+              file="Source/LUFSMeter/filters/SecondOrderIIRFilter.cpp"/>
+        <FILE id="FusvhA" name="SecondOrderIIRFilter.h" compile="0" resource="0"
+              file="Source/LUFSMeter/filters/SecondOrderIIRFilter.h"/>
+      </GROUP>
       <GROUP id="{A6A32EBC-A6BD-89D1-EE96-B627C086893D}" name="Mixer">
         <FILE id="QoCKHM" name="ChannelControlPannel.h" compile="0" resource="0"
               file="Source/Mixer/ChannelControlPannel.h"/>
@@ -68,7 +90,25 @@
         <FILE id="J0Ddjw" name="MixerInput.h" compile="0" resource="0" file="Source/Mixer/MixerInput.h"/>
         <FILE id="dhPDv5" name="VCA.h" compile="0" resource="0" file="Source/Mixer/VCA.h"/>
       </GROUP>
+      <GROUP id="{08A6ACDD-BDD6-9325-6E8A-38EFA8F5D4C1}" name="nanodbc">
+        <FILE id="FuaZkG" name="nanodbc.cpp" compile="1" resource="0" file="Source/nanodbc-master/nanodbc/nanodbc.cpp"/>
+        <FILE id="LIqIHp" name="nanodbc.h" compile="0" resource="0" file="Source/nanodbc-master/nanodbc/nanodbc.h"/>
+      </GROUP>
+      <GROUP id="{C446E222-F82A-C695-0D7B-5CADD47B4434}" name="Settings">
+        <FILE id="DaU4l3" name="Settings.cpp" compile="1" resource="0" file="Source/Settings.cpp"/>
+        <FILE id="RlP1VN" name="Settings.h" compile="0" resource="0" file="Source/Settings.h"/>
+        <FILE id="jf39aT" name="KeyMapper.cpp" compile="1" resource="0" file="Source/Settings/KeyMapper.cpp"/>
+        <FILE id="JCOhon" name="KeyMapper.h" compile="0" resource="0" file="Source/Settings/KeyMapper.h"/>
+        <FILE id="izlwXZ" name="MidiMapper.cpp" compile="1" resource="0" file="Source/Settings/MidiMapper.cpp"/>
+        <FILE id="iOodzk" name="MidiMapper.h" compile="0" resource="0" file="Source/Settings/MidiMapper.h"/>
+      </GROUP>
       <GROUP id="{B14A7909-DE9B-0519-F1D9-67C76AB4710E}" name="Soundboard">
+        <FILE id="mYOtQI" name="Player.cpp" compile="1" resource="0" file="Source/Player.cpp"/>
+        <FILE id="curOBt" name="Player.h" compile="0" resource="0" file="Source/Player.h"/>
+        <FILE id="Tsv6wi" name="Playlist.cpp" compile="1" resource="0" file="Source/Playlist.cpp"/>
+        <FILE id="VRuIHF" name="Playlist.h" compile="0" resource="0" file="Source/Playlist.h"/>
+        <FILE id="hy5idU" name="SoundPlayer.cpp" compile="1" resource="0" file="Source/SoundPlayer.cpp"/>
+        <FILE id="gE64MG" name="SoundPlayer.h" compile="0" resource="0" file="Source/SoundPlayer.h"/>
         <FILE id="Biewi1" name="KeyboardMappedSoundboard.cpp" compile="1" resource="0"
               file="Source/SoundBoard/KeyboardMappedSoundboard.cpp"/>
         <FILE id="U9z1S3" name="KeyboardMappedSoundboard.h" compile="0" resource="0"
@@ -87,72 +127,35 @@
         <FILE id="QsWaWu" name="SoundBoard.cpp" compile="1" resource="0" file="Source/SoundBoard/SoundBoard.cpp"/>
         <FILE id="ftYY0S" name="SoundBoard.h" compile="0" resource="0" file="Source/SoundBoard/SoundBoard.h"/>
       </GROUP>
-      <GROUP id="{08A6ACDD-BDD6-9325-6E8A-38EFA8F5D4C1}" name="nanodbc">
-        <FILE id="FuaZkG" name="nanodbc.cpp" compile="1" resource="0" file="Source/nanodbc-master/nanodbc/nanodbc.cpp"/>
-        <FILE id="LIqIHp" name="nanodbc.h" compile="0" resource="0" file="Source/nanodbc-master/nanodbc/nanodbc.h"/>
-      </GROUP>
       <GROUP id="{983390AC-4C7E-7A9B-DCA4-5A5711B51A62}" name="sqlite">
         <FILE id="ArEhg9" name="shell.c" compile="1" resource="0" file="Source/sqlite/shell.c"/>
         <FILE id="IZvp8c" name="sqlite3.c" compile="1" resource="0" file="Source/sqlite/sqlite3.c"/>
         <FILE id="k1OoFp" name="sqlite3.h" compile="0" resource="0" file="Source/sqlite/sqlite3.h"/>
         <FILE id="DQgdra" name="sqlite3ext.h" compile="0" resource="0" file="Source/sqlite/sqlite3ext.h"/>
       </GROUP>
-      <FILE id="Ck1or0" name="AudioBrowser.cpp" compile="1" resource="0"
-            file="Source/AudioBrowser.cpp"/>
-      <FILE id="MArcpb" name="AudioBrowser.h" compile="0" resource="0" file="Source/AudioBrowser.h"/>
-      <FILE id="JPdFqd" name="BottomComponent.cpp" compile="1" resource="0"
-            file="Source/BottomComponent.cpp"/>
-      <FILE id="TlImPd" name="ODBCManager.h" compile="0" resource="0" file="Source/ODBCManager.h"/>
-      <FILE id="RCdBfj" name="BottomComponent.h" compile="0" resource="0"
-            file="Source/BottomComponent.h"/>
-      <FILE id="zOzmFO" name="Ebu128LoudnessMeter.cpp" compile="1" resource="0"
-            file="Source/LUFSMeter/Ebu128LoudnessMeter.cpp"/>
-      <FILE id="fCKeMC" name="Ebu128LoudnessMeter.h" compile="0" resource="0"
-            file="Source/LUFSMeter/Ebu128LoudnessMeter.h"/>
-      <FILE id="SOtmgk" name="MacrosAndJuceHeaders.h" compile="0" resource="0"
-            file="Source/LUFSMeter/MacrosAndJuceHeaders.h"/>
+      <FILE id="TV1izO" name="batchConvertThread.h" compile="0" resource="0"
+            file="Source/batchConvertThread.h"/>
+      <FILE id="fcnpvs" name="convertObject.cpp" compile="1" resource="0"
+            file="Source/convertObject.cpp"/>
+      <FILE id="nsyiKm" name="convertObject.h" compile="0" resource="0" file="Source/convertObject.h"/>
+      <FILE id="BERWeG" name="Denoiser.cpp" compile="1" resource="0" file="Source/Denoiser.cpp"/>
+      <FILE id="PeXVTX" name="Denoiser.h" compile="0" resource="0" file="Source/Denoiser.h"/>
+      <FILE id="cif9Kn" name="DenoiseThread.h" compile="0" resource="0" file="Source/DenoiseThread.h"/>
+      <FILE id="Zr8s17" name="FeedThread.h" compile="0" resource="0" file="Source/FeedThread.h"/>
+      <FILE id="Od2CAb" name="ffmpegConvert.h" compile="0" resource="0" file="Source/ffmpegConvert.h"/>
+      <FILE id="eqyqq7" name="helpers.h" compile="0" resource="0" file="Source/helpers.h"/>
+      <FILE id="zGi8bw" name="LoudnessBar.cpp" compile="1" resource="0" file="Source/LoudnessBar.cpp"/>
+      <FILE id="sywl8F" name="LoudnessBar.h" compile="0" resource="0" file="Source/LoudnessBar.h"/>
       <FILE id="Kv4IAn" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="jWratW" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
       <FILE id="MOagvb" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
-      <FILE id="mYOtQI" name="Player.cpp" compile="1" resource="0" file="Source/Player.cpp"/>
-      <FILE id="curOBt" name="Player.h" compile="0" resource="0" file="Source/Player.h"/>
-      <FILE id="Tsv6wi" name="Playlist.cpp" compile="1" resource="0" file="Source/Playlist.cpp"/>
-      <FILE id="VRuIHF" name="Playlist.h" compile="0" resource="0" file="Source/Playlist.h"/>
-      <FILE id="Elc1Ju" name="Recorder.cpp" compile="1" resource="0" file="Source/Recorder.cpp"/>
-      <FILE id="Wcxw5n" name="Recorder.h" compile="0" resource="0" file="Source/Recorder.h"/>
-      <FILE id="eptmtT" name="SecondOrderIIRFilter.cpp" compile="1" resource="0"
-            file="Source/LUFSMeter/filters/SecondOrderIIRFilter.cpp"/>
-      <FILE id="FusvhA" name="SecondOrderIIRFilter.h" compile="0" resource="0"
-            file="Source/LUFSMeter/filters/SecondOrderIIRFilter.h"/>
-      <FILE id="DaU4l3" name="Settings.cpp" compile="1" resource="0" file="Source/Settings.cpp"/>
-      <FILE id="RlP1VN" name="Settings.h" compile="0" resource="0" file="Source/Settings.h"/>
-      <FILE id="hy5idU" name="SoundPlayer.cpp" compile="1" resource="0" file="Source/SoundPlayer.cpp"/>
-      <FILE id="gE64MG" name="SoundPlayer.h" compile="0" resource="0" file="Source/SoundPlayer.h"/>
+      <FILE id="TlImPd" name="ODBCManager.h" compile="0" resource="0" file="Source/ODBCManager.h"/>
       <FILE id="sECmoQ" name="PlayHead.cpp" compile="1" resource="0" file="Source/PlayHead.cpp"/>
       <FILE id="Oih2Gw" name="PlayHead.h" compile="0" resource="0" file="Source/PlayHead.h"/>
-      <FILE id="zGi8bw" name="LoudnessBar.cpp" compile="1" resource="0" file="Source/LoudnessBar.cpp"/>
-      <FILE id="sywl8F" name="LoudnessBar.h" compile="0" resource="0" file="Source/LoudnessBar.h"/>
-      <FILE id="R9cz7D" name="DistantDataBaseBrowser.cpp" compile="1" resource="0"
-            file="Source/DistantDataBaseBrowser.cpp"/>
-      <FILE id="pw1chJ" name="DistantDataBaseBrowser.h" compile="0" resource="0"
-            file="Source/DistantDataBaseBrowser.h"/>
-      <FILE id="sylIhd" name="DataBaseBrowser.cpp" compile="1" resource="0"
-            file="Source/DataBaseBrowser.cpp"/>
-      <FILE id="Zd4WzE" name="DataBaseBrowser.h" compile="0" resource="0"
-            file="Source/DataBaseBrowser.h"/>
-      <FILE id="eqyqq7" name="helpers.h" compile="0" resource="0" file="Source/helpers.h"/>
-      <FILE id="ca9F8r" name="DataBaseImport.cpp" compile="1" resource="0"
-            file="Source/DataBaseImport.cpp"/>
-      <FILE id="hNkghM" name="DataBaseImport.h" compile="0" resource="0"
-            file="Source/DataBaseImport.h"/>
-      <FILE id="e0lFg9" name="ClipEffect.cpp" compile="1" resource="0" file="Source/ClipEffect.cpp"/>
-      <FILE id="xsAOp3" name="ClipEffect.h" compile="0" resource="0" file="Source/ClipEffect.h"/>
-      <FILE id="BERWeG" name="Denoiser.cpp" compile="1" resource="0" file="Source/Denoiser.cpp"/>
-      <FILE id="PeXVTX" name="Denoiser.h" compile="0" resource="0" file="Source/Denoiser.h"/>
-      <FILE id="Zr8s17" name="FeedThread.h" compile="0" resource="0" file="Source/FeedThread.h"/>
       <FILE id="pCSuVZ" name="R128IntegratedThread.h" compile="0" resource="0"
             file="Source/R128IntegratedThread.h"/>
+      <FILE id="EnJnmP" name="StopWatch.h" compile="0" resource="0" file="Source/StopWatch.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK="0"

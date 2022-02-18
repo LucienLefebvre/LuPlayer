@@ -107,6 +107,7 @@ void BottomComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRa
     myMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
     recorderComponent.prepareToPlay(samplesPerBlockExpected, sampleRate);
     dbBrowser.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    clipEditor.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void BottomComponent::tabSelected()

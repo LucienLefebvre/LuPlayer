@@ -176,6 +176,37 @@ void MidiMapper::initializeDefaultMapping()
     addMidiCommand(Fader6TrimR, 59, "Fader 6 trim relative", 6);
     addMidiCommand(Fader7TrimR, 60, "Fader 7 trim relative", 7);
     addMidiCommand(Fader8TrimR, 61, "Fader 8 trim relative", 8);
+    addMidiCommand(KeyMap1, -1, "Keymap mode : launch player 1 (1st row)");
+    addMidiCommand(KeyMap2, -1, "Keymap mode : launch player 2 (1st row)");
+    addMidiCommand(KeyMap3, -1, "Keymap mode : launch player 3 (1st row)");
+    addMidiCommand(KeyMap4, -1, "Keymap mode : launch player 4 (1st row)");
+    addMidiCommand(KeyMap5, -1, "Keymap mode : launch player 5 (1st row)");
+    addMidiCommand(KeyMap6, -1, "Keymap mode : launch player 6 (1st row)");
+    addMidiCommand(KeyMap7, -1, "Keymap mode : launch player 7 (1st row)");
+    addMidiCommand(KeyMap8, -1, "Keymap mode : launch player 8 (1st row)");
+    addMidiCommand(KeyMap9, -1, "Keymap mode : launch player 9 (1st row)");
+    addMidiCommand(KeyMap10, -1, "Keymap mode : launch player 10 (1st row)");   
+    addMidiCommand(KeyMap11, -1, "Keymap mode : launch player 1 (2nd row)");
+    addMidiCommand(KeyMap12, -1, "Keymap mode : launch player 2 (2nd row)");
+    addMidiCommand(KeyMap13, -1, "Keymap mode : launch player 3 (2nd row)");
+    addMidiCommand(KeyMap14, -1, "Keymap mode : launch player 4 (2nd row)");
+    addMidiCommand(KeyMap15, -1, "Keymap mode : launch player 5 (2nd row)");
+    addMidiCommand(KeyMap16, -1, "Keymap mode : launch player 6 (2nd row)");
+    addMidiCommand(KeyMap17, -1, "Keymap mode : launch player 7 (2nd row)");
+    addMidiCommand(KeyMap18, -1, "Keymap mode : launch player 8 (2nd row)");
+    addMidiCommand(KeyMap19, -1, "Keymap mode : launch player 9 (2nd row)");
+    addMidiCommand(KeyMap20, -1, "Keymap mode : launch player 10 (2nd row)");    
+    addMidiCommand(KeyMap21, -1, "Keymap mode : launch player 1 (3rd row)");
+    addMidiCommand(KeyMap22, -1, "Keymap mode : launch player 2 (3rd row)");
+    addMidiCommand(KeyMap23, -1, "Keymap mode : launch player 3 (3rd row)");
+    addMidiCommand(KeyMap24, -1, "Keymap mode : launch player 4 (3rd row)");
+    addMidiCommand(KeyMap25, -1, "Keymap mode : launch player 5 (3rd row)");
+    addMidiCommand(KeyMap26, -1, "Keymap mode : launch player 6 (3rd row)");
+    addMidiCommand(KeyMap27, -1, "Keymap mode : launch player 7 (3rd row)");
+    addMidiCommand(KeyMap28, -1, "Keymap mode : launch player 8 (3rd row)");
+    addMidiCommand(KeyMap29, -1, "Keymap mode : launch player 9 (3rd row)");
+    addMidiCommand(KeyMap30, -1, "Keymap mode : launch player 10 (3rd row)");
+
     table->updateContent();
     repaint();
 }
@@ -234,14 +265,14 @@ void MidiMapper::saveMidiMapping()
             midiMapping.addChildElement(command);
     }
 
-    juce::File midiMappingFile(juce::File::getCurrentWorkingDirectory().getChildFile("midiMapping.xml"));
+    juce::File midiMappingFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/midiMapping.xml"));
     midiMapping.writeTo(midiMappingFile);
     DBG("a");
 }
 
 void MidiMapper::loadMappingFile()
 {
-    juce::File midiMappingFile(juce::File::getCurrentWorkingDirectory().getChildFile("midiMapping.xml"));
+    juce::File midiMappingFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/midiMapping.xml"));
     if (midiMappingFile.exists())
     {
         midiMappings.clear();

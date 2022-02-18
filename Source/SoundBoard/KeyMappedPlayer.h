@@ -64,6 +64,10 @@ public:
 
     void editButtonClicked();
 
+    void setPlayerDefaultColour(juce::Colour c);
+
+    juce::Colour getPlayerDefaultColour();
+
 private:
     //Player dummyPlayer;
     Player* soundPlayer = 0;
@@ -83,6 +87,7 @@ private:
     bool isDragged = false;
 
     juce::Colour currentColour;
+    juce::Colour defaultColour;
 
     juce::AudioThumbnail* thumbnail;
     juce::Rectangle<int> thumbnailBounds;
@@ -106,5 +111,7 @@ private:
     float gainAtDragStart = 0.0f;
     juce::uint32 gainTimeStartDisplay = 0;
     int gainDisplayTimeMs = 2000;
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappedPlayer)
 };

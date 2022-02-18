@@ -26,6 +26,12 @@ class ChannelControlPannel  : public juce::Component,
     public juce::ChangeListener
 {
 public:
+    enum ToolBarItemIDs
+    {
+        Open_Sound = 1,
+        Delete_Sound,
+        Select_Colour
+    };
     ChannelControlPannel() : deleteBroadcaster()
     {
         channelColour = juce::Colour(juce::uint8(50), 62, 68, 1.0f);
@@ -428,7 +434,6 @@ private:
     juce::StringArray inputsChannelsName;
     juce::AudioDeviceManager* deviceManager = 0;
     juce::Array<bool> selectedInputs;
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelControlPannel)
 };

@@ -24,12 +24,16 @@ typedef LPSTR LPTSTR;
 //==============================================================================
 Player::Player(int index)
 {
-    setWantsKeyboardFocus(false);
+     setWantsKeyboardFocus(false);
      setMouseClickGrabsKeyboardFocus(false);
      playerIndex = index;
+
      juce::Timer::startTimer(50);
+
      state = Stopped;
     
+     playerColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
+
      if (!isCart)
          waveformThumbnailXStart = leftControlsWidth + borderRectangleWidth;
      else if (isCart)
@@ -48,6 +52,7 @@ Player::Player(int index)
      trimValueChangedBroacaster = new juce::ChangeBroadcaster();
      soundEditedBroadcaster = new juce::ChangeBroadcaster();
      playerDeletedBroadcaster = new juce::ChangeBroadcaster();
+     playerLaunchedBroadcaster.reset(new juce::ChangeBroadcaster());
 
      addMouseListener(this, true);
      addAndMakeVisible(&openButton);
@@ -190,8 +195,9 @@ Player::Player(int index)
      soundName.setFont(juce::Font(19.0f, juce::Font::bold).withTypefaceStyle("Regular"));
      soundName.setText(juce::String(""), juce::NotificationType::dontSendNotification);
      soundName.setWantsKeyboardFocus(false);
-     soundName.setEditable(false, true, false);
+     //soundName.setEditable(false, true, false);
      soundName.setMouseClickGrabsKeyboardFocus(false);
+     soundName.addListener(this);
     
      addChildComponent(&normalizingLabel);
      normalizingLabel.setText("Normalizing...", juce::NotificationType::dontSendNotification);
@@ -367,11 +373,11 @@ void Player::paint (juce::Graphics& g)
         {
             g.setColour(juce::Colour(229, 149, 0));
             outputMeter.setColour(juce::Colour(229, 149, 0));
-            soundName.setColour(soundName.textColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+            soundName.setColour(soundName.textColourId, playerColour);
         }
         else
         {
-            g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+            g.setColour(playerColour);
             soundName.setColour(soundName.textColourId, juce::Colours::white);
             outputMeter.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         }
@@ -466,12 +472,12 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
     }
     else
         if (isNextPlayer == true)   g.setColour(juce::Colour(229, 149, 0));
-        else g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        else g.setColour(playerColour);
     g.fillRect(thumbnailBounds);
 
     //waveform if next player or playing
     if (isNextPlayer || state == Playing)
-        g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        g.setColour(playerColour);
     else
         g.setColour(juce::Colour(229, 149, 0));
 
@@ -618,12 +624,28 @@ void Player::timerCallback()
     }
     updateRemainingTime();
 
+    updateCuePlayHeadPosition();
+
+    updatePlayHeadPosition();
+
+    updateInOutMarkPosition();
+
+    if (shouldRepaint.load())
+    {
+        repaint();
+        shouldRepaint.store(false);
+    }
+
+}
+
+void Player::updateCuePlayHeadPosition(bool forceUpdate)
+{
     //Cue PlayHead
     auto cueaudioPosition = (float)cueTransport.getCurrentPosition();
     auto cuecurrentPosition = cueTransport.getLengthInSeconds();
     auto cuedrawPosition = ((cueaudioPosition / cuecurrentPosition) * (float)thumbnailBounds.getWidth())
-            + (float)thumbnailBounds.getX();
-    if (cueTransport.isPlaying() || mouseIsDragged)
+        + (float)thumbnailBounds.getX();
+    if (cueTransport.isPlaying() || mouseIsDragged || forceUpdate)
     {
         if (cuedrawPosition > (leftControlsWidth + borderRectangleWidth) && cuedrawPosition < rightControlsStart)
         {
@@ -658,7 +680,7 @@ void Player::timerCallback()
 
     cueTimeString = (cueelapsedTimeString + " / " + cueremainingTimeString);
 
-    if (cueTransport.isPlaying() || mouseIsDragged)
+    if (cueTransport.isPlaying() || mouseIsDragged || forceUpdate)
     {
         addAndMakeVisible(cueTimeLabel);
         cueTimeLabel.setText(cueTimeString, juce::NotificationType::dontSendNotification);
@@ -676,7 +698,10 @@ void Player::timerCallback()
     {
         cueTimeLabel.setVisible(false);
     }
+}
 
+void Player::updatePlayHeadPosition()
+{
     if (transport.isPlaying())
     {
         //PLAYHEAD
@@ -713,9 +738,10 @@ void Player::timerCallback()
         elapsedTimeLabel.setVisible(false);
         playPlayHead.setVisible(false);
     }
+}
 
-
-    //Start Time
+void Player::updateInOutMarkPosition()
+{
     if (startTimeSet)
     {
         auto startDrawPosition = (startTime * (float)thumbnailBounds.getWidth() / transport.getLengthInSeconds()) + (float)thumbnailBounds.getX();
@@ -742,16 +768,9 @@ void Player::timerCallback()
             outMark.setVisible(false);
     }
     else
-            outMark.setVisible(false);
-    
-    if (shouldRepaint.load())
-    {
-        repaint();
-        shouldRepaint.store(false);
-    }
+        outMark.setVisible(false);
 
 }
-
 void Player::repaintPlayHead()
 {
     auto cueaudioPosition = (float)cueTransport.getCurrentPosition();
@@ -877,23 +896,22 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
         }
 
         if (transport.isPlaying() && playerBuffer != nullptr)
-            inputMeter.measureBlock(playerBuffer.get());
+            meterSource.measureBlock(*playerBuffer.get());
         else if (cueBuffer != nullptr)
-            inputMeter.measureBlock(cueBuffer.get());
+            meterSource.measureBlock(*cueBuffer.get());
         filterProcessor.getNextAudioBlock(playerBuffer.get());
         cueFilterProcessor.getNextAudioBlock(cueBuffer.get());
         compProcessor.getNextAudioBlock(playerBuffer.get());
         compMeter.setReductionGain(compProcessor.getCompReductionDB());
-        meterSource.measureBlock(*playerBuffer.get());
         if (transport.isPlaying() && playerBuffer != nullptr)
         {
-            outputMeter.measureBlock(playerBuffer.get());
+            //outputMeter.measureBlock(playerBuffer.get());
             outMeterSource.measureBlock(*playerBuffer.get());
         }
         else if (cueBuffer != nullptr)
         {
-            outputMeter.measureBlock(cueBuffer.get());
-            outMeterSource.measureBlock(*playerBuffer.get());
+            //outputMeter.measureBlock(cueBuffer.get());
+            outMeterSource.measureBlock(*cueBuffer.get());
         }
         playerBuffer->applyGain(bufferGain.load());
     }
@@ -1016,6 +1034,7 @@ void Player::deleteFile()
         setEnveloppeEnabled(false);
         bypassFX(true, false);
         playerDeletedBroadcaster->sendChangeMessage();
+        setPlayerColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     }
 }
 
@@ -1278,6 +1297,9 @@ void Player::transportStateChanged(TransportState newState)
             playButton.setButtonText("Stop");
             openButton.setEnabled(false);
             deleteButton.setEnabled(false);
+            soundName.setColour(soundName.textColourId, playerColour);
+            if (Settings::viewLastPlayedSound)
+                playerLaunchedBroadcaster->sendChangeMessage();
             break;
         case Stopping:
             playerInfoChangedBroadcaster->sendChangeMessage();
@@ -1287,6 +1309,7 @@ void Player::transportStateChanged(TransportState newState)
             openButton.setEnabled(true);
             deleteButton.setEnabled(true);
             stopButtonClickedBool == false;
+            soundName.setColour(soundName.textColourId, juce::Colours::white);
             break;       
         }
 
@@ -1353,22 +1376,23 @@ void Player::mouseDown(const juce::MouseEvent& event)
     }
     if (thumbnail.getNumChannels() != 0)
     {
-            mouseDragXPosition = getMouseXYRelative().getX();
-            mouseDragYPosition = getMouseXYRelative().getY();
-            if (mouseDragXPosition > leftControlsWidth + borderRectangleWidth && mouseDragXPosition < waveformThumbnailXEnd && mouseDragYPosition < 80)
-            {
-                mouseDragRelativeXPosition = getMouseXYRelative().getX() - thumbnailBounds.getPosition().getX();
-                mouseDragInSeconds = (((float)mouseDragRelativeXPosition * cueTransport.getLengthInSeconds()) / (float)thumbnailBounds.getWidth());
-                cueTransport.setPosition(mouseDragInSeconds);
-                thumbnailMiddle = waveformThumbnailXSize / 2;
-                thumbnailDrawStart = thumbnailMiddle - (thumbnailMiddle * thumbnailHorizontalZoom);
-                thumbnailDrawEnd = thumbnailMiddle + (thumbnailMiddle * thumbnailHorizontalZoom);
-                thumbnailDrawSize = thumbnailDrawEnd - thumbnailDrawStart;
-                drawCue = true;
-                mouseIsDragged = true;
-                envButtonBroadcaster->sendChangeMessage();
-                repaintThumbnail();
-            }
+        juce::Point<int> mouseDragPosition = getMouseXYRelative();
+        mouseDragXPosition = mouseDragPosition.getX();
+        mouseDragYPosition = mouseDragPosition.getY();
+        if (thumbnailBounds.contains(mouseDragPosition))
+        {
+            mouseDragRelativeXPosition = mouseDragXPosition - thumbnailBounds.getPosition().getX();
+            mouseDragInSeconds = (((float)mouseDragRelativeXPosition * cueTransport.getLengthInSeconds()) / (float)thumbnailBounds.getWidth());
+            cueTransport.setPosition(mouseDragInSeconds);
+            thumbnailMiddle = waveformThumbnailXSize / 2;
+            thumbnailDrawStart = thumbnailMiddle - (thumbnailMiddle * thumbnailHorizontalZoom);
+            thumbnailDrawEnd = thumbnailMiddle + (thumbnailMiddle * thumbnailHorizontalZoom);
+            thumbnailDrawSize = thumbnailDrawEnd - thumbnailDrawStart;
+            drawCue = true;
+            mouseIsDragged = true;
+            envButtonBroadcaster->sendChangeMessage();
+            repaintThumbnail();
+        }
     }
 
 }
@@ -1388,16 +1412,17 @@ void Player::mouseDrag(const juce::MouseEvent& event)
     if (thumbnail.getNumChannels() != 0
         && !event.mods.isCtrlDown())
     {
-            mouseDragXPosition = getMouseXYRelative().getX();
-            mouseDragYPosition = getMouseXYRelative().getY();
-            if (mouseDragXPosition >= leftControlsWidth + borderRectangleWidth && mouseDragXPosition <= waveformThumbnailXEnd && mouseDragYPosition < 80)
-            {
-                mouseDragRelativeXPosition = getMouseXYRelative().getX() - thumbnailBounds.getPosition().getX();
-                mouseDragInSeconds = (((float)mouseDragRelativeXPosition* cueTransport.getLengthInSeconds()) / (float)thumbnailBounds.getWidth());
-                cueTransport.setPosition(mouseDragInSeconds);
-                mouseIsDragged = true;
+        juce::Point<int> mouseDragPosition = getMouseXYRelative();
+        mouseDragXPosition = mouseDragPosition.getX();
+        mouseDragYPosition = mouseDragPosition.getY();
+        if (thumbnailBounds.contains(mouseDragPosition))
+        {
+            mouseDragRelativeXPosition = mouseDragXPosition - thumbnailBounds.getPosition().getX();
+            mouseDragInSeconds = (((float)mouseDragRelativeXPosition* cueTransport.getLengthInSeconds()) / (float)thumbnailBounds.getWidth());
+            cueTransport.setPosition(mouseDragInSeconds);
+            mouseIsDragged = true;
 
-            }
+        }
     }
 }
 
@@ -1848,12 +1873,14 @@ void Player::setHasBeenNormalized(bool b)
     hasBeenNormalized = b;
 }
 
-void Player::setName(std::string Name)
+void Player::setName(std::string Name, bool sendMessage)
 {
     newName = Name;
     if (!newName.empty())
     {
         soundName.setText(newName, juce::NotificationType::dontSendNotification);
+        if (sendMessage)
+            soundEditedBroadcaster->sendChangeMessage();
     }
 }
 
@@ -2258,24 +2285,11 @@ void Player::denoiseButtonClicked()
     {
         if (denoisedFileLoaded)
         {
-            std::string n = newName;
-            loadFile(loadedFilePath, true);
-            denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-            denoisedFileLoaded = false;
-            setName(n);
+            setDenoisedFile(false);
         }
         else
         {
-            if (!denoisedFile.empty())
-            {
-                std::string n = newName;
-                std::string oldFilePath = loadedFilePath;
-                loadFile(denoisedFile, true);
-                denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
-                denoisedFileLoaded = true;
-                setName(n);
-                loadedFilePath = oldFilePath;
-            }
+            setDenoisedFile(true);
         }
         rightClickDown = false;
     }
@@ -2285,8 +2299,59 @@ void Player::denoiseButtonClicked()
         denoiseWindow->showDialog("Denoiser - " + soundName.getText(), &denoiser, this, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true);
         denoiser.setFilePath(loadedFilePath);
         denoiser.setTransportGain(trimVolumeSlider.getValue());
+        soundEditedBroadcaster->sendChangeMessage();
+    }
+
+}
+
+void Player::setDenoisedFile(bool loadDenoisedFile)
+{
+    if (!loadDenoisedFile)
+    {
+        std::string n = newName;
+        loadFile(loadedFilePath, true);
+        denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        denoisedFileLoaded = false;
+        setName(n);
+    }
+    else
+    {
+        if (!denoisedFile.empty())
+        {
+            std::string n = newName;
+            std::string oldFilePath = loadedFilePath;
+            loadFile(denoisedFile, true);
+            denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
+            denoisedFileLoaded = true;
+            setName(n);
+            loadedFilePath = oldFilePath;
+        }
     }
     soundEditedBroadcaster->sendChangeMessage();
+}
+
+bool Player::getDenoisedFileLoaded()
+{
+    return denoisedFileLoaded;
+}
+
+void Player::setPlayerColour(juce::Colour c)
+{
+    playerColour = c;
+    colourHasChanged = true;
+    soundEditedBroadcaster->sendChangeMessage();
+    repaint();
+    unfocusAllComponents();
+}
+
+bool Player::getColourHasChanged()
+{
+    return colourHasChanged;
+}
+
+juce::Colour Player::getPlayerColour()
+{
+    return playerColour;
 }
 
 void Player::killThreads()
@@ -2484,3 +2549,8 @@ bool Player::isThreadRunning()
     else
         return false;
 }
+
+void Player::labelTextChanged(juce::Label* labelThatHasChanged)
+{
+    soundEditedBroadcaster->sendChangeMessage();
+}   

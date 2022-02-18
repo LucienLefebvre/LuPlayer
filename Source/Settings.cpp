@@ -57,6 +57,7 @@ int Settings::editedPlaylist;
 int Settings::preferedSoundPlayerMode;
 
 bool Settings::showEnveloppe;
+bool Settings::viewLastPlayedSound;
 //==============================================================================
 Settings::Settings() : settingsFile(options)
 {
@@ -64,7 +65,7 @@ Settings::Settings() : settingsFile(options)
     options.applicationName = ProjectInfo::projectName;
     options.filenameSuffix = ".settings";
 
-    options.folderName = juce::File::getCurrentWorkingDirectory().getFullPathName();
+    options.folderName = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer").getFullPathName();
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     properties.setStorageParameters(options);
 
@@ -132,6 +133,8 @@ Settings::Settings() : settingsFile(options)
     if (properties.getUserSettings()->getValue("Play next sound in playlist").isEmpty())
         Settings::skewFactorGlobal = 0.5;
 
+
+    Settings::viewLastPlayedSound = true;
     //SAVE & CLOSE BUTTONS
     saveButton.setBounds(250, 400, 100, 50);
     addAndMakeVisible(saveButton);

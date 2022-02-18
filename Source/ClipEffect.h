@@ -47,6 +47,8 @@ public:
 
     void updateBypassed();
 
+    void bypassButtonClicked();
+
 
 private:
     FilterEditor filterEditor;
@@ -66,7 +68,10 @@ private:
 
     juce::String name;
     juce::Label nameLabel;
+    juce::TextButton bypassButton;
 
+    int bypassButtonWidth = 60;
+    int byPassButtonHeight = 25;
     int spaceBetweenComponents = 10;
     int meterSize = 50;
     int compWidth = 130;

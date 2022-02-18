@@ -14,8 +14,6 @@
 //==============================================================================
 ClipEffect::ClipEffect()
 {
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
     inputMeter = &initializationMeter;
     outputMeter = &initializationMeter;
     compMeter = &initializationMeter;
@@ -24,13 +22,15 @@ ClipEffect::ClipEffect()
     addAndMakeVisible(&displayOutputMeter);
     addAndMakeVisible(&displayCompMeter);
 
+    addAndMakeVisible(&bypassButton);
+    bypassButton.setButtonText("Enable");
+    bypassButton.onClick = [this] { bypassButtonClicked(); };
+
     addAndMakeVisible(&nameLabel);
     nameLabel.setJustificationType(juce::Justification::centred);
     nameLabel.setFont(juce::Font(25.0f, juce::Font::bold).withTypefaceStyle("Regular"));
     nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(229, 149, 0));
     nameLabel.setInterceptsMouseClicks(false, true);
-    //nameLabel.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colour(40, 134, 189));
-    //nameLabel.setAlpha(0.7);
 
     displayCompMeter.shouldDrawScale(false);
     addAndMakeVisible(&compEditor);
@@ -63,12 +63,13 @@ void ClipEffect::resized()
 {
     if (editedPlayer != nullptr)
     {
-        displayInputMeter.setBounds(0, 0, meterSize, getHeight());
+        bypassButton.setBounds(0, 0, bypassButtonWidth, byPassButtonHeight);
+        displayInputMeter.setBounds(bypassButton.getRight() + spaceBetweenComponents / 2, 0, meterSize, getHeight());
         displayOutputMeter.setBounds(getWidth() - meterSize, 0, meterSize, getHeight());
         compEditor.setBounds(displayOutputMeter.getX() - spaceBetweenComponents - compWidth - 10, 0, compWidth, getHeight());
         displayCompMeter.setReductionGainWidth(10);
         displayCompMeter.setBounds(displayOutputMeter.getX() - 20, 0, 20, getHeight());
-        filterEditor.setBounds(displayInputMeter.getRight() + spaceBetweenComponents, 0, getWidth() - ((2 * meterSize) + (3 * spaceBetweenComponents) + compWidth), getHeight());
+        filterEditor.setBounds(displayInputMeter.getRight() + spaceBetweenComponents / 2, 0, getWidth() - ((2 * meterSize) + (4 * spaceBetweenComponents) + compWidth + bypassButtonWidth), getHeight());
         nameLabel.setBounds(filterEditor.getFilterGraphXStart() + 100, 2, filterEditor.getRight() - filterEditor.getFilterGraphXStart() - 100, 30);
     }
 }
@@ -123,6 +124,7 @@ void ClipEffect::setPlayer(Player* p)
         editedPlayer->setEditedPlayer(false);
         editedPlayer->fxButtonBroadcaster->removeChangeListener(this);
         editedPlayer->playerDeletedBroadcaster->removeChangeListener(this);
+        editedPlayer->soundEditedBroadcaster->removeChangeListener(this);
     }
 
     editedPlayer = p;
@@ -136,6 +138,7 @@ void ClipEffect::setPlayer(Player* p)
         setName(editedPlayer->getName());
         editedPlayer->fxButtonBroadcaster->addChangeListener(this);
         editedPlayer->playerDeletedBroadcaster->addChangeListener(this);
+        editedPlayer->soundEditedBroadcaster->addChangeListener(this);
         updateBypassed();
     }
     else
@@ -165,6 +168,8 @@ void ClipEffect::changeListenerCallback(juce::ChangeBroadcaster* source)
         {
             setNullPlayer();
         }
+        else if (source == editedPlayer->soundEditedBroadcaster)
+            setName(editedPlayer->getName());
     }
 }
 
@@ -186,7 +191,24 @@ void ClipEffect::updateBypassed()
     filterEditor.updateBypassed();
     compEditor.updateBypassedSliders();
     if (filterEditor.getEditedFilterProcessor()->isBypassed())
+    {
         nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+        bypassButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::red);
+        bypassButton.setButtonText("Enable");
+    }
     else
+    {
         nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(229, 149, 0));
+        bypassButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::green);
+        bypassButton.setButtonText("Bypass");
+    }
+
+}
+
+void ClipEffect::bypassButtonClicked()
+{
+    if (editedPlayer != nullptr)
+    {
+        editedPlayer->bypassFX(editedPlayer->isFxEnabled(), true);
+    }
 }

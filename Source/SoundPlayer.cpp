@@ -439,22 +439,36 @@ void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce:
             }
         }
     }
-    if (midiMessageNumber == 43 && midiMessageValue == 127)
+    else if (soundPlayerMode == SoundPlayer::Mode::KeyMap)
     {
-        myPlaylists[0]->playersPreviousPositionClicked();
+        for (int i = 0; i < 30; i++)
+        {
+            if (midiMessageNumber == mapper->getMidiCCForCommand(250 + i))
+            {
+                auto* player = myPlaylists[0]->players[i];
+                if (player != nullptr)
+                {
+                    player->play(true);
+                }
+            }
+        }
     }
-    else if (midiMessageNumber == 44 && midiMessageValue == 127)
-    {
-        myPlaylists[0]->playersNextPositionClicked();
-    }
-    else if (midiMessageNumber == 42 && midiMessageValue == 127)
-    {
-        myPlaylists[0]->playersResetPositionClicked();
-    }
-    else if (midiMessageNumber == 41 && midiMessageValue == 127)
-    {
-        myPlaylists[0]->spaceBarPressed();
-    }
+    //if (midiMessageNumber == 43 && midiMessageValue == 127)
+    //{
+    //    myPlaylists[0]->playersPreviousPositionClicked();
+    //}
+    //else if (midiMessageNumber == 44 && midiMessageValue == 127)
+    //{
+    //    myPlaylists[0]->playersNextPositionClicked();
+    //}
+    //else if (midiMessageNumber == 42 && midiMessageValue == 127)
+    //{
+    //    myPlaylists[0]->playersResetPositionClicked();
+    //}
+    //else if (midiMessageNumber == 41 && midiMessageValue == 127)
+    //{
+    //    myPlaylists[0]->spaceBarPressed();
+    //}
 
     //const juce::ScopedValueSetter<bool> scopedInputFlag(isAddingFromMidiInput, true);
 }
@@ -1628,7 +1642,7 @@ void SoundPlayer::savePlaylist()
     multiPlayer.addChildElement(cart);
     auto xmlString = multiPlayer.toString();
 
-    juce::FileChooser chooser("Choose an XML file to save", juce::File::getSpecialLocation(juce::File::userDocumentsDirectory), "*.xml");
+    juce::FileChooser chooser("Choose an XML file to save", juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/Saves"), "*.xml");
     if (chooser.browseForFileToSave(true))
     {
         juce::File myPlaylistSave;
@@ -1709,7 +1723,7 @@ void SoundPlayer::loadPlaylist()
     }
     else
     {
-        juce::FileChooser chooser("Choose an XML File to load", juce::File::getSpecialLocation(juce::File::userDocumentsDirectory), "*.xml");
+        juce::FileChooser chooser("Choose an XML File to load", juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/Saves"), "*.xml");
 
         if (chooser.browseForFileToOpen())
         {
@@ -1979,6 +1993,8 @@ void SoundPlayer::initializeKeyMapPlayer()
     }
     keyMappedSoundboard->setShortcutKeys();
     keyMappedSoundboard->resized();
+    for (auto player : myPlaylists[0]->players)
+        player->setPlayerColour(juce::Colour(40, 134, 189));
 }
 
 SoundPlayer::Mode SoundPlayer::getSoundPlayerMode()

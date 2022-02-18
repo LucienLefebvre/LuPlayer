@@ -165,6 +165,7 @@ public:
     juce::ChangeBroadcaster* fxButtonBroadcaster;
     juce::ChangeBroadcaster* envButtonBroadcaster;
     juce::ChangeBroadcaster* grabFocusBroadcaster;
+    std::unique_ptr<juce::ChangeBroadcaster> playerLaunchedBroadcaster;
 
     int cuedPlayer = 0;
 

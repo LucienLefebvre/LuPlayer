@@ -46,8 +46,6 @@ public:
 
     void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel);
 
-    void mouseDoubleClick(const juce::MouseEvent& e);
-
     EnveloppePoint* addPoint(juce::Point<float> position, bool createPath = true);
 
     void deletePoint(EnveloppePoint* point);
@@ -70,6 +68,8 @@ public:
     void setOrDeleteStart(bool setOrDelete);
 
     void setOrDeleteStop(bool setOrDelete);
+
+    void setSoundColour(juce::Colour c);
 
 private:
     void changeListenerCallback(juce::ChangeBroadcaster* source);
@@ -104,6 +104,8 @@ private:
     PlayHead outMark;
     juce::Label infoLabel;
     
+    juce::Colour soundColour;
+
     bool drawPointInfo = false;
     int pointInfoToDraw = 0;
     bool mouseIsDragged = false;

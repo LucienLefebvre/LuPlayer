@@ -5,20 +5,23 @@
     <Filter Include="MultiPlayer\Others">
       <UniqueIdentifier>{04480EAE-95FB-41B7-A7CD-5585CEBE70B8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MultiPlayer\Clip Editor">
-      <UniqueIdentifier>{19001706-B176-1299-8A1D-4C7F12CE8697}</UniqueIdentifier>
+    <Filter Include="MultiPlayer\Source\Bottom Panel">
+      <UniqueIdentifier>{B0A4C5E6-A954-EE49-AB1D-AA60FF19A521}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MultiPlayer\Source\Settings">
-      <UniqueIdentifier>{50282CA5-0999-2B7B-D4B6-C9B5CD18D5BC}</UniqueIdentifier>
+    <Filter Include="MultiPlayer\Source\LUFS Meter">
+      <UniqueIdentifier>{700B9156-5A47-92A4-42A7-27BAE1A48C9B}</UniqueIdentifier>
     </Filter>
     <Filter Include="MultiPlayer\Source\Mixer">
       <UniqueIdentifier>{84A88619-6307-C4E6-74EC-99BA546C6AB8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MultiPlayer\Source\Soundboard">
-      <UniqueIdentifier>{47F235E6-752E-8E21-542A-B8DC02129748}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MultiPlayer\Source\nanodbc">
       <UniqueIdentifier>{F301E40E-967D-7851-CC8A-0D7A5E4BB715}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MultiPlayer\Source\Settings">
+      <UniqueIdentifier>{50282CA5-0999-2B7B-D4B6-C9B5CD18D5BC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MultiPlayer\Source\Soundboard">
+      <UniqueIdentifier>{47F235E6-752E-8E21-542A-B8DC02129748}</UniqueIdentifier>
     </Filter>
     <Filter Include="MultiPlayer\Source\sqlite">
       <UniqueIdentifier>{3B2B277A-4F96-0C8E-746D-7FF396CB0FAB}</UniqueIdentifier>
@@ -488,19 +491,37 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Clip Editor\EnveloppeEditor.cpp">
-      <Filter>MultiPlayer\Clip Editor</Filter>
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AudioBrowser.cpp">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\BottomComponent.cpp">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ClipEffect.cpp">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DataBaseBrowser.cpp">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClCompile>
     <ClCompile Include="Source\DataBaseFeeder.cpp">
-      <Filter>MultiPlayer\Source</Filter>
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Settings\KeyMapper.cpp">
-      <Filter>MultiPlayer\Source\Settings</Filter>
+    <ClCompile Include="Source\DataBaseImport.cpp">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Settings\MidiMapper.cpp">
-      <Filter>MultiPlayer\Source\Settings</Filter>
+    <ClCompile Include="Source\DistantDataBaseBrowser.cpp">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClCompile>
-    <ClCompile Include="Source\convertObject.cpp">
-      <Filter>MultiPlayer\Source</Filter>
+    <ClCompile Include="Source\Recorder.cpp">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LUFSMeter\Ebu128LoudnessMeter.cpp">
+      <Filter>MultiPlayer\Source\LUFS Meter</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LUFSMeter\filters\SecondOrderIIRFilter.cpp">
+      <Filter>MultiPlayer\Source\LUFS Meter</Filter>
     </ClCompile>
     <ClCompile Include="Source\Mixer\FilterEditor.cpp">
       <Filter>MultiPlayer\Source\Mixer</Filter>
@@ -520,6 +541,27 @@
     <ClCompile Include="Source\Mixer\MixerInput.cpp">
       <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClCompile>
+    <ClCompile Include="Source\nanodbc-master\nanodbc\nanodbc.cpp">
+      <Filter>MultiPlayer\Source\nanodbc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Settings.cpp">
+      <Filter>MultiPlayer\Source\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Settings\KeyMapper.cpp">
+      <Filter>MultiPlayer\Source\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Settings\MidiMapper.cpp">
+      <Filter>MultiPlayer\Source\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Player.cpp">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Playlist.cpp">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SoundPlayer.cpp">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClCompile>
     <ClCompile Include="Source\SoundBoard\KeyboardMappedSoundboard.cpp">
       <Filter>MultiPlayer\Source\Soundboard</Filter>
     </ClCompile>
@@ -535,22 +577,19 @@
     <ClCompile Include="Source\SoundBoard\SoundBoard.cpp">
       <Filter>MultiPlayer\Source\Soundboard</Filter>
     </ClCompile>
-    <ClCompile Include="Source\nanodbc-master\nanodbc\nanodbc.cpp">
-      <Filter>MultiPlayer\Source\nanodbc</Filter>
-    </ClCompile>
     <ClCompile Include="Source\sqlite\shell.c">
       <Filter>MultiPlayer\Source\sqlite</Filter>
     </ClCompile>
     <ClCompile Include="Source\sqlite\sqlite3.c">
       <Filter>MultiPlayer\Source\sqlite</Filter>
     </ClCompile>
-    <ClCompile Include="Source\AudioBrowser.cpp">
+    <ClCompile Include="Source\convertObject.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\BottomComponent.cpp">
+    <ClCompile Include="Source\Denoiser.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\LUFSMeter\Ebu128LoudnessMeter.cpp">
+    <ClCompile Include="Source\LoudnessBar.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Main.cpp">
@@ -559,43 +598,7 @@
     <ClCompile Include="Source\MainComponent.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Player.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Playlist.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Recorder.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\LUFSMeter\filters\SecondOrderIIRFilter.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Settings.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\SoundPlayer.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\PlayHead.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\LoudnessBar.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DistantDataBaseBrowser.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DataBaseBrowser.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DataBaseImport.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ClipEffect.cpp">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Denoiser.cpp">
       <Filter>MultiPlayer\Source</Filter>
     </ClCompile>
     <ClCompile Include="ff_meters\ff_meters\LevelMeter\LevelMeter.cpp">
@@ -2791,37 +2794,46 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Clip Editor\ClipEditor.h">
-      <Filter>MultiPlayer\Clip Editor</Filter>
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
     <ClInclude Include="Source\Clip Editor\EnveloppeEditor.h">
-      <Filter>MultiPlayer\Clip Editor</Filter>
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
     <ClInclude Include="Source\Clip Editor\EnveloppePoint.h">
-      <Filter>MultiPlayer\Clip Editor</Filter>
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AudioBrowser.h">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\BottomComponent.h">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ClipEffect.h">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DataBaseBrowser.h">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
     <ClInclude Include="Source\DataBaseFeeder.h">
-      <Filter>MultiPlayer\Source</Filter>
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Settings\KeyMapper.h">
-      <Filter>MultiPlayer\Source\Settings</Filter>
+    <ClInclude Include="Source\DataBaseImport.h">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Settings\MidiMapper.h">
-      <Filter>MultiPlayer\Source\Settings</Filter>
+    <ClInclude Include="Source\DistantDataBaseBrowser.h">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
-    <ClInclude Include="Source\StopWatch.h">
-      <Filter>MultiPlayer\Source</Filter>
+    <ClInclude Include="Source\Recorder.h">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
-    <ClInclude Include="Source\DenoiseThread.h">
-      <Filter>MultiPlayer\Source</Filter>
+    <ClInclude Include="Source\LUFSMeter\Ebu128LoudnessMeter.h">
+      <Filter>MultiPlayer\Source\LUFS Meter</Filter>
     </ClInclude>
-    <ClInclude Include="Source\batchConvertThread.h">
-      <Filter>MultiPlayer\Source</Filter>
+    <ClInclude Include="Source\LUFSMeter\MacrosAndJuceHeaders.h">
+      <Filter>MultiPlayer\Source\LUFS Meter</Filter>
     </ClInclude>
-    <ClInclude Include="Source\convertObject.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ffmpegConvert.h">
-      <Filter>MultiPlayer\Source</Filter>
+    <ClInclude Include="Source\LUFSMeter\filters\SecondOrderIIRFilter.h">
+      <Filter>MultiPlayer\Source\LUFS Meter</Filter>
     </ClInclude>
     <ClInclude Include="Source\Mixer\ChannelControlPannel.h">
       <Filter>MultiPlayer\Source\Mixer</Filter>
@@ -2877,6 +2889,27 @@
     <ClInclude Include="Source\Mixer\VCA.h">
       <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClInclude>
+    <ClInclude Include="Source\nanodbc-master\nanodbc\nanodbc.h">
+      <Filter>MultiPlayer\Source\nanodbc</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Settings.h">
+      <Filter>MultiPlayer\Source\Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Settings\KeyMapper.h">
+      <Filter>MultiPlayer\Source\Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Settings\MidiMapper.h">
+      <Filter>MultiPlayer\Source\Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Player.h">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Playlist.h">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SoundPlayer.h">
+      <Filter>MultiPlayer\Source\Soundboard</Filter>
+    </ClInclude>
     <ClInclude Include="Source\SoundBoard\KeyboardMappedSoundboard.h">
       <Filter>MultiPlayer\Source\Soundboard</Filter>
     </ClInclude>
@@ -2892,79 +2925,49 @@
     <ClInclude Include="Source\SoundBoard\SoundBoard.h">
       <Filter>MultiPlayer\Source\Soundboard</Filter>
     </ClInclude>
-    <ClInclude Include="Source\nanodbc-master\nanodbc\nanodbc.h">
-      <Filter>MultiPlayer\Source\nanodbc</Filter>
-    </ClInclude>
     <ClInclude Include="Source\sqlite\sqlite3.h">
       <Filter>MultiPlayer\Source\sqlite</Filter>
     </ClInclude>
     <ClInclude Include="Source\sqlite\sqlite3ext.h">
       <Filter>MultiPlayer\Source\sqlite</Filter>
     </ClInclude>
-    <ClInclude Include="Source\AudioBrowser.h">
+    <ClInclude Include="Source\batchConvertThread.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ODBCManager.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\BottomComponent.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\LUFSMeter\Ebu128LoudnessMeter.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\LUFSMeter\MacrosAndJuceHeaders.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MainComponent.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Player.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Playlist.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Recorder.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\LUFSMeter\filters\SecondOrderIIRFilter.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Settings.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\SoundPlayer.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\PlayHead.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\LoudnessBar.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DistantDataBaseBrowser.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DataBaseBrowser.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\helpers.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DataBaseImport.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ClipEffect.h">
+    <ClInclude Include="Source\convertObject.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\Denoiser.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\DenoiseThread.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
     <ClInclude Include="Source\FeedThread.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
+    <ClInclude Include="Source\ffmpegConvert.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\helpers.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LoudnessBar.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainComponent.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ODBCManager.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\PlayHead.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
     <ClInclude Include="Source\R128IntegratedThread.h">
+      <Filter>MultiPlayer\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StopWatch.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="ff_meters\ff_meters\LevelMeter\LevelMeter.h">

@@ -223,11 +223,17 @@ public:
     void updateBypassedSliders()
     {
         bool isBypassed = editedCompProcessor->getBypass();
+        juce::Colour activeColour(juce::Colour(40, 134, 189));
         thresholdSlider->setEnabled(!isBypassed);
+        thresholdSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
         attackSlider->setEnabled(!isBypassed);
+        attackSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
         releaseSlider->setEnabled(!isBypassed);
+        releaseSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
         gainSlider->setEnabled(!isBypassed);
+        gainSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
         ratioSlider->setEnabled(!isBypassed);
+        ratioSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
     }
 
     void setEditedCompProcessor(CompProcessor& processor) 
