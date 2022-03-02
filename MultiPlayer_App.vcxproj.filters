@@ -5,6 +5,9 @@
     <Filter Include="MultiPlayer\Others">
       <UniqueIdentifier>{04480EAE-95FB-41B7-A7CD-5585CEBE70B8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MultiPlayer\Source\Thumbnail">
+      <UniqueIdentifier>{C3115B8A-FA72-5943-DA80-FD277BCE1DDF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="MultiPlayer\Source\Bottom Panel">
       <UniqueIdentifier>{B0A4C5E6-A954-EE49-AB1D-AA60FF19A521}</UniqueIdentifier>
     </Filter>
@@ -490,6 +493,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Thumbnail\gainThumbnail.cpp">
+      <Filter>MultiPlayer\Source\Thumbnail</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Clip Editor\EnveloppeEditor.cpp">
       <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClCompile>
@@ -2793,6 +2799,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Thumbnail\gainThumbnail.h">
+      <Filter>MultiPlayer\Source\Thumbnail</Filter>
+    </ClInclude>
     <ClInclude Include="Source\Clip Editor\ClipEditor.h">
       <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>

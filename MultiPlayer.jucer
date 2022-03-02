@@ -7,6 +7,11 @@
       <FILE id="o5AHwb" name="logo sens.png" compile="0" resource="1" file="logo sens.png"/>
     </GROUP>
     <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
+      <GROUP id="{1D073893-0026-9A58-4027-E3383CC39F21}" name="Thumbnail">
+        <FILE id="EMOhki" name="gainThumbnail.cpp" compile="1" resource="0"
+              file="Source/Thumbnail/gainThumbnail.cpp"/>
+        <FILE id="Rql8Nt" name="gainThumbnail.h" compile="0" resource="0" file="Source/Thumbnail/gainThumbnail.h"/>
+      </GROUP>
       <GROUP id="{C809C04D-7425-4F57-E18C-5B2CFC41814A}" name="Bottom Panel">
         <FILE id="NVw8ph" name="ClipEditor.h" compile="0" resource="0" file="Source/Clip Editor/ClipEditor.h"/>
         <FILE id="BPgE3W" name="EnveloppeEditor.cpp" compile="1" resource="0"

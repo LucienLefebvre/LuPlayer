@@ -28,6 +28,7 @@
 #include "Mixer/FilterProcessor.h"
 #include "Mixer/CompProcessor.h"
 #include "Mixer/Meter.h"
+#include "Thumbnail/gainThumbnail.h"
 #include "ffmpegConvert.h"
 #include "convertObject.h"
 #include "Denoiser.h"
@@ -172,7 +173,7 @@ public:
 
     juce::AudioThumbnailCache& getAudioThumbnailCache();
     juce::AudioFormatManager& getAudioFormatManager();
-    juce::AudioThumbnail& getAudioThumbnail();
+    GainThumbnail& getAudioThumbnail();
 
     juce::String getRemainingTimeAsString();
     juce::String getCueTimeAsString();
@@ -208,7 +209,7 @@ public:
     void setDenoisedFile(bool loadDenoisedFile);
     bool getDenoisedFileLoaded();
 
-    void setPlayerColour(juce::Colour c);
+    void setPlayerColour(juce::Colour c, bool sendMessage = true);
     juce::Colour getPlayerColour();
     bool getColourHasChanged();
 
@@ -360,7 +361,7 @@ private:
  
     //WAVEFORM
     juce::AudioThumbnailCache thumbnailCache{ 5 };
-    juce::AudioThumbnail thumbnail          {521, formatManager, thumbnailCache};
+    GainThumbnail thumbnail          {521, formatManager, thumbnailCache};
     juce::Rectangle<int> thumbnailBounds;
 
     bool endRepainted = false;

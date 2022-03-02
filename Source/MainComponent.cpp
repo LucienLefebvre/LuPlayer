@@ -41,11 +41,11 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     addAndMakeVisible(menuBar.get());
     menuBar->setWantsKeyboardFocus(false);
 
-    keyMapper.reset(new KeyMapper(settings.get()));
-    keyMapper->setSize(600, 400);
+    /*keyMapper.reset(new KeyMapper(settings.get()));
+    keyMapper->setSize(600, 400);*/
 
-    midiMapper.reset(new MidiMapper());
-    midiMapper->setSize(600, 400);
+    /*midiMapper.reset(new MidiMapper());
+    midiMapper->setSize(600, 400);*/
 
     initializeBottomComponent();
 
@@ -105,10 +105,10 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
 
 
 
-    keyMapper->setCommandManager(&commandManager);
-    keyMapper->loadMappingFile();
-    midiMapper->setCommandManager(&commandManager);
-    midiMapper->loadMappingFile();
+    /*keyMapper->setCommandManager(&commandManager);
+    keyMapper->loadMappingFile();*/
+    midiMapper.setCommandManager(&commandManager);
+    midiMapper.loadMappingFile();
     setMouseClickGrabsKeyboardFocus(true);
     addKeyListener(this);
     setWantsKeyboardFocus(true);
@@ -145,19 +145,51 @@ void MainComponent::keyMapperButtonClicked()
     std::unique_ptr<juce::DialogWindow> keyMapperWindow = std::make_unique<juce::DialogWindow>("Key Mapping",
         getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true);
     keyMapperWindow->setSize(600, 400);
-    keyMapperWindow->showDialog("Key Mapping", keyMapper.get(), this,
-        getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, false, false);
-    keyMapper->setWantsKeyboardFocus(true);
+
+    //std::unique_ptr<KeyMapper> km = std::make_unique<KeyMapper>(settings.get());
+    km = new KeyMapper(settings.get());
+    km->setCommandManager(&commandManager);
+    km->loadMappingFile();
+    km->setWantsKeyboardFocus(true);
+
+    juce::DialogWindow::LaunchOptions o;
+    o.dialogBackgroundColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
+    o.content.setOwned(km);
+    o.content->setSize(600, 400);
+    o.escapeKeyTriggersCloseButton = true;
+    o.useNativeTitleBar = false;
+    o.dialogTitle = TRANS("Key Mapper");
+    juce::DialogWindow* window = o.launchAsync();
+    juce::ModalComponentManager::getInstance()->attachCallback(window, juce::ModalCallbackFunction::create([this](int r)
+        {
+            grabKeyboardFocus();
+        }));
 }
+
 
 void MainComponent::midiMapperButtonClicked()
 {
-    std::unique_ptr<juce::DialogWindow> keyMapperWindow = std::make_unique<juce::DialogWindow>("Midi Mapping",
-        getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true);
-    keyMapperWindow->setSize(600, 400);
-    keyMapperWindow->showDialog("Midi Mapping", midiMapper.get(), this,
-        getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, false, false);
-    midiMapper->setWantsKeyboardFocus(true);
+    juce::DialogWindow::LaunchOptions o;
+    o.dialogBackgroundColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
+    o.content.setNonOwned(&midiMapper);
+    o.content->setSize(600, 400);
+    o.escapeKeyTriggersCloseButton = true;
+    o.useNativeTitleBar = false;
+    o.dialogTitle = TRANS("Key Mapper");
+    juce::DialogWindow* window = o.launchAsync();
+    juce::ModalComponentManager::getInstance()->attachCallback(window, juce::ModalCallbackFunction::create([this](int r)
+        {
+            midiMapper.setWantsKeyPress(false);
+            grabKeyboardFocus();
+        }));
+
+    //std::unique_ptr<juce::DialogWindow> keyMapperWindow = std::make_unique<juce::DialogWindow>("Midi Mapping",
+    //    getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true);
+    //keyMapperWindow->setSize(600, 400);
+
+    //keyMapperWindow->showDialog("Midi Mapping", midiMapper.get(), this,
+    //    getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, false, false);
+    //midiMapper->setWantsKeyboardFocus(true);
 }
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
@@ -748,9 +780,9 @@ void MainComponent::setMidiInput(int index)
 
 void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message)
 {
-    if (midiMapper->getWantsKeyPress())
+    if (midiMapper.getWantsKeyPress())
     {
-        midiMapper->handleMidiMessage(message);
+        midiMapper.handleMidiMessage(message);
     }
     else
     {
@@ -758,10 +790,10 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
         {
             juce::CommandID cID = commandManager.getCommandForIndex(i)->commandID;
             const juce::MessageManagerLock mmLock;
-            if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(cID) && message.getControllerValue() == 127)
+            if (message.getControllerNumber() == midiMapper.getMidiCCForCommand(cID) && message.getControllerValue() == 127)
                 invokeDirectly(cID, true);
         }
-        soundPlayers[0]->handleIncomingMidiMessage(source, message, midiMapper.get());
+        soundPlayers[0]->handleIncomingMidiMessage(source, message, &midiMapper);
             //if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(MidiMapper::MidiCommands::LaunchRecord) && message.getControllerValue() == 127)
             //{
             //    launchRecord();
@@ -1815,20 +1847,17 @@ bool MainComponent::perform(const InvocationInfo& info)
         bottomComponent.setOrDeleteStop(false);
         break;
     case CommandIDs::showIndividualMeters:
-        Settings::showMeter = !Settings::showMeter;
-        Settings::showMeterValue = Settings::showMeter;
-        settings->saveOptions();
+        settings->setShowMeters(!Settings::showMeter);
         break;
     case CommandIDs::showEnveloppe:
-        Settings::showEnveloppe = !Settings::showEnveloppe;
+        settings->setShowEnveloppe(!Settings::showEnveloppe);
         if (soundPlayers[0]->myPlaylists[0] != nullptr)
             soundPlayers[0]->myPlaylists[0]->rearrangePlayers();
         if (soundPlayers[0]->myPlaylists[1] != nullptr)
             soundPlayers[0]->myPlaylists[1]->rearrangePlayers();
-        settings->saveOptions();
         break;
     case CommandIDs::viewLastPlayedSound:
-        Settings::viewLastPlayedSound = !Settings::viewLastPlayedSound;
+        settings->setViewLastPlayed(!Settings::viewLastPlayedSound);
         break;
     default:
         return false;

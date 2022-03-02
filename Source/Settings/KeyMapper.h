@@ -18,7 +18,8 @@
 class KeyMapper : 
     public juce::Component,
     public juce::TableListBoxModel,
-    public juce::KeyListener
+    public juce::KeyListener,
+    public juce::Timer
 {
 public:
     KeyMapper(Settings* s);
@@ -42,6 +43,7 @@ public:
     bool getWantsKeyPress();
     void setCommandManager(juce::ApplicationCommandManager* cm);
     void loadMappingFile();
+    void timerCallback();
 private:
     //KeyMapping keyMap;
     juce::Array<int> keyMapping;
@@ -52,6 +54,10 @@ private:
     bool wantsKeyPress = false;
     int commandToMap = 0;
     int numRows = 0;
+
+    juce::uint32 timerStartTime = 0;
+    int resetWantsKeyPressTime = 5000;
+
     Settings* settings;
     juce::ApplicationCommandManager* commandManager;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMapper)

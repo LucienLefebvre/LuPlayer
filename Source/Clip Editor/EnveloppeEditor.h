@@ -5,6 +5,8 @@
 #include "../PlayHead.h"
 #include "../Player.h"
 #include "../Settings/KeyMapper.h"
+//#include "../Thumbnail/gainThumbnail.h"
+
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
@@ -86,7 +88,7 @@ private:
     juce::Component* draggedComponent = nullptr;
     juce::TextButton scaleButton;
 
-    juce::AudioThumbnail* thumbnail;
+    GainThumbnail* thumbnail;
     juce::Rectangle<int> thumbnailBounds;
     juce::Range<double> thumbnailRange{ 0.0, 1.0 };
     double middleRangePoint = 0.5;

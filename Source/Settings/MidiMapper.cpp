@@ -235,6 +235,12 @@ bool MidiMapper::getWantsKeyPress()
     return wantsKeyPress;
 }
 
+
+void MidiMapper::setWantsKeyPress(bool b)
+{
+    wantsKeyPress = b;
+}
+
 void MidiMapper::setCommandManager(juce::ApplicationCommandManager* cm)
 {
     commandManager = cm;

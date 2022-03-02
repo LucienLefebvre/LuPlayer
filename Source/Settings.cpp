@@ -130,11 +130,20 @@ Settings::Settings() : settingsFile(options)
     else
         Settings::showMeter = properties.getUserSettings()->getValue("ShowMeter").getIntValue();
 
+    if (properties.getUserSettings()->getValue("ShowEnveloppe").isEmpty())
+        Settings::showEnveloppe = false;
+    else
+        Settings::showEnveloppe = properties.getUserSettings()->getValue("ShowEnveloppe").getIntValue();
+
+    if (properties.getUserSettings()->getValue("viewLastPlayedSound").isEmpty())
+        Settings::viewLastPlayedSound = false;
+    else
+        Settings::viewLastPlayedSound = properties.getUserSettings()->getValue("viewLastPlayedSound").getIntValue();
+
+
     if (properties.getUserSettings()->getValue("Play next sound in playlist").isEmpty())
         Settings::skewFactorGlobal = 0.5;
 
-
-    Settings::viewLastPlayedSound = true;
     //SAVE & CLOSE BUTTONS
     saveButton.setBounds(250, 400, 100, 50);
     addAndMakeVisible(saveButton);
@@ -658,11 +667,7 @@ void Settings::buttonClicked(juce::Button* button)
     }
     else if (button == &meterButton)
     {
-        Settings::showMeter = button->getToggleState();
-        Settings::showMeterValue = button->getToggleState();
-        properties.getUserSettings()->setValue("ShowMeter", (int)Settings::showMeter);
-        properties.saveIfNeeded();
-        settingsFile.save();
+        setShowMeters(button->getToggleState());
     }
 }
 
@@ -685,4 +690,29 @@ juce::Array<int> Settings::getKeyMapping(juce::StringArray s)
         DBG(r[i]);
     }
     return r;
+}
+
+void Settings::setShowMeters(bool show)
+{
+    Settings::showMeter = show;
+    Settings::showMeterValue = show;
+    properties.getUserSettings()->setValue("ShowMeter", (int)Settings::showMeter);
+    properties.saveIfNeeded();
+    settingsFile.save();
+}
+
+void Settings::setShowEnveloppe(bool show)
+{
+    Settings::showEnveloppe = show;
+    properties.getUserSettings()->setValue("ShowEnveloppe", (int)Settings::showEnveloppe);
+    properties.saveIfNeeded();
+    settingsFile.save();
+}
+
+void Settings::setViewLastPlayed(bool show)
+{
+    Settings::viewLastPlayedSound = show;
+    properties.getUserSettings()->setValue("viewLastPlayedSound", (int)Settings::viewLastPlayedSound);
+    properties.saveIfNeeded();
+    settingsFile.save();
 }

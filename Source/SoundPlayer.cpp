@@ -1009,6 +1009,8 @@ void SoundPlayer::mouseDragGetInfos(int playlistSource, int playerID)
         draggedEnveloppeXArray = player->getEnveloppeXArray();
         draggedEnveloppeYArray = player->getEnveloppeYArray();
         draggedEnveloppeEnabled = player->isEnveloppeEnabled();
+        draggedColour = player->getPlayerColour();
+        draggedColourChanged = player->getColourHasChanged();
         mouseDragged = true;
     }
 }
@@ -1303,7 +1305,6 @@ void SoundPlayer::mouseDragSetInfos(int playlistDestination, int playerIdDestina
                         {
                             if (playlistDestination == 0)
                             {
-                                DBG("player destination : " << playerIdDestination);
                                 reassignFaders(playerIdDestination, playerDragSource, playlistDestination);
                                 if (insertTop)
                                     destinationPlaylist->players.move(playerDragSource, 0);
@@ -1388,6 +1389,8 @@ void SoundPlayer::setSoundInfos(int playlistDestination, int playerIdDestination
     player->bypassFX(draggedFxBypassed, false);
     player->setEnveloppePath(Player::createEnveloppePathFromArrays(draggedEnveloppeXArray, draggedEnveloppeYArray));
     player->setEnveloppeEnabled(draggedEnveloppeEnabled, false, false);
+    if (draggedColourChanged)
+        player->setPlayerColour(draggedColour);
     clearDragInfos();
 }
 
@@ -1404,6 +1407,7 @@ void SoundPlayer::clearDragInfos()
     draggedNormalized = false;
     mouseDragged = false;
     draggedFxBypassed = false;
+    draggedColourChanged = false;
     draggedFilterParameters = FilterProcessor::makeDefaultFilter();
     myPlaylists[playlistDragSource]->mouseDragSource.setValue(-1);
 }
@@ -1424,6 +1428,7 @@ void SoundPlayer::mouseDragEnd(int playlistDestination)
         insertTop = false;
         myPlaylists[playlistDragSource]->mouseAltModifier = false;
         myPlaylists[playlistDragSource]->mouseDraggedStartPositionOK = false;
+        myPlaylists[playlistDragSource]->grabFocusBroadcaster->sendChangeMessage();
     }
 }
 
@@ -1700,8 +1705,12 @@ juce::XmlElement* SoundPlayer::createPlayerXmlElement(int playerID, int playlist
 
         int enveloppePointsNumber = enveloppeXArray.size();
         e->setAttribute("envPointsNumber", enveloppePointsNumber);
-        return e;
 
+        //Colour
+        e->setAttribute("playerColour", soundPlayer->getPlayerColour().toString());
+        e->setAttribute("playerColourChanged", soundPlayer->getColourHasChanged());
+
+        return e;
     }
     else
         return nullptr;
@@ -1755,9 +1764,6 @@ void SoundPlayer::loadPlaylist()
                     }
                 }
 
-                //for (auto i = 0; i < (myPlaylists[1]->players.size() + 1); i++)
-                    //myPlaylists[1]->removePlayer(i);
-
                 double numberOfPlayersToLoad = 0;
                 if (xml->hasTagName("MULTIPLAYER"))
                 {
@@ -1787,7 +1793,6 @@ void SoundPlayer::loadPlaylist()
                         }
                     }
                 }
-
 
                 double loaddedPlayers = 0;
                 std::unique_ptr<juce::Label> progressLabel = std::make_unique<juce::Label>();
@@ -1924,6 +1929,9 @@ void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID
         yArray.add(e->getStringAttribute("yArray" + juce::String(i)).getFloatValue());
     }
     playerToLoad->setEnveloppePath(Player::createEnveloppePathFromArrays(xArray, yArray));
+
+    if (e->getBoolAttribute("playerColourChanged"))
+        playerToLoad->setPlayerColour(juce::Colour::fromString(e->getStringAttribute("playerColour")), false);
 }
 
 void SoundPlayer::setTimerTime(int timertime)

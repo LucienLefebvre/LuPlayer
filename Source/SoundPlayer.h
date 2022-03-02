@@ -256,6 +256,8 @@ private:
     juce::Array<float> draggedEnveloppeYArray;
     bool draggedEnveloppeEnabled;
     bool draggedFxBypassed;
+    juce::Colour draggedColour;
+    bool draggedColourChanged;
 
     LoudnessBar loudnessBarComponent;
 

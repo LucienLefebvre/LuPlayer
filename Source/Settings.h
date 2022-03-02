@@ -58,6 +58,9 @@ public:
     int Settings::getPreferedSoundPlayerMode();
     void setKeyMapping(juce::Array<int> c, juce::StringArray s);
     juce::Array<int> getKeyMapping(juce::StringArray s);
+    void setShowMeters(bool show);
+    void setShowEnveloppe(bool show);
+    void setViewLastPlayed(bool show);
     juce::TextButton saveButton;
     //int maxFaderValue = 0;
 

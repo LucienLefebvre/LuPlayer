@@ -14,6 +14,8 @@
 //==============================================================================
 KeyMapper::KeyMapper(Settings* s)
 {
+    juce::Timer::startTimer(1000);
+
     setSize(600, 400);
 
     addKeyListener(this);
@@ -95,6 +97,7 @@ void KeyMapper::cellClicked(int rowNumber, int columnID, const juce::MouseEvent&
         if (!wantsKeyPress)
         {
             wantsKeyPress = true;
+            timerStartTime = juce::Time::getMillisecondCounter();
         }
         else
         {
@@ -164,5 +167,14 @@ void KeyMapper::loadMappingFile()
         juce::XmlDocument xmlDoc(keyMappingFile);
         juce::XmlElement xml(*xmlDoc.getDocumentElement());
         commandManager->getKeyMappings()->restoreFromXml(xml);
+    }
+}
+
+void KeyMapper::timerCallback()
+{
+    if (juce::Time::getMillisecondCounter() - timerStartTime > 5000)
+    {
+        wantsKeyPress = false;
+        repaint();
     }
 }

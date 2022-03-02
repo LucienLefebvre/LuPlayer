@@ -89,7 +89,7 @@ private:
     juce::Colour currentColour;
     juce::Colour defaultColour;
 
-    juce::AudioThumbnail* thumbnail;
+    GainThumbnail* thumbnail;
     juce::Rectangle<int> thumbnailBounds;
     //DISPLAY POSITIONS
     int shortcutLabelWidth = 20;

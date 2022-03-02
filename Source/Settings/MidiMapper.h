@@ -110,6 +110,7 @@ public:
     int getFaderNumberForCommand(juce::CommandID c);
 
     bool getWantsKeyPress();
+    void setWantsKeyPress(bool b);
     void setCommandManager(juce::ApplicationCommandManager* cm);
     void saveMidiMapping();
     void loadMappingFile();

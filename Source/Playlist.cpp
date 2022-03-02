@@ -1255,8 +1255,6 @@ void Playlist::rearrangePlayers()
         }
     }
     updateNextPlayer();
-
-
 }
 
 void Playlist::updateButtonsStates()

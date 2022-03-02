@@ -142,10 +142,11 @@ public:
 
     ~ClipEditor() override
     {
-        setNullPlayer();
         for (auto b : factory.broadcasters)
             b->removeChangeListener(this);
+        clipToolBar->clear();
         factory.broadcasters.clear();
+        setNullPlayer();
     }
 
     void paint (juce::Graphics& g) override
@@ -282,6 +283,7 @@ public:
 
             //Name
             nameLabel->setText(editedPlayer->getName(), juce::NotificationType::dontSendNotification);
+            
 
             //Tril
             trimVolumeSlider->setValue(editedPlayer->getTrimVolume());
@@ -366,9 +368,16 @@ public:
 
             //Colour
             if (editedPlayer->getColourHasChanged())
+            {
                 enveloppeEditor.setSoundColour(editedPlayer->getPlayerColour());
+                nameLabel->setColour(juce::Label::ColourIds::textColourId, editedPlayer->getPlayerColour());
+            }
             else
+            {
                 enveloppeEditor.setSoundColour(BLUE);
+                nameLabel->setColour(juce::Label::ColourIds::textColourId, BLUE);
+            }
+
 
         }
     }
@@ -558,9 +567,7 @@ public:
     }
     void componentBeingDeleted(juce::Component& component)
     {
-
         grabFocusBroadcaster->sendChangeMessage();
-
     }
     std::unique_ptr<juce::ChangeBroadcaster> grabFocusBroadcaster;
 private:
@@ -593,6 +600,17 @@ private:
                 broadcasters.add(new juce::ChangeBroadcaster());
             }
 
+        }
+
+        ~TItemFactory()
+        {
+            //labels.clear(false);
+            //for (int i = 0; i < NUM_ITEMS; i++)
+            //{
+            //    labels[i]->removeListener(this);
+            //}
+            //labels.clear(false);
+            //broadcasters.clear();
         }
 
         void getAllToolbarItemIds(juce::Array<int>& ids) override
@@ -672,37 +690,37 @@ private:
         {
         public:
             CustomToolbarLabel(const int toolbarItemId)
-                : ToolbarItemComponent(toolbarItemId, "Custom Toolbar Item", false)
+                : ToolbarItemComponent(toolbarItemId, "Custom Toolbar Item", true)
             {
-                addAndMakeVisible(tLabel);
+                tLabel.reset(new juce::Label);
+                addAndMakeVisible(tLabel.get());
 
                 switch (toolbarItemId)
                 {
                 case 1 :
-                    tLabel.setText("Open Sound", juce::dontSendNotification);
+                    tLabel->setText("Open Sound", juce::dontSendNotification);
                     break;
                 case 2:
-                    tLabel.setText("Delete Sound", juce::dontSendNotification);
+                    tLabel->setText("Delete Sound", juce::dontSendNotification);
                     break;
                 case 3:
-                    tLabel.setText("Sound Colour", juce::dontSendNotification);
+                    tLabel->setText("Sound Colour", juce::dontSendNotification);
                     break;
                 case 4:
-                    tLabel.setText("Enveloppe", juce::dontSendNotification);
+                    tLabel->setText("Enveloppe", juce::dontSendNotification);
                     break;
                 case 5:
-                    tLabel.setText("Effects", juce::dontSendNotification);
+                    tLabel->setText("Effects", juce::dontSendNotification);
                     break;
                 case 6:
-                    tLabel.setText("Normalize", juce::dontSendNotification);
+                    tLabel->setText("Normalize", juce::dontSendNotification);
                     break;
                 case 7:
-                    tLabel.setText("Denoise", juce::dontSendNotification);
+                    tLabel->setText("Denoise", juce::dontSendNotification);
                     break;
                 }
-
-                tLabel.setJustificationType(juce::Justification::centred);
-                tLabel.setInterceptsMouseClicks(false, false);
+                tLabel->setJustificationType(juce::Justification::centred);
+                tLabel->setInterceptsMouseClicks(false, false);
             }
 
             bool getToolbarItemSizes(int /*toolbarDepth*/, bool isVertical,
@@ -723,52 +741,38 @@ private:
 
             void contentAreaChanged(const juce::Rectangle<int>& newArea) override
             {
-                tLabel.setSize(newArea.getWidth(), newArea.getHeight());
+                tLabel->setSize(newArea.getWidth(), newArea.getHeight());
 
-                tLabel.setCentrePosition(newArea.getCentreX(), newArea.getCentreY());
+                tLabel->setCentrePosition(newArea.getCentreX(), newArea.getCentreY());
             }
 
             void mouseEnter(const juce::MouseEvent& event)
             {
-                tLabel.setColour(juce::Label::ColourIds::backgroundColourId, getLookAndFeel().findColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId));
+                tLabel->setColour(juce::Label::ColourIds::backgroundColourId, getLookAndFeel().findColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId));
             }            
             
             void mouseExit(const juce::MouseEvent& event)
             {
-                tLabel.setColour(juce::Label::ColourIds::backgroundColourId,
+                tLabel->setColour(juce::Label::ColourIds::backgroundColourId,
                     getLookAndFeel().findColour(juce::Toolbar::backgroundColourId));
             }
 
             void resetColour()
             {
-                tLabel.setColour(juce::Label::ColourIds::backgroundColourId,
+                tLabel->setColour(juce::Label::ColourIds::backgroundColourId,
                     getLookAndFeel().findColour(juce::Toolbar::backgroundColourId));
             }
 
             void setTextColour(juce::Colour c)
             {
-                tLabel.setColour(juce::Label::ColourIds::textColourId, c);
+                tLabel->setColour(juce::Label::ColourIds::textColourId, c);
             }
 
         private:
-            juce::Label tLabel;
+            std::unique_ptr<juce::Label> tLabel;
         };
         juce::OwnedArray<CustomToolbarLabel> labels;
         juce::OwnedArray<juce::ChangeBroadcaster> broadcasters;
-        //CustomToolbarLabel openLabel{ 1 };
-        //CustomToolbarLabel deleteLabel{ 2 };
-        //CustomToolbarLabel colourLabel{ 3 };
-        //CustomToolbarLabel envLabel{ 4 };
-        //CustomToolbarLabel fxLabel{ 5 };
-        //CustomToolbarLabel normLabel{ 6 };
-        //CustomToolbarLabel denoiseLabel{ 7 };
-        //std::unique_ptr<juce::ChangeBroadcaster> openBroadcaster;
-        //std::unique_ptr<juce::ChangeBroadcaster> deleteBroadcaster;
-        //std::unique_ptr<juce::ChangeBroadcaster> colourBroadcaster;
-        //std::unique_ptr<juce::ChangeBroadcaster> envBroadcaster;
-        //std::unique_ptr<juce::ChangeBroadcaster> fxBroadcaster;
-        //std::unique_ptr<juce::ChangeBroadcaster> normBroadcaster;
-        //std::unique_ptr<juce::ChangeBroadcaster> denoiseBroadcaster;
     };
 
     TItemFactory factory;

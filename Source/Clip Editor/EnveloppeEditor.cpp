@@ -43,10 +43,29 @@ void EnveloppeEditor::paint(juce::Graphics& g)
 
     if (editedPlayer != nullptr)
     {
+        if (editedPlayer->getColourHasChanged())
+        {
+            g.setColour(editedPlayer->getPlayerColour().darker(1.0));
+            g.setOpacity(0.2);
+            g.fillRoundedRectangle(getLocalBounds().toFloat(), 15);
+        }
+
+        
+
+
         //Draw X axis
         g.setColour(juce::Colours::white);
         g.drawLine(0, getHeight() / 2, getWidth(), getHeight() / 2, 2);
         //Draw Thumbnail
+        juce::Array<float> gainValue;
+        for (int i = 0; i < thumbnailBounds.getWidth(); i++)
+        {
+            float value = juce::Decibels::decibelsToGain(editedPlayer->getEnveloppeValue(getXValue(i), *editedPlayer->getEnveloppePath()) * 24);
+            DBG(value);
+            gainValue.set(i, value);
+        }
+        thumbnail->setGainValues(gainValue);
+
         g.setColour(soundColour);
         thumbnail->drawChannels(g, thumbnailBounds,
             juce::jlimit<double>(0, thumbnail->getTotalLength(), thumbnailRange.getStart() * thumbnail->getTotalLength()),
@@ -162,6 +181,8 @@ void EnveloppeEditor::setEditedPlayer(Player* p)
     {
         editedPlayer->trimValueChangedBroacaster->removeChangeListener(this);
         editedPlayer->soundEditedBroadcaster->removeChangeListener(this);
+        thumbnail->removeChangeListener(this);
+        thumbnail = nullptr;
     }
     myPoints.clear();
     editedPlayer = p;

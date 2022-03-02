@@ -151,6 +151,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Thumbnail\gainThumbnail.cpp"/>
     <ClCompile Include="Source\Clip Editor\EnveloppeEditor.cpp"/>
     <ClCompile Include="Source\AudioBrowser.cpp"/>
     <ClCompile Include="Source\BottomComponent.cpp"/>
@@ -2233,6 +2234,7 @@
     <ClCompile Include="JuceLibraryCode\include_juce_osc.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Thumbnail\gainThumbnail.h"/>
     <ClInclude Include="Source\Clip Editor\ClipEditor.h"/>
     <ClInclude Include="Source\Clip Editor\EnveloppeEditor.h"/>
     <ClInclude Include="Source\Clip Editor\EnveloppePoint.h"/>

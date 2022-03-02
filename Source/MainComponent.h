@@ -475,8 +475,8 @@ private:
 
     std::unique_ptr<juce::MenuBarComponent> menuBar;
 
-    std::unique_ptr<KeyMapper> keyMapper;
-    std::unique_ptr<MidiMapper> midiMapper;
+    KeyMapper* km;
+    MidiMapper midiMapper;
     //juce::MenuBarPosition menuBarPosition = juce::MenuBarPosition::window;
 
     juce::ApplicationCommandManager commandManager;
@@ -484,6 +484,7 @@ private:
     void getAllCommands(juce::Array<juce::CommandID>& commands);
     void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result);
     bool perform(const InvocationInfo& info);
+
     void globalFocusChanged(juce::Component* focusedComponent);
 
     std::unique_ptr<juce::AudioBuffer<float>> inputBuffer;
@@ -493,6 +494,8 @@ private:
     std::unique_ptr<juce::AudioSourceChannelInfo> cueAudioSource;
 
     bool initializationFocusGained = false;
+
+    bool midiMapperOpened = false;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
-

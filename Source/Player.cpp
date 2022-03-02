@@ -476,6 +476,13 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
     g.fillRect(thumbnailBounds);
 
     //waveform if next player or playing
+    juce::Array<float> gainValue;
+    for (int i = 0; i < thumbnailBounds.getWidth(); i++)
+    {
+        gainValue.set(i, 1);
+    }
+    thumbnail.setGainValues(gainValue);
+
     if (isNextPlayer || state == Playing)
         g.setColour(playerColour);
     else
@@ -1034,7 +1041,7 @@ void Player::deleteFile()
         setEnveloppeEnabled(false);
         bypassFX(true, false);
         playerDeletedBroadcaster->sendChangeMessage();
-        setPlayerColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        playerColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
     }
 }
 
@@ -2335,7 +2342,7 @@ bool Player::getDenoisedFileLoaded()
     return denoisedFileLoaded;
 }
 
-void Player::setPlayerColour(juce::Colour c)
+void Player::setPlayerColour(juce::Colour c, bool sendMessage)
 {
     playerColour = c;
     colourHasChanged = true;
@@ -2393,7 +2400,7 @@ juce::AudioFormatManager& Player::getAudioFormatManager()
     return formatManager;
 }
 
-juce::AudioThumbnail& Player::getAudioThumbnail()
+GainThumbnail& Player::getAudioThumbnail()
 {
     return thumbnail;
 }
