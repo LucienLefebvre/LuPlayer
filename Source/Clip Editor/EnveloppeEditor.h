@@ -79,6 +79,7 @@ private:
     juce::String secondsToMMSS(int seconds);
     float getRangeInSeconds(juce::Range<double>& r);
     void setPointsColour(juce::Colour c);
+    void fixFirstAndLastPoint();
 
     Player* editedPlayer = nullptr;
 

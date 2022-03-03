@@ -167,7 +167,7 @@
                JUCE_ASIO="1" JUCE_USE_LAME_AUDIO_FORMAT="1"/>
   <EXPORTFORMATS>
     <VS2019 externalLibraries="ffmpeg-cpp.lib" targetFolder="C:/Juce/Projects"
-            smallIcon="o5AHwb" bigIcon="o5AHwb">
+            smallIcon="" bigIcon="">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="MultiPlayer" libraryPath="C:\local\include\ffmpeg-cpp-master\lib\x64\Debug&#10;C:\local\lib\debug"
                        headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3&#10;C:\local\include\nanodbc&#10;C:\local\include\LUFSMeter&#10;C:\local\include\fxobjects&#10;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp&#10;C:\local\include\ffmpeg-cpp-master\ffmpeg\include&#10;C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;C:\local\include\ffmpeg-cpp-master\include"/>

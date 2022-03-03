@@ -261,16 +261,42 @@ public:
                     colourButtonClicked();
                     break;
                 case 4:
-                    editedPlayer->envButtonClicked();
+                    if (factory.rightClickDown)
+                    {
+                        editedPlayer->setEnveloppeEnabled(!editedPlayer->isEnveloppeEnabled());
+                        factory.rightClickDown = false;
+                    }
+                    else if (factory.commandDown)
+                    {
+                        editedPlayer->createDefaultEnveloppePath();
+                        editedPlayer->setEnveloppeEnabled(false, true, true);
+                        updateInfos();
+                        factory.commandDown = false;
+                    }
+                    else
+                        editedPlayer->envButtonClicked();
                     break;
                 case 5:
-                    editedPlayer->fxButtonClicked();
+                    if (factory.rightClickDown)
+                    {
+                        editedPlayer->bypassFX(editedPlayer->isFxEnabled(), false);
+                        updateInfos();
+                        factory.rightClickDown = false;
+                    }
+                    else
+                        editedPlayer->fxButtonClicked();
                     break;
                 case 6:
                     editedPlayer->normButtonClicked();
                     break;
                 case 7:
-                    editedPlayer->denoiseButtonClicked();
+                    if (factory.rightClickDown)
+                    {
+                        editedPlayer->setDenoisedFile(!editedPlayer->getDenoisedFileLoaded());
+                        updateInfos();
+                    }
+                    else
+                        editedPlayer->denoiseButtonClicked();
                     break;
             }
         }
@@ -640,6 +666,16 @@ private:
             ids.add(Normalize);
             ids.add(Denoise);
         }
+        
+        void buttonStateChanged(juce::Button* b)
+        {
+            auto& modifiers = juce::ModifierKeys::getCurrentModifiers();
+            if (modifiers.isRightButtonDown())
+                rightClickDown = true;
+            else if (modifiers.isCommandDown())
+                commandDown = true;
+        }
+
         void buttonClicked(juce::Button* b)
         {
             for (int i = 0; i < labels.size(); i++)
@@ -685,7 +721,8 @@ private:
                 }
             }
         }
-
+        bool rightClickDown = false;
+        bool commandDown = false;
         class CustomToolbarLabel : public juce::ToolbarItemComponent
         {
         public:
@@ -768,6 +805,16 @@ private:
                 tLabel->setColour(juce::Label::ColourIds::textColourId, c);
             }
 
+            //void mouseDown(const juce::MouseEvent& event)
+            //{
+            //    if (event.mods.isCommandDown())
+            //        commandClicked = true;
+            //}
+            //void mouseUp(const juce::MouseEvent& event)
+            //{
+            //    commandClicked = false;
+            //}
+            //bool commandClicked = false;
         private:
             std::unique_ptr<juce::Label> tLabel;
         };

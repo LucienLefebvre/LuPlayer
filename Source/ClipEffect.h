@@ -49,6 +49,8 @@ public:
 
     void bypassButtonClicked();
 
+    void visibilityChanged();
+
 
 private:
     FilterEditor filterEditor;

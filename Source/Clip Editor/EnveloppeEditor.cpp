@@ -60,9 +60,15 @@ void EnveloppeEditor::paint(juce::Graphics& g)
         juce::Array<float> gainValue;
         for (int i = 0; i < thumbnailBounds.getWidth(); i++)
         {
-            float value = juce::Decibels::decibelsToGain(editedPlayer->getEnveloppeValue(getXValue(i), *editedPlayer->getEnveloppePath()) * 24);
-            DBG(value);
-            gainValue.set(i, value);
+            if (editedPlayer->isEnveloppeEnabled())
+            {
+                float value = juce::Decibels::decibelsToGain(editedPlayer->getEnveloppeValue(getXValue(i), *editedPlayer->getEnveloppePath()) * 24);
+                gainValue.set(i, value);
+            }
+            else
+            {
+                gainValue.set(i, 1.0f);
+            }
         }
         thumbnail->setGainValues(gainValue);
 
@@ -162,10 +168,7 @@ void EnveloppeEditor::resized()
     {
         point->setCentrePosition(getPointPosition(*point));
     }
-    if (myPoints.getFirst() != nullptr)
-        myPoints.getFirst()->setFixedPoint();
-    if (myPoints.getLast() != nullptr)
-        myPoints.getLast()->setFixedPoint();
+    fixFirstAndLastPoint();
     cuePlayHead.setSize(2, getHeight());
     playHead.setSize(2, getHeight());
     inMark.setSize(2, getHeight());
@@ -430,7 +433,7 @@ void EnveloppeEditor::mouseMove(const juce::MouseEvent& e)
                 repaint();
                 return;
             }
-            else
+            else if (drawPointInfo == true)
             {
                 drawPointInfo = false;
                 repaint();
@@ -553,12 +556,11 @@ void EnveloppeEditor::createEnveloppePath()
             editedPlayer->getEnveloppePath()->lineTo(point->getPos());
         }
         editedPlayer->getEnveloppePath()->closeSubPath();
+        editedPlayer->enveloppePathChangedBroadcaster->sendChangeMessage();
         editedPlayer->repaint();
     }
-    if (myPoints.getFirst() != nullptr)
-        myPoints.getFirst()->setFixedPoint();
-    if (myPoints.getLast() != nullptr)
-        myPoints.getLast()->setFixedPoint();
+
+    fixFirstAndLastPoint();
     /*if (editedPlayer != nullptr)
         editedPlayer->setEnveloppePath(enveloppePath);*/
 }
@@ -581,10 +583,7 @@ void EnveloppeEditor::createPointsFromPath(juce::Path* p)
         }
         else if (iterator.elementType == juce::Path::Iterator::PathElementType::closePath)
         {
-            if (myPoints.getFirst() != nullptr)
-                myPoints.getFirst()->setFixedPoint();
-            if (myPoints.getLast() != nullptr)
-                myPoints.getLast()->setFixedPoint();
+            //fixFirstAndLastPoint();
             resized();
             return;
         }
@@ -704,4 +703,14 @@ void EnveloppeEditor::setSoundColour(juce::Colour c)
 {
     soundColour = c;
     repaint();
+}
+
+void EnveloppeEditor::fixFirstAndLastPoint()
+{
+    for (auto* point : myPoints)
+        point->setFixedPoint(false);
+    if (myPoints.getFirst() != nullptr)
+        myPoints.getFirst()->setFixedPoint(true);
+    if (myPoints.getLast() != nullptr)
+        myPoints.getLast()->setFixedPoint(true);
 }

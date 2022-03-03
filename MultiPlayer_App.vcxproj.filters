@@ -5462,9 +5462,6 @@
     <None Include="..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
     </None>
-    <None Include=".\icon.ico">
-      <Filter>JUCE Library Code</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc">

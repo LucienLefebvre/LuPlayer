@@ -53,6 +53,7 @@ Player::Player(int index)
      soundEditedBroadcaster = new juce::ChangeBroadcaster();
      playerDeletedBroadcaster = new juce::ChangeBroadcaster();
      playerLaunchedBroadcaster.reset(new juce::ChangeBroadcaster());
+     enveloppePathChangedBroadcaster.reset(new juce::ChangeBroadcaster());
 
      addMouseListener(this, true);
      addAndMakeVisible(&openButton);
@@ -476,10 +477,19 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
     g.fillRect(thumbnailBounds);
 
     //waveform if next player or playing
-    juce::Array<float> gainValue;
-    for (int i = 0; i < thumbnailBounds.getWidth(); i++)
+    juce::Array<float> gainValue;  
+    for (int i = 0; i < thumbnailBounds.getX() + thumbnailBounds.getWidth(); i++)
     {
-        gainValue.set(i, 1);
+        if (isEnveloppeEnabled())
+        {
+            float time = ((i - thumbnailBounds.getX()) * thumbnail.getTotalLength() / thumbnailBounds.getWidth()) / thumbnail.getTotalLength();
+            float value = juce::Decibels::decibelsToGain(getEnveloppeValue(time, *getEnveloppePath()) * 24);
+            gainValue.set(i, value);
+        }
+        else
+        {
+            gainValue.set(i, 1.0f);
+        }
     }
     thumbnail.setGainValues(gainValue);
 

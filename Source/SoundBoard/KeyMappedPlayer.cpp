@@ -101,9 +101,25 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
     }
 
     //DRAW THUMBNAIL
+    juce::Array<float> gainValue;
+    for (int i = 0; i < thumbnailBounds.getX() + thumbnailBounds.getWidth(); i++)
+    {
+        if (soundPlayer->isEnveloppeEnabled())
+        {
+            float time = ((i - thumbnailBounds.getX()) * thumbnail->getTotalLength() / thumbnailBounds.getWidth()) / thumbnail->getTotalLength();
+            float value = juce::Decibels::decibelsToGain(soundPlayer->getEnveloppeValue(time, *soundPlayer->getEnveloppePath()) * 24);
+            gainValue.set(i, value);
+        }
+        else
+        {
+            gainValue.set(i, 1.0f);
+        }
+    }
+    thumbnail->setGainValues(gainValue);
+
     g.setColour(currentColour);
     if (thumbnail != nullptr)
-        thumbnail->drawChannels(g, thumbnailBounds, 0.0, thumbnail->getTotalLength(), juce::Decibels::decibelsToGain(playerInfos.trimVolume) * 2.0f);
+        thumbnail->drawChannels(g, thumbnailBounds, 0.0, thumbnail->getTotalLength(), juce::Decibels::decibelsToGain(playerInfos.trimVolume) * 1.5f);
 }
 
 void KeyMappedPlayer::resized()
@@ -153,6 +169,7 @@ void KeyMappedPlayer::setPlayer(Player* p)
     soundPlayer->remainingTimeBroadcaster->addChangeListener(this);
     soundPlayer->soundEditedBroadcaster->addChangeListener(this);
     soundPlayer->playerDeletedBroadcaster->addChangeListener(this);
+    soundPlayer->enveloppePathChangedBroadcaster->addChangeListener(this);
     thumbnail = &soundPlayer->getAudioThumbnail();
     thumbnail->addChangeListener(this);
     juce::MultiTimer::startTimer(0, 50);
@@ -215,6 +232,10 @@ void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
             volumeSlider->setVisible(false);
             elapsedTimeLabel->setVisible(false);
             editButton->setVisible(false);
+        }
+        else if (source == soundPlayer->enveloppePathChangedBroadcaster.get())
+        {
+            repaint();
         }
     }
 }

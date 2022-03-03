@@ -289,6 +289,7 @@ public:
     juce::ChangeBroadcaster* remainingTimeBroadcaster;
     juce::ChangeBroadcaster* trimValueChangedBroacaster;
     juce::ChangeBroadcaster* soundEditedBroadcaster;
+    std::unique_ptr<juce::ChangeBroadcaster> enveloppePathChangedBroadcaster;
 
     std::unique_ptr<juce::MemoryAudioSource> outputSource;
     std::unique_ptr<juce::MemoryAudioSource> cueOutputSource;

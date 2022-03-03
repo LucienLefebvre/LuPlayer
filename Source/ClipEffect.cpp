@@ -212,3 +212,8 @@ void ClipEffect::bypassButtonClicked()
         editedPlayer->bypassFX(editedPlayer->isFxEnabled(), true);
     }
 }
+
+void ClipEffect::visibilityChanged()
+{
+    updateBypassed();
+}

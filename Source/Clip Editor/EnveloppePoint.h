@@ -118,9 +118,9 @@ public:
         pointColour = c;
     }
 
-    void setFixedPoint()
+    void setFixedPoint(bool isFixed)
     {
-        setCanMoveTime(false);
+        setCanMoveTime(!isFixed);
     }
 private:
     float xPos = 0.0;
