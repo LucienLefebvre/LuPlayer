@@ -61,7 +61,7 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
         playlistViewport.setWantsKeyboardFocus(false);
         addAndMakeVisible(playlistViewport);
         playlistViewport.setMouseClickGrabsKeyboardFocus(false);
-
+        playlistViewport.getVerticalScrollBar().setMouseClickGrabsKeyboardFocus(false);
         if (!isEightPlayerMode)
         {
             addAndMakeVisible(addPlayerPlaylist);
@@ -91,6 +91,8 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
             getParentWidth() / 2, (getParentHeight() - playersStartHeightPosition));
         playlistbisViewport.setViewedComponent(myPlaylists[1], false);
         playlistbisViewport.setWantsKeyboardFocus(false);
+        playlistbisViewport.getVerticalScrollBar().setMouseClickGrabsKeyboardFocus(false);
+
         addAndMakeVisible(playlistbisViewport);
 
         if (!isEightPlayerMode)
