@@ -1051,6 +1051,7 @@ void Player::deleteFile()
         setEnveloppeEnabled(false);
         bypassFX(true, false);
         playerDeletedBroadcaster->sendChangeMessage();
+        colourHasChanged = false;
         playerColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
     }
 }
