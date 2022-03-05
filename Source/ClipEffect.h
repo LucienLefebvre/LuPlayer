@@ -77,5 +77,6 @@ private:
     int spaceBetweenComponents = 10;
     int meterSize = 50;
     int compWidth = 130;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipEffect)
 };
