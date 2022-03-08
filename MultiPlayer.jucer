@@ -4,7 +4,8 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="xbXPa2" name="MultiPlayer">
     <GROUP id="{1768BD6A-1763-693F-2E07-6CF180C5BCA1}" name="Others">
-      <FILE id="o5AHwb" name="logo sens.png" compile="0" resource="1" file="logo sens.png"/>
+      <FILE id="GrBajD" name="test logo 2.png" compile="0" resource="1" file="test logo 2.png"/>
+      <FILE id="MQJM4M" name="test logo.png" compile="0" resource="1" file="test logo.png"/>
     </GROUP>
     <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
       <GROUP id="{1D073893-0026-9A58-4027-E3383CC39F21}" name="Thumbnail">
@@ -167,7 +168,7 @@
                JUCE_ASIO="1" JUCE_USE_LAME_AUDIO_FORMAT="1"/>
   <EXPORTFORMATS>
     <VS2019 externalLibraries="ffmpeg-cpp.lib" targetFolder="C:/Juce/Projects"
-            smallIcon="" bigIcon="">
+            smallIcon="GrBajD" bigIcon="GrBajD">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="MultiPlayer" libraryPath="C:\local\include\ffmpeg-cpp-master\lib\x64\Debug&#10;C:\local\lib\debug"
                        headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3&#10;C:\local\include\nanodbc&#10;C:\local\include\LUFSMeter&#10;C:\local\include\fxobjects&#10;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp&#10;C:\local\include\ffmpeg-cpp-master\ffmpeg\include&#10;C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;C:\local\include\ffmpeg-cpp-master\include"/>

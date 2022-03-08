@@ -188,21 +188,23 @@ void ClipEffect::setNullPlayer()
 
 void ClipEffect::updateBypassed()
 {
-    filterEditor.updateBypassed();
-    compEditor.updateBypassedSliders();
-    if (filterEditor.getEditedFilterProcessor()->isBypassed())
+    if (editedPlayer != nullptr)
     {
-        nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
-        bypassButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::red);
-        bypassButton.setButtonText("Enable");
+        filterEditor.updateBypassed();
+        compEditor.updateBypassedSliders();
+        if (filterEditor.getEditedFilterProcessor()->isBypassed())
+        {
+            nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::grey);
+            bypassButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::red);
+            bypassButton.setButtonText("Enable");
+        }
+        else
+        {
+            nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(229, 149, 0));
+            bypassButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::green);
+            bypassButton.setButtonText("Bypass");
+        }
     }
-    else
-    {
-        nameLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colour(229, 149, 0));
-        bypassButton.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::green);
-        bypassButton.setButtonText("Bypass");
-    }
-
 }
 
 void ClipEffect::bypassButtonClicked()

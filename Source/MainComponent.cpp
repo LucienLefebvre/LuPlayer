@@ -95,6 +95,8 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     case 3:
         mode = SoundPlayer::Mode::KeyMap;
         break;
+    default:
+        mode = SoundPlayer::Mode::OnePlaylistOneCart;
     }
 
     launchSoundPlayer(mode);
@@ -104,6 +106,9 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     commandManager.getKeyMappings()->resetToDefaultMappings();
 
 
+    km = new KeyMapper(settings.get());
+    km->setCommandManager(&commandManager);
+    km->loadMappingFile();
 
     /*keyMapper->setCommandManager(&commandManager);
     keyMapper->loadMappingFile();*/
@@ -147,9 +152,7 @@ void MainComponent::keyMapperButtonClicked()
     keyMapperWindow->setSize(600, 400);
 
     //std::unique_ptr<KeyMapper> km = std::make_unique<KeyMapper>(settings.get());
-    km = new KeyMapper(settings.get());
-    km->setCommandManager(&commandManager);
-    km->loadMappingFile();
+
     km->setWantsKeyboardFocus(true);
 
     juce::DialogWindow::LaunchOptions o;

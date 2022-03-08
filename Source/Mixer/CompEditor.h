@@ -222,18 +222,21 @@ public:
 
     void updateBypassedSliders()
     {
-        bool isBypassed = editedCompProcessor->getBypass();
-        juce::Colour activeColour(juce::Colour(40, 134, 189));
-        thresholdSlider->setEnabled(!isBypassed);
-        thresholdSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
-        attackSlider->setEnabled(!isBypassed);
-        attackSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
-        releaseSlider->setEnabled(!isBypassed);
-        releaseSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
-        gainSlider->setEnabled(!isBypassed);
-        gainSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
-        ratioSlider->setEnabled(!isBypassed);
-        ratioSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
+        if (editedCompProcessor != nullptr)
+        {
+            bool isBypassed = editedCompProcessor->getBypass();
+            juce::Colour activeColour(juce::Colour(40, 134, 189));
+            thresholdSlider->setEnabled(!isBypassed);
+            thresholdSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
+            attackSlider->setEnabled(!isBypassed);
+            attackSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
+            releaseSlider->setEnabled(!isBypassed);
+            releaseSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
+            gainSlider->setEnabled(!isBypassed);
+            gainSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
+            ratioSlider->setEnabled(!isBypassed);
+            ratioSlider->setColour(juce::Slider::ColourIds::thumbColourId, isBypassed ? juce::Colours::grey : activeColour);
+        }
     }
 
     void setEditedCompProcessor(CompProcessor& processor) 
@@ -251,37 +254,40 @@ public:
 private:
     void sliderValueChanged(juce::Slider* sliderThatWasMoved)
     {
-        if (sliderThatWasMoved == thresholdSlider.get())
+        if (editedCompProcessor != nullptr)
         {
-            auto value = sliderThatWasMoved->getValue();
-            thresholdValueLabel->setText(juce::String(value) + "dB", juce::NotificationType::dontSendNotification);
-            editedCompProcessor->setThreshold(value);
-        }
-        else if (sliderThatWasMoved == ratioSlider.get())
-        {
-            auto value = sliderThatWasMoved->getValue();
-            auto roundedValue = std::ceil(value * 10.0) / 10.0;
-            ratioValueLabel->setText(juce::String(roundedValue), juce::NotificationType::dontSendNotification);
-            editedCompProcessor->setRatio(value);
-        }
-        else if (sliderThatWasMoved == attackSlider.get())
-        {
-            auto value = sliderThatWasMoved->getValue();
-            attackValueLabel->setText(juce::String(trunc(value)) + "ms", juce::NotificationType::dontSendNotification);
-            editedCompProcessor->setAttack(value);
-        }
-        else if (sliderThatWasMoved == releaseSlider.get())
-        {
-            auto value = sliderThatWasMoved->getValue();
-            releaseValueLabel->setText(juce::String(trunc(value)) + "ms", juce::NotificationType::dontSendNotification);
-            editedCompProcessor->setRelease(value);
-        }
-        else if (sliderThatWasMoved == gainSlider.get())
-        {
-            auto value = sliderThatWasMoved->getValue();
-            auto roundedValue = std::ceil(value * 10.0) / 10.0;
-            gainValueLabel->setText(juce::String(roundedValue) + "dB", juce::NotificationType::dontSendNotification);
-            editedCompProcessor->setGain(value);
+            if (sliderThatWasMoved == thresholdSlider.get())
+            {
+                auto value = sliderThatWasMoved->getValue();
+                thresholdValueLabel->setText(juce::String(value) + "dB", juce::NotificationType::dontSendNotification);
+                editedCompProcessor->setThreshold(value);
+            }
+            else if (sliderThatWasMoved == ratioSlider.get())
+            {
+                auto value = sliderThatWasMoved->getValue();
+                auto roundedValue = std::ceil(value * 10.0) / 10.0;
+                ratioValueLabel->setText(juce::String(roundedValue), juce::NotificationType::dontSendNotification);
+                editedCompProcessor->setRatio(value);
+            }
+            else if (sliderThatWasMoved == attackSlider.get())
+            {
+                auto value = sliderThatWasMoved->getValue();
+                attackValueLabel->setText(juce::String(trunc(value)) + "ms", juce::NotificationType::dontSendNotification);
+                editedCompProcessor->setAttack(value);
+            }
+            else if (sliderThatWasMoved == releaseSlider.get())
+            {
+                auto value = sliderThatWasMoved->getValue();
+                releaseValueLabel->setText(juce::String(trunc(value)) + "ms", juce::NotificationType::dontSendNotification);
+                editedCompProcessor->setRelease(value);
+            }
+            else if (sliderThatWasMoved == gainSlider.get())
+            {
+                auto value = sliderThatWasMoved->getValue();
+                auto roundedValue = std::ceil(value * 10.0) / 10.0;
+                gainValueLabel->setText(juce::String(roundedValue) + "dB", juce::NotificationType::dontSendNotification);
+                editedCompProcessor->setGain(value);
+            }
         }
     }
     CompProcessor* editedCompProcessor = 0;

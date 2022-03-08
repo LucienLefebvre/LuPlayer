@@ -3104,7 +3104,8 @@
     <ClInclude Include="JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
-    <None Include="logo sens.png"/>
+    <None Include="test logo 2.png"/>
+    <None Include="test logo.png"/>
     <None Include="ff_meters\ff_meters\LICENSE.md"/>
     <None Include="ff_meters\ff_meters\README.md"/>
     <None Include="..\modules\juce_audio_devices\native\oboe\CMakeLists.txt"/>
@@ -3123,6 +3124,7 @@
     <None Include="..\modules\juce_core\native\java\README.txt"/>
     <None Include="..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt"/>
     <None Include="..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt"/>
+    <None Include=".\icon.ico"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc"/>
