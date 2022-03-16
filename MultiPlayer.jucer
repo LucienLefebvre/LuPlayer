@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="tfw8KZ" name="MultiPlayer" projectType="guiapp" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              version="0.9.1.1">
   <MAINGROUP id="xbXPa2" name="MultiPlayer">
     <GROUP id="{1768BD6A-1763-693F-2E07-6CF180C5BCA1}" name="Others">
       <FILE id="GrBajD" name="test logo 2.png" compile="0" resource="1" file="test logo 2.png"/>

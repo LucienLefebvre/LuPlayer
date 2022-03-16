@@ -157,7 +157,7 @@ private:
 
 
     //Settings* settings = new Settings();
-    std::unique_ptr<Settings> settings = std::make_unique<Settings>();
+    Settings settings;
     //Settings settings;
 
     double *ptrplayer1;
@@ -496,6 +496,8 @@ private:
     bool initializationFocusGained = false;
 
     bool midiMapperOpened = false;
+
+    std::unique_ptr<juce::FileLogger> logger;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

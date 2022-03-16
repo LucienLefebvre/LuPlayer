@@ -12,8 +12,11 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
                                      getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true),
                                  settingsFile(options)
 {
-    juce::FileLogger::setCurrentLogger(juce::FileLogger::createDefaultAppLogger("Multiplayer", "Log.txt", "Multiplayer Log"));
+
+    logger.reset(juce::FileLogger::createDefaultAppLogger("Multiplayer", "Log.txt", "Multiplayer Log"));
+    juce::FileLogger::setCurrentLogger(logger.get());
     juce::FileLogger::getCurrentLogger()->writeToLog("App launch");
+
     if (juce::RuntimePermissions::isRequired(juce::RuntimePermissions::recordAudio)
         && !juce::RuntimePermissions::isGranted(juce::RuntimePermissions::recordAudio))
     {
@@ -33,7 +36,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
 
     if (deviceManager.getCurrentAudioDevice() != nullptr)
     {
-        settings = std::make_unique<Settings>();
+        //settings = std::make_unique<Settings>();
         Settings::sampleRate = deviceManager.getAudioDeviceSetup().sampleRate;
     } 
 
@@ -85,7 +88,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     }
 
     SoundPlayer::Mode mode;
-    int p = settings->getPreferedSoundPlayerMode();
+    int p = settings.getPreferedSoundPlayerMode();
     switch (p)
     {
     case 1:
@@ -108,7 +111,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     commandManager.getKeyMappings()->resetToDefaultMappings();
 
 
-    km = new KeyMapper(settings.get());
+    km = new KeyMapper(&settings);
     km->setCommandManager(&commandManager);
     km->loadMappingFile();
 
@@ -125,10 +128,10 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
 void MainComponent::settingsButtonClicked()
 {  
     juce::FileLogger::getCurrentLogger()->writeToLog("Settings button clicked");
-        Settings* settings = new Settings();
-        settings->saveButton.addListener(this);
+        //Settings* _settings = new Settings();
+        settings.saveButton.addListener(this);
         juce::DialogWindow::LaunchOptions o;
-        o.content.setOwned(settings);
+        o.content.setNonOwned(&settings);
         o.content->setSize(600, 470);
         o.dialogTitle = TRANS("Settings");
         o.dialogBackgroundColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
@@ -488,6 +491,8 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
 
 MainComponent::~MainComponent()
 {
+    juce::FileLogger::setCurrentLogger(nullptr);
+    delete km;
     removeMouseListener(this);
     myMixer.removeAllInputs();
     myCueMixer.removeAllInputs();
@@ -928,7 +933,7 @@ void MainComponent::tryPreferedAudioDevice(int outputChannelsNeeded)
     juce::FileLogger::getCurrentLogger()->writeToLog("Trying prefered audio device");
     if (deviceManager.getCurrentAudioDevice() != nullptr)
     {
-        std::unique_ptr<Settings> settings = std::make_unique<Settings>();
+        //std::unique_ptr<Settings> settings = std::make_unique<Settings>();
         const juce::OwnedArray<juce::AudioIODeviceType>& types = deviceManager.getAvailableDeviceTypes();
         if (types.size() > 1)
         {
@@ -937,7 +942,7 @@ void MainComponent::tryPreferedAudioDevice(int outputChannelsNeeded)
                 if (types[i]->getTypeName() == Settings::preferedAudioDeviceType)
                 {
                     deviceManager.setCurrentAudioDeviceType(Settings::preferedAudioDeviceType, true);
-                    deviceManager.initialise(2, outputChannelsNeeded, nullptr, true, Settings::preferedAudioDeviceName, &settings->getPreferedAudioDevice());
+                    deviceManager.initialise(2, outputChannelsNeeded, nullptr, true, Settings::preferedAudioDeviceName, &settings.getPreferedAudioDevice());
                     if (deviceManager.getCurrentAudioDevice() != nullptr)
                         Settings::outputChannelsNumber = deviceManager.getCurrentAudioDevice()->getOutputChannelNames().size();
                 }
@@ -1149,7 +1154,7 @@ void MainComponent::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
             launchSoundPlayer(SoundPlayer::Mode::KeyMap);
             break;
         }
-        settings->setPreferedSoundPlayerMode(r);
+        settings.setPreferedSoundPlayerMode(r);
     }
 }
 
@@ -1653,7 +1658,7 @@ bool MainComponent::perform(const InvocationInfo& info)
         if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::OnePlaylistOneCart)
         {
             launchSoundPlayer(SoundPlayer::Mode::OnePlaylistOneCart);
-            settings->setPreferedSoundPlayerMode(1);
+            settings.setPreferedSoundPlayerMode(1);
             grabKeyboardFocus();
         }
         break;
@@ -1661,7 +1666,7 @@ bool MainComponent::perform(const InvocationInfo& info)
         if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::EightFaders)
         {
             launchSoundPlayer(SoundPlayer::Mode::EightFaders);
-            settings->setPreferedSoundPlayerMode(2);
+            settings.setPreferedSoundPlayerMode(2);
             grabKeyboardFocus();
         }
         break;
@@ -1669,7 +1674,7 @@ bool MainComponent::perform(const InvocationInfo& info)
         if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::KeyMap)
         {
             launchSoundPlayer(SoundPlayer::Mode::KeyMap);
-            settings->setPreferedSoundPlayerMode(3);
+            settings.setPreferedSoundPlayerMode(3);
             grabKeyboardFocus();
         }
         break;
@@ -1686,17 +1691,17 @@ bool MainComponent::perform(const InvocationInfo& info)
         bottomComponent.setOrDeleteStop(false);
         break;
     case CommandIDs::showIndividualMeters:
-        settings->setShowMeters(!Settings::showMeter);
+        settings.setShowMeters(!Settings::showMeter);
         break;
     case CommandIDs::showEnveloppe:
-        settings->setShowEnveloppe(!Settings::showEnveloppe);
+        settings.setShowEnveloppe(!Settings::showEnveloppe);
         if (soundPlayers[0]->myPlaylists[0] != nullptr)
             soundPlayers[0]->myPlaylists[0]->rearrangePlayers();
         if (soundPlayers[0]->myPlaylists[1] != nullptr)
             soundPlayers[0]->myPlaylists[1]->rearrangePlayers();
         break;
     case CommandIDs::viewLastPlayedSound:
-        settings->setViewLastPlayed(!Settings::viewLastPlayedSound);
+        settings.setViewLastPlayed(!Settings::viewLastPlayedSound);
         break;
     default:
         return false;

@@ -140,10 +140,6 @@ Settings::Settings() : settingsFile(options)
     else
         Settings::viewLastPlayedSound = properties.getUserSettings()->getValue("viewLastPlayedSound").getIntValue();
 
-
-    if (properties.getUserSettings()->getValue("Play next sound in playlist").isEmpty())
-        Settings::skewFactorGlobal = 0.5;
-
     //SAVE & CLOSE BUTTONS
     saveButton.setBounds(250, 400, 100, 50);
     addAndMakeVisible(saveButton);

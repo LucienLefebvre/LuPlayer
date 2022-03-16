@@ -7,12 +7,13 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING .ISS SCRIPT FILES!
 
 [Setup]
+OutputBaseFilename=Multiplayer_Beta_V0.9.1.1_x64_setup
 AppName=Multiplayer
-AppVersion=0.9.0.2
+AppVersion=0.9.1.1
 WizardStyle=modern
 DefaultDirName={autopf}\Multiplayer
 DefaultGroupName=Multiplayer
- UninstallDisplayIcon={app}\Multiplayer.exe
+UninstallDisplayIcon={app}\Multiplayer.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=userdocs:Inno Setup
@@ -39,8 +40,6 @@ Source : "swresample-3.dll"; DestDir: "{app}"
 Source : "swscale-5.dll"; DestDir: "{app}"  
 Source : "postproc-55.dll"; DestDir: "{app}"  
 Source : "lame.exe"; DestDir: "{app}"
-Source : "Multiplayer.settings"; DestDir: "{app}"
-Source : "Multiplayer.settings"; DestDir: "{app}"
 Source : "Multiplayer.touchosc"; DestDir: "{app}"
 Source : "Documentation\Doc.pdf"; DestDir: "{app}\Documentation"
 [Dirs]

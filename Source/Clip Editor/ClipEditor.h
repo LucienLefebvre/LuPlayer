@@ -222,6 +222,10 @@ public:
         {
             rightClickDown = true;
         }
+        else if (modifiers.isCommandDown())
+        {
+            commandDown = true;
+        }
     }
 
     void changeListenerCallback(juce::ChangeBroadcaster* source)
@@ -416,15 +420,17 @@ public:
     {
         if (editedPlayer != nullptr)
         {
-            if (rightClickDown)
+            if (commandDown)
             {
-                editedPlayer->setEnveloppeEnabled(!editedPlayer->isEnveloppeEnabled());
-                updateInfos();
+
+                editedPlayer->createDefaultEnveloppePath();
+                editedPlayer->setEnveloppeEnabled(false);
+                enveloppeEditor.setEditedPlayer(editedPlayer);
             }
             else
-                editedPlayer->envButtonClicked();
+                editedPlayer->setEnveloppeEnabled(!editedPlayer->isEnveloppeEnabled());
         }
-        rightClickDown = false;
+        commandDown = false;
     }
 
     void fxButtonClicked()
@@ -503,6 +509,12 @@ public:
         cueTimeLabel->setText("", juce::NotificationType::dontSendNotification);
         trimVolumeSlider->setValue(0.0);
         enveloppeEditor.setNullPlayer();
+        denoiseButton->setColour(juce::TextButton::ColourIds::buttonColourId,
+            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        enveloppeButton->setColour(juce::TextButton::ColourIds::buttonColourId,
+            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        fxButton->setColour(juce::TextButton::ColourIds::buttonColourId,
+            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     }
 
     void setStart()
@@ -546,6 +558,7 @@ public:
     Player* editedPlayer = nullptr;
 
     bool rightClickDown = false;
+    bool commandDown = false;
 
     int dividerBarWidth = 4;
     int volumeSliderWidth = 80;
