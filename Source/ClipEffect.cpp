@@ -209,6 +209,7 @@ void ClipEffect::updateBypassed()
 
 void ClipEffect::bypassButtonClicked()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("clip editor bypass button pressed");
     if (editedPlayer != nullptr)
     {
         editedPlayer->bypassFX(editedPlayer->isFxEnabled(), true);

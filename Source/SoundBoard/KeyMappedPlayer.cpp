@@ -232,6 +232,8 @@ void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
             volumeSlider->setVisible(false);
             elapsedTimeLabel->setVisible(false);
             editButton->setVisible(false);
+            currentColour = BLUE;
+            repaint();
         }
         else if (source == soundPlayer->enveloppePathChangedBroadcaster.get())
         {
@@ -257,7 +259,10 @@ void KeyMappedPlayer::updatePlayerInfo()
         editButton->setColour(juce::TextButton::ColourIds::buttonColourId,
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    defaultColour = soundPlayer->getPlayerColour();
+    if (soundPlayer->getColourHasChanged())
+        defaultColour = soundPlayer->getPlayerColour();
+    else
+        defaultColour = BLUE;
 
     resized();
     repaint();

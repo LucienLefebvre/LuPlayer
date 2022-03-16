@@ -200,6 +200,7 @@ public:
         editedPlayer = p;
         if (editedPlayer != nullptr)
         {
+            juce::FileLogger::getCurrentLogger()->writeToLog("set edited player");
             enveloppeEditor.setEditedPlayer(editedPlayer);
             editedPlayer->soundEditedBroadcaster->addChangeListener(this);
             editedPlayer->playerDeletedBroadcaster->addChangeListener(this);
@@ -234,6 +235,7 @@ public:
             }
             else if (source == editedPlayer->playerDeletedBroadcaster)
             {
+                juce::FileLogger::getCurrentLogger()->writeToLog("clip editor player deleted");
                 editedPlayer->setEditedPlayer(false);
                 editedPlayer->soundEditedBroadcaster->removeChangeListener(this);
                 editedPlayer->playerDeletedBroadcaster->removeChangeListener(this);

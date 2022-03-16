@@ -12,6 +12,8 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
                                      getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true),
                                  settingsFile(options)
 {
+    juce::FileLogger::setCurrentLogger(juce::FileLogger::createDefaultAppLogger("Multiplayer", "Log.txt", "Multiplayer Log"));
+    juce::FileLogger::getCurrentLogger()->writeToLog("App launch");
     if (juce::RuntimePermissions::isRequired(juce::RuntimePermissions::recordAudio)
         && !juce::RuntimePermissions::isGranted(juce::RuntimePermissions::recordAudio))
     {
@@ -122,6 +124,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
 
 void MainComponent::settingsButtonClicked()
 {  
+    juce::FileLogger::getCurrentLogger()->writeToLog("Settings button clicked");
         Settings* settings = new Settings();
         settings->saveButton.addListener(this);
         juce::DialogWindow::LaunchOptions o;
@@ -141,12 +144,14 @@ void MainComponent::settingsButtonClicked()
 
 void MainComponent::audioSettingsButtonClicked()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("Audio settings button clicked");
     audioSetupWindow.showDialog("Audio Setup", &audioSetupComp, this,
         getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true, false);
 }
 
 void MainComponent::keyMapperButtonClicked()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("Key mapper button cliked");
     std::unique_ptr<juce::DialogWindow> keyMapperWindow = std::make_unique<juce::DialogWindow>("Key Mapping",
         getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true);
     keyMapperWindow->setSize(600, 400);
@@ -172,6 +177,7 @@ void MainComponent::keyMapperButtonClicked()
 
 void MainComponent::midiMapperButtonClicked()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("Midi mapper button clicked");
     juce::DialogWindow::LaunchOptions o;
     o.dialogBackgroundColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
     o.content.setNonOwned(&midiMapper);
@@ -197,7 +203,6 @@ void MainComponent::midiMapperButtonClicked()
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
-
     if (source == &bottomComponent.getTabbedButtonBar())
     {   //Update red colour on fx button on player if the clipeffect tab is selected
         if (bottomComponent.getTabbedButtonBar().getCurrentTabIndex() != 5)
@@ -496,6 +501,7 @@ MainComponent::~MainComponent()
 
 void MainComponent::deleteConvertedFiles() //this delete the converted files since the opening of the application
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("Delete converted files");
     exitAnswered = true;
     while (Settings::tempFiles.size() > 0)
     {
@@ -722,13 +728,7 @@ void MainComponent::timerCallback(int timerID)
 {
     if (timerID == 0)
     {
-        if (hasKeyboardFocus(false))
-            DBG("keyboard focus !");
 
-        //grabKeyboardFocus();
-        /*juce::Time* time = new juce::Time(time->getCurrentTime());
-        timeLabel.setText(time->toString(false, true, true, true), juce::NotificationType::dontSendNotification);
-        timeLabel.toFront(false);*/
     }
     else if (timerID == 1)
     {
@@ -752,6 +752,7 @@ void MainComponent::midiInitialize()
     auto midiInputs = juce::MidiInput::getAvailableDevices();
     for (auto input : midiInputs)
     {
+        juce::FileLogger::getCurrentLogger()->writeToLog("midi initialization");
         if (!deviceManager.isMidiInputDeviceEnabled(input.identifier))
             deviceManager.setMidiInputDeviceEnabled(input.identifier, true);
             deviceManager.addMidiInputDeviceCallback(input.identifier, this);
@@ -766,6 +767,7 @@ void MainComponent::updateMidiInputs()
 
 void MainComponent::setMidiInput(int index)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("set midi input");
     auto list = juce::MidiInput::getAvailableDevices();
     deviceManager.removeMidiInputDeviceCallback(list[lastInputIndex].identifier, this);
 
@@ -797,35 +799,6 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
                 invokeDirectly(cID, true);
         }
         soundPlayers[0]->handleIncomingMidiMessage(source, message, &midiMapper);
-            //if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(MidiMapper::MidiCommands::LaunchRecord) && message.getControllerValue() == 127)
-            //{
-            //    launchRecord();
-            //}
-            //else if (message.getControllerNumber() == midiMapper->getMidiCCForCommand(CommandIDs::goToClipEditor) && message.getControllerValue() == 127)
-            //{
-            //    //invokeDirectly(CommandIDs::goToClipEditor, true);
-            //}
-            //else if (message.getControllerNumber() == 61 && message.getControllerValue() == 127)
-            //{
-            //    const juce::MessageManagerLock mmLock;
-            //    bottomComponent.setStart();
-            //}
-            //else if (message.getControllerNumber() == 62 && message.getControllerValue() == 127)
-            //{
-            //    const juce::MessageManagerLock mmLock;
-            //    bottomComponent.setStop();
-            //}
-            //else if (message.getControllerNumber() == 60 && message.getControllerValue() == 127)
-            //{
-            //    const juce::MessageManagerLock mmLock;
-            //    bottomComponent.clipEditor.launchCue();
-            //}
-            //else if (message.getControllerNumber() == 46 && message.getControllerValue() == 127)
-            //{
-            //    const juce::MessageManagerLock mmLock;
-            //    stopWatchShortcuPressed();
-            //}
-    
     }
 }
 
@@ -842,172 +815,12 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
     {
         soundPlayers[0]->keyMappedSoundboard->keyPressed(key, originatingComponent);
     }
-    //int keyCode = key.getKeyCode();
-    //if (keyMapper->getKeyMapping(7) == keyCode)
-    //{
-    //    commandManager.invokeDirectly(CommandIDs::startTimer, false);
-    //    //commandManager.invokeDirectly(SoundPlayer::CommandIDs::setInMark, true);
-    //}
-    //
-    //if (key.getModifiers() == juce::ModifierKeys::commandModifier)
-    //{
-    //    if (keyMapper->getKeyMapping(25) == keyCode)
-    //        savePlaylist();
-    //    else if (keyMapper->getKeyMapping(26) == keyCode)
-    //        loadPlaylist();
-    //    else if (keyMapper->getKeyMapping(27) == keyCode)
-    //        juce::JUCEApplication::getInstance()->systemRequestedQuit();
-    //    else if (keyMapper->getKeyMapping(28) == keyCode)
-    //        settingsButtonClicked();
-    //    else if (keyMapper->getKeyMapping(29) == keyCode)
-    //        audioSettingsButtonClicked();
-    //    else if (keyMapper->getKeyMapping(30) == keyCode)
-    //        keyMapperButtonClicked();
-    //    else if (keyMapper->getKeyMapping(31) == keyCode)
-    //        juce::JUCEApplication::getInstance()->systemRequestedQuit();
-    //}
-    //else
-    //{
-    //    if (soundPlayers[0]->getSoundPlayerMode() == SoundPlayer::Mode::KeyMap)//Block all shortcuts for key mapped soundboard
-    //    {
-    //        soundPlayers[0]->keyMappedSoundboard->keyPressed(key, originatingComponent);
-    //    }
-    //    else if (keyMapper->getKeyMapping(12) == keyCode)
-    //    {
-    //        stopWatchShortcuPressed();
-    //    }
-    //    else
-    //    {
-    //        if (soundPlayers[0]->draggedPlaylist != -1)
-    //            soundPlayers[0]->keyPressed(key, originatingComponent, keyMapper.get());
-    //        else if (soundPlayers[0]->draggedPlaylist == -1)
-    //            bottomComponent.recorderComponent.keyPressed(key, keyMapper.get());
-    //    }
-
-    //    if (keyMapper->getKeyMapping(0) == keyCode)
-    //    {
-    //        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
-    //            soundPlayers[0]->myPlaylists[0]->spaceBarPressed();
-    //        else
-    //        {
-    //            bottomComponent.keyPressed(key, originatingComponent, keyMapper.get());
-    //        }
-    //    }
-    //    else if (keyMapper->getKeyMapping(13) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(0);
-    //        else
-    //            soundPlayers[0]->myPlaylists[0]->playPlayer(0);
-    //        soundPlayers[0]->positionViewport(0);
-    //    }
-    //    else if (keyMapper->getKeyMapping(14) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(1);
-    //        else
-    //            soundPlayers[0]->myPlaylists[0]->playPlayer(1);
-    //        soundPlayers[0]->positionViewport(1);
-    //    }
-    //    else if (keyMapper->getKeyMapping(15) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(2);
-    //        else
-    //            soundPlayers[0]->myPlaylists[0]->playPlayer(2);
-    //        soundPlayers[0]->positionViewport(2);
-    //    }
-    //    else if (keyMapper->getKeyMapping(16) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(3);
-    //        else
-    //            soundPlayers[0]->myPlaylists[0]->playPlayer(3);
-    //        soundPlayers[0]->positionViewport(3);
-    //    }
-    //    else if (keyMapper->getKeyMapping(17) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(4);
-    //        else
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(0);
-    //        soundPlayers[0]->positionViewport(4);
-    //    }
-    //    else if (keyMapper->getKeyMapping(18) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(5);
-    //        else
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(1);
-    //        soundPlayers[0]->positionViewport(5);
-    //    }
-    //    else if (keyMapper->getKeyMapping(19) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(6);
-    //        else
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(2);
-    //        soundPlayers[0]->positionViewport(6);
-    //    }
-    //    else if (keyMapper->getKeyMapping(20) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(7);
-    //        else
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(3);
-    //        soundPlayers[0]->positionViewport(7);
-    //    }
-    //    else if (keyMapper->getKeyMapping(21) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(8);
-    //        soundPlayers[0]->positionViewport(8);
-    //    }
-    //    else if (keyMapper->getKeyMapping(22) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(9);
-    //        soundPlayers[0]->positionViewport(9);
-    //    }
-    //    else if (keyMapper->getKeyMapping(23) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(10);
-    //        soundPlayers[0]->positionViewport(10);
-    //    }
-    //    else if (keyMapper->getKeyMapping(24) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[1]->playPlayer(11);
-    //        soundPlayers[0]->positionViewport(11);
-    //    }
-    //    else if (keyMapper->getKeyMapping(1) == keyCode)
-    //    {
-    //        if (soundPlayers[0]->myPlaylists[0]->spaceBarIsPlaying == false)
-    //            soundPlayers[0]->myPlaylists[0]->playersResetPositionClicked();
-    //    }
-    //    else if (keyMapper->getKeyMapping(2) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[0]->playersNextPositionClicked();
-    //    }
-    //    else if (keyMapper->getKeyMapping(3) == keyCode)
-    //    {
-    //        if (!isEightPlayerMode)
-    //            soundPlayers[0]->myPlaylists[0]->playersPreviousPositionClicked();
-    //    }
-    //    else if (keyMapper->getKeyMapping(11) == keyCode)
-    //    {
-    //        if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::KeyMap)
-    //            launchRecord();
-    //    }
-    //}
-    //
     return false;
 }
 
 void MainComponent::savePlaylist()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("save playlist");
     soundPlayers[0]->savePlaylist();
     saved = true;
 }
@@ -1019,6 +832,7 @@ bool MainComponent::hasBeenSaved()
 
 void MainComponent::loadPlaylist()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("load playlist");
     soundPlayers[0]->loadPlaylist();
 }
 
@@ -1045,6 +859,7 @@ void MainComponent::valueChanged(juce::Value& value)
 
 void MainComponent::OSCInitialize()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("Osc initialize");
     soundPlayers[0]->OSCInitialize();
     if (soundPlayers[0]->oscConnected == true)
     {
@@ -1077,6 +892,7 @@ void MainComponent::channelsMapping()
 
     if (Settings::audioOutputMode == 1)
     {
+        juce::FileLogger::getCurrentLogger()->writeToLog("Cannels mapping mode 1");
         tryPreferedAudioDevice(2);
         setAudioChannels(2, 2);
 
@@ -1087,7 +903,7 @@ void MainComponent::channelsMapping()
     }
     else if (Settings::audioOutputMode == 2)
     {
-
+        juce::FileLogger::getCurrentLogger()->writeToLog("Channels mapping mode 2");
         tryPreferedAudioDevice(2);
         setAudioChannels(2, 2);
         myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
@@ -1097,6 +913,7 @@ void MainComponent::channelsMapping()
     }
     else if (Settings::audioOutputMode == 3)
     {
+        juce::FileLogger::getCurrentLogger()->writeToLog("Channels mapping mode 3");
         tryPreferedAudioDevice(4);
         setAudioChannels(2, 4);
         myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
@@ -1108,6 +925,7 @@ void MainComponent::channelsMapping()
 
 void MainComponent::tryPreferedAudioDevice(int outputChannelsNeeded)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("Trying prefered audio device");
     if (deviceManager.getCurrentAudioDevice() != nullptr)
     {
         std::unique_ptr<Settings> settings = std::make_unique<Settings>();
@@ -1137,6 +955,7 @@ void MainComponent::tryPreferedAudioDevice(int outputChannelsNeeded)
 
 void MainComponent::defaultPlayersPlaylist(int playersToAdd)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("defaulting player playlist");
     if (soundPlayers[0]->soundPlayerMode != SoundPlayer::Mode::KeyMap)
     {
         for (auto i = -1; playersToAdd < 1; ++i)
@@ -1238,6 +1057,7 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
 
     if (m == SoundPlayer::Mode::EightFaders)
     {
+        juce::FileLogger::getCurrentLogger()->writeToLog("launching eight players mode");
         isEightPlayerMode = true;
         soundPlayers[0]->myPlaylists[0]->isEightPlayerMode(true);
         soundPlayers[0]->myPlaylists[0]->setPlaylistPosition(0);
@@ -1253,6 +1073,7 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     }
     else 
     {
+        juce::FileLogger::getCurrentLogger()->writeToLog("launching playlist mode");
         for (auto i = -1; i < 1; ++i)
         {
             soundPlayers[0]->myPlaylists[0]->addPlayer(i);
@@ -1270,6 +1091,7 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     }
     if (m == SoundPlayer::Mode::KeyMap)
     {
+        juce::FileLogger::getCurrentLogger()->writeToLog("Launching keymapped mode");
         soundPlayers[0]->initializeKeyMapPlayer();
         removeKeyListener(commandManager.getKeyMappings());
         getTopLevelComponent()->removeKeyListener(commandManager.getKeyMappings());
@@ -1708,50 +1530,64 @@ bool MainComponent::perform(const InvocationInfo& info)
     switch (info.commandID)
     {
     case CommandIDs::startTimer:
+        juce::FileLogger::getCurrentLogger()->writeToLog("start timer");
         stopWatchShortcuPressed();
         break;
     case CommandIDs::showTimer:
+        juce::FileLogger::getCurrentLogger()->writeToLog("show timer");
         soundPlayers[0]->mainStopWatch.setVisible(!soundPlayers[0]->mainStopWatch.isVisible());
         break;
     case CommandIDs::lanchRecord:
+        juce::FileLogger::getCurrentLogger()->writeToLog("launch record");
         launchRecord();
         break;
     case CommandIDs::goToSoundBrowser:
+        juce::FileLogger::getCurrentLogger()->writeToLog("view sound browser");
         bottomComponent.getTabbedButtonBar().setCurrentTabIndex(0);
         break;
     case CommandIDs::goToDataBaseBrowser:
+        juce::FileLogger::getCurrentLogger()->writeToLog("view database browser");
         bottomComponent.getTabbedButtonBar().setCurrentTabIndex(1);
         break;
     case CommandIDs::goToDistantDataBaseBrowser:
+        juce::FileLogger::getCurrentLogger()->writeToLog("view distant database browser");
         bottomComponent.getTabbedButtonBar().setCurrentTabIndex(2);
         break;
     case CommandIDs::goToDatabaseImport:
+        juce::FileLogger::getCurrentLogger()->writeToLog("view database import");
         bottomComponent.getTabbedButtonBar().setCurrentTabIndex(3);
         break;
     case CommandIDs::goToRecorder:
+        juce::FileLogger::getCurrentLogger()->writeToLog("view recorder");
         bottomComponent.getTabbedButtonBar().setCurrentTabIndex(4);
         break;
     case CommandIDs::goToClipEditor:
+        juce::FileLogger::getCurrentLogger()->writeToLog("view clip editor");
         bottomComponent.getTabbedButtonBar().setCurrentTabIndex(5);
         break;
     case CommandIDs::goToClipEffect:
+        juce::FileLogger::getCurrentLogger()->writeToLog("view clip effect");
         bottomComponent.getTabbedButtonBar().setCurrentTabIndex(6);
         break;
     case CommandIDs::spaceBarPlay:
+        juce::FileLogger::getCurrentLogger()->writeToLog("space bar play");
         if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
             soundPlayers[0]->myPlaylists[0]->spaceBarPressed();
         else
             bottomComponent.spaceBarPressed();
         break;
     case CommandIDs::goToPrevious:
+        juce::FileLogger::getCurrentLogger()->writeToLog("go to previous");
         if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
             soundPlayers[0]->myPlaylists[0]->playersPreviousPositionClicked();
         break;
     case CommandIDs::goToFirst:
+        juce::FileLogger::getCurrentLogger()->writeToLog("go to first");
         if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
             soundPlayers[0]->myPlaylists[0]->playersResetPositionClicked();
         break;
     case CommandIDs::goToNext:
+        juce::FileLogger::getCurrentLogger()->writeToLog("go to next");
         if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
             soundPlayers[0]->myPlaylists[0]->playersNextPositionClicked();
         break;
@@ -1798,6 +1634,7 @@ bool MainComponent::perform(const InvocationInfo& info)
         loadPlaylist();
         break;
     case CommandIDs::quit:
+        juce::FileLogger::getCurrentLogger()->writeToLog("quit");
         juce::JUCEApplication::getInstance()->systemRequestedQuit();
         break;
     case CommandIDs::openSettings:
@@ -1813,7 +1650,6 @@ bool MainComponent::perform(const InvocationInfo& info)
         midiMapperButtonClicked();
         break;
     case CommandIDs::launchPlaylist:
-
         if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::OnePlaylistOneCart)
         {
             launchSoundPlayer(SoundPlayer::Mode::OnePlaylistOneCart);

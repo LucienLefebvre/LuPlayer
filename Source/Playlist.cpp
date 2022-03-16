@@ -366,6 +366,7 @@ void Playlist::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, co
 
 void Playlist::fader1Start()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("fader 1 start");
     players[fader1Player]->play(true);
     players[fader1Player]->fader1IsPlaying = true;
     fader1IsPlaying = true;
@@ -382,6 +383,7 @@ void Playlist::fader1Start()
 }
 void Playlist::fader1Stop(bool stoppedByFader)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("fader 1 stop");
     players[fader1Player]->stopButtonClicked();
     players[fader1Player]->fader1IsPlaying = false;
 
@@ -414,6 +416,7 @@ void Playlist::fader1Stop(bool stoppedByFader)
 }
 void Playlist::fader2Start()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("fader 2 start");
     players[fader2Player]->transport.setGain(0.0);
     players[fader2Player]->play();
     players[fader2Player]->fader2IsPlaying = true;
@@ -431,6 +434,7 @@ void Playlist::fader2Start()
 }
 void Playlist::fader2Stop(bool stoppedByFader)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("fader 2 stop");
     players[fader2Player]->stopButtonClicked();
     players[fader2Player]->fader2IsPlaying = false;
     fader2IsPlaying = false;
@@ -881,6 +885,7 @@ void Playlist::playersNextPositionClicked()
 
 void Playlist::addPlayer(int playerID)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("Add player");
     int idAddedPlayer = playerID + 1;
     players.insert(idAddedPlayer, new Player(idAddedPlayer));
     if (players[idAddedPlayer] != nullptr)
@@ -969,6 +974,7 @@ void Playlist::addPlayer(int playerID)
 
 void Playlist::removePlayer(int playerID)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("remove player");
     if (playlistType == 0)
     {
         if (players.size() > 1)
@@ -1486,6 +1492,7 @@ bool Playlist::isInterestedInFileDrag(const juce::StringArray& files)
 
 void Playlist::filesDropped(const juce::StringArray& files, int x, int y)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("file dropped");
     int i = fileDragPlayerDestination;
     for (auto file : files)
     {
@@ -1865,9 +1872,9 @@ void Playlist::actionListenerCallback(const juce::String& message)
 
 void Playlist::stopCues()
 {
-    for (auto i = 0; i < players.size(); i++)
+    for (auto player : players)
     {
-        players[i]->cueTransport.stop();
+        player->cueTransport.stop();
     }
 }
 

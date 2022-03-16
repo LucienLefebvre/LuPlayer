@@ -1008,6 +1008,7 @@ void Player::stop()
 //BUTTONS
 void Player::openButtonClicked()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player open button clicked");
     //create a chooser to open file
     juce::FileChooser chooser("Choose an audio File", juce::File::getSpecialLocation(juce::File::userDesktopDirectory), "*.wav; *.WAV; *.MP3; *.mp3; *.bwf; *.BWF; *.aiff; *.opus; *.flac"); 
 
@@ -1028,6 +1029,7 @@ void Player::deleteFile()
 {
     if (!transport.isPlaying())
     {
+        juce::FileLogger::getCurrentLogger()->writeToLog("delete player file");
         loopButton.setToggleState(false, juce::dontSendNotification);
         setIsLooping(false, false);
         cuePlayHead.setVisible(false);
@@ -1059,6 +1061,7 @@ void Player::deleteFile()
 
 void Player::playButtonClicked()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player play button clicked");
     if (!transport.isPlaying())
     {
         if (Settings::lauchAtZeroDB)
@@ -1247,6 +1250,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
     else if (source == luThread.loudnessCalculatedBroadcaster)
     {
+        juce::FileLogger::getCurrentLogger()->writeToLog("player lu thread finished");
         integratedLoudness = luThread.getILU();
         double loudnessDifference = -23. - integratedLoudness;
         trimValueToSet = loudnessDifference;
@@ -1259,6 +1263,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
     else if (source == ffmpegThread.conversionEndedBroadcaster)
     {
+        juce::FileLogger::getCurrentLogger()->writeToLog("player ffmpeg thread finished");
         juce::String convertedFilePath = ffmpegThread.getFile();
         convertingBar->setVisible(false);
         loadFile(convertedFilePath, true);
@@ -1268,6 +1273,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
     else if (source == denoiser.denoiseDoneBroadcaster)
     {
+        juce::FileLogger::getCurrentLogger()->writeToLog("player denoise thread finished");
         std::string n = newName;
         std::string oldFilePath = loadedFilePath;
         denoisedFile = denoiser.getDenoisedFile();
@@ -1295,7 +1301,6 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
 
 void Player::transportStateChanged(TransportState newState)
 {
-
     if (newState != state)
     {
         state = newState;
@@ -1470,6 +1475,7 @@ void Player::repaintThumbnail()
 }
 void Player::setStart()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("set start");
     if ((float)cueTransport.getCurrentPosition() < stopTime && (float)cueTransport.getCurrentPosition() > 0)
     {
         startTime = (float)cueTransport.getCurrentPosition();
@@ -1519,6 +1525,7 @@ float Player::getStop()
 
 void Player::deleteStart(bool shouldSendMessage)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("delete start");
     startTime = 0;
     startTimeSet = false;
     repaint();
@@ -1532,6 +1539,7 @@ void Player::deleteStart(bool shouldSendMessage)
 
 void Player::setStop()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("set stop");
     if ((float)cueTransport.getCurrentPosition() > startTime && (float)cueTransport.getCurrentPosition() > 0)
     {
     stopTime = (float)cueTransport.getCurrentPosition();
@@ -1548,6 +1556,7 @@ void Player::setStop()
 
 void Player::deleteStop(bool shouldSendMessage)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("delete stop");
     stopTime = (float)transport.getLengthInSeconds();
     stopTimeSet = false;
     repaint();
@@ -1629,6 +1638,7 @@ void Player::setRightFaderAssigned(bool isFaderRightAssigned)
 
 void Player::verifyAudioFileFormat(const juce::String& path)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player verify audio file format");
     juce::File file(path);
     if ((file.getFileExtension() == juce::String(".wav")) || (file.getFileExtension() == juce::String(".WAV"))
         || (file.getFileExtension() == juce::String(".mp3")) || (file.getFileExtension() == juce::String(".MP3"))
@@ -1665,6 +1675,7 @@ void Player::verifyAudioFileFormat(const juce::String& path)
 
 bool Player::loadFile(const juce::String& path, bool shouldSendChangeMessage)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player load file");
     loadedFilePath = path.toStdString();
     juce::File file(path);
     if (juce::AudioFormatReader* reader = formatManager.createReaderFor(file))
@@ -1953,6 +1964,7 @@ void Player::stopTimeClicked()
 
 void Player::optionButtonClicked()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player option button clicked");
     if (!rightClickDown)
     {
         if (hpfEnabled)
@@ -1995,6 +2007,7 @@ void Player::optionButtonClicked()
 
 void Player::enableHPF(bool shouldBeEnabled, bool shouldSendMessage)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player enable hpf");
     if (!shouldBeEnabled)
     {
         filterSource.makeInactive();
@@ -2045,9 +2058,9 @@ void Player::valueChanged(juce::Value& value)
 
 void Player::setChannelsMapping()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player set channels mapping");
     if (Settings::audioOutputMode == 1)
     {
-
         channelRemappingSource.clearAllMappings();
         channelRemappingSource.setOutputChannelMapping(0, 0);
         channelRemappingSource.setOutputChannelMapping(1, 0);
@@ -2123,7 +2136,7 @@ double Player::CalculateR128Integrated(std::string filePath)
     luThread.loudnessCalculatedBroadcaster->addChangeListener(this);
     luThread.setFilePath(filePath);
     luThread.startThread();
-
+    juce::FileLogger::getCurrentLogger()->writeToLog("player launch r128 calcul");
     return -1.;
 }
 
@@ -2189,6 +2202,7 @@ void Player::setDraggedPlayer()
 
 void Player::fxButtonClicked()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player fx button clicked");
     if (rightClickDown)
     {
         fxEnabled = !fxEnabled;
@@ -2218,6 +2232,7 @@ void Player::fxButtonClicked()
 
 void Player::envButtonClicked()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player enveloppe button clicked");
     if (rightClickDown)
     {
         setEnveloppeEnabled(!enveloppeEnabled);
@@ -2236,6 +2251,7 @@ void Player::envButtonClicked()
 
 void Player::bypassFX(bool isBypassed, bool shouldSendMessage)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player bypass fx");
     fxEnabled = !isBypassed;
     filterProcessor.setBypassed(isBypassed);
     cueFilterProcessor.setBypassed(isBypassed);
@@ -2265,6 +2281,7 @@ void Player::normButtonClicked()
 
 void Player::normalize(std::string p)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player launch normalization");
     CalculateR128Integrated(p);
     convertingBar->setTextToDisplay("Normalizing...");
     convertingBar->setVisible(true);
@@ -2272,6 +2289,7 @@ void Player::normalize(std::string p)
 
 void Player::setEditedPlayer(bool b)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player set edited player");
     isEdited = b;
     if (isEdited)
     {
@@ -2299,6 +2317,7 @@ juce::TextButton* Player::getfxButton()
 
 void Player::denoiseButtonClicked()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player denoise button clicked");
     if (rightClickDown)
     {
         if (denoisedFileLoaded)
@@ -2324,6 +2343,7 @@ void Player::denoiseButtonClicked()
 
 void Player::setDenoisedFile(bool loadDenoisedFile)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player set denoised file");
     if (!loadDenoisedFile)
     {
         std::string n = newName;
@@ -2355,6 +2375,7 @@ bool Player::getDenoisedFileLoaded()
 
 void Player::setPlayerColour(juce::Colour c, bool sendMessage)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player set player colour");
     playerColour = c;
     colourHasChanged = true;
     soundEditedBroadcaster->sendChangeMessage();
@@ -2374,6 +2395,7 @@ juce::Colour Player::getPlayerColour()
 
 void Player::killThreads()
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player kill threads");
     ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
     denoiser.denoiseDoneBroadcaster->removeChangeListener(this);
     denoiser.processStartedBroadcaster->removeChangeListener(this);
@@ -2456,6 +2478,7 @@ bool Player::isEnveloppeEnabled()
 
 void Player::setEnveloppeEnabled(bool b, bool shouldSendMessage, bool switchToEnveloppePanel)
 {
+    juce::FileLogger::getCurrentLogger()->writeToLog("player set enveloppe enabled");
     enveloppeEnabled = b;
     if (enveloppeEnabled && !isEdited)
         envButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
