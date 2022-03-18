@@ -165,7 +165,7 @@ void MainComponent::keyMapperButtonClicked()
 
     juce::DialogWindow::LaunchOptions o;
     o.dialogBackgroundColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
-    o.content.setOwned(km);
+    o.content.setNonOwned(km);
     o.content->setSize(600, 400);
     o.escapeKeyTriggersCloseButton = true;
     o.useNativeTitleBar = false;
