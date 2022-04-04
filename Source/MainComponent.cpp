@@ -1136,9 +1136,6 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
                                     CommandIDs::viewLastPlayedSound,
                                     CommandIDs::lanchRecord,
                                     CommandIDs::goToSoundBrowser,
-                                    CommandIDs::goToDataBaseBrowser,
-                                    CommandIDs::goToDistantDataBaseBrowser,
-                                    CommandIDs::goToDatabaseImport,
                                     CommandIDs::goToRecorder,
                                     CommandIDs::goToClipEditor,
                                     CommandIDs::goToClipEffect,
@@ -1197,37 +1194,22 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
     case CommandIDs::goToSoundBrowser:
         result.setInfo("Display sound browser", "Display sound browser", "Menu", 0);
         result.setTicked(false);
-        result.addDefaultKeypress('&', juce::ModifierKeys::noModifiers);
-        break;
-    case CommandIDs::goToDataBaseBrowser:
-        result.setInfo("Display Netia database browser", "Display Netia database browser", "Menu", 0);
-        result.setTicked(false);
-        result.addDefaultKeypress('#e9', juce::ModifierKeys::noModifiers);
-        break;
-    case CommandIDs::goToDistantDataBaseBrowser:
-        result.setInfo("Display distant database browser", "Display distant database browser", "Menu", 0);
-        result.setTicked(false);
-        result.addDefaultKeypress('"', juce::ModifierKeys::noModifiers);
-        break;
-    case CommandIDs::goToDatabaseImport:
-        result.setInfo("Display database import", "Display database import", "Menu", 0);
-        result.setTicked(false);
-        result.addDefaultKeypress('\'', juce::ModifierKeys::noModifiers);
+        result.addDefaultKeypress('1', juce::ModifierKeys::noModifiers);
         break;
     case CommandIDs::goToRecorder:
         result.setInfo("Display recorder", "Display recorder", "Menu", 0);
         result.setTicked(false);
-        result.addDefaultKeypress('(', juce::ModifierKeys::noModifiers);
+        result.addDefaultKeypress('4', juce::ModifierKeys::noModifiers);
         break;
     case CommandIDs::goToClipEditor:
         result.setInfo("Display clip editor", "Display clip editor", "Menu", 0);
         result.setTicked(false);
-        result.addDefaultKeypress('-', juce::ModifierKeys::noModifiers);
+        result.addDefaultKeypress('2', juce::ModifierKeys::noModifiers);
         break;
     case CommandIDs::goToClipEffect:
         result.setInfo("Display clip effect", "Display clip effect", "Menu", 0);
         result.setTicked(false);
-        result.addDefaultKeypress('è', juce::ModifierKeys::noModifiers);
+        result.addDefaultKeypress('3', juce::ModifierKeys::noModifiers);
         break;
     case CommandIDs::spaceBarPlay:
         result.setInfo("Play next sound in playlist (playlist mode only) or cue play (other modes)", "Play", "Menu", 0);
@@ -1416,29 +1398,17 @@ bool MainComponent::perform(const InvocationInfo& info)
         juce::FileLogger::getCurrentLogger()->writeToLog("view sound browser");
         bottomComponent.getTabbedButtonBar().setCurrentTabIndex(0);
         break;
-    case CommandIDs::goToDataBaseBrowser:
-        juce::FileLogger::getCurrentLogger()->writeToLog("view database browser");
-        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(1);
-        break;
-    case CommandIDs::goToDistantDataBaseBrowser:
-        juce::FileLogger::getCurrentLogger()->writeToLog("view distant database browser");
-        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(2);
-        break;
-    case CommandIDs::goToDatabaseImport:
-        juce::FileLogger::getCurrentLogger()->writeToLog("view database import");
-        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(3);
-        break;
     case CommandIDs::goToRecorder:
         juce::FileLogger::getCurrentLogger()->writeToLog("view recorder");
-        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(4);
+        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(3);
         break;
     case CommandIDs::goToClipEditor:
         juce::FileLogger::getCurrentLogger()->writeToLog("view clip editor");
-        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(5);
+        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(1);
         break;
     case CommandIDs::goToClipEffect:
         juce::FileLogger::getCurrentLogger()->writeToLog("view clip effect");
-        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(6);
+        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(2);
         break;
     case CommandIDs::spaceBarPlay:
         juce::FileLogger::getCurrentLogger()->writeToLog("space bar play");
