@@ -882,7 +882,7 @@ void MainComponent::launchRecord()
         bottomComponent.recorderComponent.enabledButton.setToggleState(true, juce::NotificationType::sendNotification);
     }
     bottomComponent.recorderComponent.recordButtonClicked();
-    bottomComponent.setCurrentTabIndex(4);
+    bottomComponent.setCurrentTabIndex(3);
     myLayout.setItemLayout(2,          // for item 1
         25, 600, // size must be between 20% and 60% of the available space
         300);        // and its preferred size is 50 pixels

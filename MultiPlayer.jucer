@@ -5,7 +5,7 @@
               version="0.9.1.1">
   <MAINGROUP id="xbXPa2" name="MultiPlayer">
     <GROUP id="{1768BD6A-1763-693F-2E07-6CF180C5BCA1}" name="Others">
-      <FILE id="GrBajD" name="test logo 2.png" compile="0" resource="1" file="test logo 2.png"/>
+      <FILE id="MfaJgQ" name="icon.png" compile="0" resource="1" file="icon.png"/>
     </GROUP>
     <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
       <GROUP id="{1D073893-0026-9A58-4027-E3383CC39F21}" name="Thumbnail">
@@ -123,13 +123,6 @@
               file="Source/SoundBoard/KeyMappedPlayer.cpp"/>
         <FILE id="EhQJ6c" name="KeyMappedPlayer.h" compile="0" resource="0"
               file="Source/SoundBoard/KeyMappedPlayer.h"/>
-        <FILE id="TgIwht" name="PlayerEditor.cpp" compile="1" resource="0"
-              file="Source/Soundboard/PlayerEditor.cpp"/>
-        <FILE id="QAphEq" name="PlayerEditor.h" compile="0" resource="0" file="Source/Soundboard/PlayerEditor.h"/>
-        <FILE id="hTZ2dY" name="PlayerProcessor.cpp" compile="1" resource="0"
-              file="Source/Soundboard/PlayerProcessor.cpp"/>
-        <FILE id="Jk70Dv" name="PlayerProcessor.h" compile="0" resource="0"
-              file="Source/Soundboard/PlayerProcessor.h"/>
       </GROUP>
       <GROUP id="{983390AC-4C7E-7A9B-DCA4-5A5711B51A62}" name="sqlite">
         <FILE id="ArEhg9" name="shell.c" compile="1" resource="0" file="Source/sqlite/shell.c"/>
@@ -166,7 +159,7 @@
                JUCE_ASIO="1" JUCE_USE_LAME_AUDIO_FORMAT="1"/>
   <EXPORTFORMATS>
     <VS2019 externalLibraries="ffmpeg-cpp.lib" targetFolder="C:/Juce/Projects"
-            smallIcon="GrBajD" bigIcon="GrBajD">
+            smallIcon="MfaJgQ" bigIcon="MfaJgQ">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="MultiPlayer" libraryPath="C:\local\include\ffmpeg-cpp-master\lib\x64\Debug&#10;C:\local\lib\debug"
                        headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\uvgRTP&#10;C:\local\include\opus&#10;C:\local\include\jrtplib3&#10;C:\local\include\nanodbc&#10;C:\local\include\LUFSMeter&#10;C:\local\include\fxobjects&#10;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp&#10;C:\local\include\ffmpeg-cpp-master\ffmpeg\include&#10;C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;C:\local\include\ffmpeg-cpp-master\include"/>
