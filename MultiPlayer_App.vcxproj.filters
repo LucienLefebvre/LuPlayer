@@ -17,17 +17,11 @@
     <Filter Include="MultiPlayer\Source\Mixer">
       <UniqueIdentifier>{84A88619-6307-C4E6-74EC-99BA546C6AB8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MultiPlayer\Source\nanodbc">
-      <UniqueIdentifier>{F301E40E-967D-7851-CC8A-0D7A5E4BB715}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MultiPlayer\Source\Settings">
       <UniqueIdentifier>{50282CA5-0999-2B7B-D4B6-C9B5CD18D5BC}</UniqueIdentifier>
     </Filter>
     <Filter Include="MultiPlayer\Source\Soundboard">
       <UniqueIdentifier>{47F235E6-752E-8E21-542A-B8DC02129748}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MultiPlayer\Source\sqlite">
-      <UniqueIdentifier>{3B2B277A-4F96-0C8E-746D-7FF396CB0FAB}</UniqueIdentifier>
     </Filter>
     <Filter Include="MultiPlayer\Source">
       <UniqueIdentifier>{D97AFB6E-72B4-CF12-39E0-CD91D87EAF80}</UniqueIdentifier>
@@ -508,9 +502,6 @@
     <ClCompile Include="Source\ClipEffect.cpp">
       <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClCompile>
-    <ClCompile Include="Source\DataBaseBrowser.cpp">
-      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Recorder.cpp">
       <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClCompile>
@@ -538,9 +529,6 @@
     <ClCompile Include="Source\Mixer\MixerInput.cpp">
       <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClCompile>
-    <ClCompile Include="Source\nanodbc-master\nanodbc\nanodbc.cpp">
-      <Filter>MultiPlayer\Source\nanodbc</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Settings.cpp">
       <Filter>MultiPlayer\Source\Settings</Filter>
     </ClCompile>
@@ -564,12 +552,6 @@
     </ClCompile>
     <ClCompile Include="Source\SoundBoard\KeyMappedPlayer.cpp">
       <Filter>MultiPlayer\Source\Soundboard</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\sqlite\shell.c">
-      <Filter>MultiPlayer\Source\sqlite</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\sqlite\sqlite3.c">
-      <Filter>MultiPlayer\Source\sqlite</Filter>
     </ClCompile>
     <ClCompile Include="Source\convertObject.cpp">
       <Filter>MultiPlayer\Source</Filter>
@@ -2802,9 +2784,6 @@
     <ClInclude Include="Source\ClipEffect.h">
       <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
-    <ClInclude Include="Source\DataBaseBrowser.h">
-      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Recorder.h">
       <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
@@ -2871,9 +2850,6 @@
     <ClInclude Include="Source\Mixer\VCA.h">
       <Filter>MultiPlayer\Source\Mixer</Filter>
     </ClInclude>
-    <ClInclude Include="Source\nanodbc-master\nanodbc\nanodbc.h">
-      <Filter>MultiPlayer\Source\nanodbc</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Settings.h">
       <Filter>MultiPlayer\Source\Settings</Filter>
     </ClInclude>
@@ -2897,12 +2873,6 @@
     </ClInclude>
     <ClInclude Include="Source\SoundBoard\KeyMappedPlayer.h">
       <Filter>MultiPlayer\Source\Soundboard</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\sqlite\sqlite3.h">
-      <Filter>MultiPlayer\Source\sqlite</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\sqlite\sqlite3ext.h">
-      <Filter>MultiPlayer\Source\sqlite</Filter>
     </ClInclude>
     <ClInclude Include="Source\batchConvertThread.h">
       <Filter>MultiPlayer\Source</Filter>

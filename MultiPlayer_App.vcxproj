@@ -156,7 +156,6 @@
     <ClCompile Include="Source\AudioBrowser.cpp"/>
     <ClCompile Include="Source\BottomComponent.cpp"/>
     <ClCompile Include="Source\ClipEffect.cpp"/>
-    <ClCompile Include="Source\DataBaseBrowser.cpp"/>
     <ClCompile Include="Source\Recorder.cpp"/>
     <ClCompile Include="Source\LUFSMeter\Ebu128LoudnessMeter.cpp"/>
     <ClCompile Include="Source\LUFSMeter\filters\SecondOrderIIRFilter.cpp"/>
@@ -166,7 +165,6 @@
     <ClCompile Include="Source\Mixer\InputsControl.cpp"/>
     <ClCompile Include="Source\Mixer\Mixer.cpp"/>
     <ClCompile Include="Source\Mixer\MixerInput.cpp"/>
-    <ClCompile Include="Source\nanodbc-master\nanodbc\nanodbc.cpp"/>
     <ClCompile Include="Source\Settings.cpp"/>
     <ClCompile Include="Source\Settings\KeyMapper.cpp"/>
     <ClCompile Include="Source\Settings\MidiMapper.cpp"/>
@@ -175,8 +173,6 @@
     <ClCompile Include="Source\SoundPlayer.cpp"/>
     <ClCompile Include="Source\SoundBoard\KeyboardMappedSoundboard.cpp"/>
     <ClCompile Include="Source\SoundBoard\KeyMappedPlayer.cpp"/>
-    <ClCompile Include="Source\sqlite\shell.c"/>
-    <ClCompile Include="Source\sqlite\sqlite3.c"/>
     <ClCompile Include="Source\convertObject.cpp"/>
     <ClCompile Include="Source\Denoiser.cpp"/>
     <ClCompile Include="Source\LoudnessBar.cpp"/>
@@ -2235,7 +2231,6 @@
     <ClInclude Include="Source\AudioBrowser.h"/>
     <ClInclude Include="Source\BottomComponent.h"/>
     <ClInclude Include="Source\ClipEffect.h"/>
-    <ClInclude Include="Source\DataBaseBrowser.h"/>
     <ClInclude Include="Source\Recorder.h"/>
     <ClInclude Include="Source\LUFSMeter\Ebu128LoudnessMeter.h"/>
     <ClInclude Include="Source\LUFSMeter\MacrosAndJuceHeaders.h"/>
@@ -2258,7 +2253,6 @@
     <ClInclude Include="Source\Mixer\Mixer.h"/>
     <ClInclude Include="Source\Mixer\MixerInput.h"/>
     <ClInclude Include="Source\Mixer\VCA.h"/>
-    <ClInclude Include="Source\nanodbc-master\nanodbc\nanodbc.h"/>
     <ClInclude Include="Source\Settings.h"/>
     <ClInclude Include="Source\Settings\KeyMapper.h"/>
     <ClInclude Include="Source\Settings\MidiMapper.h"/>
@@ -2267,8 +2261,6 @@
     <ClInclude Include="Source\SoundPlayer.h"/>
     <ClInclude Include="Source\SoundBoard\KeyboardMappedSoundboard.h"/>
     <ClInclude Include="Source\SoundBoard\KeyMappedPlayer.h"/>
-    <ClInclude Include="Source\sqlite\sqlite3.h"/>
-    <ClInclude Include="Source\sqlite\sqlite3ext.h"/>
     <ClInclude Include="Source\batchConvertThread.h"/>
     <ClInclude Include="Source\convertObject.h"/>
     <ClInclude Include="Source\Denoiser.h"/>

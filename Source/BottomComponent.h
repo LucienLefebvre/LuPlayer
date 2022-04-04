@@ -14,7 +14,6 @@
 #include "AudioBrowser.h"
 #include "Recorder.h"
 #include "Mixer/Mixer.h"
-#include "nanodbc/nanodbc.h"
 #include "ClipEffect.h"
 #include "Clip Editor/ClipEditor.h"
 #include "Settings/KeyMapper.h"
@@ -46,8 +45,6 @@ public:
     ClipEditor clipEditor;
     ClipEffect clipEffect;
     juce::MixerAudioSource myMixer;
-
-    nanodbc::connection conn;
 
     juce::ChangeBroadcaster* cuePlay;
 
