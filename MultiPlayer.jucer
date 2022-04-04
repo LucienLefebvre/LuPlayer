@@ -6,7 +6,6 @@
   <MAINGROUP id="xbXPa2" name="MultiPlayer">
     <GROUP id="{1768BD6A-1763-693F-2E07-6CF180C5BCA1}" name="Others">
       <FILE id="GrBajD" name="test logo 2.png" compile="0" resource="1" file="test logo 2.png"/>
-      <FILE id="MQJM4M" name="test logo.png" compile="0" resource="1" file="test logo.png"/>
     </GROUP>
     <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
       <GROUP id="{1D073893-0026-9A58-4027-E3383CC39F21}" name="Thumbnail">
@@ -131,8 +130,6 @@
               file="Source/Soundboard/PlayerProcessor.cpp"/>
         <FILE id="Jk70Dv" name="PlayerProcessor.h" compile="0" resource="0"
               file="Source/Soundboard/PlayerProcessor.h"/>
-        <FILE id="QsWaWu" name="SoundBoard.cpp" compile="1" resource="0" file="Source/SoundBoard/SoundBoard.cpp"/>
-        <FILE id="ftYY0S" name="SoundBoard.h" compile="0" resource="0" file="Source/SoundBoard/SoundBoard.h"/>
       </GROUP>
       <GROUP id="{983390AC-4C7E-7A9B-DCA4-5A5711B51A62}" name="sqlite">
         <FILE id="ArEhg9" name="shell.c" compile="1" resource="0" file="Source/sqlite/shell.c"/>

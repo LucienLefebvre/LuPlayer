@@ -3,7 +3,7 @@
 
     BottomComponent.h
     Created: 15 Mar 2021 6:43:01pm
-    Author:  Lucien
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */
@@ -13,10 +13,6 @@
 #include <JuceHeader.h>
 #include "AudioBrowser.h"
 #include "Recorder.h"
-#include "DataBaseBrowser.h"
-#include "DistantDataBaseBrowser.h"
-#include "DataBaseImport.h"
-#include "DataBaseFeeder.h"
 #include "Mixer/Mixer.h"
 #include "nanodbc/nanodbc.h"
 #include "ClipEffect.h"
@@ -47,14 +43,9 @@ public:
     void setOrDeleteStop(bool setOrDelete);
     AudioPlaybackDemo audioPlaybackDemo;
     Recorder recorderComponent;
-    DataBaseBrowser dbBrowser;
-    DataBaseImport dbImport;
-    DistantDataBaseBrowser distantDbBrowser;
     ClipEditor clipEditor;
     ClipEffect clipEffect;
-    DataBaseFeeder dataBaseFeeder;
     juce::MixerAudioSource myMixer;
-    juce::Label noDbLabel{ "No DataBase Found" };
 
     nanodbc::connection conn;
 

@@ -3,7 +3,7 @@
 
     FilterBandEditor.h
     Created: 18 Apr 2021 6:10:08pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

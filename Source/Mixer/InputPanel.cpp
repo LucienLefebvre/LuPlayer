@@ -3,7 +3,7 @@
 
     InputPanel.cpp
     Created: 21 Apr 2021 12:16:58pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

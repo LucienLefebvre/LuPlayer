@@ -3,7 +3,7 @@
 
     FFTAnalyser.h
     Created: 21 Apr 2021 5:34:43pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

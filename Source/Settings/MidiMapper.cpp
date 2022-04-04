@@ -3,7 +3,7 @@
 
     MidiMapper.cpp
     Created: 3 Feb 2022 10:58:09pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

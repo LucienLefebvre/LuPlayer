@@ -3,7 +3,7 @@
 
     LimiterEditor.h
     Created: 27 Apr 2021 3:36:10pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

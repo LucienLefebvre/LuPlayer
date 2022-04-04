@@ -3,7 +3,7 @@
 
     Recorder.cpp
     Created: 16 Mar 2021 10:05:40am
-    Author:  Lucien
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

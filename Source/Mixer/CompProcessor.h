@@ -3,7 +3,7 @@
 
     CompProcessor.h
     Created: 19 Apr 2021 11:23:23pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

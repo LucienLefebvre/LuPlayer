@@ -1267,7 +1267,6 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         juce::String convertedFilePath = ffmpegThread.getFile();
         convertingBar->setVisible(false);
         loadFile(convertedFilePath, true);
-        extactName(convertedFilePath.toStdString());
         ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
         soundEditedBroadcaster->sendChangeMessage();
     }
@@ -1652,13 +1651,6 @@ void Player::verifyAudioFileFormat(const juce::String& path)
             loadFile(file.getFullPathName(), true);
             delete reader;
         }
-        else
-        {
-            std::string pathstd = path.toStdString();
-            juce::String newpath = startFFmpeg(pathstd);
-            std::string newpathstd = newpath.toStdString();
-            loadFile(newpathstd, false);
-        }
     }
     else
     {
@@ -1746,82 +1738,6 @@ bool Player::loadFile(const juce::String& path, bool shouldSendChangeMessage)
         playerInfoChangedBroadcaster->sendChangeMessage();
         soundEditedBroadcaster->sendChangeMessage();
     }
-}
-
-const juce::String Player::startFFmpeg(std::string filePath)
-{
-    std::string USES_CONVERSION_EX;
-    std::string ffmpegpath = juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\ffmpeg.exe").toStdString();
-    //FFmpegPath = Settings::FFmpegPath.toStdString();
-    convertedFilesPath = Settings::convertedSoundsPath.toStdString();
-    //////////*****************Create FFMPEG command Line
-    //add double slash to path
-    std::string newFilePath = std::regex_replace(filePath, std::regex(R"(\\)"), R"(\\)");
-    std::string newFFmpegPath = std::regex_replace(ffmpegpath, std::regex(R"(\\)"), R"(\\)");
-    std::string newConvertedFilesPath = std::regex_replace(convertedFilesPath, std::regex(R"(\\)"), R"(\\)");
-    //give Output Directory
-    std::size_t botDirPos = filePath.find_last_of("\\");
-    std::string outputFileDirectory = filePath.substr(0, botDirPos);
-    //give file name with extension
-    std::string fileOutputName = filePath.substr(botDirPos, filePath.length());
-    std::string newFileOutputDir = std::regex_replace(outputFileDirectory, std::regex(R"(\\)"), R"(\\)");
-    size_t lastindex = fileOutputName.find_last_of(".");
-    //give file name without extension and add double dash before
-    std::string rawname = fileOutputName.substr(0, lastindex);
-    std::string rawnamedoubleslash = std::regex_replace(rawname, std::regex(R"(\\)"), R"(\\)");
-    //create entire command string
-    std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -i \"" + newFilePath + "\" -ar 48000 -y \"" + newConvertedFilesPath + rawnamedoubleslash + ".wav\"");
-    std::wstring w = (utf8_to_utf16(cmdstring));
-    LPWSTR str = const_cast<LPWSTR>(w.c_str());
-    ////////////Launch FFMPEG
-    PROCESS_INFORMATION pi;
-    STARTUPINFOW si;
-    ZeroMemory(&si, sizeof(si));
-    BOOL logDone = CreateProcessW(NULL, str, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
-    if (logDone)
-        {
-            WaitForSingleObject(pi.hProcess, INFINITE);
-        }
-
-
-
-    /////////////////////return created file path
-    std::string returnFilePath = std::string(newConvertedFilesPath + "\\" + rawname + ".wav");
-    std::string returnFilePathBackslah = std::regex_replace(returnFilePath, std::regex(R"(\\)"), R"(\\)");
-    juce::String returnedFile = juce::String(returnFilePath);
-    Settings::tempFiles.add(returnedFile);
-    return returnedFile;
-}
-
-std::string Player::extactName(std::string Filepath)
-{
-    auto const connection_string = NANODBC_TEXT("Driver=ODBC Driver 17 for SQL Server;Server=localhost\\NETIA;Database=ABC4;Uid=SYSADM;Pwd=SYSADM;");
-    nanodbc::connection conn;
-    try
-    {
-        nanodbc::result row;
-        conn.connect(connection_string, 1000);
-        juce::File bwfFile(Filepath);
-        std::string fileName = bwfFile.getFileNameWithoutExtension().toStdString();
-        std::string searchString = std::string("SELECT * FROM ABC4.SYSADM.T_ITEM WHERE ABC4.SYSADM.T_ITEM.[FILE] LIKE '%" + fileName + "%'");
-        row = execute(
-            conn,
-            searchString);
-        row.next();
-        newName = row.get<nanodbc::string>(45);
-    }
-    catch (std::runtime_error const& e)
-    {
-        std::cerr << e.what() << std::endl;
-    }
-
-    if (!newName.empty())
-    {
-        soundName.setText(newName, juce::NotificationType::dontSendNotification);
-        soundEditedBroadcaster->sendChangeMessage();
-    }
-
-    return newName;
 }
 
 

@@ -3,7 +3,7 @@
 
     ClipEditor.h
     Created: 24 Jan 2022 2:47:44pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

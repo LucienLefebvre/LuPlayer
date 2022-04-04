@@ -3,7 +3,7 @@
 
     DynamicsEditor.h
     Created: 27 Apr 2021 3:35:36pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

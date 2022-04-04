@@ -3,7 +3,7 @@
 
     FilterProcessor.h
     Created: 16 Apr 2021 1:50:05am
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

@@ -340,9 +340,7 @@ private:
     void calculThumbnailBounds();
     void repaintPlayHead();
     void valueChanged(juce::Value& value);
-    const juce::String startFFmpeg(std::string filePath);
     void handleAudioTags(std::string filePath);
-    std::string extactName(std::string Filepath);
     void labelTextChanged(juce::Label* labelThatHasChanged);
 
 

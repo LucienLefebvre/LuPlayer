@@ -3,7 +3,7 @@
 
     CompEditor.h
     Created: 19 Apr 2021 11:23:34pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

@@ -3,7 +3,7 @@
 
     KeyMapper.h
     Created: 1 Feb 2022 1:46:49pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

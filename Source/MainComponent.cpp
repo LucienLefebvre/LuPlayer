@@ -1,8 +1,6 @@
 #include "MainComponent.h"
-#define JUCE_ASIO 1
 //#define INFO_BUFFER_SIZE 32767
 //==============================================================================
-//Channel shift ne shift pas le trim
 bool MainComponent::exitAnswered;
 MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
                                             audioSetupComp(deviceManager, 0, 2, 0, 4, true, false, true, true),
@@ -195,20 +193,13 @@ void MainComponent::midiMapperButtonClicked()
             grabKeyboardFocus();
         }));
 
-    //std::unique_ptr<juce::DialogWindow> keyMapperWindow = std::make_unique<juce::DialogWindow>("Midi Mapping",
-    //    getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true);
-    //keyMapperWindow->setSize(600, 400);
-
-    //keyMapperWindow->showDialog("Midi Mapping", midiMapper.get(), this,
-    //    getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, false, false);
-    //midiMapper->setWantsKeyboardFocus(true);
 }
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     if (source == &bottomComponent.getTabbedButtonBar())
     {   //Update red colour on fx button on player if the clipeffect tab is selected
-        if (bottomComponent.getTabbedButtonBar().getCurrentTabIndex() != 5)
+        if (bottomComponent.getTabbedButtonBar().getCurrentTabIndex() != 2)
         {
             for (auto* p : soundPlayers[0]->myPlaylists)
                 p->resetFxEditedButtons();
@@ -293,128 +284,6 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         }
         grabKeyboardFocus();
     }
-    else if (source == bottomComponent.dbBrowser.fileDraggedFromDataBase)
-    {
-        std::unique_ptr<juce::StringArray> null = std::make_unique<juce::StringArray >();
-
-        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
-        {
-            soundPlayers[0]->keyMappedSoundboard->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY());
-        }
-        else
-        {
-            int cartPosition = soundPlayers[0]->playlistbisViewport.getPosition().getX();
-            int playlistScrollPosition = soundPlayers[0]->playlistViewport.getViewPositionY();
-            int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
-
-            if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
-                soundPlayers[0]->myPlaylists[0]->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
-            else if (getMouseXYRelative().getX() > cartPosition)
-                soundPlayers[0]->myPlaylists[1]->fileDragMove(*null, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
-            else
-            {
-                soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
-                soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
-            }
-        }
-        grabKeyboardFocus();
-    }
-    else if (source == bottomComponent.dbBrowser.fileDroppedFromDataBase)
-    {
-        std::unique_ptr<juce::StringArray> null = std::make_unique<juce::StringArray >();
-
-
-        juce::String selectedSoundName = bottomComponent.dbBrowser.getSelectedSoundName();
-        juce::String fullPathName = bottomComponent.dbBrowser.getSelectedFile().getFullPathName();
-
-        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
-        {
-            soundPlayers[0]->keyMappedSoundboard->setDroppedFile(getMouseXYRelative(), fullPathName, selectedSoundName);
-            soundPlayers[0]->keyMappedSoundboard->fileDragExit();
-        }
-        else
-        {
-            int cartPosition = soundPlayers[0]->playlistbisViewport.getPosition().getX();
-            int playlistScrollPosition = soundPlayers[0]->playlistViewport.getViewPositionY();
-            int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
-
-            if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
-            {
-                soundPlayers[0]->myPlaylists[0]->setDroppedSoundName(selectedSoundName);
-                soundPlayers[0]->myPlaylists[0]->filesDropped(fullPathName, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
-
-            }
-            else if (getMouseXYRelative().getX() > cartPosition)
-            {
-                soundPlayers[0]->myPlaylists[1]->setDroppedSoundName(selectedSoundName);
-                soundPlayers[0]->myPlaylists[1]->filesDropped(fullPathName, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
-            }
-            soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
-            soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
-        }
-        grabKeyboardFocus();
-    }
-    else if (source == bottomComponent.distantDbBrowser.fileDraggedFromDataBase)
-    {
-
-        std::unique_ptr<juce::StringArray> null = std::make_unique<juce::StringArray >();
-
-        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
-        {
-            soundPlayers[0]->keyMappedSoundboard->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY());
-        }
-        else
-        {
-            int cartPosition = soundPlayers[0]->playlistbisViewport.getPosition().getX();
-            int playlistScrollPosition = soundPlayers[0]->playlistViewport.getViewPositionY();
-            int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
-
-            if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
-                soundPlayers[0]->myPlaylists[0]->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
-            else if (getMouseXYRelative().getX() > cartPosition)
-                soundPlayers[0]->myPlaylists[1]->fileDragMove(*null, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
-            else
-            {
-                soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
-                soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
-            }
-        }
-        grabKeyboardFocus();
-    }
-    else if (source == bottomComponent.distantDbBrowser.fileDroppedFromDataBase)
-    {
-        juce::String selectedSoundName = bottomComponent.distantDbBrowser.getSelectedSoundName();
-        juce::String fullPathName = bottomComponent.distantDbBrowser.getSelectedFile().getFullPathName();
-
-        std::unique_ptr<juce::StringArray> null = std::make_unique<juce::StringArray >();
-
-        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
-        {
-            soundPlayers[0]->keyMappedSoundboard->setDroppedFile(getMouseXYRelative(), fullPathName, selectedSoundName);
-            soundPlayers[0]->keyMappedSoundboard->fileDragExit();
-        }
-        else
-        {
-            int cartPosition = soundPlayers[0]->playlistbisViewport.getPosition().getX();
-            int playlistScrollPosition = soundPlayers[0]->playlistViewport.getViewPositionY();
-            int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
-
-            if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
-            {
-                soundPlayers[0]->myPlaylists[0]->setDroppedSoundName(selectedSoundName);
-                soundPlayers[0]->myPlaylists[0]->filesDropped(fullPathName, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
-
-            }
-            else if (getMouseXYRelative().getX() > cartPosition)
-            {
-                soundPlayers[0]->myPlaylists[1]->setDroppedSoundName(selectedSoundName);
-                soundPlayers[0]->myPlaylists[1]->filesDropped(fullPathName, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
-            }
-            soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
-            soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
-        }
-        grabKeyboardFocus();
-    }
     else if (source == bottomComponent.recorderComponent.mouseDragInRecorder)//when mouse is dragged in recorder, desactivate shortcuts keys for players
     {
         soundPlayers[0]->draggedPlaylist = -1;
@@ -456,14 +325,14 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         auto* player = soundPlayers[0]->myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
         bottomComponent.clipEffect.setPlayer(player);
         bottomComponent.clipEditor.setPlayer(player);
-        bottomComponent.setCurrentTabIndex(6);
+        bottomComponent.setCurrentTabIndex(2);
     }
     else if (source == soundPlayers[0]->myPlaylists[0]->envButtonBroadcaster || source == soundPlayers[0]->myPlaylists[1]->envButtonBroadcaster)
     {
         auto* player = soundPlayers[0]->myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
         bottomComponent.clipEditor.setPlayer(player);
         bottomComponent.clipEffect.setPlayer(player);
-        bottomComponent.setCurrentTabIndex(5);
+        bottomComponent.setCurrentTabIndex(1);
     }
     else if (source == soundPlayers[0]->myPlaylists[0]->playerLaunchedBroadcaster.get()
     || source == soundPlayers[0]->myPlaylists[1]->playerLaunchedBroadcaster.get())
@@ -471,7 +340,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         auto* player = soundPlayers[0]->myPlaylists[Settings::editedPlaylist]->players[Settings::editedPlayer];
         bottomComponent.clipEditor.setPlayer(player);
         bottomComponent.clipEffect.setPlayer(player);
-        bottomComponent.setCurrentTabIndex(5);
+        bottomComponent.setCurrentTabIndex(1);
     }
     else if (source == soundPlayers[0]->playlistLoadedBroadcaster)
     {
@@ -1236,10 +1105,6 @@ void MainComponent::initializeBottomComponent()
     myMixer.addInputSource(&bottomComponent.myMixer, false);
     bottomComponent.audioPlaybackDemo.fileDraggedFromBrowser->addChangeListener(this);
     bottomComponent.audioPlaybackDemo.fileDroppedFromBrowser->addChangeListener(this);
-    bottomComponent.dbBrowser.fileDraggedFromDataBase->addChangeListener(this);
-    bottomComponent.dbBrowser.fileDroppedFromDataBase->addChangeListener(this);
-    bottomComponent.distantDbBrowser.fileDraggedFromDataBase->addChangeListener(this);
-    bottomComponent.distantDbBrowser.fileDroppedFromDataBase->addChangeListener(this);
     bottomComponent.recorderComponent.mouseDragInRecorder->addChangeListener(this);
     bottomComponent.recorderComponent.spaceBarKeyPressed->addChangeListener(this);
     bottomComponent.cuePlay->addChangeListener(this);

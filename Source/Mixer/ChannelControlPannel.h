@@ -3,7 +3,7 @@
 
     ChannelControlPannel.h
     Created: 21 Apr 2021 11:10:16pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

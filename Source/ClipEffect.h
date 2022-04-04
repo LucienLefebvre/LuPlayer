@@ -3,7 +3,7 @@
 
     ClipEffect.h
     Created: 12 Jan 2022 4:22:43pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

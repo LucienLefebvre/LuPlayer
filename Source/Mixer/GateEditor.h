@@ -3,7 +3,7 @@
 
     GateEditor.h
     Created: 27 Apr 2021 3:35:49pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

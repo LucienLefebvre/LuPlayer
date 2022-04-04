@@ -26,7 +26,7 @@ public:
     {
         // This method is where you should put your application's initialisation code..
 
-        mainWindow.reset (new MainWindow ("MultiPlayer beta"));
+        mainWindow.reset (new MainWindow ("LuPlayer Beta"));
         mainWindow->setCommandLine(commandLine);
     }
 

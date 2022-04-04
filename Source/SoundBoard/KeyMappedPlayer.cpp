@@ -3,7 +3,7 @@
 
     KeyMappedPlayer.cpp
     Created: 16 Jan 2022 9:32:26pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

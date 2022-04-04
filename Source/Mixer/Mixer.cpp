@@ -3,7 +3,7 @@
 
     Mixer.cpp
     Created: 3 Apr 2021 12:32:50pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

@@ -504,18 +504,6 @@
     <ClCompile Include="Source\ClipEffect.cpp">
       <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClCompile>
-    <ClCompile Include="Source\DataBaseBrowser.cpp">
-      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DataBaseFeeder.cpp">
-      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DataBaseImport.cpp">
-      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\DistantDataBaseBrowser.cpp">
-      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Recorder.cpp">
       <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClCompile>
@@ -568,12 +556,6 @@
       <Filter>MultiPlayer\Source\Soundboard</Filter>
     </ClCompile>
     <ClCompile Include="Source\SoundBoard\KeyMappedPlayer.cpp">
-      <Filter>MultiPlayer\Source\Soundboard</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Soundboard\PlayerEditor.cpp">
-      <Filter>MultiPlayer\Source\Soundboard</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Soundboard\PlayerProcessor.cpp">
       <Filter>MultiPlayer\Source\Soundboard</Filter>
     </ClCompile>
     <ClCompile Include="Source\sqlite\shell.c">
@@ -2696,18 +2678,6 @@
     <ClInclude Include="Source\ClipEffect.h">
       <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
-    <ClInclude Include="Source\DataBaseBrowser.h">
-      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DataBaseFeeder.h">
-      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DataBaseImport.h">
-      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DistantDataBaseBrowser.h">
-      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Recorder.h">
       <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
@@ -2801,12 +2771,6 @@
     <ClInclude Include="Source\SoundBoard\KeyMappedPlayer.h">
       <Filter>MultiPlayer\Source\Soundboard</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Soundboard\PlayerEditor.h">
-      <Filter>MultiPlayer\Source\Soundboard</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Soundboard\PlayerProcessor.h">
-      <Filter>MultiPlayer\Source\Soundboard</Filter>
-    </ClInclude>
     <ClInclude Include="Source\sqlite\sqlite3.h">
       <Filter>MultiPlayer\Source\sqlite</Filter>
     </ClInclude>
@@ -2829,9 +2793,6 @@
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\ffmpegConvert.h">
-      <Filter>MultiPlayer\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\helpers.h">
       <Filter>MultiPlayer\Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\LoudnessBar.h">

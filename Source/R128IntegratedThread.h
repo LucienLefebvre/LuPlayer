@@ -3,7 +3,7 @@
 
     R128IntegratedThread.h
     Created: 6 Jan 2022 9:25:30pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

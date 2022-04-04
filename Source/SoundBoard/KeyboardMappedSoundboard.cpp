@@ -3,7 +3,7 @@
 
     KeyboardMappedSoundboard.cpp
     Created: 16 Jan 2022 9:21:14pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

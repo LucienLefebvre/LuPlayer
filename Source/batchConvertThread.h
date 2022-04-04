@@ -3,7 +3,7 @@
 
     batchConvertThread.h
     Created: 6 Jan 2022 1:48:52pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

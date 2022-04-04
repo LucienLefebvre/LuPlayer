@@ -3,7 +3,7 @@
 
     InputsControl.cpp
     Created: 21 Apr 2021 1:00:24pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

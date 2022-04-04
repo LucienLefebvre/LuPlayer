@@ -3,7 +3,7 @@
 
     Denoiser.cpp
     Created: 15 Jan 2022 1:59:15pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

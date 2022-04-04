@@ -3,7 +3,7 @@
 
     helpers.h
     Created: 22 Dec 2021 4:02:46pm
-    Author:  lucie
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

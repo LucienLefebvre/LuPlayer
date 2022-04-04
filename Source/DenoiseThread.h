@@ -3,7 +3,7 @@
 
     DenoiseThread.h
     Created: 15 Jan 2022 4:39:24pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

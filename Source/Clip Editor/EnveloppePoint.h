@@ -3,7 +3,7 @@
 
     EnveloppePoint.h
     Created: 12 Jan 2022 10:00:08pm
-    Author:  Lucien
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

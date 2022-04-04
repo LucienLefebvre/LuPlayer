@@ -3,7 +3,7 @@
 
     filterGraphPoint.h
     Created: 17 Apr 2021 3:14:38pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

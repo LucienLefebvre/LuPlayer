@@ -3,7 +3,7 @@
 
     convertObject.h
     Created: 22 Dec 2021 6:13:02pm
-    Author:  lucie
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

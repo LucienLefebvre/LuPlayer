@@ -3,7 +3,7 @@
 
     ffmpegConvert.h
     Created: 22 Dec 2021 3:50:11pm
-    Author:  lucie
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

@@ -3,7 +3,7 @@
 
     FilterEditor.h
     Created: 16 Apr 2021 1:50:43am
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

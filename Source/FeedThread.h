@@ -3,7 +3,7 @@
 
     FeedThread.h
     Created: 11 Feb 2022 8:05:45pm
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

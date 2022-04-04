@@ -3,7 +3,7 @@
 
     MixerInput.h
     Created: 9 Apr 2021 9:18:19am
-    Author:  DPR
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */

@@ -1,4 +1,6 @@
+
 /*
+* This is a modification of the Thumbnail class in order to display enveloppe gain
   ==============================================================================
 
    This file is part of the JUCE library.
