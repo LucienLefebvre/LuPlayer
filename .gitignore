@@ -10,6 +10,7 @@
 /exiftool
 /ffmpeg.exe
 /lame
+/ff_meters
 /*.exe
 *.dll
 /odbc
