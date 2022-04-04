@@ -683,12 +683,13 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
 bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* originatingComponent)
 {
     auto command = commandManager.getKeyMappings()->findCommandForKeyPress(key);
-    commandManager.invokeDirectly(command, true);
     if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap
         && soundPlayers[0]->keyMappedSoundboard != nullptr)
     {
         soundPlayers[0]->keyMappedSoundboard->keyPressed(key, originatingComponent);
     }
+    else
+        commandManager.invokeDirectly(command, true);
     return false;
 }
 

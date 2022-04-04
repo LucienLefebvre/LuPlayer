@@ -11,6 +11,7 @@
 /ffmpeg.exe
 /lame
 /*.exe
+/*.dll
 /odbc
 /OLD
 /MultiPlayer.jucer

@@ -1252,6 +1252,9 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         juce::FileLogger::getCurrentLogger()->writeToLog("player lu thread finished");
         integratedLoudness = luThread.getILU();
+        if (integratedLoudness > 0)
+            integratedLoudness = -23;
+        DBG("integrated lloudness : " << integratedLoudness);
         double loudnessDifference = -23. - integratedLoudness;
         trimValueToSet = loudnessDifference;
         luThread.deleteProgressFile();

@@ -38,9 +38,9 @@ public:
     juce::MixerAudioSource mixer;
 private:
     juce::OwnedArray<KeyMappedPlayer> mappedPlayers;
-    juce::StringArray shortcutArray{ "A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P",
-                                     "Q", "S", "D", "F", "G", "H", "J", "K", "L", "M",
-                                     "<", "W", "X", "C", "V", "B", "N", ",", ";", ":"};
+    juce::StringArray shortcutArray{ "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
+                                     "A", "S", "D", "F", "G", "H", "J", "K", "L", ";",
+                                     "\\", "Z", "X", "C", "V", "B", "N", "M", ",", "."};
     int shortcutCodeArray[30]{ 1, 2 };
     int spaceBetweenPlayers = 4;
     int playerWidth = 50;
