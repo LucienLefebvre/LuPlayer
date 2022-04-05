@@ -13,8 +13,9 @@
 #include "Settings.h"
 
 //==============================================================================
-SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
+SoundPlayer::SoundPlayer(SoundPlayer::Mode m, Settings* s)
 {
+    settings = s;
     soundPlayerMode = m;
     if (m == SoundPlayer::Mode::EightFaders)
         isEightPlayerMode = true;;
@@ -32,10 +33,9 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
     {
         myPlaylists.add(new Playlist(0));
         myPlaylists.add(new Playlist(1));
-        keyMappedSoundboard.reset(new KeyboardMappedSoundboard());
+        keyMappedSoundboard.reset(new KeyboardMappedSoundboard(settings));
         addAndMakeVisible(keyMappedSoundboard.get());
         keyMappedSoundboard->setBounds(getLocalBounds());
-
     }
 
 
@@ -165,6 +165,8 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m)
 
     addChildComponent(&mainStopWatch);
     mainStopWatch.setMouseClickGrabsKeyboardFocus(false);
+
+
 
     for (int i = 0; i < getNumChildComponents(); i++)
     {
@@ -1985,6 +1987,14 @@ void SoundPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
         draggedPlaylist = -1;
         draggedPlaylist = 1;
         draggedPlayer = Settings::draggedPlayer;
+    }
+    else if (source == settings->keyboardLayoutBroadcaster.get())
+    {
+        if (soundPlayerMode == SoundPlayer::Mode::KeyMap)
+        {
+            if (keyMappedSoundboard != nullptr)
+                keyMappedSoundboard->setShortcutKeys();
+        }
     }
 }
 

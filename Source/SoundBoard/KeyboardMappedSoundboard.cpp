@@ -12,11 +12,9 @@
 #include "KeyboardMappedSoundboard.h"
 
 //==============================================================================
-KeyboardMappedSoundboard::KeyboardMappedSoundboard()
+KeyboardMappedSoundboard::KeyboardMappedSoundboard(Settings* s)
 {
-
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
+    settings = s;
 
 }
 
@@ -109,7 +107,10 @@ void KeyboardMappedSoundboard::setShortcutKeys()
 {
     for (int i = 0; i < mappedPlayers.size(); i++)
     {
-        mappedPlayers[i]->setShortcut(shortcutArray[i]);
+        if (Settings::keyboardLayout == 1)
+            mappedPlayers[i]->setShortcut(qwertyShortcutArray[i]);
+        else if (Settings::keyboardLayout == 2)
+            mappedPlayers[i]->setShortcut(azertyShortcutArray[i]);
     }
 }
 
@@ -117,10 +118,22 @@ bool KeyboardMappedSoundboard::keyPressed(const juce::KeyPress& key, juce::Compo
 {
     for (int i = 0; i < mappedPlayers.size(); i++)
     {
-        if (juce::KeyPress::createFromDescription(shortcutArray[i]) == key.getKeyCode())
+        if (Settings::keyboardLayout == 1)
         {
-            mappedPlayers[i]->shortcutKeyPressed();
+            if (juce::KeyPress::createFromDescription(qwertyShortcutArray[i]) == key.getKeyCode())
+                mappedPlayers[i]->shortcutKeyPressed();
+        }
+        else if (Settings::keyboardLayout == 2)
+        {
+            if (juce::KeyPress::createFromDescription(azertyShortcutArray[i]) == key.getKeyCode())
+                mappedPlayers[i]->shortcutKeyPressed();
         }
     }
     return false;
+}
+
+
+void KeyboardMappedSoundboard::changeListenerCallback(juce::ChangeBroadcaster* source)
+{
+
 }

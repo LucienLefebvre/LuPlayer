@@ -58,6 +58,8 @@ int Settings::preferedSoundPlayerMode;
 
 bool Settings::showEnveloppe;
 bool Settings::viewLastPlayedSound;
+
+int Settings::keyboardLayout;
 //==============================================================================
 Settings::Settings() : settingsFile(options)
 {
@@ -139,6 +141,11 @@ Settings::Settings() : settingsFile(options)
         Settings::viewLastPlayedSound = false;
     else
         Settings::viewLastPlayedSound = properties.getUserSettings()->getValue("viewLastPlayedSound").getIntValue();
+
+    if (properties.getUserSettings()->getValue("keyboardLayout").isEmpty())
+        Settings::keyboardLayout = 1;
+    else
+        Settings::keyboardLayout = properties.getUserSettings()->getValue("keyboardLayout").getIntValue();
 
     //SAVE & CLOSE BUTTONS
     saveButton.setBounds(250, 400, 100, 50);
@@ -344,7 +351,7 @@ Settings::Settings() : settingsFile(options)
         audioOutputModeListbox.setItemEnabled(3, false);
     audioOutputModeListbox.addListener(this);
 
-
+    keyboardLayoutBroadcaster.reset(new juce::ChangeBroadcaster);
 
     makeIpAdress();
     setOptions();
@@ -711,4 +718,13 @@ void Settings::setViewLastPlayed(bool show)
     properties.getUserSettings()->setValue("viewLastPlayedSound", (int)Settings::viewLastPlayedSound);
     properties.saveIfNeeded();
     settingsFile.save();
+}
+
+void Settings::setKeyboardLayout(int layout)
+{
+    Settings::keyboardLayout = layout;
+    properties.getUserSettings()->setValue("keyboardLayout", (int)Settings::keyboardLayout);
+    properties.saveIfNeeded();
+    settingsFile.save();
+    keyboardLayoutBroadcaster->sendChangeMessage();
 }

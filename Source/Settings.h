@@ -61,6 +61,7 @@ public:
     void setShowMeters(bool show);
     void setShowEnveloppe(bool show);
     void setViewLastPlayed(bool show);
+    void setKeyboardLayout(int layout);
     juce::TextButton saveButton;
     //int maxFaderValue = 0;
 
@@ -115,6 +116,9 @@ public:
 
     static int Settings::preferedSoundPlayerMode;
 
+    static int Settings::keyboardLayout;
+
+    std::unique_ptr<juce::ChangeBroadcaster> keyboardLayoutBroadcaster;
 
 private:
 

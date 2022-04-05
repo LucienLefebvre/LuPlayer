@@ -19,7 +19,8 @@ class KeyMapper :
     public juce::Component,
     public juce::TableListBoxModel,
     public juce::KeyListener,
-    public juce::Timer
+    public juce::Timer,
+    public juce::ComboBox::Listener
 {
 public:
     KeyMapper(Settings* s);
@@ -45,11 +46,17 @@ public:
     void loadMappingFile();
     void timerCallback();
 private:
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
     //KeyMapping keyMap;
     juce::Array<int> keyMapping;
     juce::Array<int> commandUIDS;
     juce::StringArray keyMapCommands;
     std::unique_ptr<juce::TableListBox> table;
+
+    std::unique_ptr<juce::Label> keyboardLayoutLabel;
+    std::unique_ptr<juce::ComboBox> keyboardLayloutComboBox;
+    int keyboardLayoutHeight = 25;
+    int saveButtonHeight = 25;
 
     bool wantsKeyPress = false;
     int commandToMap = 0;

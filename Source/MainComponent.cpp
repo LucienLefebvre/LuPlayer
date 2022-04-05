@@ -923,12 +923,14 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     myMixer.removeAllInputs();
     myCueMixer.removeAllInputs();
     soundPlayers.clear();
-    soundPlayers.add(new SoundPlayer(m));
+    soundPlayers.add(new SoundPlayer(m, &settings));
     addAndMakeVisible(soundPlayers[0]);
     soundPlayers[0]->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     soundPlayers[0]->setWantsKeyboardFocus(false);
     myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
     myCueMixer.addInputSource(&soundPlayers[0]->myCueMixer, false);
+
+    settings.keyboardLayoutBroadcaster->removeAllChangeListeners();
 
     if (m == SoundPlayer::Mode::EightFaders)
     {
@@ -970,6 +972,7 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
         soundPlayers[0]->initializeKeyMapPlayer();
         removeKeyListener(commandManager.getKeyMappings());
         getTopLevelComponent()->removeKeyListener(commandManager.getKeyMappings());
+        settings.keyboardLayoutBroadcaster->addChangeListener(soundPlayers[0]);
     }
     else
     {

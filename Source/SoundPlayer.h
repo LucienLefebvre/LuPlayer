@@ -61,7 +61,7 @@ public:
         downOneDb,
         dummy
     };
-    SoundPlayer(SoundPlayer::Mode m);
+    SoundPlayer(SoundPlayer::Mode m, Settings* s);
     ~SoundPlayer() override;
 
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
@@ -73,6 +73,8 @@ public:
 
     Player* getActivePlayer();
     void playPlayer(int playerID);
+
+    void setSettings(Settings* s);
 
     void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper);
     void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message);
@@ -265,5 +267,7 @@ private:
 
     //Stopwatch
     int stopWatchHeight = 25;
+
+    Settings* settings;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SoundPlayer)
 };

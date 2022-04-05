@@ -25,13 +25,26 @@ KeyMapper::KeyMapper(Settings* s)
     table.reset(new juce::TableListBox);
     addAndMakeVisible(table.get());
     table->setModel(this);
-    table->setBounds(getBounds());
+    table->setBounds(0, 0, getBounds().getWidth(), getBounds().getHeight() - keyboardLayoutHeight);
     table->getHeader().addColumn("Action", 1, 400);
     table->getHeader().addColumn("Shortcut", 2, 190);
     table->getHeader().setColour(juce::TableHeaderComponent::ColourIds::backgroundColourId, juce::Colour(40, 134, 189));
     table->removeKeyListener(this);
     table->setWantsKeyboardFocus(false);
     table->setMouseClickGrabsKeyboardFocus(false);
+
+    keyboardLayoutLabel.reset(new juce::Label);
+    addAndMakeVisible(keyboardLayoutLabel.get());
+    keyboardLayoutLabel->setText("Key mapped soundboard layout (need restart)", juce::dontSendNotification);
+    keyboardLayoutLabel->setBounds(0, getHeight() - keyboardLayoutHeight, 300, keyboardLayoutHeight);
+
+    keyboardLayloutComboBox.reset(new juce::ComboBox);
+    addAndMakeVisible(keyboardLayloutComboBox.get());
+    keyboardLayloutComboBox->setBounds(300, getHeight() - keyboardLayoutHeight, 200, keyboardLayoutHeight);
+    keyboardLayloutComboBox->addItem("QWERTY", 1);
+    keyboardLayloutComboBox->addItem("AZERTY", 2);
+    keyboardLayloutComboBox->setSelectedId(Settings::keyboardLayout, juce::dontSendNotification);
+    keyboardLayloutComboBox->addListener(this);
 }
 
 KeyMapper::~KeyMapper()
@@ -41,12 +54,14 @@ KeyMapper::~KeyMapper()
 void KeyMapper::paint (juce::Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
+    g.setColour(juce::Colour(40, 134, 189));
+    int lineY = getHeight() - keyboardLayoutHeight + 1;
+    g.drawLine(0, lineY, getWidth(), lineY);
 }
 
 void KeyMapper::resized()
 {
-    int saveButtonHeight = 25;
-    //table->setSize(600, 400 - saveButtonHeight);
+    //table->setSize(600, 400 - saveButtonHeight - keyboardLayoutHeight);
 }
 
 int KeyMapper::getNumRows()
@@ -176,5 +191,13 @@ void KeyMapper::timerCallback()
     {
         wantsKeyPress = false;
         repaint();
+    }
+}
+
+void KeyMapper::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
+{
+    if (comboBoxThatHasChanged == keyboardLayloutComboBox.get())
+    {
+        settings->setKeyboardLayout(comboBoxThatHasChanged->getSelectedId());
     }
 }
