@@ -33,7 +33,7 @@ class Playlist  : public juce::Component,
     public juce::ApplicationCommandTarget
 {
 public:
-    Playlist(int splaylistType);
+    Playlist(int splaylistType, Settings* s);
     ~Playlist() override;
 
     void paint (juce::Graphics&) override;
@@ -253,6 +253,8 @@ private:
     int fader1StartPlayer;
     int fader2StartPlayer;
     bool keypressed = 0;
+
+    Settings* settings;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Playlist)
 };

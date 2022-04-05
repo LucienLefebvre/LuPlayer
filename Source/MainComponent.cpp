@@ -121,6 +121,8 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     addKeyListener(this);
     setWantsKeyboardFocus(true);
 
+    OSCInitialize();
+
 }
 
 void MainComponent::settingsButtonClicked()
@@ -734,16 +736,16 @@ void MainComponent::valueChanged(juce::Value& value)
 
 void MainComponent::OSCInitialize()
 {
-    juce::FileLogger::getCurrentLogger()->writeToLog("Osc initialize");
-    soundPlayers[0]->OSCInitialize();
-    if (soundPlayers[0]->oscConnected == true)
-    {
-        connectOSCButton.setButtonText("Disconnect OSC");
-    }
-    else 
-    {
-        connectOSCButton.setButtonText("Connect OSC");
-    }
+    //juce::FileLogger::getCurrentLogger()->writeToLog("Osc initialize");
+    //soundPlayers[0]->OSCInitialize();
+    //if (soundPlayers[0]->oscConnected == true)
+    //{
+    //    connectOSCButton.setButtonText("Disconnect OSC");
+    //}
+    //else 
+    //{
+    //    connectOSCButton.setButtonText("Connect OSC");
+    //}
 }
 
 
@@ -946,6 +948,14 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
         {
             soundPlayers[0]->myPlaylists[0]->addPlayer(i);
             soundPlayers[0]->myPlaylists[1]->addPlayer(i);
+        }
+        for (int i = 1; i < 9; i++)
+        {
+            auto playlistID = i < 5 ? 0 : 1;
+            auto playerID = i < 5 ? i - 1 : i - 5;
+            auto player = soundPlayers[0]->myPlaylists[playlistID]->players[playerID];
+            if (player != nullptr)
+                player->volumeSlider.addListener(soundPlayers[0]);
         }
     }
     else 

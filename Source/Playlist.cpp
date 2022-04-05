@@ -14,10 +14,11 @@
 #include "Settings.h"
 
 //==============================================================================
-Playlist::Playlist(int splaylistType)
+Playlist::Playlist(int splaylistType, Settings* s)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
+    settings = s;
     playerNumber = 4;
     playlistType = splaylistType;
     //if (playlistType == 1)
@@ -887,11 +888,15 @@ void Playlist::addPlayer(int playerID)
 {
     juce::FileLogger::getCurrentLogger()->writeToLog("Add player");
     int idAddedPlayer = playerID + 1;
-    players.insert(idAddedPlayer, new Player(idAddedPlayer));
+    players.insert(idAddedPlayer, new Player(idAddedPlayer, settings));
     if (players[idAddedPlayer] != nullptr)
     {
         if (eightPlayerMode)
             players.getLast()->setEightPlayerMode(true);
+        if (isEightPlayerSecondCart)
+            players.getLast()->setOSCIndex(idAddedPlayer + 5);
+        else
+            players.getLast()->setOSCIndex(idAddedPlayer + 1);
         players[idAddedPlayer]->playerPrepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
         playlistMixer.addInputSource(players[idAddedPlayer]->outputSource.get(), false);
         playlistCueMixer.addInputSource(players[idAddedPlayer]->cueOutputSource.get(), false);

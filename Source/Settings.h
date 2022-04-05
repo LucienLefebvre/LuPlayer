@@ -120,6 +120,8 @@ public:
 
     std::unique_ptr<juce::ChangeBroadcaster> keyboardLayoutBroadcaster;
 
+    juce::OSCSender sender;
+    bool oscConnected = true;
 private:
 
     
@@ -196,6 +198,7 @@ private:
     void Settings::makeIpAdress();
 
     void labelTextChanged(juce::Label* labelThatHasChanged) override;
+
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Settings)

@@ -39,7 +39,8 @@ class SoundPlayer : public juce::Component,
                     private juce::OSCReceiver::ListenerWithOSCAddress<juce::OSCReceiver::MessageLoopCallback>,
                     private juce::OSCReceiver::Listener<juce::OSCReceiver::MessageLoopCallback>,
                     public juce::ActionListener,
-                    public juce::ApplicationCommandTarget
+                    public juce::ApplicationCommandTarget,
+                    public juce::Slider::Listener
 {
 public:
     enum  class Mode : int
@@ -80,6 +81,9 @@ public:
     void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message);
     void SoundPlayer::OSCInitialize();
     void SoundPlayer::oscMessageReceived(const juce::OSCMessage& message);
+    void handleOSCKeyMap(const juce::OSCMessage& message);
+    void handleOSCEightFaders(const juce::OSCMessage& message);
+    void handleOSCPlaylist(const juce::OSCMessage& message);
     void SoundPlayer::metersInitialize();
     void SoundPlayer::savePlaylist();
     juce::XmlElement* createPlayerXmlElement(int player, int playlist, juce::XmlElement* e);
@@ -146,7 +150,7 @@ private:
     void SoundPlayer::copyPlayingSound();
     void SoundPlayer::changeListenerCallback(juce::ChangeBroadcaster* source);
     void SoundPlayer::actionListenerCallback(const juce::String& message);
-
+    void sliderValueChanged(juce::Slider* slider);
     //SAVE
     juce::File myFile;
     double loadingProgress = 0;
@@ -206,7 +210,7 @@ private:
     int midiMessageValue;
 
     //OSC
-    juce::OSCSender sender;
+    juce::OSCSender* sender;
     juce::OSCReceiver receiver;
     juce::String ipAdress;
     int outPort;
@@ -269,5 +273,7 @@ private:
     int stopWatchHeight = 25;
 
     Settings* settings;
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SoundPlayer)
 };

@@ -26,13 +26,13 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m, Settings* s)
     //addKeyListener(this);
 
     if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
-        myPlaylists.add(new Playlist(0));
+        myPlaylists.add(new Playlist(0, settings));
     else if (soundPlayerMode == SoundPlayer::Mode::EightFaders)
-        myPlaylists.add(new Playlist(1));
+        myPlaylists.add(new Playlist(1, settings));
     else
     {
-        myPlaylists.add(new Playlist(0));
-        myPlaylists.add(new Playlist(1));
+        myPlaylists.add(new Playlist(0, settings));
+        myPlaylists.add(new Playlist(1, settings));
         keyMappedSoundboard.reset(new KeyboardMappedSoundboard(settings));
         addAndMakeVisible(keyMappedSoundboard.get());
         keyMappedSoundboard->setBounds(getLocalBounds());
@@ -73,7 +73,7 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m, Settings* s)
         }
 
         //ADD CART
-        myPlaylists.add(new Playlist(1));
+        myPlaylists.add(new Playlist(1, settings));
 
 
         myPlaylists[1]->playerStoppedID.addListener(this);
@@ -159,19 +159,23 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m, Settings* s)
     mainMeter.setMouseClickGrabsKeyboardFocus(false);
 
     addAndMakeVisible(&timeLabel);
-    //timeLabel.setBounds(getParentWidth() - 200, 0, 200, topButtonsHeight);
     timeLabel.setFont(juce::Font(30.00f, juce::Font::plain).withTypefaceStyle("Regular"));
     timeLabel.setMouseClickGrabsKeyboardFocus(false);
 
     addChildComponent(&mainStopWatch);
     mainStopWatch.setMouseClickGrabsKeyboardFocus(false);
 
+    if (soundPlayerMode == Mode::EightFaders)
+    {
 
+    }
 
     for (int i = 0; i < getNumChildComponents(); i++)
     {
         getChildComponent(i)->setMouseClickGrabsKeyboardFocus(false);
     }
+
+    OSCInitialize();
 }
 
 SoundPlayer::~SoundPlayer()
@@ -219,12 +223,7 @@ void SoundPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 
 void SoundPlayer::paint (juce::Graphics& g)
 {
-    //g.fillAll (juce::Colours::red);   // clear the background
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-   /* g.setColour(juce::Colour(40, 134, 189));
-    g.drawRoundedRectangle(timeLabel.getBounds().toFloat(), 5, 2);
-    g.setColour(juce::Colour(229, 149, 0));
-    g.fillRoundedRectangle(timeLabel.getBounds().reduced(2).toFloat(), 5);*/
 }
 
 void SoundPlayer::resized()
@@ -334,74 +333,75 @@ void SoundPlayer::timerCallback()
     //OSC SEND
     if (oscConnected)
     {
-        if (myPlaylists[0]->players[myPlaylists[0]->fader1Player] != nullptr)
+        if (soundPlayerMode == Mode::OnePlaylistOneCart)
         {
-            OSCsend(1, myPlaylists[0]->players[myPlaylists[0]->fader1Player]->remainingTimeString);
-            sender.send("/1/gain1", juce::String(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->volumeLabel.getText() + "dB"));
-            delta1 = juce::Time::currentTimeMillis() - start1;
-            if (delta1 > deltaTime)
+            if (myPlaylists[0]->players[myPlaylists[0]->fader1Player] != nullptr)
+            {
+                OSCsend(1, myPlaylists[0]->players[myPlaylists[0]->fader1Player]->remainingTimeString);
+                sender->send("/1/gain1", juce::String(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->volumeLabel.getText() + "dB"));
+                delta1 = juce::Time::currentTimeMillis() - start1;
+                if (delta1 > deltaTime)
+                {
+
+                    juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.0001, Settings::skewFactorGlobal);
+                    sender->send("/1/fader1", valueToSendNorm.convertTo0to1(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->volumeSlider.getValue()));
+
+                }
+            }
+            else
+            {
+                OSCsend(1, "0:0");
+            }
+
+            if (myPlaylists[0]->players[myPlaylists[0]->fader2Player] != nullptr)
             {
 
-                juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.0001, Settings::skewFactorGlobal);
-                sender.send("/1/fader1", valueToSendNorm.convertTo0to1(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->volumeSlider.getValue()));
-
+                OSCsend(2, myPlaylists[0]->players[myPlaylists[0]->fader2Player]->remainingTimeString);
+                sender->send("/1/gain2", juce::String(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->volumeLabel.getText() + "dB"));
+                delta2 = juce::Time::currentTimeMillis() - start2;
+                if (delta2 > deltaTime)
+                {
+                    juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.0001, Settings::skewFactorGlobal);
+                    sender->send("/1/fader2", valueToSendNorm.convertTo0to1(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->volumeSlider.getValue()));
+                }
             }
-        }
-        else
-        {
-            OSCsend(1, "0:0");
-        }
-
-        if (myPlaylists[0]->players[myPlaylists[0]->fader2Player] != nullptr)
-        {
-
-            OSCsend(2, myPlaylists[0]->players[myPlaylists[0]->fader2Player]->remainingTimeString);
-            sender.send("/1/gain2", juce::String(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->volumeLabel.getText() + "dB"));
-            delta2 = juce::Time::currentTimeMillis() - start2;
-            if (delta2 > deltaTime)
+            else
             {
-                juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.0001, Settings::skewFactorGlobal);
-                sender.send("/1/fader2", valueToSendNorm.convertTo0to1(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->volumeSlider.getValue()));
+                OSCsend(2, "0:0");
             }
-        }
-        else
-        {
-            OSCsend(2, "0:0");
-        }
 
-        if (myPlaylists[1]->players[myPlaylists[1]->fader1Player] != nullptr)
-        {
-            OSCsend(3, myPlaylists[1]->players[myPlaylists[1]->fader1Player]->remainingTimeString);
-            sender.send("/1/gain3", juce::String(myPlaylists[1]->players[myPlaylists[1]->fader1Player]->volumeLabel.getText() + "dB"));
-            delta3 = juce::Time::currentTimeMillis() - start3;
-            if (delta3 > deltaTime)
+            if (myPlaylists[1]->players[myPlaylists[1]->fader1Player] != nullptr)
             {
-                juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.0001, Settings::skewFactorGlobal);
-                sender.send("/1/fader3", valueToSendNorm.convertTo0to1(myPlaylists[1]->players[myPlaylists[1]->fader1Player]->volumeSlider.getValue()));
+                OSCsend(3, myPlaylists[1]->players[myPlaylists[1]->fader1Player]->remainingTimeString);
+                sender->send("/1/gain3", juce::String(myPlaylists[1]->players[myPlaylists[1]->fader1Player]->volumeLabel.getText() + "dB"));
+                delta3 = juce::Time::currentTimeMillis() - start3;
+                if (delta3 > deltaTime)
+                {
+                    juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.0001, Settings::skewFactorGlobal);
+                    sender->send("/1/fader3", valueToSendNorm.convertTo0to1(myPlaylists[1]->players[myPlaylists[1]->fader1Player]->volumeSlider.getValue()));
+                }
             }
-        }
-        else
-        {
-            OSCsend(3, "0:0");
-        }
-
-        if (myPlaylists[1]->players[myPlaylists[1]->fader2Player] != nullptr)
-        {
-            OSCsend(4, myPlaylists[1]->players[myPlaylists[1]->fader2Player]->remainingTimeString);
-            sender.send("/1/gain4", juce::String(myPlaylists[1]->players[myPlaylists[1]->fader2Player]->volumeLabel.getText() + "dB"));
-            delta4 = juce::Time::currentTimeMillis() - start4;
-            if (delta4 > deltaTime)
+            else
             {
-                juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.0001, Settings::skewFactorGlobal);
-                sender.send("/1/fader4", valueToSendNorm.convertTo0to1(myPlaylists[1]->players[myPlaylists[1]->fader2Player]->volumeSlider.getValue()));
+                OSCsend(3, "0:0");
+            }
+
+            if (myPlaylists[1]->players[myPlaylists[1]->fader2Player] != nullptr)
+            {
+                OSCsend(4, myPlaylists[1]->players[myPlaylists[1]->fader2Player]->remainingTimeString);
+                sender->send("/1/gain4", juce::String(myPlaylists[1]->players[myPlaylists[1]->fader2Player]->volumeLabel.getText() + "dB"));
+                delta4 = juce::Time::currentTimeMillis() - start4;
+                if (delta4 > deltaTime)
+                {
+                    juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.0001, Settings::skewFactorGlobal);
+                    sender->send("/1/fader4", valueToSendNorm.convertTo0to1(myPlaylists[1]->players[myPlaylists[1]->fader2Player]->volumeSlider.getValue()));
+                }
+            }
+            else
+            {
+                OSCsend(4, "0:0");
             }
         }
-        else
-        {
-            OSCsend(4, "0:0");
-        }
-
-
         juce::NormalisableRange<float>valueToSendNorm(0., 1., 0.001, 0.2);
         OSCsend(5, valueToSendNorm.convertTo0to1(meterSource.getRMSLevel(1)));
     }
@@ -457,46 +457,12 @@ void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce:
             }
         }
     }
-    //if (midiMessageNumber == 43 && midiMessageValue == 127)
-    //{
-    //    myPlaylists[0]->playersPreviousPositionClicked();
-    //}
-    //else if (midiMessageNumber == 44 && midiMessageValue == 127)
-    //{
-    //    myPlaylists[0]->playersNextPositionClicked();
-    //}
-    //else if (midiMessageNumber == 42 && midiMessageValue == 127)
-    //{
-    //    myPlaylists[0]->playersResetPositionClicked();
-    //}
-    //else if (midiMessageNumber == 41 && midiMessageValue == 127)
-    //{
-    //    myPlaylists[0]->spaceBarPressed();
-    //}
 
-    //const juce::ScopedValueSetter<bool> scopedInputFlag(isAddingFromMidiInput, true);
 }
 
 void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message)
 {
-    //midiMessageValue = message.getControllerValue();
-    //midiMessageNumber = message.getControllerNumber();
-    //if (myPlaylists[0] != nullptr && midiMessageNumber < 4 && midiMessageNumber >= 0)
-    //{
-    //    myPlaylists[0]->handleIncomingMidiMessageEightPlayers(midiMessageValue, midiMessageNumber);
-    //}
-    //else if (myPlaylists[1] != nullptr && midiMessageNumber >= 4 && midiMessageNumber < 8)
-    //{
-    //    myPlaylists[1]->handleIncomingMidiMessageEightPlayers(midiMessageValue, midiMessageNumber - 4);
-    //}
-    //else if (myPlaylists[0] != nullptr && midiMessageNumber >= 16 && midiMessageNumber <= 19)
-    //{
-    //    myPlaylists[0]->handleTrimMidiMessage(midiMessageValue, midiMessageNumber - 16);
-    //}
-    //else if (myPlaylists[1] != nullptr && midiMessageNumber >= 20 && midiMessageNumber < 24)
-    //{
-    //    myPlaylists[1]->handleTrimMidiMessage(midiMessageValue, midiMessageNumber - 20);
-    //}
+
 }
 
 void SoundPlayer::positionViewport(int player)
@@ -648,10 +614,14 @@ void SoundPlayer::valueChanged(juce::Value& value)
 
 void SoundPlayer::OSCInitialize()
 {
+
     if (oscConnected == false)
     {
-        if (receiver.connect(juce::int32(Settings::inOscPort)) && sender.connect(Settings::ipAdress, juce::int32(Settings::outOscPort)))
+        if (receiver.connect(juce::int32(Settings::inOscPort)) && settings->sender.connect(Settings::ipAdress, juce::int32(Settings::outOscPort)))
         {
+            sender = &settings->sender;
+            oscConnected = true;
+            OSCClean();
             //oscStatusLabel.setText("OSC Connected", juce::NotificationType::dontSendNotification);
             //oscStatusLabel.setColour(juce::Label::textColourId, juce::Colours::green);
             //connectOSCButton.setButtonText("Disconnect OSC");
@@ -671,7 +641,7 @@ void SoundPlayer::OSCInitialize()
         addListener(this, "/1/down");
         addListener(this, "/2/multipush1");
 
-        oscConnected = true;
+
     }
     else if (oscConnected == true)
     {
@@ -702,12 +672,80 @@ void SoundPlayer::OSCClean()
         OSCsend(3, 0.);
         OSCsend(4, 0.);
     }
+    if (soundPlayerMode == Mode::EightFaders)
+    {
+        for (int i = 1; i < 9; i++)
+        {
+            juce::String adress = "/8faderstime" + juce::String(i);
+            settings->sender.send(adress, juce::String());
+            adress = "/8fader" + juce::String(i) + "gain";
+            settings->sender.send(adress, (float)0.0);
+            adress = "/8faderslabel" + juce::String(i);
+            settings->sender.send(adress, juce::String());
+        }
+    }
 }
 void SoundPlayer::oscMessageReceived(const juce::OSCMessage& message)
 {
-    //DBG("OSC message received");
+    if (soundPlayerMode == Mode::OnePlaylistOneCart)
+        handleOSCPlaylist(message);
+    else if (soundPlayerMode == Mode::EightFaders)
+        handleOSCEightFaders(message);
+    else if (soundPlayerMode == Mode::KeyMap)
+        handleOSCKeyMap(message);
+}
 
-    //DBG(message.getAddressPattern().toString());
+void SoundPlayer::handleOSCKeyMap(const juce::OSCMessage& message)
+{
+    for (int i = 0; i < 30; i++)
+    {
+        juce::String adress = "/push" + juce::String(i + 1);
+        if (message.getAddressPattern().matches(adress))
+        {
+            if (message.size() == 1 && message[0].isFloat32())
+            {
+                auto* player = myPlaylists[0]->players[i];
+                if (player != nullptr)
+                {
+                    player->play(true);
+                }
+            }
+            return;
+        }
+    }
+}
+
+void SoundPlayer::handleOSCEightFaders(const juce::OSCMessage& message)
+{
+    for (int i = 1; i < 9; i++)
+    {
+        auto playlistID = i < 5 ? 0 : 1;
+        auto playerID = i < 5 ? i - 1 : i - 5;
+        auto player = myPlaylists[playlistID]->players[playerID];
+
+        juce::String adress = "/8fader" + juce::String(i) + "gain";
+        if (message.getAddressPattern().matches(adress))
+        {
+            if (message.size() == 1 && message[0].isFloat32() && player != nullptr)
+            {
+                player->handleOSCMessage(message[0].getFloat32());
+            }
+            return;
+        }
+        adress = "/push" + juce::String(i);
+        if (message.getAddressPattern().matches(adress))
+        {
+            if (message.size() == 1 && message[0].getFloat32() == 1)
+            {
+                playPlayer(i - 1);
+            }
+            return;
+        }
+    }
+}
+
+void SoundPlayer::handleOSCPlaylist(const juce::OSCMessage& message)
+{
     if (message.getAddressPattern().matches("/1/fader1"))
     {
         if (message.size() == 1 && message[0].isFloat32())
@@ -765,8 +803,6 @@ void SoundPlayer::oscMessageReceived(const juce::OSCMessage& message)
                             juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal);
                             myPlaylists[0]->handleFader1OSC(0);
                             myPlaylists[0]->handleFader1OSC(valueToSendNorm.convertTo0to1(1.));
-                            //sender.send("/1/fader1", valueToSendNorm.convertTo0to1(1.));
-                            //sender.send("/1/fader1", valueToSendNorm.convertTo0to1(1.));
                             fader1OSCLaunched = true;
                         }
                     }
@@ -791,8 +827,6 @@ void SoundPlayer::oscMessageReceived(const juce::OSCMessage& message)
                             juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal);
                             myPlaylists[0]->handleFader2OSC(0);
                             myPlaylists[0]->handleFader2OSC(valueToSendNorm.convertTo0to1(1.));
-                            //sender.send("/1/fader2", valueToSendNorm.convertTo0to1(1.));
-                            //sender.send("/1/fader2", valueToSendNorm.convertTo0to1(1.));
                             fader2OSCLaunched = true;
 
                         }
@@ -818,8 +852,8 @@ void SoundPlayer::oscMessageReceived(const juce::OSCMessage& message)
                             juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal);
                             myPlaylists[1]->handleFader3OSC(0);
                             myPlaylists[1]->handleFader3OSC(valueToSendNorm.convertTo0to1(1.));
-                            sender.send("/1/fader3", valueToSendNorm.convertTo0to1(1.));
-                            sender.send("/1/fader3", valueToSendNorm.convertTo0to1(1.));
+                            sender->send("/1/fader3", valueToSendNorm.convertTo0to1(1.));
+                            sender->send("/1/fader3", valueToSendNorm.convertTo0to1(1.));
                         }
                     }
                 }
@@ -842,8 +876,8 @@ void SoundPlayer::oscMessageReceived(const juce::OSCMessage& message)
                             juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal);
                             myPlaylists[1]->handleFader4OSC(0);
                             myPlaylists[1]->handleFader4OSC(valueToSendNorm.convertTo0to1(1.));
-                            sender.send("/1/fader4", valueToSendNorm.convertTo0to1(1.));
-                            sender.send("/1/fader4", valueToSendNorm.convertTo0to1(1.));
+                            sender->send("/1/fader4", valueToSendNorm.convertTo0to1(1.));
+                            sender->send("/1/fader4", valueToSendNorm.convertTo0to1(1.));
                         }
                     }
                 }
@@ -897,7 +931,7 @@ void SoundPlayer::OSCsend(int destination, float value)
 
             float valueToSend = value / 127;
             juce::NormalisableRange<float>valueToSendNorm(0.0, 1, 0.001, 0.5, false);
-            if (!sender.send("/1/fader1", valueToSendNorm.convertTo0to1(valueToSend)))
+            if (!sender->send("/1/fader1", valueToSendNorm.convertTo0to1(valueToSend)))
             {
             }
         }
@@ -905,7 +939,7 @@ void SoundPlayer::OSCsend(int destination, float value)
         {
             float valueToSend = value / 127;
             juce::NormalisableRange<float>valueToSendNorm(0.0, 1, 0.001, 0.5, false);
-            if (!sender.send("/1/fader2", valueToSendNorm.convertTo0to1(valueToSend)))
+            if (!sender->send("/1/fader2", valueToSendNorm.convertTo0to1(valueToSend)))
             {
             }
         }
@@ -913,7 +947,7 @@ void SoundPlayer::OSCsend(int destination, float value)
         {
             float valueToSend = value / 127;
             juce::NormalisableRange<float>valueToSendNorm(0.0, 1, 0.001, 0.5, false);
-            if (!sender.send("/1/fader3", valueToSendNorm.convertTo0to1(valueToSend)))
+            if (!sender->send("/1/fader3", valueToSendNorm.convertTo0to1(valueToSend)))
             {
             }
         }
@@ -921,13 +955,13 @@ void SoundPlayer::OSCsend(int destination, float value)
         {
             float valueToSend = value / 127;
             juce::NormalisableRange<float>valueToSendNorm(0.0, 1, 0.001, 0.5, false);
-            if (!sender.send("/1/fader4", valueToSendNorm.convertTo0to1(valueToSend)))
+            if (!sender->send("/1/fader4", valueToSendNorm.convertTo0to1(valueToSend)))
             {
             }
         }
         else if (destination == 5)
         {
-            if (!sender.send("/1/meter", value))
+            if (!sender->send("/1/meter", value))
             {
 
             }
@@ -943,49 +977,49 @@ void SoundPlayer::OSCsend(int destination, juce::String string)
     {
         if (destination == 1)
         {
-            if (!sender.send("/1/remaining1", string))
+            if (!sender->send("/1/remaining1", string))
             {
             }
         }
         else if (destination == 2)
         {
-            if (!sender.send("/1/remaining2", string))
+            if (!sender->send("/1/remaining2", string))
             {
             }
         }
         else if (destination == 3)
         {
-            if (!sender.send("/1/remaining3", string))
+            if (!sender->send("/1/remaining3", string))
             {
             }
         }
         else if (destination == 4)
         {
-            if (!sender.send("/1/remaining4", string))
+            if (!sender->send("/1/remaining4", string))
             {
             }
         }
         else if (destination == 5)
         {
-            if (!sender.send("/1/soundname1", string))
+            if (!sender->send("/1/soundname1", string))
             {
             }
         }
         else if (destination == 6)
         {
-            if (!sender.send("/1/soundname2", string))
+            if (!sender->send("/1/soundname2", string))
             {
             }
         }
         else if (destination == 7)
         {
-            if (!sender.send("/1/soundname3", string))
+            if (!sender->send("/1/soundname3", string))
             {
             }
         }
         else if (destination == 8)
         {
-            if (!sender.send("/1/soundname4", string))
+            if (!sender->send("/1/soundname4", string))
             {
             }
         }
@@ -2004,6 +2038,28 @@ void SoundPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
 void SoundPlayer::actionListenerCallback(const juce::String& message)
 {
 
+}
+
+void SoundPlayer::sliderValueChanged(juce::Slider* slider)
+{
+    //if (oscConnected)
+    //{
+    //    for (int i = 1; i < 9; i++)
+    //    {
+    //        auto playlistID = i < 5 ? 0 : 1;
+    //        auto playerID = i < 5 ? i - 1 : i - 5;
+    //        auto player = myPlaylists[playlistID]->players[playerID];
+    //        if (player != nullptr)
+    //        {
+    //            if (slider == &player->volumeSlider)
+    //            {
+    //                juce::String adress = "/8fader" + juce::String(i) + "gain";
+    //                juce::NormalisableRange<float>valueRange(0.0, juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal, false);
+    //                sender->send(adress, valueRange.convertTo0to1((float)slider->getValue()));
+    //            }
+    //        }
+    //    }
+    //}
 }
 
 void SoundPlayer::initializeKeyMapPlayer()

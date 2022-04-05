@@ -40,7 +40,7 @@ typedef char* LPSTR;
 class Player : public juce::Component,
     private juce::ChangeListener,
     public juce::Slider::Listener,
-    public juce::Timer,
+    public juce::MultiTimer,
     public juce::MouseListener,
     public juce::Button::Listener,
     public juce::Value::Listener,
@@ -57,8 +57,8 @@ public:
         float trimVolume = 0.0;
         bool loop = false;
     };
-    Player(int index);
-    Player(Player& source) : Player{ source.actualMidiLevel } {};
+    Player(int index, Settings* s);
+    //Player(Player& source) : Player{ source.actualMidiLevel } {};
     ~Player() override;
 
     void paint (juce::Graphics&) override;
@@ -67,7 +67,7 @@ public:
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
     std::atomic<float> getEnveloppeValue(float x, juce::Path& p);
     void playerPrepareToPlay(int samplesPerBlockExpected, double sampleRate);
-    void timerCallback();
+    void timerCallback(int timerID);
     void sliderValueChanged(juce::Slider* slider) override;
 
     void handleMidiMessage(int midiMessageNumber, int midiMessageValue);
@@ -89,6 +89,7 @@ public:
 
     void setNextPlayer(bool trueOrFalse);
     void setPlayerIndex(int i);
+    void setOSCIndex(int i);
 
     double CalculateR128Integrated(std::string filePath);
     void setLabelPlayerPosition(int playerPosition);
@@ -215,6 +216,8 @@ public:
 
     void setPlayMode(int m);
     int getPlayMode();
+
+    void setIsSecondCart(bool t);
 
     std::unique_ptr<juce::AudioFormatReaderSource> playSource;
     juce::AudioTransportSource transport;
@@ -360,7 +363,8 @@ private:
     double actualSampleRate;
 
     int playerIndex;
- 
+    int oscIndex = 0;
+    bool isSecondCart = false;
     //WAVEFORM
     juce::AudioThumbnailCache thumbnailCache{ 5 };
     GainThumbnail thumbnail          {521, formatManager, thumbnailCache};
@@ -514,5 +518,7 @@ private:
     bool colourHasChanged = false;
 
     int playMode = 2;
+
+    Settings* settings;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };

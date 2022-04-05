@@ -66,7 +66,7 @@ private:
     Meter initializationMeter{ Meter::Mode::Stereo };
 
     FilterProcessor dummyFilterProcessor;
-    Player dummyPlayer{ 0 };
+    Player dummyPlayer{ 0 , nullptr};
 
     juce::String name;
     juce::Label nameLabel;

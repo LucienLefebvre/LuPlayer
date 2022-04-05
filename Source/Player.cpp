@@ -22,13 +22,16 @@ typedef LPSTR LPTSTR;
 //#include <string>
 
 //==============================================================================
-Player::Player(int index)
+Player::Player(int index, Settings* s)
 {
+    DBG("player index : " << index);
+     settings = s;
      setWantsKeyboardFocus(false);
      setMouseClickGrabsKeyboardFocus(false);
      playerIndex = index;
 
-     juce::Timer::startTimer(50);
+     juce::MultiTimer::startTimer(0, 50);
+     juce::MultiTimer::startTimer(1, 500);
 
      state = Stopped;
     
@@ -611,48 +614,61 @@ void Player::setCuePlayHeadVisible(bool isVisible)
     drawCue = isVisible;
 }
 //TIMER
-void Player::timerCallback()
+void Player::timerCallback(int timerID)
 {
-    if (((stopTime - transport.getCurrentPosition() < 6)) && fileLoaded == true && state == Playing)
+    if (timerID == 0)
     {
-        if (endRepainted == false)
+        if (((stopTime - transport.getCurrentPosition() < 6)) && fileLoaded == true && state == Playing)
+        {
+            if (endRepainted == false)
+            {
+                repaint();
+                endRepainted = true;
+            }
+        }
+
+
+        volumeSlider.setValue(bufferGain.load(), juce::dontSendNotification);
+        volumeLabel.setText(juce::String(round(juce::Decibels::gainToDecibels(bufferGain.load()))), juce::dontSendNotification);
+        trimVolumeSlider.setValue(trimValueToSet);
+
+        if ((float)transport.getCurrentPosition() > stopTime)
+        {
+
+        }
+        if ((float)cueTransport.getCurrentPosition() > stopTime)
+        {
+            if (stopCueTransportOut)
+            {
+                cueTransport.stop();
+                soundEditedBroadcaster->sendChangeMessage();
+            }
+        }
+        updateRemainingTime();
+
+        updateCuePlayHeadPosition();
+
+        updatePlayHeadPosition();
+
+        updateInOutMarkPosition();
+
+        if (shouldRepaint.load())
         {
             repaint();
-            endRepainted = true;
+            shouldRepaint.store(false);
         }
     }
-
-
-    volumeSlider.setValue(bufferGain.load(), juce::dontSendNotification);
-    volumeLabel.setText(juce::String(round(juce::Decibels::gainToDecibels(bufferGain.load()))), juce::dontSendNotification);
-    trimVolumeSlider.setValue(trimValueToSet);
-
-    if ((float)transport.getCurrentPosition() > stopTime)
+    else if (timerID == 1)
     {
-
-    }
-    if ((float)cueTransport.getCurrentPosition() > stopTime)
-    {
-        if (stopCueTransportOut)
+        if (settings != nullptr)
         {
-            cueTransport.stop();
-            soundEditedBroadcaster->sendChangeMessage();
+            if (settings->oscConnected && transport.isPlaying())
+            {
+                juce::String adress = "/time" + juce::String(oscIndex);
+                settings->sender.send(adress, remainingTimeLabel.getText());
+            }
         }
     }
-    updateRemainingTime();
-
-    updateCuePlayHeadPosition();
-
-    updatePlayHeadPosition();
-
-    updateInOutMarkPosition();
-
-    if (shouldRepaint.load())
-    {
-        repaint();
-        shouldRepaint.store(false);
-    }
-
 }
 
 void Player::updateCuePlayHeadPosition(bool forceUpdate)
@@ -1325,6 +1341,16 @@ void Player::transportStateChanged(TransportState newState)
             soundName.setColour(soundName.textColourId, playerColour);
             if (Settings::viewLastPlayedSound)
                 playerLaunchedBroadcaster->sendChangeMessage();
+
+            if (settings != nullptr)
+            {
+                if (settings->oscConnected)
+                {
+                    juce::String adress = "/push" + juce::String(oscIndex);
+                    settings->sender.send(adress, 1);
+                }
+            }
+
             break;
         case Stopping:
             playerInfoChangedBroadcaster->sendChangeMessage();
@@ -1335,6 +1361,15 @@ void Player::transportStateChanged(TransportState newState)
             deleteButton.setEnabled(true);
             stopButtonClickedBool == false;
             soundName.setColour(soundName.textColourId, juce::Colours::white);
+
+            if (settings != nullptr)
+            {
+                if (settings->oscConnected)
+                {
+                    juce::String adress = "/push" + juce::String(oscIndex);
+                    settings->sender.send(adress, 0);
+                }
+            }
             break;       
         }
 
@@ -1362,6 +1397,16 @@ void Player::sliderValueChanged(juce::Slider* slider)
         previousSliderValue = actualSliderValue;
         bufferGain.store(volumeSlider.getValue());
 
+        if (settings != nullptr)
+        {
+            if (settings->oscConnected && isEightPlayerMode)
+            {
+                juce::String adress = "/8fader" + juce::String(oscIndex) + "gain";
+                DBG("player adress : " << adress);
+                juce::NormalisableRange<float>valueRange(0.0, juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal, false);
+                settings->sender.send(adress, valueRange.convertTo0to1((float)slider->getValue()));
+            }
+        }
     }
     if (slider == &trimVolumeSlider)
     {
@@ -1692,7 +1737,7 @@ bool Player::loadFile(const juce::String& path, bool shouldSendChangeMessage)
 
         fileName = file.getFileNameWithoutExtension();
         newName = file.getFileName().toStdString();
-        soundName.setText(fileName.toString(), juce::NotificationType::dontSendNotification);
+        soundName.setText(fileName.toString(), juce::NotificationType::sendNotification);
         playButton.setEnabled(true);
         cueStopButton.setEnabled(true);
         stopButton.setEnabled(true);
@@ -1849,8 +1894,14 @@ void Player::setOptions()
 
 void Player::handleOSCMessage(float faderValue)
 {
-    juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal, false);
-    volumeSlider.setValue(valueToSendNorm.convertFrom0to1(faderValue));
+    juce::NormalisableRange<float>rangedMidiMessage(0.0, juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal, false);
+    sliderValueToset = rangedMidiMessage.convertFrom0to1(faderValue);
+    //float transportgain = juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * monoReductionGain;
+    float transportgain = juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * sliderValueToset * monoReductionGain;
+
+    bufferGain.store(rangedMidiMessage.convertFrom0to1(faderValue));
+
+    transport.setGain(transportgain);
 }
 
 void Player::assignNextPlayer()
@@ -2019,7 +2070,7 @@ juce::String Player::secondsToMMSS(int seconds)
 
 void Player::setTimerTime(int timertime)
 {
-    juce::Timer::startTimer(timertime);
+    juce::MultiTimer::startTimer(0, timertime);
 }
 
 
@@ -2048,6 +2099,12 @@ void Player::setActivePlayer(bool isActive)
 void Player::setPlayerIndex(int i)
 {
     playerIndex = i;
+}
+
+void Player::setOSCIndex(int i)
+{
+    oscIndex = i;
+    DBG("osc index : " << i);
 }
 
 double Player::CalculateR128Integrated(std::string filePath)
@@ -2317,6 +2374,12 @@ int Player::getPlayMode()
     return playMode;
 }
 
+void Player::setIsSecondCart(bool t)
+{
+    isSecondCart = t;
+    playerIndex += 4;
+}
+
 juce::Colour Player::getPlayerColour()
 {
     return playerColour;
@@ -2523,4 +2586,13 @@ bool Player::isThreadRunning()
 void Player::labelTextChanged(juce::Label* labelThatHasChanged)
 {
     soundEditedBroadcaster->sendChangeMessage();
+    if (settings != nullptr)
+    {
+        if (settings->oscConnected)
+        {
+            juce::String adress = "/name" + juce::String(oscIndex);
+            DBG("adress : " << adress);
+            settings->sender.send(adress, labelThatHasChanged->getText());
+        }
+    }
 }   
