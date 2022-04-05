@@ -2307,6 +2307,16 @@ bool Player::getColourHasChanged()
     return colourHasChanged;
 }
 
+void Player::setPlayMode(int m)
+{
+    playMode = m;
+}
+
+int Player::getPlayMode()
+{
+    return playMode;
+}
+
 juce::Colour Player::getPlayerColour()
 {
     return playerColour;

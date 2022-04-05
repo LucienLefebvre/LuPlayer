@@ -14,6 +14,7 @@
 #include <JuceHeader.h>
 #include "EnveloppeEditor.h"
 #include "../Mixer/Meter.h"
+#include "../Settings.h"
 //==============================================================================
 /*
 */
@@ -23,7 +24,8 @@ class ClipEditor  : public juce::Component,
     public juce::Timer,
     public juce::Button::Listener,
     public juce::Label::Listener,
-    public juce::ComponentListener
+    public juce::ComponentListener,
+    public juce::ComboBox::Listener
 {
 public:
     ClipEditor()
@@ -137,6 +139,17 @@ public:
         meter.reset(new Meter(Meter::Mode::Stereo));
         addAndMakeVisible(meter.get());
         enableButttons(false);
+        //Play mode
+        playModeLabel.reset(new juce::Label);
+        addAndMakeVisible(playModeLabel.get());
+        playModeLabel->setText("Play mode :", juce::dontSendNotification);
+        playModeLabel->setJustificationType(juce::Justification::right);
+
+        playModeSelector.reset(new juce::ComboBox);
+        addAndMakeVisible(playModeSelector.get());
+        playModeSelector->addItem("Trigger", 1);
+        playModeSelector->addItem("Start / Stop", 2);
+        playModeSelector->addListener(this);
     }
 
     ~ClipEditor() override
@@ -172,6 +185,9 @@ public:
         fxButton->setBounds(enveloppeButton->getRight() + spacer, 0, barButtonsWidth, toolBarHeight);
         normButton->setBounds(fxButton->getRight() + spacer, 0, barButtonsWidth, toolBarHeight);
         denoiseButton->setBounds(normButton->getRight() + spacer, 0, barButtonsWidth, toolBarHeight);
+
+        playModeLabel->setBounds(denoiseButton->getRight() + 100, 0, 200, toolBarHeight);
+        playModeSelector->setBounds(playModeLabel->getRight() + spacer, 0, 200, toolBarHeight);
 
         inOutButtonWidth = getWidth() / 24;
         enveloppeEditor.setBounds(volumeSliderWidth + dividerBarWidth, toolBarHeight, getWidth() - volumeSliderWidth - meterWidth - dividerBarWidth * 2 - 2, getHeight() - toolBarHeight - bottomButtonHeight - 2);
@@ -351,6 +367,17 @@ public:
                 nameLabel->setColour(juce::Label::ColourIds::textColourId, BLUE);
             }
 
+            if (Settings::preferedSoundPlayerMode == 3)
+            {
+                playModeLabel->setVisible(true);
+                playModeSelector->setVisible(true);
+                playModeSelector->setSelectedId(editedPlayer->getPlayMode());
+            }
+            else
+            {
+                playModeLabel->setVisible(false);
+                playModeSelector->setVisible(false);
+            }
 
         }
     }
@@ -548,6 +575,17 @@ public:
                 editedPlayer->setName(nameLabel->getText().toStdString(), true);
         }
     }
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
+    {
+        if (comboBoxThatHasChanged == playModeSelector.get())
+        {
+            if (editedPlayer != nullptr)
+            {
+                editedPlayer->setPlayMode(comboBoxThatHasChanged->getSelectedId());
+            }
+        }
+    }
+
     void componentBeingDeleted(juce::Component& component)
     {
         grabFocusBroadcaster->sendChangeMessage();
@@ -587,6 +625,8 @@ public:
     std::unique_ptr<juce::TextButton> openButton;
     std::unique_ptr<juce::TextButton> deleteButton;
     std::unique_ptr<juce::TextButton> colourButton;
+    std::unique_ptr<juce::Label> playModeLabel;
+    std::unique_ptr<juce::ComboBox> playModeSelector;
 
     std::unique_ptr<Meter> meter;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipEditor)

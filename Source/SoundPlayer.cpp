@@ -1680,6 +1680,7 @@ juce::XmlElement* SoundPlayer::createPlayerXmlElement(int playerID, int playlist
         e->setAttribute("isStopTimeSet", isStopTimeSet);
         if (isStopTimeSet)
             e->setAttribute("stopTime", soundPlayer->getStop());
+        e->setAttribute("playMode", soundPlayer->getPlayMode());
 
         //FILTER
         juce::StringArray params = soundPlayer->getFilterProcessor().getFilterParametersAsArray();
@@ -1883,6 +1884,7 @@ void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID
     float startTime = e->getDoubleAttribute("startTime");
     bool isStopTimeSet = e->getBoolAttribute("isStopTimeSet");
     float stopTime = e->getDoubleAttribute("stopTime");
+    int playMode = e->getIntAttribute("playMode");
 
     if (soundPlayerMode == Mode::KeyMap)
     {
@@ -1912,6 +1914,7 @@ void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID
         playerToLoad->setStartTime(startTime);
     if (isStopTimeSet)
         playerToLoad->setStopTime(stopTime);
+    playerToLoad->setPlayMode(playMode);
 
     //EQ
     juce::StringArray filterParams;

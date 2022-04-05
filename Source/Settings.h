@@ -187,12 +187,6 @@ private:
 
     void Settings::buttonClicked(juce::Button* button) override;
 
-
-
-    
-
-
-
     juce::ApplicationProperties properties;
 
     juce::PropertiesFile::Options options;

@@ -270,7 +270,18 @@ void KeyMappedPlayer::updatePlayerInfo()
 
 void KeyMappedPlayer::shortcutKeyPressed()
 {
-    startOrStop();
+    if (soundPlayer != nullptr)
+    {
+        if (soundPlayer->getPlayMode() == 1)
+        {
+            soundPlayer->stop();
+            soundPlayer->launch();
+        }
+        else if (soundPlayer->getPlayMode() == 2)
+        {
+            startOrStop();
+        }
+    }
 }
 
 void KeyMappedPlayer::startOrStop()

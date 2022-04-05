@@ -213,6 +213,9 @@ public:
     juce::Colour getPlayerColour();
     bool getColourHasChanged();
 
+    void setPlayMode(int m);
+    int getPlayMode();
+
     std::unique_ptr<juce::AudioFormatReaderSource> playSource;
     juce::AudioTransportSource transport;
     juce::ResamplingAudioSource resampledSource                     { &transport, false, 2 };
@@ -509,5 +512,7 @@ private:
 
     juce::Colour playerColour;
     bool colourHasChanged = false;
+
+    int playMode = 2;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)
 };
