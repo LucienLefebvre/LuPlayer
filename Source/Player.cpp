@@ -1050,7 +1050,8 @@ void Player::deleteFile()
         setIsLooping(false, false);
         cuePlayHead.setVisible(false);
         transport.releaseResources();
-        thumbnail.setSource(nullptr);
+        thumbnail.setSource(nullptr);        
+        playThumbnail.setSource(nullptr);
         transport.setSource(nullptr);
         enableButtons(false);
         loadedFilePath = "";
@@ -1414,6 +1415,7 @@ void Player::sliderValueChanged(juce::Slider* slider)
         transport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * monoReductionGain);
         cueTransport.setGain(juce::Decibels::decibelsToGain(trimVolumeSlider.getValue()) * monoReductionGain);
         thumbnailZoomValue = juce::Decibels::decibelsToGain(trimVolumeSlider.getValue());
+
         if (thumbnail.getNumChannels() != 0)
         {
             repaint();
@@ -1755,6 +1757,7 @@ bool Player::loadFile(const juce::String& path, bool shouldSendChangeMessage)
         endRepainted = false;
 
         thumbnail.setSource(new juce::FileInputSource(file));
+        playThumbnail.setSource(new juce::FileInputSource(file));
         waveformPainted = false;
         fileLoaded = true;
         enableButtons(true);
@@ -2429,6 +2432,10 @@ GainThumbnail& Player::getAudioThumbnail()
 {
     return thumbnail;
 }
+GainThumbnail& Player::getPlayThumbnail()
+{
+    return playThumbnail;
+}
 juce::String Player::getRemainingTimeAsString()
 {
     return remainingTimeString;
@@ -2508,7 +2515,7 @@ bool Player::isEditedPlayer()
     return isEdited;
 }
 
-float Player::getLenght()
+double Player::getLenght()
 {
     if (fileLoaded)
         return transport.getLengthInSeconds();

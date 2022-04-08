@@ -68,6 +68,7 @@ public:
 
     juce::Colour getPlayerDefaultColour();
 
+    juce::KeyPress getShortcut();
 private:
     //Player dummyPlayer;
     Player* soundPlayer = 0;
@@ -83,14 +84,16 @@ private:
 
     int editButtonWidth = 0;
     juce::String shortcutKey;
-
+    juce::KeyPress shortcutKeyPress;
     bool isDragged = false;
 
     juce::Colour currentColour;
     juce::Colour defaultColour;
 
     GainThumbnail* thumbnail;
+    GainThumbnail* playThumbnail;
     juce::Rectangle<int> thumbnailBounds;
+    juce::Rectangle<int> playThumbnailBounds;
     //DISPLAY POSITIONS
     int shortcutLabelWidth = 20;
     int shortcutLabelHeight = 20;

@@ -188,7 +188,7 @@ public:
     /** Returns the hash code that was set by setSource() or setReader(). */
     juce::int64 getHashCode() const override;
 
-    void setGainValues(juce::Array<float> gv);
+    void setGainValues(juce::Array<float>& gv);
 
 
 private:

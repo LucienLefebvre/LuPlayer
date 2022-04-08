@@ -96,19 +96,23 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
     if (soundPlayer != nullptr && soundPlayer->isPlayerPlaying())
     {
         g.setColour(defaultColour);
-        g.setOpacity(0.3f);
-        g.fillRoundedRectangle(getLocalBounds().reduced(1).toFloat(), 15);
+        g.setOpacity(1.0f);
+        //g.fillRoundedRectangle(getLocalBounds().toFloat(), 15);
     }
 
     //DRAW THUMBNAIL
+    double transportPosition = soundPlayer->transport.getCurrentPosition();
+    int playHeadPosition = (transportPosition / soundPlayer->getLenght()) * getWidth();
+
+    thumbnailBounds.setBounds(0, 2 * nameLabelHeight, playHeadPosition, thumbnailHeight);
     juce::Array<float> gainValue;
     for (int i = 0; i < thumbnailBounds.getX() + thumbnailBounds.getWidth(); i++)
     {
         if (soundPlayer->isEnveloppeEnabled())
         {
-            float time = ((i - thumbnailBounds.getX()) * thumbnail->getTotalLength() / thumbnailBounds.getWidth()) / thumbnail->getTotalLength();
+            float time = ((i - thumbnailBounds.getX()) * soundPlayer->getLenght() / thumbnailBounds.getWidth()) / soundPlayer->getLenght();
             float value = juce::Decibels::decibelsToGain(soundPlayer->getEnveloppeValue(time, *soundPlayer->getEnveloppePath()) * 24);
-            gainValue.set(i, value);
+            gainValue.set(i, 1.0f);
         }
         else
         {
@@ -118,8 +122,35 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
     thumbnail->setGainValues(gainValue);
 
     g.setColour(currentColour);
+    g.setOpacity(1.0);
+    
+    double thumbnailMiddleTime = (playHeadPosition / (double)getWidth()) * soundPlayer->getLenght();
+
     if (thumbnail != nullptr)
-        thumbnail->drawChannels(g, thumbnailBounds, 0.0, thumbnail->getTotalLength(), juce::Decibels::decibelsToGain(playerInfos.trimVolume) * 1.5f);
+        thumbnail->drawChannels(g, thumbnailBounds, 0.0, thumbnailMiddleTime, juce::Decibels::decibelsToGain(playerInfos.trimVolume) * 1.5f);
+
+    playThumbnailBounds.setBounds(playHeadPosition, 2 * nameLabelHeight, getWidth() - playHeadPosition, thumbnailHeight);
+    juce::Array<float> playGainValue;
+    for (int i = 0; i < playThumbnailBounds.getX() + playThumbnailBounds.getWidth(); i++)
+    {
+        if (soundPlayer->isEnveloppeEnabled())
+        {
+            float time = ((i - playThumbnailBounds.getX()) * soundPlayer->getLenght() / playThumbnailBounds.getWidth()) / soundPlayer->getLenght();
+            float value = juce::Decibels::decibelsToGain(soundPlayer->getEnveloppeValue(time, *soundPlayer->getEnveloppePath()) * 24);
+            playGainValue.set(i, 1.0f);
+        }
+        else
+        {
+            playGainValue.set(i, 1.0f);
+        }
+    }
+
+    playThumbnail->setGainValues(playGainValue);
+
+    g.setColour(defaultColour);
+    g.setOpacity(1.0);
+    if (playThumbnail != nullptr)
+        playThumbnail->drawChannels(g, playThumbnailBounds, thumbnailMiddleTime, soundPlayer->getLenght(), juce::Decibels::decibelsToGain(playerInfos.trimVolume) * 1.5f);
 }
 
 void KeyMappedPlayer::resized()
@@ -135,7 +166,7 @@ void KeyMappedPlayer::resized()
     volumeSlider->setBounds(0, getHeight() * 3 / 5, volumeSliderWidth, volumeSliderHeight);
     */
     thumbnailHeight = getHeight() * 3 / 5;
-    thumbnailBounds.setBounds(0, 2*nameLabelHeight, getWidth(), thumbnailHeight);
+    //thumbnailBounds.setBounds(0, 2*nameLabelHeight, getWidth(), thumbnailHeight);
 
     playHead->setSize(1, thumbnailHeight);
 
@@ -154,7 +185,7 @@ void KeyMappedPlayer::resized()
     editButtonWidth = 3 * getWidth() / 10;
     editButton->setBounds(elapsedTimeWidth, elapsedTimeHeight, editButtonWidth, elapsedTimeHeight);
 
-    dBLabel->setCentrePosition(thumbnailBounds.getCentre());
+    dBLabel->setCentrePosition(getBounds().getCentre());
     int dBLabelHeight = nameLabelHeight;
     dBLabel->setSize(getWidth(), dBLabelHeight);
     dBLabel->setFont(juce::Font(dBLabelHeight, juce::Font::plain).withTypefaceStyle("Regular"));
@@ -171,7 +202,9 @@ void KeyMappedPlayer::setPlayer(Player* p)
     soundPlayer->playerDeletedBroadcaster->addChangeListener(this);
     soundPlayer->enveloppePathChangedBroadcaster->addChangeListener(this);
     thumbnail = &soundPlayer->getAudioThumbnail();
-    thumbnail->addChangeListener(this);
+    playThumbnail = &soundPlayer->getPlayThumbnail();
+    thumbnail->addChangeListener(this);    
+    playThumbnail->addChangeListener(this);
     juce::MultiTimer::startTimer(0, 50);
     juce::MultiTimer::startTimer(1, 50);
     //thumbnail.reset(new juce::AudioThumbnail(521, soundPlayer->getAudioFormatManager(), soundPlayer->getAudioThumbnailCache()));
@@ -180,6 +213,7 @@ void KeyMappedPlayer::setPlayer(Player* p)
 void KeyMappedPlayer::setShortcut(juce::String s)
 {
     shortcutKey = s;
+    shortcutKeyPress = juce::KeyPress::createFromDescription(s);
     shortcutLabel->setText(shortcutKey, juce::NotificationType::dontSendNotification);
 }
 
@@ -214,6 +248,10 @@ void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
             }
         }
         else if (source == thumbnail)
+        {
+            repaint();
+        }
+        else if (source == playThumbnail)
         {
             repaint();
         }
@@ -380,9 +418,10 @@ void KeyMappedPlayer::timerCallback(int timerID)
             }
             if (soundPlayer->isPlayerPlaying())
             {
-                playHead->setVisible(true);
-                int playHeadPosition = (soundPlayer->transport.getCurrentPosition() / soundPlayer->getLenght()) * getWidth();
-                playHead->setTopLeftPosition(playHeadPosition, thumbnailBounds.getY());
+                //playHead->setVisible(true);
+                //int playHeadPosition = (soundPlayer->transport.getCurrentPosition() / soundPlayer->getLenght()) * getWidth();
+                //playHead->setTopLeftPosition(playHeadPosition, thumbnailBounds.getY());
+                repaint();
                 nameLabel->setColour(juce::Label::ColourIds::textColourId, currentColour); 
                 elapsedTimeLabel->setColour(juce::Label::ColourIds::textColourId, currentColour); 
             }
@@ -469,4 +508,9 @@ void KeyMappedPlayer::setPlayerDefaultColour(juce::Colour c)
 juce::Colour KeyMappedPlayer::getPlayerDefaultColour()
 {
     return defaultColour;
+}
+
+juce::KeyPress KeyMappedPlayer::getShortcut()
+{
+    return shortcutKeyPress;
 }

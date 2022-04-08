@@ -175,6 +175,7 @@ public:
     juce::AudioThumbnailCache& getAudioThumbnailCache();
     juce::AudioFormatManager& getAudioFormatManager();
     GainThumbnail& getAudioThumbnail();
+    GainThumbnail& getPlayThumbnail();
 
     juce::String getRemainingTimeAsString();
     juce::String getCueTimeAsString();
@@ -191,7 +192,7 @@ public:
     void enableButtons(bool isEnabled);
 
     bool isEditedPlayer();
-    float getLenght();
+    double getLenght();
 
     void createArraysFromPath();
     juce::Array<float> getEnveloppeXArray();
@@ -368,6 +369,7 @@ private:
     //WAVEFORM
     juce::AudioThumbnailCache thumbnailCache{ 5 };
     GainThumbnail thumbnail          {521, formatManager, thumbnailCache};
+    GainThumbnail playThumbnail      { 521, formatManager, thumbnailCache };
     juce::Rectangle<int> thumbnailBounds;
 
     bool endRepainted = false;

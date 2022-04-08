@@ -53,6 +53,9 @@ private:
     int playerWidth = 50;
     int playerHeight = 50;
 
+    int rowNumber = 2;
+    int columnNumber = 6;
+
     Settings* settings;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyboardMappedSoundboard)

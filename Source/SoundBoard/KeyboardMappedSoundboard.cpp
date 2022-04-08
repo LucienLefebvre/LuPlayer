@@ -15,7 +15,6 @@
 KeyboardMappedSoundboard::KeyboardMappedSoundboard(Settings* s)
 {
     settings = s;
-
 }
 
 KeyboardMappedSoundboard::~KeyboardMappedSoundboard()
@@ -31,8 +30,8 @@ void KeyboardMappedSoundboard::paint (juce::Graphics& g)
 
 void KeyboardMappedSoundboard::resized()
 {
-    playerWidth = (getWidth() - spaceBetweenPlayers * 11) / 10 ;
-    playerHeight = getHeight() / 3 - spaceBetweenPlayers * 4;
+    playerWidth = (getWidth() - spaceBetweenPlayers * (columnNumber + 1)) / columnNumber ;
+    playerHeight = getHeight() / rowNumber - spaceBetweenPlayers * (rowNumber + 1);
     int playerIdInLine = 0;
     for (int i = 0; i < mappedPlayers.size(); i++)
     {
@@ -116,17 +115,11 @@ void KeyboardMappedSoundboard::setShortcutKeys()
 
 bool KeyboardMappedSoundboard::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
 {
-    for (int i = 0; i < mappedPlayers.size(); i++)
+    for (auto player : mappedPlayers)
     {
-        if (Settings::keyboardLayout == 1)
+        if (key == player->getShortcut())
         {
-            if (juce::KeyPress::createFromDescription(qwertyShortcutArray[i]) == key.getKeyCode())
-                mappedPlayers[i]->shortcutKeyPressed();
-        }
-        else if (Settings::keyboardLayout == 2)
-        {
-            if (juce::KeyPress::createFromDescription(azertyShortcutArray[i]) == key.getKeyCode())
-                mappedPlayers[i]->shortcutKeyPressed();
+            player->shortcutKeyPressed();
         }
     }
     return false;

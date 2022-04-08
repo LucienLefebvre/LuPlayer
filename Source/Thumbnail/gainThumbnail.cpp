@@ -700,7 +700,7 @@ juce::int64 GainThumbnail::getHashCode() const
     return source == nullptr ? 0 : source->hashCode;
 }
 
-void GainThumbnail::setGainValues(juce::Array<float> gv)
+void GainThumbnail::setGainValues(juce::Array<float>& gv)
 {
     window->setClipValues(gv);
 }
