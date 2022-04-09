@@ -419,6 +419,7 @@ void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce:
     }
     else if (soundPlayerMode == SoundPlayer::Mode::EightFaders)
     {
+        DBG(mapper->getMidiCCForCommand(200));
         for (int i = 0; i < 4; i++)
         {
             if (midiMessageNumber == mapper->getMidiCCForCommand(200 + i))
@@ -447,12 +448,13 @@ void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce:
     {
         for (int i = 0; i < 30; i++)
         {
-            if (midiMessageNumber == mapper->getMidiCCForCommand(250 + i))
+            if (midiMessageNumber == mapper->getMidiCCForCommand(250 + i) && midiMessageValue == 127)
             {
-                auto* player = myPlaylists[0]->players[i];
+                auto* player = keyMappedSoundboard->mappedPlayers[i];
                 if (player != nullptr)
                 {
-                    player->play(true);
+                    player->shortcutKeyPressed();
+                    return;
                 }
             }
         }

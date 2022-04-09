@@ -1280,6 +1280,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         convertingBar->setTextToDisplay("Converting...");
         hasBeenNormalized = true;
         soundEditedBroadcaster->sendChangeMessage();
+        normalizationFinishedBroadcaster->sendChangeMessage();
     }
     else if (source == ffmpegThread.conversionEndedBroadcaster)
     {
@@ -2264,6 +2265,7 @@ void Player::normalize(std::string p)
     CalculateR128Integrated(p);
     convertingBar->setTextToDisplay("Normalizing...");
     convertingBar->setVisible(true);
+    normalizationLaunchedBroadcaster->sendChangeMessage();
 }
 
 void Player::setEditedPlayer(bool b)

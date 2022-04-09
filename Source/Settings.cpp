@@ -60,6 +60,8 @@ bool Settings::showEnveloppe;
 bool Settings::viewLastPlayedSound;
 
 int Settings::keyboardLayout;
+int Settings::keyMappedSoundboardRows;
+int Settings::keyMappedSoundboardColumns;
 //==============================================================================
 Settings::Settings() : settingsFile(options)
 {
@@ -147,12 +149,17 @@ Settings::Settings() : settingsFile(options)
     else
         Settings::keyboardLayout = properties.getUserSettings()->getValue("keyboardLayout").getIntValue();
 
-    //SAVE & CLOSE BUTTONS
-    saveButton.setBounds(250, 400, 100, 50);
-    addAndMakeVisible(saveButton);
-    saveButton.setButtonText("Save & Close");
-    saveButton.onClick = [this] { setOptions();
-                                    makeIpAdress(); saveOptions(); };
+    if (properties.getUserSettings()->getValue("keyMappedRows").isEmpty())
+        Settings::keyMappedSoundboardRows = 3;
+    else
+        Settings::keyMappedSoundboardRows = properties.getUserSettings()->getValue("keyMappedRows").getIntValue();
+
+    if (properties.getUserSettings()->getValue("keyMappedColums").isEmpty())
+        Settings::keyMappedSoundboardColumns = 10;
+    else
+        Settings::keyMappedSoundboardColumns = properties.getUserSettings()->getValue("keyMappedColums").getIntValue();
+
+
     
 
     //MAX FADER LEVEL
@@ -171,7 +178,7 @@ Settings::Settings() : settingsFile(options)
     maxFaderValueLabel.setText("Fader Maximum Value", juce::NotificationType::dontSendNotification);
 
     //SkEW FACTOR
-    skewFactorSlider.setBounds(200, 50, 300, 25);
+    skewFactorSlider.setBounds(200, maxFaderValueSlider.getBottom() + spacer, 300, 25);
     skewFactorSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
     skewFactorSlider.setRange(0.1, 1.0, 0.1);
     skewFactorSlider.addListener(this);
@@ -180,49 +187,23 @@ Settings::Settings() : settingsFile(options)
     addAndMakeVisible(skewFactorSlider);
 
 
-    skewFactorLabel.setBounds(0, 50, 130, 25);
+    skewFactorLabel.setBounds(0, maxFaderValueSlider.getBottom() + spacer, 130, 25);
     addAndMakeVisible(skewFactorLabel);
     skewFactorLabel.setText("Fader Acceleration", juce::NotificationType::dontSendNotification);
-    skewFactorLabelLeft.setBounds(130, 50, 70, 25);
+    skewFactorLabelLeft.setBounds(130, maxFaderValueSlider.getBottom() + spacer, 70, 25);
     addAndMakeVisible(skewFactorLabelLeft);
     skewFactorLabelLeft.setText("Logarithmic", juce::NotificationType::dontSendNotification);
     skewFactorLabelLeft.setJustificationType(juce::Justification::right);
-    skewFactorLabelRight.setBounds(500, 50, 100, 25);
+    skewFactorLabelRight.setBounds(500, maxFaderValueSlider.getBottom() + spacer, 100, 25);
     addAndMakeVisible(skewFactorLabelRight);
     skewFactorLabelRight.setText("Linear", juce::NotificationType::dontSendNotification);
 
-    //FMPEG PATH
-    ffmpegPathLabel.setBounds(200, 300, 400, 25);
-
-    selectFFmpegButton.setBounds(0, 300, 200, 25);
-    selectFFmpegButton.setButtonText("Select FFmpeg.exe");
-    selectFFmpegButton.onClick = [this] { selectFFmpeg(); };
-    ffmpegPathLabel.setText(Settings::FFmpegPath, juce::NotificationType::dontSendNotification);
-
-    //EXIFTOOL PATH
-    exiftoolLabel.setBounds(200, 350, 400, 25);
-
-    selectExiftoolButton.setBounds(0, 350, 200, 25);
-    selectExiftoolButton.setButtonText("Select Exiftool.exe");
-    //addAndMakeVisible(selectExiftoolButton);
-    selectExiftoolButton.onClick = [this] { selectExiftool(); };
-    exiftoolLabel.setText(Settings::exiftoolPath, juce::NotificationType::dontSendNotification);
-
-    //CONVERTED SOUNDS PATH 
-    convertedSoundsLabel.setBounds(200, 300, 400, 25);
-    addAndMakeVisible(convertedSoundsLabel);
-    convertedSoundsLabel.setText(Settings::convertedSoundsPath, juce::NotificationType::dontSendNotification);
-
-    convertedSoundsButtons.setBounds(1, 300, 199, 25);
-    convertedSoundsButtons.setButtonText("Select converted sounds folder");
-    addAndMakeVisible(convertedSoundsButtons);
-    convertedSoundsButtons.onClick = [this] { selectSoundsFolder(); };
 
     //MIDI SHIFT
-    midiShiftLabel.setBounds(0, 100, 200, 25);
+    midiShiftLabel.setBounds(0, skewFactorLabel.getBottom() + spacer, 200, 25);
     midiShiftLabel.setText("Midi Channel Shift", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(midiShiftLabel);
-    midiShiftValue.setBounds(200, 100, 25, 25);
+    midiShiftValue.setBounds(200, skewFactorLabel.getBottom() + spacer, 25, 25);
     midiShiftValue.setText(juce::String(Settings::midiShift), juce::NotificationType::dontSendNotification);
     addAndMakeVisible(midiShiftValue);
     midiShiftValue.setEditable(true, true, false);
@@ -231,10 +212,10 @@ Settings::Settings() : settingsFile(options)
     midiShiftValue.setColour(juce::Label::outlineColourId, juce::Colours::black);
 
     //FADER TEMP
-    faderTempLabel.setBounds(300, 100, 200, 25);
+    faderTempLabel.setBounds(0, midiShiftLabel.getBottom() + spacer, 200, 25);
     faderTempLabel.setText("Fader Temporisation (ms)", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(faderTempLabel);
-    faderTempValue.setBounds(500, 100, 50, 25);
+    faderTempValue.setBounds(200, midiShiftLabel.getBottom() + spacer, 50, 25);
     faderTempValue.setText(juce::String(Settings::faderTempTime), juce::NotificationType::dontSendNotification);
     addAndMakeVisible(faderTempValue);
     faderTempValue.setEditable(true, true, false);
@@ -246,16 +227,16 @@ Settings::Settings() : settingsFile(options)
     //OSC Ports
     addAndMakeVisible(oscPorts);
     oscPorts.setText("OSC", juce::NotificationType::dontSendNotification);
-    oscPorts.setBounds(0, 150, 100, 25);
+    oscPorts.setBounds(0, faderTempValue.getBottom() + spacer, leftColumnWidth, 25);
 
     //OUT
     addAndMakeVisible(oscOutPortLabel);
-    oscOutPortLabel.setText("Outgoing", juce::NotificationType::dontSendNotification);
-    oscOutPortLabel.setBounds(50, 150, 100, 25);
+    oscOutPortLabel.setText("Outgoing port", juce::NotificationType::dontSendNotification);
+    oscOutPortLabel.setBounds(0, oscPorts.getBottom() + spacer, leftColumnWidth, 25);
 
     addAndMakeVisible(oscOutPort);
     oscOutPort.setText(juce::String(Settings::outOscPort), juce::NotificationType::dontSendNotification);
-    oscOutPort.setBounds(125, 150, 50, 25);
+    oscOutPort.setBounds(leftColumnWidth, oscPorts.getBottom() + spacer, 50, 25);
     oscOutPort.setEditable(true, true, false);
     oscOutPort.addListener(this);
     oscOutPort.setJustificationType(juce::Justification::centred);
@@ -264,11 +245,11 @@ Settings::Settings() : settingsFile(options)
     //IN
     addAndMakeVisible(oscInPortLabel);
     oscInPortLabel.setText("Incoming", juce::NotificationType::dontSendNotification);
-    oscInPortLabel.setBounds(175, 150, 100, 25);
+    oscInPortLabel.setBounds(0, oscOutPort.getBottom() + spacer, leftColumnWidth, 25);
 
     addAndMakeVisible(oscInPort);
     oscInPort.setText(juce::String(Settings::inOscPort), juce::NotificationType::dontSendNotification);
-    oscInPort.setBounds(250, 150, 50, 25);
+    oscInPort.setBounds(leftColumnWidth, oscOutPort.getBottom() + spacer, 50, 25);
     oscInPort.setEditable(true, true, false);
     oscInPort.addListener(this);
     oscInPort.setJustificationType(juce::Justification::centred);
@@ -276,32 +257,32 @@ Settings::Settings() : settingsFile(options)
 
     //OSC IP Adress Destination
     addAndMakeVisible(ipAdressLabel);
-    ipAdressLabel.setBounds(300, 150, 50, 25);
+    ipAdressLabel.setBounds(300, oscPorts.getBottom() + spacer, 50, 25);
     ipAdressLabel.setText("Ip", juce::NotificationType::dontSendNotification);
 
     addAndMakeVisible(ipAdress1);
-    ipAdress1.setBounds(350, 150, 50, 25);
+    ipAdress1.setBounds(350, oscPorts.getBottom() + spacer, 50, 25);
     ipAdress1.setText(Settings::adress1, juce::NotificationType::sendNotification);
     ipAdress1.setEditable(true, true, false);
     ipAdress1.addListener(this);
     ipAdress1.setJustificationType(juce::Justification::centred);
     ipAdress1.setColour(juce::Label::outlineColourId, juce::Colours::black);
     addAndMakeVisible(ipAdress2);
-    ipAdress2.setBounds(400, 150, 50, 25);
+    ipAdress2.setBounds(400, oscPorts.getBottom() + spacer, 50, 25);
     ipAdress2.setText(Settings::adress2, juce::NotificationType::sendNotification);
     ipAdress2.setEditable(true, true, false);
     ipAdress2.addListener(this);
     ipAdress2.setJustificationType(juce::Justification::centred);
     ipAdress2.setColour(juce::Label::outlineColourId, juce::Colours::black);
     addAndMakeVisible(ipAdress3);
-    ipAdress3.setBounds(450, 150, 50, 25);
+    ipAdress3.setBounds(450, oscPorts.getBottom() + spacer, 50, 25);
     ipAdress3.setText(Settings::adress3, juce::NotificationType::sendNotification);
     ipAdress3.setEditable(true, true, false);
     ipAdress3.addListener(this);
     ipAdress3.setJustificationType(juce::Justification::centred);
     ipAdress3.setColour(juce::Label::outlineColourId, juce::Colours::black);
     addAndMakeVisible(ipAdress4);
-    ipAdress4.setBounds(500, 150, 50, 25);
+    ipAdress4.setBounds(500, oscPorts.getBottom() + spacer, 50, 25);
     ipAdress4.setText(Settings::adress4, juce::NotificationType::sendNotification);
     ipAdress4.setEditable(true, true, false);
     ipAdress4.addListener(this);
@@ -311,38 +292,72 @@ Settings::Settings() : settingsFile(options)
     //AUTO NORMALIZE
     addAndMakeVisible(&normalizeButton);
     normalizeButton.setButtonText("Auto normalize sounds at 0 LU");
-    normalizeButton.setBounds(0, 200, 200, 25);
+    normalizeButton.setBounds(0, oscInPort.getBottom() + spacer, 200, 25);
     normalizeButton.setToggleState(Settings::autoNormalize, juce::NotificationType::dontSendNotification);
     normalizeButton.addListener(this);
 
     //SHOW METER
     addAndMakeVisible(&meterButton);
     meterButton.setButtonText("Show individual meter");
-    meterButton.setBounds(200, 200, 200, 25);
+    meterButton.setBounds(0, normalizeButton.getBottom() + spacer, 200, 25);
     meterButton.setToggleState(Settings::showMeter, juce::NotificationType::dontSendNotification);
     meterButton.addListener(this);
 
     //LAUNCH LEVEL
     addAndMakeVisible(&launchLevelButton);
     launchLevelButton.setButtonText("Always launch sounds at 0dB");
-    launchLevelButton.setBounds(0, 250, 200, 25);
+    launchLevelButton.setBounds(0, meterButton.getBottom() + spacer, 200, 25);
     launchLevelButton.setToggleState(Settings::lauchAtZeroDB, juce::NotificationType::dontSendNotification);
     launchLevelButton.addListener(this);
 
     //MOUSE WHEEL CONTROL
     addAndMakeVisible(&mouseWheelControlButton);
     mouseWheelControlButton.setButtonText("Mouse wheel control volume");
-    mouseWheelControlButton.setBounds(200, 250, 200, 25);
+    mouseWheelControlButton.setBounds(0, launchLevelButton.getBottom() + spacer, 200, 25);
     mouseWheelControlButton.setToggleState(Settings::mouseWheelControlVolume, juce::NotificationType::dontSendNotification);
     mouseWheelControlButton.addListener(this);
 
+    //KEY MAPPED SOUNDBOARD SIZE
+    addAndMakeVisible(&keyMappedSizeLabel);
+    keyMappedSizeLabel.setBounds(0, mouseWheelControlButton.getBottom() + spacer, 200, 25);
+    keyMappedSizeLabel.setText("Key mapped soundboard colums", juce::dontSendNotification);
+
+    addAndMakeVisible(&keyMappedColumsValue);
+    keyMappedColumsValue.setBounds(200, mouseWheelControlButton.getBottom() + spacer, 50, 25);
+    keyMappedColumsValue.setText(juce::String(Settings::keyMappedSoundboardColumns), juce::dontSendNotification);
+    keyMappedColumsValue.setEditable(true);
+    keyMappedColumsValue.addListener(this);
+    keyMappedColumsValue.setColour(juce::Label::outlineColourId, juce::Colours::black);
+
+    addAndMakeVisible(&keyMappedRowsLabel);
+    keyMappedRowsLabel.setBounds(250, mouseWheelControlButton.getBottom() + spacer, 50, 25);
+    keyMappedRowsLabel.setText("rows", juce::dontSendNotification);
+
+    addAndMakeVisible(&keyMappedRowsValue);
+    keyMappedRowsValue.setBounds(300, mouseWheelControlButton.getBottom() + spacer, 50, 25);
+    keyMappedRowsValue.setText(juce::String(Settings::keyMappedSoundboardRows), juce::dontSendNotification);
+    keyMappedRowsValue.setEditable(true);
+    keyMappedRowsValue.addListener(this);
+    keyMappedRowsValue.setColour(juce::Label::outlineColourId, juce::Colours::black);
+
+
+    //CONVERTED SOUNDS PATH 
+    convertedSoundsLabel.setBounds(200, keyMappedSizeLabel.getBottom() + spacer, 400, 25);
+    addAndMakeVisible(convertedSoundsLabel);
+    convertedSoundsLabel.setText(Settings::convertedSoundsPath, juce::NotificationType::dontSendNotification);
+
+    convertedSoundsButtons.setBounds(1, keyMappedSizeLabel.getBottom() + spacer, 199, 25);
+    convertedSoundsButtons.setButtonText("Select converted sounds folder");
+    addAndMakeVisible(convertedSoundsButtons);
+    convertedSoundsButtons.onClick = [this] { selectSoundsFolder(); };
+
     //AUDIO OUTPUT MODE
     addAndMakeVisible(audioOutputModeLabel);
-    audioOutputModeLabel.setBounds(0, 350, 200, 25);
+    audioOutputModeLabel.setBounds(0, convertedSoundsLabel.getBottom() + spacer, 200, 25);
     audioOutputModeLabel.setText("Audio Output Mode", juce::NotificationType::sendNotification);
 
     addAndMakeVisible(audioOutputModeListbox);
-    audioOutputModeListbox.setBounds(200, 350, 399, 25);
+    audioOutputModeListbox.setBounds(200, convertedSoundsLabel.getBottom() + spacer, 399, 25);
     audioOutputModeListbox.addItem("Mono (Left -> Output, Right -> Cue)", 1);
     audioOutputModeListbox.addItem("Stereo 2 Outputs (Output & Cue on same stereo Output)", 2);
     audioOutputModeListbox.addItem("Stereo 4 Outputs(Output on first pair, Cue on second)", 3);
@@ -352,6 +367,13 @@ Settings::Settings() : settingsFile(options)
     audioOutputModeListbox.addListener(this);
 
     keyboardLayoutBroadcaster.reset(new juce::ChangeBroadcaster);
+
+    //SAVE & CLOSE BUTTONS
+    saveButton.setBounds(250, audioOutputModeLabel.getBottom() + spacer, 100, 50);
+    addAndMakeVisible(saveButton);
+    saveButton.setButtonText("Save & Close");
+    saveButton.onClick = [this] { setOptions();
+    makeIpAdress(); saveOptions(); };
 
     makeIpAdress();
     setOptions();
@@ -486,7 +508,7 @@ void Settings::labelTextChanged(juce::Label* labelThatHasChanged)
         properties.getUserSettings()->setValue("Midi Shift", Settings::midiShift);
         makeIpAdress();
     }
-    if (labelThatHasChanged == &faderTempValue)
+    else if (labelThatHasChanged == &faderTempValue)
     {
         Settings::faderTempTime = (faderTempValue.getTextValue()).toString().getIntValue();
         properties.getUserSettings()->setValue("Fader Temp", Settings::faderTempTime);
@@ -524,6 +546,20 @@ void Settings::labelTextChanged(juce::Label* labelThatHasChanged)
     {
         Settings::inOscPort = oscInPort.getText().getIntValue();
         properties.getUserSettings()->setValue("In OSC Port", Settings::inOscPort);
+    }
+    else if (labelThatHasChanged == &keyMappedColumsValue)
+    { 
+        Settings::keyMappedSoundboardColumns = juce::jlimit<int>(1, 10, keyMappedColumsValue.getText().getIntValue());
+        keyMappedColumsValue.setText(juce::String(Settings::keyMappedSoundboardColumns), juce::dontSendNotification);
+        properties.getUserSettings()->setValue("keyMappedColums", Settings::keyMappedSoundboardColumns);
+        keyMappedSoundboardSize->sendChangeMessage();
+    }
+    else if (labelThatHasChanged == &keyMappedRowsValue)
+    {
+        Settings::keyMappedSoundboardRows = juce::jlimit<int>(1, 3, keyMappedRowsValue.getText().getIntValue());
+        keyMappedRowsValue.setText(juce::String(Settings::keyMappedSoundboardRows), juce::dontSendNotification);
+        properties.getUserSettings()->setValue("keyMappedRows", Settings::keyMappedSoundboardRows);
+        keyMappedSoundboardSize->sendChangeMessage();
     }
     properties.saveIfNeeded();
     settingsFile.save();

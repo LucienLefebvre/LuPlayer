@@ -43,7 +43,6 @@ KeyMappedPlayer::KeyMappedPlayer()
     volumeSlider->setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
     juce::NormalisableRange<double> range(-80, +12, 0.5, 2);
     volumeSlider->setNormalisableRange(range);
-    //volumeSlider->setRange(0., 2., 0.01);
     volumeSlider->setValue(0.0);
     volumeSlider->setTextValueSuffix("dB");
     volumeSlider->addListener(this);
@@ -60,13 +59,18 @@ KeyMappedPlayer::KeyMappedPlayer()
     editButton->setButtonText("Edit");
     editButton->onClick = [this] {editButtonClicked(); };
     editButton->setMouseClickGrabsKeyboardFocus(false);
+    editButton->setAlpha(0.8);
 
     playHead.reset(new PlayHead());
-    addAndMakeVisible(playHead.get());
+    //addAndMakeVisible(playHead.get());
     playHead->setMouseClickGrabsKeyboardFocus(false);
 
     dBLabel.reset(new juce::Label());
     addChildComponent(dBLabel.get());
+
+    busyBar.reset(new juce::ProgressBar(busyBarValue));
+    addChildComponent(busyBar.get());
+    busyBar->setAlpha(0.7);
 }
 
 KeyMappedPlayer::~KeyMappedPlayer()
@@ -78,16 +82,6 @@ KeyMappedPlayer::~KeyMappedPlayer()
 
 void KeyMappedPlayer::paint (juce::Graphics& g)
 {
-    //DRAW SURROUNDING & BACKGROUND
-    //if (soundPlayer->isPlayerPlaying() && !soundPlayer->isLastSeconds())
-    //    g.setColour(juce::Colours::green);
-    //else if (soundPlayer->isLastSeconds() && soundPlayer->isPlayerPlaying())
-    //    g.setColour(juce::Colours::red);
-    //else
-    //    g.setColour(getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-    //g.fillRoundedRectangle(getLocalBounds().toFloat(), 15);
-
-
     g.setColour(currentColour);
     if (isDragged)
         g.setColour(juce::Colours::red);
@@ -97,7 +91,6 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
     {
         g.setColour(defaultColour);
         g.setOpacity(1.0f);
-        //g.fillRoundedRectangle(getLocalBounds().toFloat(), 15);
     }
 
     //DRAW THUMBNAIL
@@ -121,7 +114,7 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
     }
     thumbnail->setGainValues(gainValue);
 
-    g.setColour(currentColour);
+    g.setColour(defaultColour.brighter(0.5f));
     g.setOpacity(1.0);
     
     double thumbnailMiddleTime = (playHeadPosition / (double)getWidth()) * soundPlayer->getLenght();
@@ -161,12 +154,7 @@ void KeyMappedPlayer::resized()
     nameLabelTextTotalWidth = nameLabel->getFont().getStringWidth(nameLabel->getText());
     nameLabel->setSize(nameLabelTextTotalWidth, nameLabelHeight);
 
-    /*volumeSliderWidth = getWidth();
-    volumeSliderHeight = getHeight() / 5;
-    volumeSlider->setBounds(0, getHeight() * 3 / 5, volumeSliderWidth, volumeSliderHeight);
-    */
     thumbnailHeight = getHeight() * 3 / 5;
-    //thumbnailBounds.setBounds(0, 2*nameLabelHeight, getWidth(), thumbnailHeight);
 
     playHead->setSize(1, thumbnailHeight);
 
@@ -185,12 +173,16 @@ void KeyMappedPlayer::resized()
     editButtonWidth = 3 * getWidth() / 10;
     editButton->setBounds(elapsedTimeWidth, elapsedTimeHeight, editButtonWidth, elapsedTimeHeight);
 
-    dBLabel->setCentrePosition(getBounds().getCentre());
+    dBLabel->setCentrePosition(getLocalBounds().getCentre());
     int dBLabelHeight = nameLabelHeight;
     dBLabel->setSize(getWidth(), dBLabelHeight);
     dBLabel->setFont(juce::Font(dBLabelHeight, juce::Font::plain).withTypefaceStyle("Regular"));
     dBLabel->setJustificationType(juce::Justification::centred);
     dBLabel->setColour(juce::Label::ColourIds::textColourId, ORANGE);
+
+
+    busyBarBounds.setBounds(0, getHeight() / 10 * 6, getWidth(), getHeight() / 5);
+    busyBar->setBounds(busyBarBounds.reduced(30, 5));
 }
 
 void KeyMappedPlayer::setPlayer(Player* p)
@@ -201,13 +193,16 @@ void KeyMappedPlayer::setPlayer(Player* p)
     soundPlayer->soundEditedBroadcaster->addChangeListener(this);
     soundPlayer->playerDeletedBroadcaster->addChangeListener(this);
     soundPlayer->enveloppePathChangedBroadcaster->addChangeListener(this);
+    soundPlayer->normalizationLaunchedBroadcaster->addChangeListener(this);
+    soundPlayer->normalizationFinishedBroadcaster->addChangeListener(this);
+
     thumbnail = &soundPlayer->getAudioThumbnail();
     playThumbnail = &soundPlayer->getPlayThumbnail();
     thumbnail->addChangeListener(this);    
     playThumbnail->addChangeListener(this);
     juce::MultiTimer::startTimer(0, 50);
     juce::MultiTimer::startTimer(1, 50);
-    //thumbnail.reset(new juce::AudioThumbnail(521, soundPlayer->getAudioFormatManager(), soundPlayer->getAudioThumbnailCache()));
+
 }
 
 void KeyMappedPlayer::setShortcut(juce::String s)
@@ -276,6 +271,15 @@ void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
         else if (source == soundPlayer->enveloppePathChangedBroadcaster.get())
         {
             repaint();
+        }
+        else if (source == soundPlayer->normalizationLaunchedBroadcaster.get())
+        {
+            busyBar->setTextToDisplay("Normalizing...");
+            busyBar->setVisible(true);
+        }
+        else if (source == soundPlayer->normalizationFinishedBroadcaster.get())
+        {
+            busyBar->setVisible(false);
         }
     }
 }
@@ -449,10 +453,16 @@ void KeyMappedPlayer::timerCallback(int timerID)
 
 void KeyMappedPlayer::setPlayerColours(juce::Colour c)
 {
-    currentColour = c;
-    elapsedTimeLabel->setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
-    nameLabel->setColour(juce::Label::ColourIds::textColourId, currentColour);
-    repaint();
+    if (soundPlayer != nullptr)
+    {
+        if (soundPlayer->isPlayerPlaying())
+            currentColour = c;
+        else
+            currentColour = defaultColour;
+        elapsedTimeLabel->setColour(juce::Label::ColourIds::textColourId, currentColour);
+        nameLabel->setColour(juce::Label::ColourIds::textColourId, currentColour);
+        repaint();
+    }
 }
 
 void KeyMappedPlayer::scrollNameLabel()

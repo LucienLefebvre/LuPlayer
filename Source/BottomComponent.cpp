@@ -20,7 +20,7 @@ BottomComponent::BottomComponent()
     addTab("Clip Editor", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &clipEditor, false);
     addTab("Clip Effect", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &clipEffect, false);
     addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
-    //addTab("Database Feeder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &dataBaseFeeder, false);
+    addTab("Text Editor", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &textEditor, false);
     setTabBarDepth(tabBarHeight);
     setCurrentTabIndex(0);
     getTabbedButtonBar().setWantsKeyboardFocus(false);
@@ -35,6 +35,7 @@ BottomComponent::BottomComponent()
 
     recorderComponent.setName("recorder");
     audioPlaybackDemo.setName("browser");
+
 
     cuePlay = new juce::ChangeBroadcaster();
 }
@@ -64,6 +65,7 @@ void BottomComponent::resized()
     // components that your component contains..
     audioPlaybackDemo.setBounds(0, 0, getWidth(), getHeight() - 25);
     recorderComponent.setBounds(0, 0, getWidth(), getHeight() - 25);
+    textEditor.setBounds(0, 0, getWidth(), getHeight() - 30);
     TabbedComponent::resized();
     getTabbedButtonBar().setBounds(0, 0, getWidth(), 25);
 }

@@ -40,8 +40,8 @@ public:
     void changeListenerCallback(juce::ChangeBroadcaster* source);
 
     juce::MixerAudioSource mixer;
-private:
     juce::OwnedArray<KeyMappedPlayer> mappedPlayers;
+private:
     juce::StringArray qwertyShortcutArray{  "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
                                             "A", "S", "D", "F", "G", "H", "J", "K", "L", ";",
                                             "\\", "Z", "X", "C", "V", "B", "N", "M", ",", "."};
@@ -53,8 +53,8 @@ private:
     int playerWidth = 50;
     int playerHeight = 50;
 
-    int rowNumber = 2;
-    int columnNumber = 6;
+    int rowNumber = 3;
+    int columnNumber = 10;
 
     Settings* settings;
 

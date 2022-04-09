@@ -17,6 +17,7 @@
 #include "ClipEffect.h"
 #include "Clip Editor/ClipEditor.h"
 #include "Settings/KeyMapper.h"
+#include "TextEditorTab.h"
 //==============================================================================
 /*
 */
@@ -44,6 +45,8 @@ public:
     Recorder recorderComponent;
     ClipEditor clipEditor;
     ClipEffect clipEffect;
+    TextEditorTab textEditor;
+
     juce::MixerAudioSource myMixer;
 
     juce::ChangeBroadcaster* cuePlay;

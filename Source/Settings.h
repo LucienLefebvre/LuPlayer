@@ -119,9 +119,14 @@ public:
     static int Settings::keyboardLayout;
 
     std::unique_ptr<juce::ChangeBroadcaster> keyboardLayoutBroadcaster;
+    std::unique_ptr<juce::ChangeBroadcaster> keyMappedSoundboardSize = std::make_unique<juce::ChangeBroadcaster>();
 
     juce::OSCSender sender;
     bool oscConnected = true;
+
+    static int Settings::keyMappedSoundboardRows;
+    static int Settings::keyMappedSoundboardColumns;
+
 private:
 
     
@@ -178,6 +183,10 @@ private:
     juce::ToggleButton launchLevelButton;
     juce::ToggleButton mouseWheelControlButton;
 
+    juce::Label keyMappedSizeLabel;
+    juce::Label keyMappedRowsLabel;
+    juce::Label keyMappedRowsValue;
+    juce::Label keyMappedColumsValue;
 
     void Settings::selectFFmpeg();
     void Settings::selectSoundsFolder();
@@ -199,7 +208,8 @@ private:
 
     void labelTextChanged(juce::Label* labelThatHasChanged) override;
 
-
+    int spacer = 5;
+    int leftColumnWidth = 200;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Settings)
 };

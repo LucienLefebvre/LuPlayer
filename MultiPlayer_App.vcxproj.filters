@@ -2766,6 +2766,12 @@
     <ClInclude Include="Source\Thumbnail\gainThumbnail.h">
       <Filter>MultiPlayer\Source\Thumbnail</Filter>
     </ClInclude>
+    <ClInclude Include="Source\TextEditorTab.h">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FocusAwareTextEditor.h">
+      <Filter>MultiPlayer\Source\Bottom Panel</Filter>
+    </ClInclude>
     <ClInclude Include="Source\Clip Editor\ClipEditor.h">
       <Filter>MultiPlayer\Source\Bottom Panel</Filter>
     </ClInclude>

@@ -60,6 +60,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     deviceManager.addChangeListener(this);
     Settings::audioOutputModeValue.addListener(this);
     Settings::showMeterValue.addListener(this);
+    bottomComponent.textEditor.textEditor.textFocusLostBroadcaster->addChangeListener(this);
 
     timerSlider.setRange(10, 1000);
     timerSlider.addListener(this);
@@ -355,6 +356,10 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         grabKeyboardFocus();
     }
     else if (source == bottomComponent.clipEditor.grabFocusBroadcaster.get())
+    {
+        grabKeyboardFocus();
+    }
+    else if (source == bottomComponent.textEditor.textEditor.textFocusLostBroadcaster.get())
     {
         grabKeyboardFocus();
     }

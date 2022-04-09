@@ -15,10 +15,12 @@
 KeyboardMappedSoundboard::KeyboardMappedSoundboard(Settings* s)
 {
     settings = s;
+    settings->keyMappedSoundboardSize->addChangeListener(this);
 }
 
 KeyboardMappedSoundboard::~KeyboardMappedSoundboard()
 {
+    settings->keyMappedSoundboardSize->removeChangeListener(this);
 }
 
 void KeyboardMappedSoundboard::paint (juce::Graphics& g)
@@ -30,6 +32,8 @@ void KeyboardMappedSoundboard::paint (juce::Graphics& g)
 
 void KeyboardMappedSoundboard::resized()
 {
+    rowNumber = Settings::keyMappedSoundboardRows;
+    columnNumber = Settings::keyMappedSoundboardColumns;
     playerWidth = (getWidth() - spaceBetweenPlayers * (columnNumber + 1)) / columnNumber ;
     playerHeight = getHeight() / rowNumber - spaceBetweenPlayers * (rowNumber + 1);
     int playerIdInLine = 0;
@@ -37,7 +41,14 @@ void KeyboardMappedSoundboard::resized()
     {
         int line = i / 10;
         int lineXStart = spaceBetweenPlayers + (spaceBetweenPlayers + playerHeight) * line;
-        mappedPlayers[i]->setBounds(spaceBetweenPlayers + (playerIdInLine * (playerWidth + spaceBetweenPlayers)) , lineXStart, playerWidth, playerHeight);
+
+        mappedPlayers[i]->setBounds(spaceBetweenPlayers + (playerIdInLine * (playerWidth + spaceBetweenPlayers)), lineXStart, playerWidth, playerHeight);
+
+        if (playerIdInLine < Settings::keyMappedSoundboardColumns)
+            mappedPlayers[i]->setVisible(true);
+        else
+            mappedPlayers[i]->setVisible(false);
+        
         playerIdInLine++;
         if (playerIdInLine == 10)
             playerIdInLine = 0;
@@ -128,5 +139,8 @@ bool KeyboardMappedSoundboard::keyPressed(const juce::KeyPress& key, juce::Compo
 
 void KeyboardMappedSoundboard::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
-
+    if (source == settings->keyMappedSoundboardSize.get())
+    {
+        resized();
+    }
 }

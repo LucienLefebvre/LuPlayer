@@ -308,6 +308,8 @@ public:
     juce::ChangeBroadcaster* playerInfoChangedBroadcaster;
     juce::ChangeBroadcaster* playerDeletedBroadcaster;
     std::unique_ptr<juce::ChangeBroadcaster> playerLaunchedBroadcaster;
+    std::unique_ptr<juce::ChangeBroadcaster> normalizationLaunchedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
+    std::unique_ptr<juce::ChangeBroadcaster> normalizationFinishedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 
     foleys::LevelMeterSource meterSource;
     foleys::LevelMeterSource outMeterSource;

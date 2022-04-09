@@ -81,6 +81,7 @@ private:
     std::unique_ptr<juce::TextButton> editButton;
     std::unique_ptr<juce::Label> dBLabel;
     std::unique_ptr<PlayHead> playHead;
+    std::unique_ptr<juce::ProgressBar> busyBar;
 
     int editButtonWidth = 0;
     juce::String shortcutKey;
@@ -115,6 +116,8 @@ private:
     juce::uint32 gainTimeStartDisplay = 0;
     int gainDisplayTimeMs = 2000;
 
+    juce::Rectangle<int> busyBarBounds;
+    double busyBarValue = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappedPlayer)
 };

@@ -2225,6 +2225,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Thumbnail\gainThumbnail.h"/>
+    <ClInclude Include="Source\TextEditorTab.h"/>
+    <ClInclude Include="Source\FocusAwareTextEditor.h"/>
     <ClInclude Include="Source\Clip Editor\ClipEditor.h"/>
     <ClInclude Include="Source\Clip Editor\EnveloppeEditor.h"/>
     <ClInclude Include="Source\Clip Editor\EnveloppePoint.h"/>
