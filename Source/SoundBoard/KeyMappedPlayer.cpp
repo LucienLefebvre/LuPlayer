@@ -83,11 +83,6 @@ KeyMappedPlayer::~KeyMappedPlayer()
 
 void KeyMappedPlayer::paint (juce::Graphics& g)
 {
-    g.setColour(currentColour);
-    if (isDragged)
-        g.setColour(juce::Colours::red);
-    g.drawRoundedRectangle(getLocalBounds().toFloat(), 15, 2);
-
     if (soundPlayer != nullptr && soundPlayer->isPlayerPlaying())
     {
         g.setColour(defaultColour);
@@ -145,6 +140,11 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
     g.setOpacity(1.0);
     if (playThumbnail != nullptr)
         playThumbnail->drawChannels(g, playThumbnailBounds, thumbnailMiddleTime, soundPlayer->getLenght(), juce::Decibels::decibelsToGain(playerInfos.trimVolume) * 1.5f);
+
+    g.setColour(currentColour);
+    if (isDragged)
+        g.setColour(juce::Colours::red);
+    g.drawRoundedRectangle(getLocalBounds().toFloat(), 15, 2);
 }
 
 void KeyMappedPlayer::resized()

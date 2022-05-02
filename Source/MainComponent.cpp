@@ -274,7 +274,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
         {
             soundPlayers[0]->keyMappedSoundboard->setDroppedFile(getMouseXYRelative(), myFile->getFullPathName(), myFile->getFileNameWithoutExtension());
-            soundPlayers[0]->keyMappedSoundboard->fileDragExit();
+            soundPlayers[0]->keyMappedSoundboard->fileDragExit(*null.get());
         }
         else
         {
@@ -1063,7 +1063,7 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
         menu.addCommandItem(&commandManager, CommandIDs::open, "Open");
         menu.addCommandItem(&commandManager, CommandIDs::save, "Save");
         menu.addSeparator();
-        menu.addCommandItem(&commandManager, CommandIDs::open, "Quit");
+        menu.addCommandItem(&commandManager, CommandIDs::quit, "Quit");
     }
     else if (menuIndex == 1)
     {

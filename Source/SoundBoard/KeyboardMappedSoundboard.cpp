@@ -69,6 +69,43 @@ void KeyboardMappedSoundboard::fileDragMove(const juce::StringArray& files, int 
     }
 }
 
+void KeyboardMappedSoundboard::fileDragExit(const juce::StringArray& files, int x, int y)
+{
+    for (auto* player : mappedPlayers)
+    {
+        player->isDraggedOver(false);
+    }
+}
+
+bool KeyboardMappedSoundboard::isInterestedInFileDrag(const juce::StringArray& files)
+{
+    for (auto file : files)
+
+        if ((file.contains(".wav")) || (file.contains(".WAV"))
+            || (file.contains(".bwf")) || (file.contains(".BWF"))
+            || (file.contains(".aiff")) || (file.contains(".AIFF"))
+            || (file.contains(".aif")) || (file.contains(".AIF"))
+            || (file.contains(".flac")) || (file.contains(".FLAC"))
+            || (file.contains(".opus")) || (file.contains(".OPUS"))
+            || (file.contains(".mp3")) || (file.contains(".MP3")))
+        {
+            return true;
+        }
+    return false;
+}
+
+void KeyboardMappedSoundboard::filesDropped(const juce::StringArray& files, int x, int y)
+{
+    auto pos = juce::Point<int>(x, y);
+    for (auto* player : mappedPlayers)
+    {
+        if (player->getBounds().contains(pos))
+        {
+            player->loadFile(files[0], "");
+        }
+        player->isDraggedOver(false);
+    }
+}
 void KeyboardMappedSoundboard::setDroppedFile(juce::Point<int> p,juce::String path,juce::String name)
 {
     auto pointOnTopLevel = getLocalPoint(getTopLevelComponent(), p);
@@ -81,7 +118,7 @@ void KeyboardMappedSoundboard::setDroppedFile(juce::Point<int> p,juce::String pa
     }
 }
 
-void KeyboardMappedSoundboard::fileDragExit()
+void KeyboardMappedSoundboard::fileDragExit(const juce::StringArray& files)
 {
     for (auto* player : mappedPlayers)
     {

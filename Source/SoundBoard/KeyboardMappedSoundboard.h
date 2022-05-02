@@ -18,7 +18,8 @@
 */
 class KeyboardMappedSoundboard : public juce::Component,
                                  public juce::KeyListener,
-                                 public juce::ChangeListener
+                                 public juce::ChangeListener,
+                                 public juce::FileDragAndDropTarget
 {
 public:
     KeyboardMappedSoundboard(Settings* s);
@@ -28,12 +29,15 @@ public:
     void resized() override;
 
     void fileDragMove(const juce::StringArray& files, int x, int y);
+    void fileDragExit(const juce::StringArray& files, int x, int y);
+    bool isInterestedInFileDrag(const juce::StringArray& files);
+    void filesDropped(const juce::StringArray& files, int x, int y);
     void setDroppedFile(juce::Point<int> p, juce::String path, juce::String name);
     KeyMappedPlayer* KeyboardMappedSoundboard::getPlayer(int i);
     KeyMappedPlayer* KeyboardMappedSoundboard::addPlayer(Player* p);
     void setShortcutKeys();
     void setPlayer(Player* p, int i);
-    void fileDragExit();
+    void fileDragExit(const juce::StringArray& files);
     void mouseDrag(const juce::MouseEvent& event);
     void mouseExit(const juce::MouseEvent& event);
     void mouseUp(const juce::MouseEvent& event);
