@@ -310,11 +310,15 @@ void KeyMappedPlayer::updatePlayerInfo()
     repaint();
 }
 
-void KeyMappedPlayer::shortcutKeyPressed()
+void KeyMappedPlayer::shortcutKeyPressed(bool commandDown)
 {
     if (soundPlayer != nullptr)
     {
-        if (soundPlayer->getPlayMode() == 1)
+        if (commandDown)
+        {
+            soundPlayer->stop();
+        }
+        else if (soundPlayer->getPlayMode() == 1)
         {
             soundPlayer->stop();
             soundPlayer->launch();
@@ -343,14 +347,21 @@ void KeyMappedPlayer::mouseDown(const juce::MouseEvent& event)
 
     if (soundPlayer != nullptr)
     {
-        if (event.getNumberOfClicks() == 2)
+        if (event.mods.isCommandDown())
         {
-            soundPlayer->setGain(juce::Decibels::decibelsToGain(0));
+            soundPlayer->stop();
         }
-        if (soundPlayer->isFileLoaded())
-            setDBText();
-        gainAtDragStart = juce::Decibels::gainToDecibels(soundPlayer->getVolume());
-        gainTimeStartDisplay = juce::Time::getMillisecondCounter();
+        else
+        {
+            if (event.getNumberOfClicks() == 2)
+            {
+                soundPlayer->setGain(juce::Decibels::decibelsToGain(0));
+            }
+            if (soundPlayer->isFileLoaded())
+                setDBText();
+            gainAtDragStart = juce::Decibels::gainToDecibels(soundPlayer->getVolume());
+            gainTimeStartDisplay = juce::Time::getMillisecondCounter();
+        }
     }
 }
 

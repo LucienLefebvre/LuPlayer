@@ -40,7 +40,7 @@ public:
 
     void updatePlayerInfo();
 
-    void shortcutKeyPressed();
+    void shortcutKeyPressed(bool commandDown = false);
 
     void startOrStop();
 

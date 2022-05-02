@@ -126,11 +126,16 @@ void KeyboardMappedSoundboard::setShortcutKeys()
 
 bool KeyboardMappedSoundboard::keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent)
 {
+    bool isCommandDown = false;
+    if (key.getModifiers().isCommandDown())
+    {
+        isCommandDown = true;
+    }
     for (auto player : mappedPlayers)
     {
-        if (key == player->getShortcut())
+        if (key.isKeyCode(player->getShortcut().getKeyCode()))
         {
-            player->shortcutKeyPressed();
+            player->shortcutKeyPressed(isCommandDown);
         }
     }
     return false;
