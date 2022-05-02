@@ -77,7 +77,7 @@ public:
 
     void setSettings(Settings* s);
 
-    void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper);
+    bool SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper);
     void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message);
     void SoundPlayer::OSCInitialize();
     void SoundPlayer::oscMessageReceived(const juce::OSCMessage& message);

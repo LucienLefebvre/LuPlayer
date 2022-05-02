@@ -407,40 +407,43 @@ void SoundPlayer::timerCallback()
     }
 }
 
-void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper)
+bool SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper)
 {
     midiMessageValue = message.getControllerValue();
     midiMessageNumber = message.getControllerNumber();
 
     if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
     {
-        for (auto* playlist : myPlaylists)
-            playlist->handleIncomingMidiMessage(source, message, mapper);
+        if (myPlaylists[0]->handleIncomingMidiMessage(source, message, mapper))
+            return true;
+        else if (myPlaylists[1]->handleIncomingMidiMessage(source, message, mapper))
+            return true;
+        else
+            return false;
     }
     else if (soundPlayerMode == SoundPlayer::Mode::EightFaders)
     {
-        DBG(mapper->getMidiCCForCommand(200));
         for (int i = 0; i < 4; i++)
         {
             if (midiMessageNumber == mapper->getMidiCCForCommand(200 + i))
             {
                 myPlaylists[0]->handleIncomingMidiMessageEightPlayers(source, message, mapper, 200);
-                return;
+                return true;
             }
             else if (midiMessageNumber == mapper->getMidiCCForCommand(204 + i))
             {
                 myPlaylists[1]->handleIncomingMidiMessageEightPlayers(source, message, mapper, 204);
-                return;
+                return true;
             }
             else if (midiMessageNumber == mapper->getMidiCCForCommand(208 + i))
             {
                 myPlaylists[0]->handleMidiTrimEightPlayers(midiMessageValue, midiMessageNumber, mapper, 208);
-                return;
+                return true;
             }
             else if (midiMessageNumber == mapper->getMidiCCForCommand(212 + i))
             {
                 myPlaylists[1]->handleMidiTrimEightPlayers(midiMessageValue, midiMessageNumber, mapper, 212);
-                return;
+                return true;
             }
         }
     }
@@ -448,18 +451,18 @@ void SoundPlayer::handleIncomingMidiMessage(juce::MidiInput* source, const juce:
     {
         for (int i = 0; i < 30; i++)
         {
-            if (midiMessageNumber == mapper->getMidiCCForCommand(250 + i) && midiMessageValue == 127)
+            if (midiMessageNumber == mapper->getMidiCCForCommand(250 + i))
             {
-                auto* player = keyMappedSoundboard->mappedPlayers[i];
+                auto* player = myPlaylists[0]->players[i];
                 if (player != nullptr)
                 {
-                    player->shortcutKeyPressed();
-                    return;
+                    player->play(true);
                 }
+                return true;
             }
         }
     }
-
+    return false;
 }
 
 void SoundPlayer::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message)

@@ -57,9 +57,9 @@ public:
     void handleFader4(int faderValue);
     void handleFader4OSC(float faderValue);
 
-    void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper);
-    void handleMidiTrim(int value, int number, MidiMapper* mapper); //normal mode
-    void handleMidiRelativeTrim(int value, int number, MidiMapper* mapper);
+    bool handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper);
+    bool handleMidiTrim(int value, int number, MidiMapper* mapper); //normal mode
+    bool handleMidiRelativeTrim(int value, int number, MidiMapper* mapper);
 
     void handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper, int startIndex);
     void handleMidiTrimEightPlayers(int value, int number, MidiMapper* mapper, int startIndex);

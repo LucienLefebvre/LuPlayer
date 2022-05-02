@@ -672,19 +672,21 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
     }
     else
     {
-        for (int i = 0; i < commandManager.getNumCommands(); i++)
+        if (!soundPlayers[0]->handleIncomingMidiMessage(source, message, &midiMapper))
         {
-            juce::CommandID cID = commandManager.getCommandForIndex(i)->commandID;
-            const juce::MessageManagerLock mmLock;
-            if (message.getControllerNumber() == midiMapper.getMidiCCForCommand(cID) && message.getControllerValue() == 127)
-                invokeDirectly(cID, true);
+            for (int i = 0; i < commandManager.getNumCommands(); i++)
+            {
+                juce::CommandID cID = commandManager.getCommandForIndex(i)->commandID;
+                const juce::MessageManagerLock mmLock;
+                if (message.getControllerNumber() == midiMapper.getMidiCCForCommand(cID) && message.getControllerValue() == 127)
+                {
+                    invokeDirectly(cID, true);
+                    return;
+                }
+            }
         }
-        soundPlayers[0]->handleIncomingMidiMessage(source, message, &midiMapper);
     }
 }
-
-
-
 
 
 bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* originatingComponent)

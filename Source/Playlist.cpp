@@ -242,52 +242,89 @@ void Playlist::resized()
 
 }
 
-void Playlist::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper)
+bool Playlist::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper)
 {
     int midiMessageValue = message.getControllerValue();
     int midiMessageNumber = message.getControllerNumber();
     if (playlistType == 0)
     {
         if (midiMessageNumber == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader1Level))
+        {
             handleFader1(midiMessageValue);
+            return true;
+        }
         else if (midiMessageNumber == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader2Level))
+        {
             handleFader2(midiMessageValue);
+            return true;
+        }
+        else if (handleMidiTrim(midiMessageValue, midiMessageNumber, mapper))
+            return true;
+        else if (handleMidiRelativeTrim(midiMessageValue, midiMessageNumber, mapper))
+            return true;
+        else
+            return false;
     }
     else if (playlistType == 1)
     {
         if (midiMessageNumber == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader3Level))
+        {
             handleFader3(midiMessageValue);
-        if (midiMessageNumber == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader4Level))
+            return true;
+        }
+        else if (midiMessageNumber == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader4Level))
+        {
             handleFader4(midiMessageValue);
+            return true;
+        }
+        else if (handleMidiTrim(midiMessageValue, midiMessageNumber, mapper))
+            return true;
+        else if (handleMidiRelativeTrim(midiMessageValue, midiMessageNumber, mapper))
+            return true;
+        else
+            return false;
     }
 
-    handleMidiTrim(midiMessageValue, midiMessageNumber, mapper);
-    handleMidiRelativeTrim(midiMessageValue, midiMessageNumber, mapper);
-
     const juce::ScopedValueSetter<bool> scopedInputFlag(isAddingFromMidiInput, true);
-
 }
 
-void Playlist::handleMidiTrim(int value, int number, MidiMapper* mapper)
+bool Playlist::handleMidiTrim(int value, int number, MidiMapper* mapper)
 {
     if (playlistType == 0)
     {
         if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader1Trim) && players[fader1Player] != nullptr)
+        {
             players[fader1Player]->handleMidiTrimMessage(value);
+            return true;
+        }
         else if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader2Trim) && players[fader2Player] != nullptr)
+        {
             players[fader2Player]->handleMidiTrimMessage(value);
+            return true;
+        }
+        else
+            return false;
     }
     else if (playlistType == 1)
     {
         if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader3Trim) && players[fader1Player] != nullptr)
+        {
             players[fader1Player]->handleMidiTrimMessage(value);
+            return true;
+        }
         else if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader4Trim) && players[fader2Player] != nullptr)
+        {
             players[fader2Player]->handleMidiTrimMessage(value);
+            return true;
+        }
+        else
+            return false;
     }
-
+    else
+        return false;
 }
 
-void Playlist::handleMidiRelativeTrim(int value, int number, MidiMapper* mapper)
+bool Playlist::handleMidiRelativeTrim(int value, int number, MidiMapper* mapper)
 {
     if (playlistType == 0)
     {
@@ -297,6 +334,7 @@ void Playlist::handleMidiRelativeTrim(int value, int number, MidiMapper* mapper)
                 players[fader1Player]->handleMidiTrimMessage(true);
             else
                 players[fader1Player]->handleMidiTrimMessage(false);
+            return true;
         }
 
         else if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader2TrimR) && players[fader2Player] != nullptr)
@@ -305,8 +343,10 @@ void Playlist::handleMidiRelativeTrim(int value, int number, MidiMapper* mapper)
                 players[fader2Player]->handleMidiTrimMessage(true);
             else
                 players[fader2Player]->handleMidiTrimMessage(false);
+            return true;
         }
-
+        else
+            return false;
     }
     else if (playlistType == 1)
     {
@@ -316,6 +356,7 @@ void Playlist::handleMidiRelativeTrim(int value, int number, MidiMapper* mapper)
                 players[fader1Player]->handleMidiTrimMessage(true);
             else
                 players[fader1Player]->handleMidiTrimMessage(false);
+            return true;
         }
         else if (number == mapper->getMidiCCForCommand(MidiMapper::MidiCommands::Fader4TrimR) && players[fader2Player] != nullptr)
         {
@@ -323,8 +364,13 @@ void Playlist::handleMidiRelativeTrim(int value, int number, MidiMapper* mapper)
                 players[fader2Player]->handleMidiTrimMessage(true);
             else
                 players[fader2Player]->handleMidiTrimMessage(false);
+            return true;
         }
-    } 
+        else
+            return false;
+    }
+    else
+        return false;
 }
 
 void Playlist::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, const juce::MidiMessage& message, MidiMapper* mapper, int startIndex)
