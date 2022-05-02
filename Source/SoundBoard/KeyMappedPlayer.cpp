@@ -78,6 +78,7 @@ KeyMappedPlayer::~KeyMappedPlayer()
     juce::MultiTimer::stopTimer(0);
     juce::MultiTimer::stopTimer(1);
     soundPlayer = nullptr;
+    playerDraggedBroadcaster->removeAllChangeListeners();
 }
 
 void KeyMappedPlayer::paint (juce::Graphics& g)
@@ -203,6 +204,12 @@ void KeyMappedPlayer::setPlayer(Player* p)
     juce::MultiTimer::startTimer(0, 50);
     juce::MultiTimer::startTimer(1, 50);
 
+}
+
+Player* KeyMappedPlayer::getPlayer()
+{
+    if (soundPlayer != nullptr)
+        return soundPlayer;
 }
 
 void KeyMappedPlayer::setShortcut(juce::String s)
@@ -351,6 +358,10 @@ void KeyMappedPlayer::mouseDown(const juce::MouseEvent& event)
         {
             soundPlayer->stop();
         }
+        else if (event.mods.isAltDown())
+        {
+            playerDraggedBroadcaster->sendChangeMessage();
+        }
         else
         {
             if (event.getNumberOfClicks() == 2)
@@ -369,12 +380,15 @@ void KeyMappedPlayer::mouseDrag(const juce::MouseEvent& event)
 {
     if (soundPlayer != nullptr)
     {
-        if (soundPlayer->isFileLoaded())
+        if (!event.mods.isAltDown())
         {
-            float gain = gainAtDragStart - event.getDistanceFromDragStartY() / 10 + event.getDistanceFromDragStartX() / 10;
-            soundPlayer->setGain(juce::Decibels::decibelsToGain(gain));
-            setDBText();
-            gainTimeStartDisplay = juce::Time::getMillisecondCounter();
+            if (soundPlayer->isFileLoaded())
+            {
+                float gain = gainAtDragStart - event.getDistanceFromDragStartY() / 10 + event.getDistanceFromDragStartX() / 10;
+                soundPlayer->setGain(juce::Decibels::decibelsToGain(gain));
+                setDBText();
+                gainTimeStartDisplay = juce::Time::getMillisecondCounter();
+            }
         }
     }
 }

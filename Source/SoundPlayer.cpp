@@ -2047,24 +2047,7 @@ void SoundPlayer::actionListenerCallback(const juce::String& message)
 
 void SoundPlayer::sliderValueChanged(juce::Slider* slider)
 {
-    //if (oscConnected)
-    //{
-    //    for (int i = 1; i < 9; i++)
-    //    {
-    //        auto playlistID = i < 5 ? 0 : 1;
-    //        auto playerID = i < 5 ? i - 1 : i - 5;
-    //        auto player = myPlaylists[playlistID]->players[playerID];
-    //        if (player != nullptr)
-    //        {
-    //            if (slider == &player->volumeSlider)
-    //            {
-    //                juce::String adress = "/8fader" + juce::String(i) + "gain";
-    //                juce::NormalisableRange<float>valueRange(0.0, juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal, false);
-    //                sender->send(adress, valueRange.convertTo0to1((float)slider->getValue()));
-    //            }
-    //        }
-    //    }
-    //}
+
 }
 
 void SoundPlayer::initializeKeyMapPlayer()
@@ -2073,7 +2056,9 @@ void SoundPlayer::initializeKeyMapPlayer()
     {
         //myPlaylists[0]->players.clear();
         myPlaylists[0]->addPlayer(i);
-        keyMappedSoundboard->addPlayer(myPlaylists[0]->players[i]);
+        auto addedPlayer = keyMappedSoundboard->addPlayer(myPlaylists[0]->players[i]);
+        addedPlayer->playerDraggedBroadcaster->addChangeListener(keyMappedSoundboard.get());
+        addedPlayer->addMouseListener(keyMappedSoundboard.get(), true);
     }
     keyMappedSoundboard->setShortcutKeys();
     keyMappedSoundboard->resized();

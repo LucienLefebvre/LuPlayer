@@ -237,6 +237,15 @@ public:
     }
 
     //*************COMPRESSOR*************
+    void setCompParameters(CompParameters p)
+    {
+        setThreshold(p.threshold);
+        setRatio(p.ratio);
+        setAttack(p.attack);
+        setRelease(p.release);
+        setGain(p.gain);
+    }
+
     void setThreshold(float threshold)
     {
         compParams.threshold = threshold;

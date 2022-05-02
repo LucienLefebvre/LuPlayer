@@ -1052,7 +1052,8 @@ void Player::deleteFile()
         transport.releaseResources();
         thumbnail.setSource(nullptr);        
         playThumbnail.setSource(nullptr);
-        transport.setSource(nullptr);
+        transport.setSource(nullptr, 0, nullptr, 0);
+        transport.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
         enableButtons(false);
         loadedFilePath = "";
         deleteStart(false);
@@ -1725,18 +1726,18 @@ bool Player::loadFile(const juce::String& path, bool shouldSendChangeMessage)
     {
         //transport
         std::unique_ptr<juce::AudioFormatReaderSource> tempSource(new juce::AudioFormatReaderSource(reader, true));
-        transport.setSource(tempSource.get());
+        transport.setSource(tempSource.get(), 0, nullptr, reader->sampleRate);
         transport.addChangeListener(this);
         transport.setGain(1.0);
         sliderValueToset = 1.0;
 
-        resampledSource.setResamplingRatio(reader->sampleRate / Settings::sampleRate);
+        //resampledSource.setResamplingRatio(1);
         fileSampleRate = reader->sampleRate;
         playSource.reset(tempSource.release());
 
+        juce::FileLogger::getCurrentLogger()->writeToLog("File sample rate : " + juce::String(fileSampleRate));
+
         setChannelsMapping();
-
-
 
         fileName = file.getFileNameWithoutExtension();
         newName = file.getFileName().toStdString();
@@ -1762,7 +1763,6 @@ bool Player::loadFile(const juce::String& path, bool shouldSendChangeMessage)
         waveformPainted = false;
         fileLoaded = true;
         enableButtons(true);
-        //soundEditedBroadcaster->sendChangeMessage();
     }
     //R128
     if (Settings::autoNormalize && !hasBeenNormalized)
@@ -1773,10 +1773,10 @@ bool Player::loadFile(const juce::String& path, bool shouldSendChangeMessage)
     if (juce::AudioFormatReader* cuereader = formatManager.createReaderFor(file))
     {
         std::unique_ptr<juce::AudioFormatReaderSource> cuetempSource(new juce::AudioFormatReaderSource(cuereader, true));
-        cueTransport.setSource(cuetempSource.get());
+        cueTransport.setSource(cuetempSource.get(), 0, nullptr, cuereader->sampleRate);
         cueTransport.addChangeListener(this);
         cueTransport.setGain(1.0);
-        cueResampledSource.setResamplingRatio(cuereader->sampleRate / Settings::sampleRate);
+        //cueResampledSource.setResamplingRatio(cuereader->sampleRate / Settings::sampleRate);
         cuePlaySource.reset(cuetempSource.release());
         cueButton.setEnabled(true);
         //setDraggedPlayer();
@@ -1799,17 +1799,6 @@ void Player::handleAudioTags(std::string filePath)
 
 }
 
-
-Player::PlayerInfo Player::getPlayerInfo()
-{
-    Player::PlayerInfo info;
-    info.filePath = getFilePath();
-    info.name = getName();
-    info.volume = getVolume();
-    info.trimVolume = getTrimVolume();
-    info.loop = getIsLooping();
-    return info;
-}
 
 std::string Player::getFilePath()
 {
@@ -2138,6 +2127,16 @@ FilterProcessor::GlobalParameters Player::getFilterParameters()
     globalParams.highMidBand = filterProcessor.getFilterParameters(2);
     globalParams.highBand = filterProcessor.getFilterParameters(3);
     return globalParams;
+}
+
+CompProcessor::CompParameters Player::getCompParameters()
+{
+    return compProcessor.getCompParams();
+}
+
+void Player::setCompParameters(CompProcessor::CompParameters p)
+{
+    compProcessor.setCompParameters(p);
 }
 
 void Player::setFilterParameters(FilterProcessor::GlobalParameters g)
@@ -2605,3 +2604,49 @@ void Player::labelTextChanged(juce::Label* labelThatHasChanged)
         }
     }
 }   
+
+Player::PlayerInfo Player::getPlayerInfo()
+{
+    PlayerInfo p;
+    p.filePath = getFilePath();
+    p.name = getName();
+    p.hasBeenNormalized = getHasBeenNormalized();
+    p.trimVolume = getTrimVolume();
+    p.loop = getIsLooping();
+    p.hpfEnabled = isHpfEnabled();
+    p.startTime = isStartTimeSet();
+    p.stopTimeSet = isStopTimeSet();
+    p.startTime = getStart();
+    p.stopTime = getStop();
+    p.playMode = getPlayMode();
+    p.fxBypassed = getBypassed();
+    p.filterParams = getFilterParameters();
+    p.compParams = getCompParameters();
+    p.enveloppeEnabled = isEnveloppeEnabled();
+    p.enveloppePath = *getEnveloppePath();
+    p.playerColour = getPlayerColour();
+    p.colourHasChanged = getColourHasChanged();
+    return p;
+}
+
+void Player::setPlayerInfo(Player::PlayerInfo p)
+{
+    setHasBeenNormalized(p.hasBeenNormalized);
+    verifyAudioFileFormat(p.filePath);
+    setName(p.name.toStdString(), false);
+    setTrimVolume(p.trimVolume);
+    setIsLooping(p.loop);
+    enableHPF(p.hpfEnabled, false);
+    if (p.startTimeSet)
+        setStartTime(p.startTime, false);
+    if (p.stopTimeSet)
+        setStopTime(p.stopTime, false);
+    setPlayMode(p.playMode);
+    bypassFX(p.fxBypassed, false);
+    setFilterParameters(p.filterParams);
+    setCompParameters(p.compParams);
+    setEnveloppeEnabled(p.enveloppeEnabled, false, false);
+    setEnveloppePath(p.enveloppePath);
+    if (p.colourHasChanged)
+        setPlayerColour(p.playerColour);
+}

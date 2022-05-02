@@ -51,14 +51,28 @@ class Player : public juce::Component,
 public:
     struct PlayerInfo
     {
-        std::string filePath = "";
-        std::string name = "";
-        float volume = 0.0;
-        float trimVolume = 0.0;
+        juce::String filePath = "";
+        juce::String name = "";
+        double volume = 0.0;
+        double trimVolume = 0.0;
+        bool hasBeenNormalized = false;
         bool loop = false;
+        bool hpfEnabled = false;
+        bool startTimeSet = false;
+        bool stopTimeSet = false;
+        float startTime = 0.0;
+        float stopTime = 0.0;
+        int playMode = 0;
+        bool fxBypassed = true;
+        FilterProcessor::GlobalParameters filterParams;
+        CompProcessor::CompParameters compParams;
+        bool enveloppeEnabled = false;
+        juce::Path enveloppePath;
+        juce::Colour playerColour;
+        bool colourHasChanged;
     };
+
     Player(int index, Settings* s);
-    //Player(Player& source) : Player{ source.actualMidiLevel } {};
     ~Player() override;
 
     void paint (juce::Graphics&) override;
@@ -99,6 +113,7 @@ public:
     void verifyAudioFileFormat(const juce::String& path);
     bool loadFile(const juce::String& path, bool shouldSendChangeMessage);
     Player::PlayerInfo getPlayerInfo();
+    void setPlayerInfo(Player::PlayerInfo p);
     std::string getFilePath();
 
     void setGain(float g);
@@ -144,6 +159,8 @@ public:
     FilterProcessor& getFilterProcessor();
     std::unique_ptr<juce::AudioBuffer<float>>& getBuffer();
     FilterProcessor::GlobalParameters getFilterParameters();
+    CompProcessor::CompParameters getCompParameters();
+    void setCompParameters(CompProcessor::CompParameters p);
     void setFilterParameters(FilterProcessor::GlobalParameters g);
     void setFilterParameters(int i, FilterProcessor::FilterParameters p);
 
@@ -224,14 +241,14 @@ public:
     juce::AudioTransportSource transport;
     juce::ResamplingAudioSource resampledSource                     { &transport, false, 2 };
     juce::ChannelRemappingAudioSource channelRemappingSource        { &filterSource, false };
-    juce::IIRFilterAudioSource filterSource                         { &resampledSource, false };
+    juce::IIRFilterAudioSource filterSource                         { &transport, false };
 
     std::unique_ptr<juce::AudioFormatReaderSource> cuePlaySource;
     juce::AudioTransportSource cueTransport;
     juce::ResamplingAudioSource cueResampledSource                  { &cueTransport, false, 2 };
     juce::ChannelRemappingAudioSource cuechannelRemappingSource     { &cuefilterSource, false };
 
-    juce::IIRFilterAudioSource cuefilterSource                      { &cueResampledSource, false };
+    juce::IIRFilterAudioSource cuefilterSource                      { &cueTransport, false };
 
     juce::MixerAudioSource mixer;
     juce::MixerAudioSource cueMixer;

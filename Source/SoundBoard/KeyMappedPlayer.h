@@ -30,6 +30,8 @@ public:
 
     void setPlayer(Player* p);
 
+    Player* getPlayer();
+
     void setShortcut(juce::String s);
 
     void isDraggedOver(bool b);
@@ -69,6 +71,8 @@ public:
     juce::Colour getPlayerDefaultColour();
 
     juce::KeyPress getShortcut();
+
+    std::unique_ptr<juce::ChangeBroadcaster> playerDraggedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 private:
     //Player dummyPlayer;
     Player* soundPlayer = 0;

@@ -362,6 +362,11 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     else if (source == bottomComponent.textEditor.textEditor.textFocusLostBroadcaster.get())
     {
         grabKeyboardFocus();
+    }    
+    else if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
+    {
+        if (source == soundPlayers[0]->keyMappedSoundboard->grabFocusBroadcaster.get())
+            grabKeyboardFocus();
     }
 }
 
@@ -432,8 +437,6 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             {
                 newOutputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
                 bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer.get(), inputBuffer.get(), newOutputBuffer.get(), 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
-
-                //bufferToFill.clearActiveBufferRegion();
                 bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                 bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
                 if (soundPlayers[0] != nullptr)
@@ -445,19 +448,12 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                     bufferToFill.buffer->copyFrom(2, 0, *newOutputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                     bufferToFill.buffer->copyFrom(3, 0, *newOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
                 }
-
-                //delete newOutputBuffer;
             }
             else
             {
                 bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                 bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
-                //soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
-                //soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
             }
-            /*delete(inputBuffer);
-            delete(outputBuffer);
-            delete(playAudioSource);*/
         }
         else if (Settings::audioOutputMode == 1)
         {
@@ -743,16 +739,7 @@ void MainComponent::valueChanged(juce::Value& value)
 
 void MainComponent::OSCInitialize()
 {
-    //juce::FileLogger::getCurrentLogger()->writeToLog("Osc initialize");
-    //soundPlayers[0]->OSCInitialize();
-    //if (soundPlayers[0]->oscConnected == true)
-    //{
-    //    connectOSCButton.setButtonText("Disconnect OSC");
-    //}
-    //else 
-    //{
-    //    connectOSCButton.setButtonText("Connect OSC");
-    //}
+
 }
 
 
@@ -990,11 +977,10 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
         removeKeyListener(commandManager.getKeyMappings());
         getTopLevelComponent()->removeKeyListener(commandManager.getKeyMappings());
         settings.keyboardLayoutBroadcaster->addChangeListener(soundPlayers[0]);
+        soundPlayers[0]->keyMappedSoundboard->grabFocusBroadcaster->addChangeListener(this);
     }
     else
     {
-        //getTopLevelComponent()->addKeyListener(commandManager.getKeyMappings());
-        //addKeyListener(commandManager.getKeyMappings());
     }
 
     soundPlayers[0]->playerSelectionChanged->addChangeListener(this);

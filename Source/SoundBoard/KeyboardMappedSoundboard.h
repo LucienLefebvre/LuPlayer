@@ -30,17 +30,21 @@ public:
     void fileDragMove(const juce::StringArray& files, int x, int y);
     void setDroppedFile(juce::Point<int> p, juce::String path, juce::String name);
     KeyMappedPlayer* KeyboardMappedSoundboard::getPlayer(int i);
-    void KeyboardMappedSoundboard::addPlayer(Player* p);
+    KeyMappedPlayer* KeyboardMappedSoundboard::addPlayer(Player* p);
     void setShortcutKeys();
     void setPlayer(Player* p, int i);
     void fileDragExit();
     void mouseDrag(const juce::MouseEvent& event);
+    void mouseExit(const juce::MouseEvent& event);
+    void mouseUp(const juce::MouseEvent& event);
     bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent);
 
     void changeListenerCallback(juce::ChangeBroadcaster* source);
 
     juce::MixerAudioSource mixer;
     juce::OwnedArray<KeyMappedPlayer> mappedPlayers;
+
+    std::unique_ptr<juce::ChangeBroadcaster> grabFocusBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 private:
     juce::StringArray qwertyShortcutArray{  "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
                                             "A", "S", "D", "F", "G", "H", "J", "K", "L", ";",
@@ -58,5 +62,7 @@ private:
 
     Settings* settings;
 
+    KeyMappedPlayer* draggedPlayer = nullptr;
+    KeyMappedPlayer* destinationPlayer = nullptr;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyboardMappedSoundboard)
 };

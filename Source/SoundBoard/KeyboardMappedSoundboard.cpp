@@ -20,7 +20,6 @@ KeyboardMappedSoundboard::KeyboardMappedSoundboard(Settings* s)
 
 KeyboardMappedSoundboard::~KeyboardMappedSoundboard()
 {
-    settings->keyMappedSoundboardSize->removeChangeListener(this);
 }
 
 void KeyboardMappedSoundboard::paint (juce::Graphics& g)
@@ -91,6 +90,50 @@ void KeyboardMappedSoundboard::fileDragExit()
 }
 void KeyboardMappedSoundboard::mouseDrag(const juce::MouseEvent& event)
 {
+    if (draggedPlayer != nullptr)
+    {
+        for (auto* player : mappedPlayers)
+        {
+            if (player->getScreenBounds().contains(event.getScreenPosition()))
+            {
+                player->isDraggedOver(true);
+            }
+            else
+            {
+                player->isDraggedOver(false);
+            }
+        }
+    }
+}
+
+void KeyboardMappedSoundboard::mouseExit(const juce::MouseEvent& event)
+{
+    destinationPlayer = nullptr;
+}
+
+void KeyboardMappedSoundboard::mouseUp(const juce::MouseEvent& event)
+{
+    for (auto* player : mappedPlayers)
+    {
+        player->isDraggedOver(false);
+        if (player->getScreenBounds().contains(event.getScreenPosition()))
+        {
+            destinationPlayer = player;
+        }
+    }
+    if (draggedPlayer != nullptr && destinationPlayer != nullptr && draggedPlayer != destinationPlayer)
+    {
+        auto source = draggedPlayer->getPlayer();
+        auto destination = destinationPlayer->getPlayer();
+        if (source != nullptr && destination != nullptr)
+        {
+            destination->setPlayerInfo(source->getPlayerInfo());
+            source->deleteFile();
+        }
+    }
+    draggedPlayer = nullptr;
+    destinationPlayer = nullptr;
+    grabFocusBroadcaster->sendChangeMessage();
 }
 
 KeyMappedPlayer* KeyboardMappedSoundboard::getPlayer(int i)
@@ -103,14 +146,14 @@ void KeyboardMappedSoundboard::setPlayer(Player* p, int i)
     mappedPlayers[i]->setPlayer(p);
 }
 
-void KeyboardMappedSoundboard::addPlayer(Player* p)
+KeyMappedPlayer* KeyboardMappedSoundboard::addPlayer(Player* p)
 {
-    mappedPlayers.add(new KeyMappedPlayer());
+    auto addedPlayer = mappedPlayers.add(new KeyMappedPlayer());
     addAndMakeVisible(*mappedPlayers.getLast());
     mappedPlayers.getLast()->setPlayer(p);
     mappedPlayers.getLast()->setMouseClickGrabsKeyboardFocus(false);
     mappedPlayers.getLast()->repaint();
-    //resized();
+    return addedPlayer;
 }
 
 void KeyboardMappedSoundboard::setShortcutKeys()
@@ -147,5 +190,14 @@ void KeyboardMappedSoundboard::changeListenerCallback(juce::ChangeBroadcaster* s
     if (source == settings->keyMappedSoundboardSize.get())
     {
         resized();
+        return;
+    }
+    for (auto player : mappedPlayers)
+    {
+        if (source == player->playerDraggedBroadcaster.get())
+        {
+            draggedPlayer = player;
+            return;
+        }
     }
 }
