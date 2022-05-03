@@ -65,7 +65,7 @@ public:
     SoundPlayer(SoundPlayer::Mode m, Settings* s);
     ~SoundPlayer() override;
 
-    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
+    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill, const juce::AudioSourceChannelInfo& cueBuffer);
 
     void SoundPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
 

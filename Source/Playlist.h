@@ -41,7 +41,7 @@ public:
     void rearrangePlayers();
 
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
-    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
+    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill, const juce::AudioSourceChannelInfo& cueBuffer);
 
     void assignLeftFader(int playerID);
     void assignRightFader(int playerID);
@@ -112,6 +112,8 @@ public:
     juce::OwnedArray<juce::TextButton> assignRightFaderButtons;
     juce::MixerAudioSource playlistMixer;
     juce::MixerAudioSource playlistCueMixer;
+
+
     
     double actualSampleRate;
     int actualSamplesPerBlockExpected;

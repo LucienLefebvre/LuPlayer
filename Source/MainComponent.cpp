@@ -3,7 +3,7 @@
 //==============================================================================
 bool MainComponent::exitAnswered;
 MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
-                                            audioSetupComp(deviceManager, 0, 2, 0, 4, true, false, true, true),
+                                 audioSetupComp(deviceManager, 0, 2, 0, 4, true, false, true, true),
                                  audioSetupWindow("Audiosetup",
                                      getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true),
                                  settingsWindow("Settings",
@@ -34,7 +34,6 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
 
     if (deviceManager.getCurrentAudioDevice() != nullptr)
     {
-        //settings = std::make_unique<Settings>();
         Settings::sampleRate = deviceManager.getAudioDeviceSetup().sampleRate;
     } 
 
@@ -44,11 +43,6 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     addAndMakeVisible(menuBar.get());
     menuBar->setWantsKeyboardFocus(false);
 
-    /*keyMapper.reset(new KeyMapper(settings.get()));
-    keyMapper->setSize(600, 400);*/
-
-    /*midiMapper.reset(new MidiMapper());
-    midiMapper->setSize(600, 400);*/
 
     initializeBottomComponent();
 
@@ -114,8 +108,6 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     km->setCommandManager(&commandManager);
     km->loadMappingFile();
 
-    /*keyMapper->setCommandManager(&commandManager);
-    keyMapper->loadMappingFile();*/
     midiMapper.setCommandManager(&commandManager);
     midiMapper.loadMappingFile();
     setMouseClickGrabsKeyboardFocus(true);
@@ -159,8 +151,6 @@ void MainComponent::keyMapperButtonClicked()
     std::unique_ptr<juce::DialogWindow> keyMapperWindow = std::make_unique<juce::DialogWindow>("Key Mapping",
         getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true);
     keyMapperWindow->setSize(600, 400);
-
-    //std::unique_ptr<KeyMapper> km = std::make_unique<KeyMapper>(settings.get());
 
     km->setWantsKeyboardFocus(true);
 
@@ -214,15 +204,11 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     {
         if (deviceManager.getCurrentAudioDevice() != nullptr)
         {
-            Settings* settings = new Settings();
-            settings->setPreferedAudioDeviceType(deviceManager.getCurrentAudioDeviceType());
-            settings->setPreferedAudioDeviceName(deviceManager.getCurrentAudioDevice()->getName());
-            settings->setPreferedAudioDevice(deviceManager.getAudioDeviceSetup());
-            //Settings::sampleRateValue = deviceManager.getAudioDeviceSetup().sampleRate;
-            settings->updateSampleRateValue(deviceManager.getAudioDeviceSetup().sampleRate);
-            settings->saveOptions();
-            delete settings;
-            prepareToPlay(deviceManager.getAudioDeviceSetup().bufferSize, deviceManager.getAudioDeviceSetup().sampleRate);
+            settings.setPreferedAudioDeviceType(deviceManager.getCurrentAudioDeviceType());
+            settings.setPreferedAudioDeviceName(deviceManager.getCurrentAudioDevice()->getName());
+            settings.setPreferedAudioDevice(deviceManager.getAudioDeviceSetup());
+            settings.updateSampleRateValue(deviceManager.getAudioDeviceSetup().sampleRate);
+            settings.saveOptions();
             Settings::outputChannelsNumber = deviceManager.getCurrentAudioDevice()->getOutputChannelNames().size();
             auto midiInputs = juce::MidiInput::getAvailableDevices();
             for (auto input : midiInputs)
@@ -232,8 +218,6 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
                 else
                     deviceManager.removeMidiInputDeviceCallback(input.identifier, this);
             }
-            //bottomComponent.mixerPanel.inputPanel.channelEditor.setDeviceManagerInfos(deviceManager);
-            mixer.prepareToPlay(deviceManager.getAudioDeviceSetup().bufferSize, deviceManager.getAudioDeviceSetup().sampleRate);
             mixer.inputPanel.channelEditor.setDeviceManagerInfos(deviceManager);
         }
     }
@@ -264,8 +248,6 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
     else if (source == bottomComponent.audioPlaybackDemo.fileDroppedFromBrowser)
     {
-        //std::unique_ptr<Settings> settings = std::make_unique<Settings>();
-
         int cartPosition = soundPlayers[0]->playlistbisViewport.getPosition().getX();
         int playlistScrollPosition = soundPlayers[0]->playlistViewport.getViewPositionY();
         int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
@@ -409,14 +391,24 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
     mixerOutputBuffer = std::make_unique<juce::AudioBuffer<float>>(2, samplesPerBlockExpected);
 
+    inputBuffer.reset(new juce::AudioBuffer<float>(2, samplesPerBlockExpected));
+    outputBuffer.reset(new juce::AudioBuffer<float>(2, samplesPerBlockExpected));
+    playAudioSource.reset(new juce::AudioSourceChannelInfo(*outputBuffer));
+    newOutputBuffer.reset(new juce::AudioBuffer<float>(2, samplesPerBlockExpected));
+    cueBuffer.reset(new juce::AudioBuffer<float>(2, samplesPerBlockExpected));
+    cueAudioSource.reset(new juce::AudioSourceChannelInfo(*cueBuffer));
+    bottomComponentBuffer.reset(new juce::AudioBuffer<float>(2, samplesPerBlockExpected));
+    bottomComponentSource.reset(new juce::AudioSourceChannelInfo(*bottomComponentBuffer));
+
+
+    if (soundPlayers[0] != nullptr)
+        soundPlayers[0]->prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
-    //TODO vérifier bug changement de soundplayer sur mode mono et double stereo
     if (soundPlayers[0] != nullptr && soundboardLaunched)
     {
-        soundPlayers[0]->getNextAudioBlock(bufferToFill);
         if (Settings::audioOutputMode == 3 && (bufferToFill.buffer->getNumChannels() > 3))
         {
             inputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
@@ -456,30 +448,38 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             }
         }
         else if (Settings::audioOutputMode == 1)
-        {
-            inputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
+        {      
             inputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
-            outputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
-            playAudioSource.reset(new juce::AudioSourceChannelInfo(*outputBuffer));
-            myMixer.getNextAudioBlock(*playAudioSource);
 
+            outputBuffer->clear();
+            cueBuffer->clear();
 
+            if (soundPlayers[0] != nullptr)
+                soundPlayers[0]->getNextAudioBlock(*playAudioSource.get(), *cueAudioSource.get());
+
+            bufferToFill.clearActiveBufferRegion();
             bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
+            bufferToFill.buffer->copyFrom(1, 0, *cueBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
+
+            bottomComponent.myMixer.getNextAudioBlock(*bottomComponentSource.get());
+            bufferToFill.buffer->addFrom(1, 0, *bottomComponentBuffer.get(), 0, 0, bufferToFill.buffer->getNumSamples());
+
             if (!bottomComponent.recorderComponent.isEnabled())
             {
                 if (soundPlayers[0] != nullptr)
+                {
                     soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
-                if (soundPlayers[0] != nullptr)
-                    soundPlayers[0]->meterSource.measureBlock(*bufferToFill.buffer);
+                    soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
+                    soundPlayers[0]->cueloudnessMeter.processBlock(*cueBuffer);
+                    soundPlayers[0]->cuemeterSource.measureBlock(*cueBuffer);
+                }
             }
-
             if (bottomComponent.recorderComponent.isEnabled())
             {
                 newOutputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
                 bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer.get(), inputBuffer.get(), newOutputBuffer.get(), 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
                 if (bottomComponent.recorderComponent.enableMonitoring.getToggleState())
                 {
-                    myCueMixer.getNextAudioBlock(*playAudioSource);
                     bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                     soundPlayers[0]->cuemeterSource.measureBlock(*bufferToFill.buffer);
                     bufferToFill.buffer->addFrom(1, 0, *newOutputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
@@ -488,65 +488,40 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                 }
                 else
                 {
-                    myCueMixer.getNextAudioBlock(*playAudioSource);
-                    bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
                     soundPlayers[0]->loudnessMeter.processBlock(*bufferToFill.buffer);
                     soundPlayers[0]->meterSource.measureBlock(*bufferToFill.buffer);
                     soundPlayers[0]->cueloudnessMeter.processBlock(*outputBuffer);
                     soundPlayers[0]->cuemeterSource.measureBlock(*bufferToFill.buffer);
                 }
-                //delete newOutputBuffer;
             }
-            else
-            {
-                myCueMixer.getNextAudioBlock(*playAudioSource);
-                soundPlayers[0]->cueloudnessMeter.processBlock(*outputBuffer);
-                bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
-                soundPlayers[0]->cuemeterSource.measureBlock(*bufferToFill.buffer);
-            }
-            //delete(outputBuffer);
-            //delete(inputBuffer);
-            //delete(playAudioSource);
         }
         else if (Settings::audioOutputMode == 2 || Settings::audioOutputMode == 3)
         {
-            inputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
             inputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
             inputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
-
-            //MIXER
-            if (showMixer)
-                mixer.getNextAudioBlock(bufferToFill.buffer, mixerOutputBuffer.get());
-            //
-
+            
             bufferToFill.clearActiveBufferRegion();
-            outputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
-            playAudioSource.reset(new juce::AudioSourceChannelInfo(*outputBuffer));
-            myMixer.getNextAudioBlock(*playAudioSource);
-            bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
-            bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
 
-
-            //MIXER
-            if (showMixer)
-            {
-                bufferToFill.buffer->addFrom(0, 0, *mixerOutputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
-                bufferToFill.buffer->addFrom(1, 0, *mixerOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
-            }
-            //
+            if (soundPlayers[0] != nullptr)
+                soundPlayers[0]->getNextAudioBlock(bufferToFill, bufferToFill);
+            
+            bottomComponent.myMixer.getNextAudioBlock(*bottomComponentSource.get());
+            bufferToFill.buffer->addFrom(0, 0, *bottomComponentBuffer.get(), 0, 0, bufferToFill.buffer->getNumSamples());
+            bufferToFill.buffer->addFrom(1, 0, *bottomComponentBuffer.get(), 1, 0, bufferToFill.buffer->getNumSamples());
 
             if (!bottomComponent.recorderComponent.isEnabled())
             {
                 if (soundPlayers[0] != nullptr)
-                    soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
+                    soundPlayers[0]->meterSource.measureBlock(*bufferToFill.buffer);
                 if (soundPlayers[0] != nullptr)
-                    soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
+                    soundPlayers[0]->loudnessMeter.processBlock(*bufferToFill.buffer);
                 if (soundPlayers[0] != nullptr)
-                    soundPlayers[0]->newMeter->measureBlock(outputBuffer.get());
+                    soundPlayers[0]->newMeter->measureBlock(bufferToFill.buffer);
             }
-            if (bottomComponent.recorderComponent.isEnabled() && soundPlayers[0] != nullptr)
+            else if (bottomComponent.recorderComponent.isEnabled() && soundPlayers[0] != nullptr)
             {
-                newOutputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
+                outputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
+                outputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
                 bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer.get(), inputBuffer.get(), newOutputBuffer.get(), 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
                 bufferToFill.clearActiveBufferRegion();
                 bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
@@ -566,7 +541,6 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 void MainComponent::releaseResources()
 {
 }
-
 
 void MainComponent::paint(juce::Graphics& g)
 {
@@ -617,12 +591,10 @@ void MainComponent::timerCallback(int timerID)
     }
 }
 
-
 void MainComponent::audioInitialize()
 {
 
 }
-
 
 void MainComponent::midiInitialize()
 {
@@ -766,30 +738,18 @@ void MainComponent::channelsMapping()
         juce::FileLogger::getCurrentLogger()->writeToLog("Cannels mapping mode 1");
         tryPreferedAudioDevice(2);
         setAudioChannels(2, 2);
-
-        myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
-        myCueMixer.addInputSource(&soundPlayers[0]->myCueMixer, false);
-        myCueMixer.addInputSource(&bottomComponent.myMixer, false);
-
     }
     else if (Settings::audioOutputMode == 2)
     {
         juce::FileLogger::getCurrentLogger()->writeToLog("Channels mapping mode 2");
         tryPreferedAudioDevice(2);
         setAudioChannels(2, 2);
-        myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
-        myMixer.addInputSource(&soundPlayers[0]->myCueMixer, false);
-        myMixer.addInputSource(&bottomComponent.myMixer, false);
-
     }
     else if (Settings::audioOutputMode == 3)
     {
         juce::FileLogger::getCurrentLogger()->writeToLog("Channels mapping mode 3");
         tryPreferedAudioDevice(4);
         setAudioChannels(2, 4);
-        myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
-        myCueMixer.addInputSource(&bottomComponent.myMixer, false);
-        myCueMixer.addInputSource(&soundPlayers[0]->myCueMixer, false);
     }
 }
 
@@ -799,7 +759,6 @@ void MainComponent::tryPreferedAudioDevice(int outputChannelsNeeded)
     juce::FileLogger::getCurrentLogger()->writeToLog("Trying prefered audio device");
     if (deviceManager.getCurrentAudioDevice() != nullptr)
     {
-        //std::unique_ptr<Settings> settings = std::make_unique<Settings>();
         const juce::OwnedArray<juce::AudioIODeviceType>& types = deviceManager.getAvailableDeviceTypes();
         if (types.size() > 1)
         {
@@ -923,8 +882,6 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
     addAndMakeVisible(soundPlayers[0]);
     soundPlayers[0]->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     soundPlayers[0]->setWantsKeyboardFocus(false);
-    myMixer.addInputSource(&soundPlayers[0]->myMixer, false);
-    myCueMixer.addInputSource(&soundPlayers[0]->myCueMixer, false);
 
     settings.keyboardLayoutBroadcaster->removeAllChangeListeners();
 
@@ -960,8 +917,6 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
             soundPlayers[0]->myPlaylists[0]->addPlayer(i);
             soundPlayers[0]->myPlaylists[1]->addPlayer(i);
         }
-        //for (auto player : myPlaylists[0]->players)
-        //    player->setPlayerColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
         soundPlayers[0]->myPlaylists[1]->assignLeftFader(-1);
         soundPlayers[0]->myPlaylists[1]->assignLeftFader(0);
@@ -1008,8 +963,6 @@ void MainComponent::launchSoundPlayer(SoundPlayer::Mode m)
 
     channelsMapping();
 
-
-
     soundboardLaunched = true;
 }
 
@@ -1047,6 +1000,7 @@ void MainComponent::stopWatchShortcuPressed()
 {
     soundPlayers[0]->mainStopWatch.setVisible(true);
     soundPlayers[0]->mainStopWatch.startStopButtonClicked();
+    soundPlayers[0]->resized();
 }
 
 juce::StringArray MainComponent::getMenuBarNames()
@@ -1090,10 +1044,7 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
         menu.addItem(1, "Documentation");
         menu.addItem(2, "About");
     }
-
-
     return menu;
-
 }
 
 void MainComponent::menuItemSelected(int menuItemID, int topLevelMenuIndex)
@@ -1395,6 +1346,7 @@ bool MainComponent::perform(const InvocationInfo& info)
     case CommandIDs::showTimer:
         juce::FileLogger::getCurrentLogger()->writeToLog("show timer");
         soundPlayers[0]->mainStopWatch.setVisible(!soundPlayers[0]->mainStopWatch.isVisible());
+        soundPlayers[0]->resized();
         break;
     case CommandIDs::lanchRecord:
         juce::FileLogger::getCurrentLogger()->writeToLog("launch record");
@@ -1553,10 +1505,8 @@ bool MainComponent::perform(const InvocationInfo& info)
 
 void MainComponent::focusLost(juce::Component::FocusChangeType cause)
 {
-    //grabKeyboardFocus();
 }
 
 void MainComponent::globalFocusChanged(juce::Component* focusedComponent)
 {
-
 }

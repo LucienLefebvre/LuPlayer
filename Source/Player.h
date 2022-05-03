@@ -78,7 +78,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
-    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
+    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill, const juce::AudioSourceChannelInfo& cue);
     std::atomic<float> getEnveloppeValue(float x, juce::Path& p);
     void playerPrepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void timerCallback(int timerID);
@@ -239,16 +239,18 @@ public:
 
     std::unique_ptr<juce::AudioFormatReaderSource> playSource;
     juce::AudioTransportSource transport;
-    juce::ResamplingAudioSource resampledSource                     { &transport, false, 2 };
+    //juce::ResamplingAudioSource resampledSource                     { &transport, false, 2 };
     juce::ChannelRemappingAudioSource channelRemappingSource        { &filterSource, false };
     juce::IIRFilterAudioSource filterSource                         { &transport, false };
 
     std::unique_ptr<juce::AudioFormatReaderSource> cuePlaySource;
     juce::AudioTransportSource cueTransport;
-    juce::ResamplingAudioSource cueResampledSource                  { &cueTransport, false, 2 };
+    //juce::ResamplingAudioSource cueResampledSource                  { &cueTransport, false, 2 };
     juce::ChannelRemappingAudioSource cuechannelRemappingSource     { &cuefilterSource, false };
-
     juce::IIRFilterAudioSource cuefilterSource                      { &cueTransport, false };
+
+    std::unique_ptr<juce::AudioSourceChannelInfo> playerSource;
+    std::unique_ptr<juce::AudioSourceChannelInfo> cuePlayerSource;
 
     juce::MixerAudioSource mixer;
     juce::MixerAudioSource cueMixer;

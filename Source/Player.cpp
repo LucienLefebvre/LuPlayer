@@ -35,6 +35,8 @@ Player::Player(int index, Settings* s)
 
      state = Stopped;
     
+
+
      playerColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
 
      if (!isCart)
@@ -305,9 +307,7 @@ Player::Player(int index, Settings* s)
     
      
     
-     mixer.addInputSource(&channelRemappingSource, false);
-     cueMixer.addInputSource(&cuechannelRemappingSource, false);
-     cueMixer.addInputSource(&denoiser.resampledSource, false);
+
      Settings::sampleRateValue.addListener(this);
      Settings::audioOutputModeValue.addListener(this);
      setChannelsMapping();
@@ -844,25 +844,24 @@ void Player::playerPrepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
     actualSampleRate = sampleRate;
+
     channelRemappingSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
     cuechannelRemappingSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    resampledSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    cueResampledSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
+
     filterSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    cuefilterSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    mixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    cueMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    
+    cuefilterSource.prepareToPlay(samplesPerBlockExpected, sampleRate);    
 
-    playerBuffer = std::make_unique<juce::AudioBuffer<float>>(2, actualSamplesPerBlockExpected);
-    cueBuffer = std::make_unique<juce::AudioBuffer<float>>(2, actualSamplesPerBlockExpected);
+    playerBuffer.reset(new juce::AudioBuffer<float>(2, actualSamplesPerBlockExpected));
+    cueBuffer.reset(new juce::AudioBuffer<float>(2, actualSamplesPerBlockExpected));
 
-    outputSource = std::make_unique <juce::MemoryAudioSource>(*playerBuffer, false);
+    outputSource.reset(new juce::MemoryAudioSource(*playerBuffer, false));
+    cueOutputSource.reset(new juce::MemoryAudioSource(*cueBuffer, false));
+
     outputSource->prepareToPlay(samplesPerBlockExpected, sampleRate);
-    playerBuffer->setSize(2, actualSamplesPerBlockExpected, false, true, false);
-    cueOutputSource = std::make_unique <juce::MemoryAudioSource>(*cueBuffer, false);
+    playerSource.reset(new juce::AudioSourceChannelInfo(*playerBuffer));
+    
     cueOutputSource->prepareToPlay(samplesPerBlockExpected, sampleRate);
-    cueBuffer->setSize(2, actualSamplesPerBlockExpected, false, true, false);
+    cuePlayerSource.reset(new juce::AudioSourceChannelInfo(*cueBuffer));
 
     filterProcessor.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
     filterProcessor.setBypassed(true);
@@ -878,19 +877,25 @@ void Player::playerPrepareToPlay(int samplesPerBlockExpected, double sampleRate)
 
     meterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
     outMeterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
+
+
+    //mixer.addInputSource(&channelRemappingSource, false);
+    //cueMixer.addInputSource(&cuechannelRemappingSource, false);
+    //cueMixer.addInputSource(&denoiser.resampledSource, false);
 }
 
-void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
+void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill, const juce::AudioSourceChannelInfo& cue)
 {
     if (playerBuffer != nullptr)
     {
-        juce::AudioSourceChannelInfo* playerSource = new juce::AudioSourceChannelInfo(*playerBuffer);
+        playerSource->clearActiveBufferRegion();
         playerBuffer->clear();
-        mixer.getNextAudioBlock(*playerSource);
+        channelRemappingSource.getNextAudioBlock(*playerSource);
 
-        juce::AudioSourceChannelInfo* cuePlayerSource = new juce::AudioSourceChannelInfo(*cueBuffer);
+        cuePlayerSource->clearActiveBufferRegion();
         cueBuffer->clear();
-        cueMixer.getNextAudioBlock(*cuePlayerSource);
+        cuechannelRemappingSource.getNextAudioBlock(*cuePlayerSource);
+
 
         float nextReadPosition = transport.getNextReadPosition();
         float cueNextReadPosition = cueTransport.getNextReadPosition();
@@ -932,21 +937,27 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
             meterSource.measureBlock(*playerBuffer.get());
         else if (cueBuffer != nullptr)
             meterSource.measureBlock(*cueBuffer.get());
+
         filterProcessor.getNextAudioBlock(playerBuffer.get());
         cueFilterProcessor.getNextAudioBlock(cueBuffer.get());
         compProcessor.getNextAudioBlock(playerBuffer.get());
         compMeter.setReductionGain(compProcessor.getCompReductionDB());
+
         if (transport.isPlaying() && playerBuffer != nullptr)
         {
-            //outputMeter.measureBlock(playerBuffer.get());
             outMeterSource.measureBlock(*playerBuffer.get());
         }
         else if (cueBuffer != nullptr)
         {
-            //outputMeter.measureBlock(cueBuffer.get());
             outMeterSource.measureBlock(*cueBuffer.get());
         }
         playerBuffer->applyGain(bufferGain.load());
+
+        bufferToFill.buffer->addFrom(0, 0, *playerBuffer, 0, 0, playerBuffer->getNumSamples());
+        bufferToFill.buffer->addFrom(1, 0, *playerBuffer, 1, 0, playerBuffer->getNumSamples());
+
+        cue.buffer->addFrom(0, 0, *cueBuffer, 0, 0, playerBuffer->getNumSamples());
+        cue.buffer->addFrom(1, 0, *cueBuffer, 1, 0, playerBuffer->getNumSamples());
     }
 }
 
@@ -2010,9 +2021,10 @@ void Player::valueChanged(juce::Value& value)
         actualSampleRate = Settings::sampleRate;
         if (fileLoaded)
         {
-            resampledSource.setResamplingRatio(fileSampleRate / Settings::sampleRate);
-            cueResampledSource.setResamplingRatio(fileSampleRate / Settings::sampleRate);
+            //resampledSource.setResamplingRatio(fileSampleRate / Settings::sampleRate);
+            //cueResampledSource.setResamplingRatio(fileSampleRate / Settings::sampleRate);
         }
+        playerPrepareToPlay(Settings::preferedAudioDevice.bufferSize, Settings::preferedAudioDevice.sampleRate);
     }
     else if (value.refersToSameSourceAs(Settings::maxFaderValue))
         volumeSlider.setRange(0, juce::Decibels::decibelsToGain(Settings::maxFaderValue.toString().getDoubleValue()));

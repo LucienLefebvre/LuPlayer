@@ -23,8 +23,6 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m, Settings* s)
 
     juce::Timer::startTimer(50);
 
-    //addKeyListener(this);
-
     if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
         myPlaylists.add(new Playlist(0, settings));
     else if (soundPlayerMode == SoundPlayer::Mode::EightFaders)
@@ -124,13 +122,6 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m, Settings* s)
         }
     }
 
-
-
-
-    myMixer.addInputSource(&myPlaylists[0]->playlistMixer, false);
-    myMixer.addInputSource(&myPlaylists[1]->playlistMixer, false);
-    myCueMixer.addInputSource(&myPlaylists[0]->playlistCueMixer, false);
-    myCueMixer.addInputSource(&myPlaylists[1]->playlistCueMixer, false);
     Settings::audioOutputModeValue.addListener(this);
 
     addAndMakeVisible(&loudnessBarComponent);
@@ -165,11 +156,6 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m, Settings* s)
     addChildComponent(&mainStopWatch);
     mainStopWatch.setMouseClickGrabsKeyboardFocus(false);
 
-    if (soundPlayerMode == Mode::EightFaders)
-    {
-
-    }
-
     for (int i = 0; i < getNumChildComponents(); i++)
     {
         getChildComponent(i)->setMouseClickGrabsKeyboardFocus(false);
@@ -191,28 +177,23 @@ SoundPlayer::~SoundPlayer()
     Settings::audioOutputModeValue.removeListener(this);
 }
 
-void SoundPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
+void SoundPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill, const juce::AudioSourceChannelInfo& cueBuffer)
 {
-    for (int i = 0; i < myPlaylists.size(); i++)
+    for (auto playlist : myPlaylists)
     {
-        myPlaylists[i]->getNextAudioBlock(bufferToFill);
+        playlist->getNextAudioBlock(bufferToFill, cueBuffer);
     }
 }
 
 void SoundPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
-    myMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    myCueMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-
     actualSampleRate = sampleRate;
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
-
 
     myPlaylists[0]->prepareToPlay(samplesPerBlockExpected, sampleRate);
     myPlaylists[1]->prepareToPlay(samplesPerBlockExpected, sampleRate);
 
     loudnessMeter.prepareToPlay(actualSampleRate, 2, actualSamplesPerBlockExpected, 20);
-
     meterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
     cuemeterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
 
@@ -230,7 +211,6 @@ void SoundPlayer::resized()
 {
     if (soundPlayerMode != SoundPlayer::Mode::KeyMap)
     {
-        //setSize(getParentWidth(), getParentHeight());
         playlistViewport.setBounds(0, playersStartHeightPosition,
             (getParentWidth() / 2) - 50 - dragZoneWidth, (getHeight() - playersStartHeightPosition - bottomButtonsHeight));
         if (myPlaylists[0] != nullptr)
@@ -275,18 +255,28 @@ void SoundPlayer::resized()
 
         int cueMeterXStart = playlistViewport.getWidth();
 
+        if (mainStopWatch.isVisible())
+            stopWatchHeight = 25;
+        else
+            stopWatchHeight = 0;
+
         if (Settings::audioOutputMode == 1 || Settings::audioOutputMode == 3)
         {
-            levelMeterHeight = std::min(getHeight() - playersStartHeightPosition - cuelevelMeterMinimumHeight,
+            int availableHeight = getHeight() - timeLabelHeight - stopWatchHeight;
+            levelMeterHeight = std::min(getHeight() - playersStartHeightPosition - cuelevelMeterMinimumHeight - timeLabelHeight - stopWatchHeight,
                 levelMeterMaximumHeight);
+            levelMeterHeight = availableHeight / 2;
             meter.setBounds(cueMeterXStart, getHeight() - levelMeterHeight, 80,
                 std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
             loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7,
                 getHeight() - levelMeterHeight, 25, levelMeterHeight);
             cuelevelMeterHeight = std::min(getHeight() - playersStartHeightPosition - levelMeterHeight,
                 cuelevelMeterMaximumHeight);
-            int cueMeterYStart = meter.getPosition().getY() - cuelevelMeterHeight;
-            cuemeter.setBounds(cueMeterXStart, cueMeterYStart, 80, cuelevelMeterHeight);
+            int cueMeterYStart = meter.getPosition().getY() - levelMeterHeight;
+            cuemeter.setBounds(cueMeterXStart, cueMeterYStart, 80, levelMeterHeight);
+
+            timeLabel.setBounds(playlistViewport.getRight(), 0, timeLabelWidth, timeLabelHeight);
+            mainStopWatch.setBounds(timeLabel.getX(), timeLabel.getBottom(), timeLabelWidth, stopWatchHeight);
         }
         else if (Settings::audioOutputMode == 2)
         {
@@ -481,9 +471,7 @@ void SoundPlayer::valueChanged(juce::Value& value)
         playlistViewport.setViewPosition(0, (((myPlaylists[0]->minimumPlayer).toString().getIntValue()) - 1) * 105);
     }
     else if (value.refersToSameSourceAs(Settings::audioOutputModeValue))
-    {
-        //channelsMapping();
-        
+    {        
         metersInitialize();
         resized();
     }
@@ -517,15 +505,12 @@ void SoundPlayer::valueChanged(juce::Value& value)
     {
         if (value.toString().getIntValue() == myPlaylists[1]->fader1Player)
         {
-            //DBG(value.toString().getIntValue());
             OSCsend(3, 0.);
-            //myPlaylists[1]->handleFader3(0);
 
         }
         else if (value.toString().getIntValue() == myPlaylists[1]->fader2Player)
         {
             OSCsend(4, 0.);
-            //myPlaylists[1]->handleFader4(0);
         }
     }
     else if (value.refersToSameSourceAs(myPlaylists[0]->fader1Name))
@@ -614,7 +599,6 @@ void SoundPlayer::valueChanged(juce::Value& value)
         myPlaylists[0]->draggedPlayer = -1;
         updateDraggedPlayerDisplay(draggedPlayer, 1);
     }
-
 }
 
 void SoundPlayer::OSCInitialize()
@@ -627,9 +611,6 @@ void SoundPlayer::OSCInitialize()
             sender = &settings->sender;
             oscConnected = true;
             OSCClean();
-            //oscStatusLabel.setText("OSC Connected", juce::NotificationType::dontSendNotification);
-            //oscStatusLabel.setColour(juce::Label::textColourId, juce::Colours::green);
-            //connectOSCButton.setButtonText("Disconnect OSC");
         }
 
         receiver.addListener(this);
@@ -653,9 +634,6 @@ void SoundPlayer::OSCInitialize()
         OSCClean();
         if (receiver.disconnect())   // [13]
         {
-            //connectOSCButton.setButtonText("Connect OSC");
-            //oscStatusLabel.setText("OSC Not Connected", juce::NotificationType::dontSendNotification);
-            //oscStatusLabel.setColour(juce::Label::textColourId, juce::Colours::red);
             oscConnected = false;
         }
     }
@@ -1607,7 +1585,7 @@ void SoundPlayer::metersInitialize()
         cuemeter.setMeterSource(&cuemeterSource);
         addAndMakeVisible(cuemeter);
         cuemeter.setMeterFlags(foleys::LevelMeter::MeterFlags::SingleChannel);
-        cuemeter.setSelectedChannel(1);
+        cuemeter.setSelectedChannel(0);
     }
     else if (audioMode == 2)
     {
@@ -1616,15 +1594,6 @@ void SoundPlayer::metersInitialize()
         addAndMakeVisible(meter);
         meter.setMeterFlags(foleys::LevelMeter::MeterFlags::Default);
         removeChildComponent(&cuemeter);
-
-        //mainMeter.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
-        /*mainMeter.shouldDrawScaleNumbers(true);
-        mainMeter.setMeterColour(juce::Colour(229, 149, 0));
-        mainMeter.setPeakColour(juce::Colours::red);
-        mainMeter.shouldDrawScale(true);
-        mainMeter.setSkewFactor(1.5f);
-        mainMeter.setRectangleRoundSize(10);
-        mainMeter.setMouseClickGrabsKeyboardFocus(false);*/
     }
 
     else if (audioMode == 3)

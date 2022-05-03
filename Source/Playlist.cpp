@@ -85,55 +85,33 @@ Playlist::~Playlist()
 
 void Playlist::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
-    // This function will be called when the audio device is started, or when
-    // its settings (i.e. sample rate, block size, etc) are changed.
-
-    // You can use this function to initialise any resources you might need,
-    // but be careful - it will be called on the audio thread, not the GUI thread.
-
-    // For more details, see the help for AudioProcessor::prepareToPlay()
-
-
-   /* for (auto i = 0; i < playerNumber; ++i)
-    {
-       players[i]->playerPrepareToPlay(samplesPerBlockExpected, sampleRate);
-    }*/
-
-    playlistMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    playlistCueMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
     actualSampleRate = sampleRate;
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
 
-
+    for (auto* player : players)
+    {
+        player->playerPrepareToPlay(samplesPerBlockExpected, sampleRate);
+    }
 }
 
-void Playlist::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
+void Playlist::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill, const juce::AudioSourceChannelInfo& cueBuffer)
 {
-    for (int i = 0; i < players.size(); i++)
+    for (auto player : players)
     {
-        players[i]->getNextAudioBlock(bufferToFill);
+        player->getNextAudioBlock(bufferToFill, cueBuffer);
     }
-    //bufferToFill.clearActiveBufferRegion();
-
-    //playlistMixer.getNextAudioBlock(bufferToFill);
 }
 
 void Playlist::paint(juce::Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    //Vertical and horizontal lines between players
-
-    //g.drawRect(0, 0, 600, 470);
     for (auto i = 1; i < playerNumber; i++)
     {
             g.setColour(juce::Colour(37, 45, 49));
             g.drawHorizontalLine((playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)) - 4), 0, getParentWidth());
             g.setColour(juce::Colours::black);
             g.drawHorizontalLine((playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)) - 3), 0, getParentWidth());
-            //g.drawHorizontalLine((playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)) - 2), 0, getParentWidth());
             g.setColour(juce::Colour(37, 45, 49));
             g.drawHorizontalLine((playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)) - 2), 0, getParentWidth());
     }
@@ -420,11 +398,8 @@ void Playlist::fader1Start()
     fader1Stopped = false;
     fader1StartPlayer = fader1Player;
     updateButtonsStates();
-    //fader1PreviousMidiLevel = fader1ActualMidiLevel;
     if (fader2IsPlaying == false)
         fader2Player++;
-    //if (fader2Player > (playerNumber - 1))
-    //    fader2Player = playerNumber - 1;
     fader1StartTime = juce::Time::currentTimeMillis();
     updateNextPlayer();
 }
@@ -472,11 +447,8 @@ void Playlist::fader2Start()
     updateButtonsStates();
     fader2Stopped = false;
     fader2StartTime = juce::Time::currentTimeMillis();
-    //fader2PreviousMidiLevel = fader2ActualMidiLevel;
     if (fader1IsPlaying == false)
         fader1Player++;
-    //if (fader1Player > (playerNumber - 1))
-    //    fader1Player = playerNumber - 1;
     updateNextPlayer();
 }
 void Playlist::fader2Stop(bool stoppedByFader)
@@ -944,8 +916,8 @@ void Playlist::addPlayer(int playerID)
         else
             players.getLast()->setOSCIndex(idAddedPlayer + 1);
         players[idAddedPlayer]->playerPrepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
-        playlistMixer.addInputSource(players[idAddedPlayer]->outputSource.get(), false);
-        playlistCueMixer.addInputSource(players[idAddedPlayer]->cueOutputSource.get(), false);
+        //playlistMixer.addInputSource(players[idAddedPlayer]->outputSource.get(), false);
+        //playlistCueMixer.addInputSource(players[idAddedPlayer]->cueOutputSource.get(), false);
 
         players[idAddedPlayer]->fileName.addListener(this);
         players[idAddedPlayer]->playerPositionLabel.addListener(this);
