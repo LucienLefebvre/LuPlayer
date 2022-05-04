@@ -2032,7 +2032,11 @@ void SoundPlayer::initializeKeyMapPlayer()
     keyMappedSoundboard->setShortcutKeys();
     keyMappedSoundboard->resized();
     for (auto player : myPlaylists[0]->players)
+    {
         player->setPlayerColour(juce::Colour(40, 134, 189));
+        player->setIsCart(true);
+    }
+
 }
 
 SoundPlayer::Mode SoundPlayer::getSoundPlayerMode()

@@ -205,6 +205,8 @@ public:
 
     bool getIsCart();
 
+    void setIsCart(bool b);
+
     bool isFxEnabled();
     void enableButtons(bool isEnabled);
 

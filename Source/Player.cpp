@@ -24,7 +24,6 @@ typedef LPSTR LPTSTR;
 //==============================================================================
 Player::Player(int index, Settings* s)
 {
-    DBG("player index : " << index);
      settings = s;
      setWantsKeyboardFocus(false);
      setMouseClickGrabsKeyboardFocus(false);
@@ -34,8 +33,6 @@ Player::Player(int index, Settings* s)
      juce::MultiTimer::startTimer(1, 500);
 
      state = Stopped;
-    
-
 
      playerColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
 
@@ -2481,6 +2478,11 @@ juce::Path* Player::getEnveloppePath()
 bool Player::getIsCart()
 {
     return isCart;
+}
+
+void Player::setIsCart(bool b)
+{
+    isCart = b;
 }
 
 bool Player::isEnveloppeEnabled()

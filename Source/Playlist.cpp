@@ -1213,7 +1213,7 @@ void Playlist::rearrangePlayers()
                         meters[i]->setBounds(dragZoneWidth, playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)), meterWidth, playerHeight);
                     }
                 }
-                players[i]->isCart = true;
+                players[i]->setIsCart(true);
                 players[i]->resized();
 
                 if (!eightPlayerMode)
