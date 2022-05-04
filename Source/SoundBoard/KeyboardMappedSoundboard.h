@@ -12,7 +12,7 @@
 
 #include <JuceHeader.h>
 #include "KeyMappedPlayer.h"
-#include "../Settings.h"
+#include "../Settings/Settings.h"
 //==============================================================================
 /*
 */

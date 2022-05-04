@@ -11,7 +11,6 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "RemoteInput.h"
 #include "MixerInput.h"
 #include "FilterEditor.h"
 #include "CompEditor.h"
@@ -30,7 +29,6 @@ public:
 
     void paint (juce::Graphics&) override;
     void resized() override;
-    //RemoteInput remoteInput1;
     void Mixer::prepareToPlay(int samplesPerBlockExpected, double sampleRate);
     void Mixer::getNextAudioBlock(juce::AudioBuffer<float>* inputBuffer, juce::AudioBuffer<float>* outputBuffer);
     void Mixer::setDeviceManagerInfos(juce::AudioDeviceManager* devicemanager);

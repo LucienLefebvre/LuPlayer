@@ -11,7 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "../Settings.h"
+#include "Settings.h"
 //==============================================================================
 /*
 */

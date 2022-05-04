@@ -11,8 +11,8 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "../Player.h"
-#include "../PlayHead.h"
+#include "Player.h"
+#include "../Others/PlayHead.h"
 //==============================================================================
 /*
 */
@@ -99,6 +99,7 @@ private:
     GainThumbnail* playThumbnail;
     juce::Rectangle<int> thumbnailBounds;
     juce::Rectangle<int> playThumbnailBounds;
+
     //DISPLAY POSITIONS
     int shortcutLabelWidth = 20;
     int shortcutLabelHeight = 20;

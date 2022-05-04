@@ -11,7 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "../Settings.h"
+#include "Settings.h"
 //==============================================================================
 /*
 */
@@ -30,11 +30,8 @@ public:
     void resized() override;
 
     int getNumRows();
-
     void paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected);
-
     void paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected);
-
     void cellClicked(int rowNumber, int columnID, const juce::MouseEvent& e);
 
     juce::Array<int> getKeyMapping();
@@ -45,9 +42,10 @@ public:
     void setCommandManager(juce::ApplicationCommandManager* cm);
     void loadMappingFile();
     void timerCallback();
+
 private:
     void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged);
-    //KeyMapping keyMap;
+
     juce::Array<int> keyMapping;
     juce::Array<int> commandUIDS;
     juce::StringArray keyMapCommands;

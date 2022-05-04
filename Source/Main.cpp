@@ -8,7 +8,7 @@
 
 #include <JuceHeader.h>
 #include "MainComponent.h"
-#include "Settings.h"
+#include "Settings/Settings.h"
 #define JUCE_ASIO 1
 //==============================================================================
 class MultiPlayerApplication  : public juce::JUCEApplication
@@ -111,7 +111,6 @@ public:
                                                           .findColour (juce::ResizableWindow::backgroundColourId),
                               DocumentWindow::allButtons)
         {
-            //setUsingNativeTitleBar (true);
             setFullScreen(true);
             setVisible(true);
             setUsingNativeTitleBar(true);
@@ -119,36 +118,20 @@ public:
             setContentOwned (&mainComponent, true);
             setResizable(true, false);
 
-
            #if JUCE_IOS || JUCE_ANDROID
             setFullScreen (true);
            #else
-            //setResizable (true, true);
-            //centreWithSize (getWidth(), getHeight());
            #endif
-            //setSize(1300, 550);
             setResizeLimits(1000, 600, 10000, 10000);
-
-
-            //setTitleBarHeight(30);
-
-            //toFront(true);
             setWantsKeyboardFocus(true);
             mainComponent.grabKeyboardFocus();
-            //setAlwaysOnTop(true);
-
-            //runModalLoop(); 
         } 
 
         void setCommandLine(juce::String command)
         {
-            //mainComponent.setCommandLine("8p");
         }
         void closeButtonPressed() override
         {
-            // This is called when the user tries to close this window. Here, we'll just
-            // ask the app to quit when this happens, but you can change this to do
-            // whatever you need.
             juce::JUCEApplication::getInstance()->systemRequestedQuit();
 
         }
