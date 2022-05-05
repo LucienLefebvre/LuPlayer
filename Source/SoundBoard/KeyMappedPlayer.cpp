@@ -394,7 +394,14 @@ void KeyMappedPlayer::mouseWheelMove(const juce::MouseEvent& e, const juce::Mous
 {
     if (soundPlayer != nullptr)
     {
-        if (soundPlayer->isFileLoaded())
+        if (e.mods.isCommandDown() && soundPlayer->isFileLoaded())
+        {
+            if (wheel.deltaY > 0)
+                soundPlayer->setTrimVolume(soundPlayer->getTrimVolume() + 1);
+            else if (wheel.deltaY < 0)
+                soundPlayer->setTrimVolume(soundPlayer->getTrimVolume() - 1);
+        }
+        else if (soundPlayer->isFileLoaded())
         {
             float playerGain = juce::Decibels::gainToDecibels(soundPlayer->getVolume());
             float gain = 0.0f;

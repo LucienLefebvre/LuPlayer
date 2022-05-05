@@ -1461,17 +1461,14 @@ void Playlist::spaceBarStop()
 bool Playlist::isInterestedInFileDrag(const juce::StringArray& files)
 {
     for (auto file : files)
-
-        if ((file.contains(".wav")) || (file.contains(".WAV"))
-            || (file.contains(".bwf")) || (file.contains(".BWF"))
-            || (file.contains(".aiff")) || (file.contains(".AIFF"))
-            || (file.contains(".aif")) || (file.contains(".AIF"))
-            || (file.contains(".flac")) || (file.contains(".FLAC"))
-            || (file.contains(".opus")) || (file.contains(".OPUS"))
-            || (file.contains(".mp3")) || (file.contains(".MP3")))
+    {
+        juce::File f(file);
+        for (auto format : Settings::getAcceptedFileFormats())
         {
-            return true;
+            if (f.hasFileExtension(format))
+                return true;
         }
+    }
     return false;
 }
 

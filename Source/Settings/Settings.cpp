@@ -144,11 +144,6 @@ Settings::Settings() : settingsFile(options)
     else
         Settings::viewLastPlayedSound = properties.getUserSettings()->getValue("viewLastPlayedSound").getIntValue();
 
-    if (properties.getUserSettings()->getValue("keyboardLayout").isEmpty())
-        Settings::keyboardLayout = 1;
-    else
-        Settings::keyboardLayout = properties.getUserSettings()->getValue("keyboardLayout").getIntValue();
-
     if (properties.getUserSettings()->getValue("keyMappedRows").isEmpty())
         Settings::keyMappedSoundboardRows = 3;
     else
@@ -159,9 +154,15 @@ Settings::Settings() : settingsFile(options)
     else
         Settings::keyMappedSoundboardColumns = properties.getUserSettings()->getValue("keyMappedColums").getIntValue();
 
-
+    HKL currentLayout = GetKeyboardLayout(0);
+    unsigned int x = (unsigned int)currentLayout & 0x0000FFFF;
+    if (x == 1033)
+        Settings::keyboardLayout = 1;
+    else if (x == 1036)
+        Settings::keyboardLayout = 2;
+    else
+        Settings::keyboardLayout = 1;
     
-
     //MAX FADER LEVEL
     maxFaderValueSlider.setBounds(150, 0, 450, 25);
     maxFaderValueSlider.setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
@@ -169,9 +170,7 @@ Settings::Settings() : settingsFile(options)
     maxFaderValueSlider.addListener(this);
     maxFaderValueSlider.setValue(Settings::maxFaderValueGlobal);
     addAndMakeVisible(maxFaderValueSlider);
-    maxFaderValueSlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 50, 100);
-
-    
+    maxFaderValueSlider.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 50, 100);    
 
     maxFaderValueLabel.setBounds(0, 0, 150, 25);
     addAndMakeVisible(maxFaderValueLabel);
@@ -360,10 +359,7 @@ Settings::Settings() : settingsFile(options)
     audioOutputModeListbox.setBounds(200, convertedSoundsLabel.getBottom() + spacer, 399, 25);
     audioOutputModeListbox.addItem("Mono (Left -> Output, Right -> Cue)", 1);
     audioOutputModeListbox.addItem("Stereo 2 Outputs (Output & Cue on same stereo Output)", 2);
-    audioOutputModeListbox.addItem("Stereo 4 Outputs(Output on first pair, Cue on second)", 3);
     audioOutputModeListbox.setSelectedId(Settings::audioOutputMode);
-    if (Settings::outputChannelsNumber <= 4)
-        audioOutputModeListbox.setItemEnabled(3, false);
     audioOutputModeListbox.addListener(this);
 
     keyboardLayoutBroadcaster.reset(new juce::ChangeBroadcaster);
@@ -763,4 +759,24 @@ void Settings::setKeyboardLayout(int layout)
     properties.saveIfNeeded();
     settingsFile.save();
     keyboardLayoutBroadcaster->sendChangeMessage();
+}
+
+juce::StringArray Settings::getAcceptedFileFormats()
+{
+    juce::StringArray formats;
+    formats.add(".wav");
+    formats.add(".WAV");
+    formats.add(".bwf");
+    formats.add(".BWF");
+    formats.add(".aiff");
+    formats.add(".AIFF");
+    formats.add(".aif");
+    formats.add(".AIF");
+    formats.add(".flac");
+    formats.add(".FLAC");    
+    formats.add(".opus");
+    formats.add(".OPUS");
+    formats.add(".mp3");
+    formats.add(".MP3");
+    return formats;
 }

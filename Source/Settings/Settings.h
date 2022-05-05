@@ -10,6 +10,8 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include <Windows.h>
+
 class Settings  :   public juce::Component,
                     public juce::Slider::Listener,
                     public juce::Label::Listener,
@@ -54,6 +56,7 @@ public:
     void setShowEnveloppe(bool show);
     void setViewLastPlayed(bool show);
     void setKeyboardLayout(int layout);
+    static juce::StringArray getAcceptedFileFormats();
     juce::TextButton saveButton;
 
     int outputNumChannels = 0;

@@ -291,10 +291,6 @@ void FilterEditor::createMagnitudeArray()
         magnitudeArray.set(i, lowMagnitudeArray[i] + lowMidMagnitudeArray[i] + highMidMagnitudeArray[i] + highMagnitudeArray[i]);
     }
 
-
-
-
-
     magnitudeArrayCreated = true;
     magnitudeChanged = false;
     repaint();

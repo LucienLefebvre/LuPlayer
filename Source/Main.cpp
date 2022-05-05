@@ -111,19 +111,17 @@ public:
                                                           .findColour (juce::ResizableWindow::backgroundColourId),
                               DocumentWindow::allButtons)
         {
-            setFullScreen(true);
+
             setVisible(true);
-            setUsingNativeTitleBar(true);
-            mainComponent.setSize(1280, 768);
+            //setUsingNativeTitleBar(true);
+            mainComponent.setSize(getWidth(), getHeight());
             setContentOwned (&mainComponent, true);
             setResizable(true, false);
 
-           #if JUCE_IOS || JUCE_ANDROID
-            setFullScreen (true);
-           #else
-           #endif
             setResizeLimits(1000, 600, 10000, 10000);
+            setFullScreen(true);
             setWantsKeyboardFocus(true);
+
             mainComponent.grabKeyboardFocus();
         } 
 

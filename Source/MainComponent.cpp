@@ -20,7 +20,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     else if (micAutorisation.equalsIgnoreCase("Allow"))
         numInputsChannels = 2;
 
-    setAudioChannels(numInputsChannels, 4);
+    setAudioChannels(numInputsChannels, 2);
     tryPreferedAudioDevice(2);
 
     juce::MultiTimer::startTimer(0, 50);
@@ -155,7 +155,7 @@ void MainComponent::midiMapperButtonClicked()
     o.content->setSize(600, 400);
     o.escapeKeyTriggersCloseButton = true;
     o.useNativeTitleBar = false;
-    o.dialogTitle = TRANS("Key Mapper");
+    o.dialogTitle = TRANS("Midi Mapper");
     juce::DialogWindow* window = o.launchAsync();
     juce::ModalComponentManager::getInstance()->attachCallback(window, juce::ModalCallbackFunction::create([this](int r)
         {
@@ -377,43 +377,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 {
     if (soundPlayers[0] != nullptr && soundboardLaunched)
     {
-        if (Settings::audioOutputMode == 3 && (bufferToFill.buffer->getNumChannels() > 3))
-        {
-            inputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
-            inputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
-            inputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
-            bufferToFill.clearActiveBufferRegion();
-            outputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
-            playAudioSource.reset(new juce::AudioSourceChannelInfo(*outputBuffer));
-            cueAudioSource.reset(new juce::AudioSourceChannelInfo(*outputBuffer));
-
-            bufferToFill.buffer->copyFrom(2, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
-            bufferToFill.buffer->copyFrom(3, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
-            soundPlayers[0]->cueloudnessMeter.processBlock(*outputBuffer);
-            soundPlayers[0]->cuemeterSource.measureBlock(*outputBuffer);
-            if (bottomComponent.recorderComponent.isEnabled())
-            {
-                newOutputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
-                bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer.get(), inputBuffer.get(), newOutputBuffer.get(), 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
-                bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
-                bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
-                if (soundPlayers[0] != nullptr)
-                    soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
-                if (soundPlayers[0] != nullptr)
-                    soundPlayers[0]->meterSource.measureBlock(*outputBuffer);
-                if (bottomComponent.recorderComponent.enableMonitoring.getToggleState())
-                {
-                    bufferToFill.buffer->copyFrom(2, 0, *newOutputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
-                    bufferToFill.buffer->copyFrom(3, 0, *newOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
-                }
-            }
-            else
-            {
-                bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
-                bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
-            }
-        }
-        else if (Settings::audioOutputMode == 1)
+        if (Settings::audioOutputMode == 1)
         {      
             inputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
 
@@ -440,7 +404,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                     soundPlayers[0]->cuemeterSource.measureBlock(*cueBuffer);
                 }
             }
-            if (bottomComponent.recorderComponent.isEnabled())
+            else if (bottomComponent.recorderComponent.isEnabled())
             {
                 newOutputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
                 bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer.get(), inputBuffer.get(), newOutputBuffer.get(), 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
@@ -587,19 +551,21 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
 
 bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* originatingComponent)
 {
-    auto command = commandManager.getKeyMappings()->findCommandForKeyPress(key);
     if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap
         && soundPlayers[0]->keyMappedSoundboard != nullptr)
     {
         soundPlayers[0]->keyMappedSoundboard->keyPressed(key, originatingComponent);
     }
     else
+    {
+        auto command = commandManager.getKeyMappings()->findCommandForKeyPress(key);
         commandManager.invokeDirectly(command, true);
+    }
     return false;
 }
 
 void MainComponent::savePlaylist()
-{
+{ 
     juce::FileLogger::getCurrentLogger()->writeToLog("save playlist");
     soundPlayers[0]->savePlaylist();
     saved = true;
@@ -725,11 +691,6 @@ void MainComponent::launchRecord()
     }
     bottomComponent.recorderComponent.recordButtonClicked();
     bottomComponent.setCurrentTabIndex(3);
-    myLayout.setItemLayout(2,          // for item 1
-        25, 600, // size must be between 20% and 60% of the available space
-        300);        // and its preferred size is 50 pixels
-    Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
-    myLayout.layOutComponents(comps, 4, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition, true, false);
 }
 
 bool MainComponent::isPlayingOrRecording()
