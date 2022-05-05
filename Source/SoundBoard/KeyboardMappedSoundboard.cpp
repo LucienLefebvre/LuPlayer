@@ -16,6 +16,8 @@ KeyboardMappedSoundboard::KeyboardMappedSoundboard(Settings* s)
 {
     settings = s;
     settings->keyMappedSoundboardSize->addChangeListener(this);
+
+    juce::Timer::startTimer(50);
 }
 
 KeyboardMappedSoundboard::~KeyboardMappedSoundboard()
@@ -32,15 +34,26 @@ void KeyboardMappedSoundboard::resized()
 {
     rowNumber = Settings::keyMappedSoundboardRows;
     columnNumber = Settings::keyMappedSoundboardColumns;
+
     playerWidth = (getWidth() - spaceBetweenPlayers * (columnNumber + 1)) / columnNumber ;
+    if (Settings::showMeter)
+    {
+        playerWidth = playerWidth * 4 / 5;
+        meterWidth = playerWidth / 5 - 4;
+    }
+    else
+        meterWidth = 0;
+
     playerHeight = getHeight() / rowNumber - spaceBetweenPlayers * (rowNumber + 1);
+
     int playerIdInLine = 0;
     for (int i = 0; i < mappedPlayers.size(); i++)
     {
         int line = i / 10;
         int lineXStart = spaceBetweenPlayers + (spaceBetweenPlayers + playerHeight) * line;
 
-        mappedPlayers[i]->setBounds(spaceBetweenPlayers + (playerIdInLine * (playerWidth + spaceBetweenPlayers)), lineXStart, playerWidth, playerHeight);
+        mappedPlayers[i]->setBounds(spaceBetweenPlayers + (playerIdInLine * (playerWidth + spaceBetweenPlayers + meterWidth)), lineXStart, playerWidth, playerHeight);
+        meters[i]->setBounds(mappedPlayers[i]->getRight() + 2, lineXStart, meterWidth, playerHeight);
 
         if (playerIdInLine < Settings::keyMappedSoundboardColumns)
             mappedPlayers[i]->setVisible(true);
@@ -51,6 +64,15 @@ void KeyboardMappedSoundboard::resized()
         if (playerIdInLine == 10)
             playerIdInLine = 0;
     }
+}
+
+void KeyboardMappedSoundboard::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
+{
+    for (auto meter : meters)
+    {
+        meter->prepareToPlay(samplesPerBlockExpected, sampleRate);
+    }
+
 }
 
 void KeyboardMappedSoundboard::fileDragMove(const juce::StringArray& files, int x, int y)
@@ -183,10 +205,19 @@ void KeyboardMappedSoundboard::setPlayer(Player* p, int i)
 KeyMappedPlayer* KeyboardMappedSoundboard::addPlayer(Player* p)
 {
     auto addedPlayer = mappedPlayers.add(new KeyMappedPlayer());
-    addAndMakeVisible(*mappedPlayers.getLast());
-    mappedPlayers.getLast()->setPlayer(p);
-    mappedPlayers.getLast()->setMouseClickGrabsKeyboardFocus(false);
-    mappedPlayers.getLast()->repaint();
+    addAndMakeVisible(addedPlayer);
+    addedPlayer->setPlayer(p);
+    addedPlayer->setMouseClickGrabsKeyboardFocus(false);
+    addedPlayer->repaint();
+
+    auto addedMeter = meters.add(new Meter(Meter::Mode::Stereo));
+    addAndMakeVisible(*addedMeter);
+    addedMeter->shouldDrawScale(false);
+    addedMeter->shouldDrawScaleNumbers(false);
+    addedMeter->setMeterColour(juce::Colours::green);
+    addedMeter->setRectangleRoundSize(4);
+    addedMeter->setMouseClickGrabsKeyboardFocus(false);
+    
     return addedPlayer;
 }
 
@@ -232,6 +263,20 @@ void KeyboardMappedSoundboard::changeListenerCallback(juce::ChangeBroadcaster* s
         {
             draggedPlayer = player;
             return;
+        }
+    }
+}
+
+void KeyboardMappedSoundboard::timerCallback()
+{
+    if (Settings::showMeter)
+    {
+        for (int i = 0; i < meters.size(); i++)
+        {         
+            meters[i]->setRMSMeterData(mappedPlayers[i]->getPlayer()->outMeterSource.getRMSLevel(0), 
+                                        mappedPlayers[i]->getPlayer()->outMeterSource.getRMSLevel(1));
+            meters[i]->setPeakMeterDate(mappedPlayers[i]->getPlayer()->outMeterSource.getMaxLevel(0), 
+                                        mappedPlayers[i]->getPlayer()->outMeterSource.getMaxLevel(1));
         }
     }
 }

@@ -173,6 +173,9 @@ void SoundPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
     myPlaylists[0]->prepareToPlay(samplesPerBlockExpected, sampleRate);
     myPlaylists[1]->prepareToPlay(samplesPerBlockExpected, sampleRate);
 
+    if (keyMappedSoundboard != nullptr)
+        keyMappedSoundboard->prepareToPlay(samplesPerBlockExpected, sampleRate);
+
     loudnessMeter.prepareToPlay(actualSampleRate, 2, actualSamplesPerBlockExpected, 20);
     meterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
     cuemeterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
@@ -290,7 +293,6 @@ void SoundPlayer::initializeKeyMapPlayer()
 {
     for (int i = 0; myPlaylists[0]->players.size() < 32; i++)
     {
-        //myPlaylists[0]->players.clear();
         myPlaylists[0]->addPlayer(i);
         auto addedPlayer = keyMappedSoundboard->addPlayer(myPlaylists[0]->players[i]);
         addedPlayer->playerDraggedBroadcaster->addChangeListener(keyMappedSoundboard.get());
@@ -303,7 +305,7 @@ void SoundPlayer::initializeKeyMapPlayer()
         player->setPlayerColour(juce::Colour(40, 134, 189));
         player->setIsCart(true);
     }
-
+    keyMappedSoundboard->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
 }
 
 SoundPlayer::Mode SoundPlayer::getSoundPlayerMode()

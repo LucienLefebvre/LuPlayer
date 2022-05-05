@@ -13,13 +13,15 @@
 #include <JuceHeader.h>
 #include "KeyMappedPlayer.h"
 #include "../Settings/Settings.h"
+#include "../Mixer/Meter.h"
 //==============================================================================
 /*
 */
 class KeyboardMappedSoundboard : public juce::Component,
                                  public juce::KeyListener,
                                  public juce::ChangeListener,
-                                 public juce::FileDragAndDropTarget
+                                 public juce::FileDragAndDropTarget,
+                                 public juce::Timer
 {
 public:
     KeyboardMappedSoundboard(Settings* s);
@@ -27,6 +29,8 @@ public:
 
     void paint (juce::Graphics&) override;
     void resized() override;
+
+    void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
 
     void fileDragMove(const juce::StringArray& files, int x, int y);
     void fileDragExit(const juce::StringArray& files, int x, int y);
@@ -45,8 +49,11 @@ public:
 
     void changeListenerCallback(juce::ChangeBroadcaster* source);
 
+    void timerCallback();
+
     juce::MixerAudioSource mixer;
     juce::OwnedArray<KeyMappedPlayer> mappedPlayers;
+    juce::OwnedArray<Meter> meters;
 
     std::unique_ptr<juce::ChangeBroadcaster> grabFocusBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 private:
@@ -59,6 +66,7 @@ private:
     int shortcutCodeArray[30]{ 1, 2 };
     int spaceBetweenPlayers = 4;
     int playerWidth = 50;
+    int meterWidth = 10;
     int playerHeight = 50;
 
     int rowNumber = 3;

@@ -411,8 +411,8 @@ public:
         rectangleRoundSize = s;
     }
 
-
     Meter::Mode meterMode;
+
 private:
     double actualSampleRate;
     int actualSamplesPerBlockExpected;

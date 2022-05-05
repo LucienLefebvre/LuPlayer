@@ -1252,11 +1252,6 @@ void Playlist::rearrangePlayers()
 
 void Playlist::updateButtonsStates()
 {
-    if (spaceBarIsPlaying)
-        DBG("space bar is playing");
-    else
-        DBG("space bar is not playing");
-
     const juce::MessageManagerLock mmLock;
     for (auto i = 0; i < playerNumber; i++)
     {
