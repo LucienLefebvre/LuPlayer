@@ -27,6 +27,7 @@ public:
         textEditor.setReturnKeyStartsNewLine(true);
         textEditor.setFont(juce::Font(defaultFontHeight));
         textEditor.setColour(juce::TextEditor::ColourIds::focusedOutlineColourId, juce::Colours::red);
+        textEditor.setPopupMenuEnabled(false);
 
         fontSizeSlider.reset(new juce::Slider());
         addAndMakeVisible(fontSizeSlider.get());

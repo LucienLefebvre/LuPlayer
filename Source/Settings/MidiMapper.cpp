@@ -76,7 +76,7 @@ void MidiMapper::paintCell(juce::Graphics& g, int rowNumber, int columnId, int w
         if (wantsKeyPress && table->getSelectedRow() == rowNumber)
         {
             g.setColour(juce::Colours::red);
-            g.drawText("Press a key...", 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+            g.drawText("Touch a midi control...", 2, 0, width - 4, height, juce::Justification::centredLeft, true);
         }
         else
         {

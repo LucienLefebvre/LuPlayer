@@ -947,6 +947,9 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
         bufferToFill.buffer->addFrom(0, 0, *playerBuffer, 0, 0, playerBuffer->getNumSamples());
         bufferToFill.buffer->addFrom(1, 0, *playerBuffer, 1, 0, playerBuffer->getNumSamples());
 
+        if (denoiser.isVisible())
+            denoiser.transport.getNextAudioBlock(cue);
+
         cue.buffer->addFrom(0, 0, *cueBuffer, 0, 0, playerBuffer->getNumSamples());
         cue.buffer->addFrom(1, 0, *cueBuffer, 1, 0, playerBuffer->getNumSamples());
     }

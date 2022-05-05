@@ -577,6 +577,10 @@ void SoundPlayer::metersInitialize()
         cuelevelMeterHeight = std::min(getHeight() - playersStartHeightPosition - levelMeterHeight, cuelevelMeterMaximumHeight);
         int cueMeterYStart = meter.getPosition().getY() - cuelevelMeterHeight;
         cuemeter.setBounds(cueMeterXStart, cueMeterYStart, 80, cuelevelMeterHeight);
+        if (soundPlayerMode == SoundPlayer::Mode::KeyMap)
+            cuemeter.setVisible(false);
+        else
+            cuemeter.setVisible(true);
     }
     else if (Settings::audioOutputMode == 2)
     {
