@@ -74,7 +74,9 @@ public:
         setInMark,
         deleteInMark,
         setOutMark,
-        deleteOutMark
+        deleteOutMark,
+        documentation,
+        about
     };
 
     MainComponent();

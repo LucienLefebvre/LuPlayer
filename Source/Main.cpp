@@ -131,8 +131,14 @@ public:
         void closeButtonPressed() override
         {
             juce::JUCEApplication::getInstance()->systemRequestedQuit();
-
         }
+
+        void maximiseButtonPressed() override
+        {
+            setFullScreen(!isFullScreen());
+            mainComponent.grabKeyboardFocus();
+        }
+
         MainComponent mainComponent;
     private:
 

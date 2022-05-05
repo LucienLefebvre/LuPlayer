@@ -50,9 +50,9 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
 
     midiInitialize();
 
-    myLayout.setItemLayout(0, 200, 1080, -0.70);
+    myLayout.setItemLayout(0, 210, 1080, -0.72);
     myLayout.setItemLayout(1, 4, 4, 4);
-    myLayout.setItemLayout(2, 5, 600, 420);
+    myLayout.setItemLayout(2, 5, 610, 420);
 
     horizontalDividerBar.reset(new juce::StretchableLayoutResizerBar(&myLayout, 1, false));
     addAndMakeVisible(horizontalDividerBar.get());
@@ -842,8 +842,8 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
     }
     else if (menuIndex == 4)
     {
-        menu.addItem(1, "Documentation");
-        menu.addItem(2, "About");
+        menu.addCommandItem(&commandManager, CommandIDs::documentation, "Documentation");
+        menu.addCommandItem(&commandManager, CommandIDs::about, "About");
     }
     return menu;
 }
@@ -920,7 +920,9 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
                                     CommandIDs::setInMark,
                                     CommandIDs::deleteInMark,
                                     CommandIDs::setOutMark,
-                                    CommandIDs::deleteOutMark };
+                                    CommandIDs::deleteOutMark,
+                                    CommandIDs::documentation,
+                                    CommandIDs::about };
     commands.addArray(c);
 }
 
@@ -1125,6 +1127,14 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setInfo("Automatic show last played sound in bottom panel", "View last played sound", "Menu", 0);
         result.setTicked(Settings::viewLastPlayedSound);
         break;
+    case CommandIDs::documentation:
+        result.setInfo("Show documentation", "Documentation", "Menu", 0);
+        result.setTicked(false);
+        break;
+    case CommandIDs::about:
+        result.setInfo("About", "About", "Menu", 0);
+        result.setTicked(false);
+        break;
     default:
         break;
     }
@@ -1291,6 +1301,21 @@ bool MainComponent::perform(const InvocationInfo& info)
         break;
     case CommandIDs::viewLastPlayedSound:
         settings.setViewLastPlayed(!Settings::viewLastPlayedSound);
+        break;
+    case CommandIDs::documentation:
+    {
+        juce::File docFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/Documentation/Doc.pdf"));
+        if (docFile.existsAsFile())
+            juce::Process::openDocument(docFile.getFullPathName(), "");
+        break;
+    }
+    case CommandIDs::about:
+    {
+        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::NoIcon, "About",
+            "Licensed under GPLv3\n"
+            "Developped by Lucien Lefebvre\n"
+            "To view source, go to : \n github.com/lucienlefebvre\n");
+    }
         break;
     default:
         return false;

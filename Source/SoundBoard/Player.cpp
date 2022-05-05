@@ -873,7 +873,7 @@ void Player::playerPrepareToPlay(int samplesPerBlockExpected, double sampleRate)
 
 void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill, const juce::AudioSourceChannelInfo& cue)
 {
-    if (playerBuffer != nullptr)
+    if (playerBuffer != nullptr && cueBuffer != nullptr)
     {
         playerSource->clearActiveBufferRegion();
         playerBuffer->clear();
