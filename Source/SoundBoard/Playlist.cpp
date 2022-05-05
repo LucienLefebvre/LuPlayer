@@ -361,8 +361,9 @@ void Playlist::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, co
                 destinationPlayer->transport.stop();
             }
         }
+        destinationPlayer->handleMidiMessage(0, actualMidiLevels[midiMessageNumber]);
     }
-    destinationPlayer->handleMidiMessage(0, actualMidiLevels[midiMessageNumber]);
+
     previousMidiLevels[midiMessageNumber] = actualMidiLevels[midiMessageNumber];
     const juce::ScopedValueSetter<bool> scopedInputFlag(isAddingFromMidiInput, true);
 }
@@ -389,6 +390,7 @@ void Playlist::fader1Stop(bool stoppedByFader)
 
     fader1IsPlaying = false;
     fader1Stopped = true;
+
     updateButtonsStates();
     fader1PreviousMidiLevel = fader1ActualMidiLevel;
     fader1StopTime = juce::Time::currentTimeMillis();
@@ -1250,6 +1252,11 @@ void Playlist::rearrangePlayers()
 
 void Playlist::updateButtonsStates()
 {
+    if (spaceBarIsPlaying)
+        DBG("space bar is playing");
+    else
+        DBG("space bar is not playing");
+
     const juce::MessageManagerLock mmLock;
     for (auto i = 0; i < playerNumber; i++)
     {
@@ -1429,7 +1436,6 @@ void Playlist::spaceBarPressed()
 
 void Playlist::spaceBarStop()
 {
-
     if (spaceBarIsPlaying == true)
     {
         if (players[spaceBarPlayerId] != nullptr)
@@ -1455,7 +1461,7 @@ void Playlist::spaceBarStop()
         spaceBarIsPlaying = false;
     }
     spaceBarIsPlaying = false;
-
+    updateButtonsStates();
 }
 
 bool Playlist::isInterestedInFileDrag(const juce::StringArray& files)

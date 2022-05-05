@@ -530,7 +530,7 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
     {
         midiMapper.handleMidiMessage(message);
     }
-    else
+    else if (soundPlayers[0] != nullptr)
     {
         if (!soundPlayers[0]->handleIncomingMidiMessage(source, message, &midiMapper))
         {
