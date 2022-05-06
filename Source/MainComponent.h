@@ -107,6 +107,8 @@ public:
 
     static bool MainComponent::exitAnswered;
 
+    void checkNewVersion();
+
 private:
     Settings settings;
     int numInputsChannels = 2;

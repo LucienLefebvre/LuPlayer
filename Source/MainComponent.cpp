@@ -97,6 +97,8 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     setMouseClickGrabsKeyboardFocus(true);
     addKeyListener(this);
     setWantsKeyboardFocus(true);
+
+    checkNewVersion();
 }
 
 void MainComponent::settingsButtonClicked()
@@ -594,6 +596,8 @@ void MainComponent::valueChanged(juce::Value& value)
             soundPlayers[0]->myPlaylists[0]->shouldShowMeters(Settings::showMeterValue.getValue());
         if (soundPlayers[0]->myPlaylists[1] != nullptr)
             soundPlayers[0]->myPlaylists[1]->shouldShowMeters(Settings::showMeterValue.getValue());
+        if (soundPlayers[0]->keyMappedSoundboard != nullptr)
+            soundPlayers[0]->keyMappedSoundboard->shouldShowMeters(Settings::showMeterValue.getValue());
     }
 }
 
@@ -1325,4 +1329,43 @@ bool MainComponent::perform(const InvocationInfo& info)
 
 void MainComponent::releaseResources()
 {
+}
+
+void MainComponent::checkNewVersion()
+{
+    juce::URL latestVersionURL("https://api.github.com/repos/lucienlefebvre/luplayer/releases/latest");
+    std::unique_ptr<juce::InputStream> inStream(latestVersionURL.createInputStream(false, nullptr, nullptr, {}, 5000));
+
+    if (inStream != nullptr)
+    {
+        auto content = inStream->readEntireStreamAsString();
+        auto latestReleaseDetails = juce::JSON::parse(content);
+        auto* json = latestReleaseDetails.getDynamicObject();
+        auto versionString = json->getProperty("tag_name").toString();
+
+        auto currentTokens = juce::StringArray::fromTokens(ProjectInfo::versionString, ".", {});
+        auto thisTokens = juce::StringArray::fromTokens(versionString, ".", {});
+
+        bool result = false;
+        if (currentTokens[0].getIntValue() == thisTokens[0].getIntValue())
+        {
+            if (currentTokens[1].getIntValue() == thisTokens[1].getIntValue())
+            {
+                if (currentTokens[2].getIntValue() == thisTokens[2].getIntValue())
+                {
+                    result = currentTokens[3].getIntValue() < thisTokens[3].getIntValue();
+                }
+                else
+                    result = currentTokens[2].getIntValue() < thisTokens[2].getIntValue();
+            }
+            else
+                result = currentTokens[1].getIntValue() < thisTokens[1].getIntValue();
+
+        }
+        else
+            result =  currentTokens[0].getIntValue() < thisTokens[0].getIntValue();
+
+        if (result)
+            juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::NoIcon, "New version available !", "Check github.com/lucienlefebvre to update");
+    }
 }

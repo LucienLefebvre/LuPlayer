@@ -51,6 +51,8 @@ public:
 
     void timerCallback();
 
+    void shouldShowMeters(bool shouldShow);
+
     juce::MixerAudioSource mixer;
     juce::OwnedArray<KeyMappedPlayer> mappedPlayers;
     juce::OwnedArray<Meter> meters;

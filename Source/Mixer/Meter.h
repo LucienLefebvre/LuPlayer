@@ -45,6 +45,34 @@ public:
         if (meterMode != ReductionGain)
         {
             {
+                //DRAW SCALE
+                if (drawScale)
+                {
+                    for (auto db : dbScale)
+                    {
+                        auto yPos = getHeight() - range.convertTo0to1(db) * getHeight();
+                        if (linePosition == 0 && db == 0.0f)
+                            g.setColour(juce::Colours::red);
+                        else if (db == -9.0f)
+                            g.setColour(juce::Colours::orange);
+                        else if (db == 0.0f)
+                            g.setColour(juce::Colours::red);
+                        else if (meterMode != ReductionGain)
+                            g.setColour(juce::Colours::black);
+                        else
+                        {
+                            g.setColour(juce::Colours::darkgrey);
+                            g.setOpacity(0.8f);
+                        }
+                        auto lineEnd = (reductionGainXStart == 0) ? getWidth() : reductionGainXStart;
+                        g.drawLine(0, yPos, lineEnd, yPos);
+                        g.setColour(juce::Colours::lightgrey);
+                        g.setOpacity(0.3f);
+                        if (drawScaleNumbers)
+                            g.drawText(juce::String(db), 0, yPos + 2, getWidth() - reductionGainWidth, 10, juce::Justification::centred);
+                    }
+                }
+
                 //DRAW RMS
                 float limitedRmsLevel = juce::jlimit<float>(-100.0f, 0.0f, juce::Decibels::gainToDecibels(rmsL));
                 float rangedRmsLevel = range.convertTo0to1(limitedRmsLevel);
@@ -66,7 +94,7 @@ public:
                 float rangedPeakLevel = range.convertTo0to1(limitedPeakLevel);
                 linePosition = getHeight() - rangedPeakLevel * getHeight();
                 juce::jlimit(0, getHeight(), linePosition);
-                g.setColour(meterColour);
+                g.setColour(juce::Colours::green);
                 if (limitedPeakLevel > -9.0f)
                     g.setColour(peakColour);
                 if (linePosition == 0)
@@ -115,7 +143,7 @@ public:
                 float rangedPeakLevel = range.convertTo0to1(limitedPeakLevel);
                 linePosition = getHeight() - rangedPeakLevel * getHeight();
                 juce::jlimit(0, getHeight(), linePosition);
-                g.setColour(meterColour);
+                g.setColour(juce::Colours::green);
                 if (limitedPeakLevel > -9.0f)
                     g.setColour(peakColour);
                 if (linePosition == 0)
@@ -148,33 +176,9 @@ public:
         if (limitedReductionLevel < 0)
             g.fillRect(reductionGainXStart, 0, reductionGainWidth, reductionRectHeight);
 
-        //DRAW SCALE
-        if (drawScale)
-        {
-            for (auto db : dbScale)
-            {
-                auto yPos = getHeight() - range.convertTo0to1(db) * getHeight();
-                if (linePosition == 0 && db == 0.0f)
-                    g.setColour(juce::Colours::red);
-                else if (db == -9.0f)
-                    g.setColour(juce::Colours::orange);
-                else if (db == 0.0f)
-                    g.setColour(juce::Colours::red);
-                else if (meterMode != ReductionGain)
-                    g.setColour(juce::Colours::black);
-                else
-                {
-                    g.setColour(juce::Colours::darkgrey);
-                    g.setOpacity(0.8f);
-                }
-                auto lineEnd = (reductionGainXStart == 0) ? getWidth() : reductionGainXStart;
-                g.drawLine(0, yPos, lineEnd, yPos);
-                g.setColour(juce::Colours::lightgrey);
-                g.setOpacity(0.7f);
-                if (drawScaleNumbers)
-                    g.drawText(juce::String(db), 0, yPos + 2, getWidth() - reductionGainWidth, 10, juce::Justification::centred);
-            }
-        }
+        g.setColour(juce::Colours::black);
+        g.drawLine(0, getHeight(), getWidth(), getHeight());
+        g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
 
         if (drawExteriorLine)
         {

@@ -883,7 +883,6 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
         cueBuffer->clear();
         cuechannelRemappingSource.getNextAudioBlock(*cuePlayerSource);
 
-
         float nextReadPosition = transport.getNextReadPosition();
         float cueNextReadPosition = cueTransport.getNextReadPosition();
         if (stopTimeSet || looping)
@@ -931,6 +930,8 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
         compProcessor.getNextAudioBlock(playerBuffer.get());
         cueCompProcessor.getNextAudioBlock(cueBuffer.get());
 
+        playerBuffer->applyGain(bufferGain.load());
+
         if (transport.isPlaying() && playerBuffer != nullptr)
         {
             outMeterSource.measureBlock(*playerBuffer.get());
@@ -941,8 +942,6 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
             outMeterSource.measureBlock(*cueBuffer.get());
             compMeter.setReductionGain(cueCompProcessor.getCompReductionDB());
         }
-
-        playerBuffer->applyGain(bufferGain.load());
 
         bufferToFill.buffer->addFrom(0, 0, *playerBuffer, 0, 0, playerBuffer->getNumSamples());
         bufferToFill.buffer->addFrom(1, 0, *playerBuffer, 1, 0, playerBuffer->getNumSamples());
