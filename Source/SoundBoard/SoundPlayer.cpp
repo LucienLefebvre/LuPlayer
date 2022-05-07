@@ -132,6 +132,7 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m, Settings* s)
     addAndMakeVisible(&timeLabel);
     timeLabel.setFont(juce::Font(30.00f, juce::Font::plain).withTypefaceStyle("Regular"));
     timeLabel.setMouseClickGrabsKeyboardFocus(false);
+    timeLabel.setJustificationType(juce::Justification::centred);
 
     addChildComponent(&mainStopWatch);
     mainStopWatch.setMouseClickGrabsKeyboardFocus(false);
@@ -191,6 +192,11 @@ void SoundPlayer::paint (juce::Graphics& g)
 
 void SoundPlayer::resized()
 {
+    if (mainStopWatch.isVisible())
+        stopWatchHeight = 25;
+    else
+        stopWatchHeight = 0;
+
     if (soundPlayerMode != SoundPlayer::Mode::KeyMap)
     {
         playlistViewport.setBounds(0, playersStartHeightPosition,
@@ -237,11 +243,6 @@ void SoundPlayer::resized()
 
         int cueMeterXStart = playlistViewport.getWidth();
 
-        if (mainStopWatch.isVisible())
-            stopWatchHeight = 25;
-        else
-            stopWatchHeight = 0;
-
         if (Settings::audioOutputMode == 1 || Settings::audioOutputMode == 3)
         {
             int availableHeight = getHeight() - timeLabelHeight - stopWatchHeight;
@@ -277,15 +278,15 @@ void SoundPlayer::resized()
     }
     else
     {
-        levelMeterHeight = getHeight() - 15;
+        levelMeterHeight = getHeight() - timeLabelHeight - stopWatchHeight;
         meter.setBounds(getWidth() - meterWidth - loudnessBarWidth - 7, getHeight() - levelMeterHeight,
             meterWidth, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
         loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 5,
             getHeight() - levelMeterHeight, loudnessBarWidth, levelMeterHeight);
         keyMappedSoundboard->setBounds(0, 15, getWidth() - (getWidth() - meter.getX()), getHeight());
+        timeLabel.setBounds(meter.getX(), 0, getWidth() - meter.getX(), timeLabelHeight);
+        mainStopWatch.setBounds(meter.getX(), timeLabel.getBottom(), getWidth() - meter.getX(), stopWatchHeight);
     }
-
-
 }
 
 
