@@ -830,7 +830,7 @@ void Player::updateRemainingTime()
 void Player::playerPrepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     const juce::ScopedLock sl(lock);
-
+    
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
     actualSampleRate = sampleRate;
 
@@ -928,49 +928,37 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
             }
         }
 
-        if (transport.isPlaying() && playerBuffer != nullptr)
+        if (transport.isPlaying())
             meterSource.measureBlock(*playerBuffer.get());
-        else if (cueBuffer != nullptr)
-            meterSource.measureBlock(*cueBuffer.get());
+        meterSource.measureBlock(*cueBuffer.get());
 
-        if (playerBuffer != nullptr)
-            filterProcessor.getNextAudioBlock(playerBuffer.get());
-        if (cueBuffer != nullptr)
-            cueFilterProcessor.getNextAudioBlock(cueBuffer.get());
+        filterProcessor.getNextAudioBlock(playerBuffer.get());
+        cueFilterProcessor.getNextAudioBlock(cueBuffer.get());
 
-        if (playerBuffer != nullptr)
-            compProcessor.getNextAudioBlock(playerBuffer.get());
-        if (cueBuffer != nullptr)
-            cueCompProcessor.getNextAudioBlock(cueBuffer.get());
+        compProcessor.getNextAudioBlock(playerBuffer.get());
+        cueCompProcessor.getNextAudioBlock(cueBuffer.get());
 
-        if (playerBuffer != nullptr)
-            playerBuffer->applyGain(bufferGain.load());
+        playerBuffer->applyGain(bufferGain.load());
 
-        if (transport.isPlaying() && playerBuffer != nullptr)
+        if (transport.isPlaying())
         {
             outMeterSource.measureBlock(*playerBuffer.get());
             compMeter.setReductionGain(compProcessor.getCompReductionDB());
         }
-        else if (cueBuffer != nullptr)
+        else
         {
             outMeterSource.measureBlock(*cueBuffer.get());
             compMeter.setReductionGain(cueCompProcessor.getCompReductionDB());
         }
 
-        if (playerBuffer != nullptr)
-        {
-            bufferToFill.buffer->addFrom(0, 0, *playerBuffer, 0, 0, playerBuffer->getNumSamples());
-            bufferToFill.buffer->addFrom(1, 0, *playerBuffer, 1, 0, playerBuffer->getNumSamples());
-        }
+        bufferToFill.buffer->addFrom(0, 0, *playerBuffer, 0, 0, playerBuffer->getNumSamples());
+        bufferToFill.buffer->addFrom(1, 0, *playerBuffer, 1, 0, playerBuffer->getNumSamples());
 
-        if (denoiser.isVisible() && cueBuffer != nullptr)
+        if (denoiser.isVisible())
             denoiser.transport.getNextAudioBlock(cue);
 
-        if (cueBuffer != nullptr)
-        {
-            cue.buffer->addFrom(0, 0, *cueBuffer, 0, 0, playerBuffer->getNumSamples());
-            cue.buffer->addFrom(1, 0, *cueBuffer, 1, 0, playerBuffer->getNumSamples());
-        }
+        cue.buffer->addFrom(0, 0, *cueBuffer, 0, 0, playerBuffer->getNumSamples());
+        cue.buffer->addFrom(1, 0, *cueBuffer, 1, 0, playerBuffer->getNumSamples());
     }
 }
 
