@@ -158,12 +158,17 @@ Settings::Settings() : settingsFile(options)
 
     HKL currentLayout = GetKeyboardLayout(0);
     unsigned int x = (unsigned int)currentLayout & 0x0000FFFF;
+    DBG(juce::String(x));
     if (x == 1033)
         Settings::keyboardLayout = 1;
     else if (x == 1036)
         Settings::keyboardLayout = 2;
-    else
+    else if (x == 1031)
+        Settings::keyboardLayout = 3;
+    else if (properties.getUserSettings()->getValue("keyboardLayout").isEmpty())
         Settings::keyboardLayout = 1;
+    else
+        Settings::keyboardLayout = properties.getUserSettings()->getValue("keyboardLayout").getIntValue();
 
     if (properties.getUserSettings()->getValue("autoCheckUpdate").isEmpty())
         Settings::autoCheckNewUpdate = 1;

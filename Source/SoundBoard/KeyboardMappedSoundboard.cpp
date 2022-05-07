@@ -237,6 +237,8 @@ void KeyboardMappedSoundboard::setShortcutKeys()
             mappedPlayers[i]->setShortcut(qwertyShortcutArray[i]);
         else if (Settings::keyboardLayout == 2)
             mappedPlayers[i]->setShortcut(azertyShortcutArray[i]);
+        else if (Settings::keyboardLayout == 3)
+            mappedPlayers[i]->setShortcut(qwertzShortcutArray[i]);
     }
 }
 

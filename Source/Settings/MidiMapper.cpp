@@ -46,7 +46,6 @@ void MidiMapper::resized()
 
 int MidiMapper::getNumRows()
 {
-    DBG("num rows : " << midiMappings.size());
     return midiMappings.size();
 }
 

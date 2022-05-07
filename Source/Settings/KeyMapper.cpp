@@ -43,6 +43,7 @@ KeyMapper::KeyMapper(Settings* s)
     keyboardLayloutComboBox->setBounds(300, getHeight() - keyboardLayoutHeight, 200, keyboardLayoutHeight);
     keyboardLayloutComboBox->addItem("QWERTY", 1);
     keyboardLayloutComboBox->addItem("AZERTY", 2);
+    keyboardLayloutComboBox->addItem("QWERTZ", 3);
     keyboardLayloutComboBox->setSelectedId(Settings::keyboardLayout, juce::dontSendNotification);
     keyboardLayloutComboBox->addListener(this);
 }
