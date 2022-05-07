@@ -84,6 +84,12 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
 {
     if (soundPlayer != nullptr && soundPlayer->isFileLoaded())
     {
+        if (soundPlayer->isPlayerPlaying())
+        {
+            g.setColour(currentColour.brighter(0.5));
+            g.setOpacity(0.15);
+            g.fillRoundedRectangle(getLocalBounds().toFloat(), 15);
+        }
         g.setColour(defaultColour);
         g.setOpacity(1.0f);
         //DRAW THUMBNAIL
@@ -139,8 +145,6 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
             playThumbnail->drawChannels(g, playThumbnailBounds, thumbnailMiddleTime, soundPlayer->getLenght(), juce::Decibels::decibelsToGain(playerInfos.trimVolume) * 1.6f);
 
     }
-
-    
 
     g.setColour(currentColour);
     if (isDragged)
