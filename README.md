@@ -12,8 +12,8 @@ Key features :
 * Simple recorder with mic input
 * Differents output modes : stereo, or double mono (master and cue)
 
-![Capture 1](/Screenshots/Capture_1.PNG?raw=true "Capture 1")
-![Capture 2](/Screenshots/Capture_2.PNG?raw=true "Capture 2")
+![Capture 1](https://raw.githubusercontent.com/LucienLefebvre/LuPlayer/master/Screenshots/Capture_1.PNG?token=GHSAT0AAAAAABT5MEDTMICKHHLJHPU7LVA4YTWSDSA "Capture 1")
+![Capture 2](https://raw.githubusercontent.com/LucienLefebvre/LuPlayer/master/Screenshots/Capture_2.PNG?token=GHSAT0AAAAAABT5MEDSTBWSTALXLAPGQXRYYTWSDWQ "Capture 2")
 
 ## License
 LuPlayer is licensed under GPLv3
