@@ -35,14 +35,18 @@ void KeyboardMappedSoundboard::resized()
     rowNumber = Settings::keyMappedSoundboardRows;
     columnNumber = Settings::keyMappedSoundboardColumns;
 
-    playerWidth = getWidth() / columnNumber ;
+
     if (Settings::showMeter)
     {
-        playerWidth = playerWidth * 9 / 10;
+        playerWidth = (getWidth() / columnNumber) * 9 / 10;
         meterWidth = playerWidth / 10 - 4;
     }
     else
+    {
+        playerWidth = (getWidth() / columnNumber) - spaceBetweenPlayers;
         meterWidth = 0;
+    }
+
     
     playerHeight = getHeight() / rowNumber - spaceBetweenPlayers * (rowNumber + 1);
 
