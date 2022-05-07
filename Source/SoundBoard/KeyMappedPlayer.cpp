@@ -182,9 +182,8 @@ void KeyMappedPlayer::resized()
     dBLabel->setJustificationType(juce::Justification::centred);
     dBLabel->setColour(juce::Label::ColourIds::textColourId, ORANGE);
 
-
     busyBarBounds.setBounds(0, getHeight() / 10 * 6, getWidth(), getHeight() / 5);
-    busyBar->setBounds(busyBarBounds.reduced(30, 5));
+    busyBar->setBounds(busyBarBounds.reduced(5, 5));
 }
 
 void KeyMappedPlayer::setPlayer(Player* p)
@@ -271,6 +270,7 @@ void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
             volumeSlider->setVisible(false);
             elapsedTimeLabel->setVisible(false);
             editButton->setVisible(false);
+            busyBar->setVisible(false);
             currentColour = BLUE;
             repaint();
         }

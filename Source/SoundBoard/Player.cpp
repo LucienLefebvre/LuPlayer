@@ -1083,6 +1083,7 @@ void Player::deleteFile()
         bypassFX(true, false);
         playerDeletedBroadcaster->sendChangeMessage();
         colourHasChanged = false;
+        convertingBar->setVisible(false);
         playerColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
     }
 }
