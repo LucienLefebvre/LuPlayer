@@ -12,6 +12,9 @@ Key features :
 * Simple recorder with mic input
 * Differents output modes : stereo, or double mono (master and cue)
 
+![Capture 1](/Screenshots/Capture_1.PNG?raw=true "Capture 1")
+![Capture 2](/Screenshots/Capture_2.PNG?raw=true "Capture 2")
+
 ## Framework & Librairies
 LuPlayer is based on [JUCE](https://github.com/juce-framework/JUCE) framework.
 It use the following librairies / modules :
