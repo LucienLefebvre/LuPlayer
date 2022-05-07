@@ -22,7 +22,7 @@ KeyboardMappedSoundboard::KeyboardMappedSoundboard(Settings* s)
 
 KeyboardMappedSoundboard::~KeyboardMappedSoundboard()
 {
-
+    settings->keyMappedSoundboardSize->removeAllChangeListeners();
 }
 
 void KeyboardMappedSoundboard::paint (juce::Graphics& g)
