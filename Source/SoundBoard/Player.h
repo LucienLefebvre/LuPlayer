@@ -487,7 +487,6 @@ private:
 
     bool drawCue = false;
 
-
     float floatMidiMessageValue = 0;
     int previousMidiLevel = 0;
     int actualMidiLevel = 0;
@@ -533,6 +532,8 @@ private:
     bool colourHasChanged = false;
 
     int playMode = 2;
+
+    juce::CriticalSection lock;
 
     Settings* settings;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)

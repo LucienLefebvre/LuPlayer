@@ -169,10 +169,11 @@ Player::Player(int index, Settings* s)
          trimVolumeSlider.setBounds(borderRectangleWidth - 8, 40, 64, 56);
      trimVolumeSlider.setDoubleClickReturnValue(true, 0.);
      trimVolumeSlider.setPopupDisplayEnabled(true, true, this, 2000);
-     trimVolumeSlider.setScrollWheelEnabled(false);
      trimVolumeSlider.setWantsKeyboardFocus(false);
      trimVolumeSlider.setTextValueSuffix("dB");
      trimVolumeSlider.setMouseClickGrabsKeyboardFocus(false);
+     if (!Settings::mouseWheelControlVolume)
+         trimVolumeSlider.setScrollWheelEnabled(false);
 
      addAndMakeVisible(trimLabel);
      trimLabel.setFont(juce::Font(15.00f, juce::Font::plain).withTypefaceStyle("Regular"));
@@ -283,7 +284,7 @@ Player::Player(int index, Settings* s)
      deleteButton.setBounds(rightControlsStart + openDeleteButtonWidth, 80, openDeleteButtonWidth, 20);
      remainingTimeLabel.setBounds(rightControlsStart, 40, 150, 39);
      volumeSlider.setBounds(volumeLabelStart, -5, volumeSliderWidth, 100);
-     volumeLabel.setBounds(volumeLabelStart, 90, volumeSliderWidth, 10);
+     volumeLabel.setBounds(volumeLabelStart + 5, 90, volumeSliderWidth, 10);
      soundName.setBounds(leftControlsWidth + borderRectangleWidth + optionButtonWidth, 80, waveformThumbnailXSize - 50 - optionButtonWidth, 20);
      loopButton.setBounds(leftControlsWidth + borderRectangleWidth + waveformThumbnailXSize - 50, 80, 50, 20);
     
@@ -828,6 +829,8 @@ void Player::updateRemainingTime()
 //AUDIO OUTPUT
 void Player::playerPrepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
+    const juce::ScopedLock sl(lock);
+
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
     actualSampleRate = sampleRate;
 
@@ -877,6 +880,8 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
 {
     if (playerBuffer != nullptr && cueBuffer != nullptr)
     {
+        const juce::ScopedLock sl(lock);
+
         playerSource->clearActiveBufferRegion();
         playerBuffer->clear();
         channelRemappingSource.getNextAudioBlock(*playerSource);

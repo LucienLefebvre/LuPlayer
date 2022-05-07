@@ -689,7 +689,7 @@ void Settings::buttonClicked(juce::Button* button)
     else if (button == &faderStartButton)
     {
         Settings::enableFaderStart = button->getToggleState();
-        properties.getUserSettings()->setValue("faderStart", (int)Settings::autoNormalize);
+        properties.getUserSettings()->setValue("faderStart", (int)Settings::enableFaderStart);
         properties.saveIfNeeded();
         settingsFile.save();
     }
