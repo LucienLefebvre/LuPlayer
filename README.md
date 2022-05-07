@@ -10,7 +10,13 @@ Key features :
 * Auto – normalisation at 0LU
 * Midi & OSC control, with fader start
 * Simple recorder with mic input
-* Differents output modes : stereo, or double mono (master and cue)
+* Differents output modes : stereo, double mono (master and cue)
+
+![Capture 1](https://raw.githubusercontent.com/LucienLefebvre/LuPlayer/master/Screenshots/Capture_1.PNG?token=GHSAT0AAAAAABT5MEDTMICKHHLJHPU7LVA4YTWSDSA "Capture 1")
+![Capture 2](https://raw.githubusercontent.com/LucienLefebvre/LuPlayer/master/Screenshots/Capture_2.PNG?token=GHSAT0AAAAAABT5MEDSTBWSTALXLAPGQXRYYTWSDWQ "Capture 2")
+
+## License
+LuPlayer is licensed under GPLv3
 
 ## Framework & Librairies
 LuPlayer is based on [JUCE](https://github.com/juce-framework/JUCE) framework.
