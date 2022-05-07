@@ -15,6 +15,9 @@ Key features :
 ![Capture 1](/Screenshots/Capture_1.PNG?raw=true "Capture 1")
 ![Capture 2](/Screenshots/Capture_2.PNG?raw=true "Capture 2")
 
+## License
+LuPlayer is licensed under GPLv3
+
 ## Framework & Librairies
 LuPlayer is based on [JUCE](https://github.com/juce-framework/JUCE) framework.
 It use the following librairies / modules :
