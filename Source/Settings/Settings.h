@@ -56,6 +56,7 @@ public:
     void setShowEnveloppe(bool show);
     void setViewLastPlayed(bool show);
     void setKeyboardLayout(int layout);
+    void setAutoCheckUpdate(bool check);
     static juce::StringArray getAcceptedFileFormats();
     juce::TextButton saveButton;
 
@@ -111,6 +112,10 @@ public:
     static int Settings::preferedSoundPlayerMode;
 
     static int Settings::keyboardLayout;
+    static int Settings::keyMappedSoundboardRows;
+    static int Settings::keyMappedSoundboardColumns;
+
+    static bool Settings::autoCheckNewUpdate;
 
     std::unique_ptr<juce::ChangeBroadcaster> keyboardLayoutBroadcaster;
     std::unique_ptr<juce::ChangeBroadcaster> keyMappedSoundboardSize = std::make_unique<juce::ChangeBroadcaster>();
@@ -118,8 +123,7 @@ public:
     juce::OSCSender sender;
     bool oscConnected = true;
 
-    static int Settings::keyMappedSoundboardRows;
-    static int Settings::keyMappedSoundboardColumns;
+
 
 private:
     juce::TextButton selectFFmpegButton;

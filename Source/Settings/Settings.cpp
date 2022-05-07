@@ -62,6 +62,8 @@ bool Settings::viewLastPlayedSound;
 int Settings::keyboardLayout;
 int Settings::keyMappedSoundboardRows;
 int Settings::keyMappedSoundboardColumns;
+
+bool Settings::autoCheckNewUpdate;
 //==============================================================================
 Settings::Settings() : settingsFile(options)
 {
@@ -162,6 +164,11 @@ Settings::Settings() : settingsFile(options)
         Settings::keyboardLayout = 2;
     else
         Settings::keyboardLayout = 1;
+
+    if (properties.getUserSettings()->getValue("autoCheckUpdate").isEmpty())
+        Settings::autoCheckNewUpdate = 1;
+    else
+        Settings::autoCheckNewUpdate = properties.getUserSettings()->getValue("autoCheckUpdate").getIntValue();
     
     //MAX FADER LEVEL
     maxFaderValueSlider.setBounds(150, 0, 450, 25);
@@ -759,6 +766,14 @@ void Settings::setKeyboardLayout(int layout)
     properties.saveIfNeeded();
     settingsFile.save();
     keyboardLayoutBroadcaster->sendChangeMessage();
+}
+
+void Settings::setAutoCheckUpdate(bool check)
+{
+    Settings::autoCheckNewUpdate = check;
+    properties.getUserSettings()->setValue("autoCheckUpdate", (int)Settings::autoCheckNewUpdate);
+    properties.saveIfNeeded();
+    settingsFile.save();
 }
 
 juce::StringArray Settings::getAcceptedFileFormats()

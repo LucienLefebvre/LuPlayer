@@ -98,7 +98,8 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     addKeyListener(this);
     setWantsKeyboardFocus(true);
 
-    checkNewVersion();
+    if (Settings::autoCheckNewUpdate)
+        checkNewVersion();
 }
 
 void MainComponent::settingsButtonClicked()
@@ -357,6 +358,8 @@ void MainComponent::deleteConvertedFiles() //this delete the converted files sin
 
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
+    isPreparedToPlay = false;
+
     bottomComponent.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
@@ -373,11 +376,13 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
     if (soundPlayers[0] != nullptr)
         soundPlayers[0]->prepareToPlay(samplesPerBlockExpected, sampleRate);
+
+    isPreparedToPlay = true;
 }
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
-    if (soundPlayers[0] != nullptr && soundboardLaunched)
+    if (soundPlayers[0] != nullptr && soundboardLaunched && isPreparedToPlay)
     {
         if (Settings::audioOutputMode == 1)
         {      
@@ -848,6 +853,7 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
     {
         menu.addCommandItem(&commandManager, CommandIDs::documentation, "Documentation");
         menu.addCommandItem(&commandManager, CommandIDs::about, "About");
+        menu.addCommandItem(&commandManager, CommandIDs::autoCheckUpdate, "Automatically check for new update");
     }
     return menu;
 }
@@ -926,7 +932,8 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
                                     CommandIDs::setOutMark,
                                     CommandIDs::deleteOutMark,
                                     CommandIDs::documentation,
-                                    CommandIDs::about };
+                                    CommandIDs::about,
+                                    CommandIDs::autoCheckUpdate };
     commands.addArray(c);
 }
 
@@ -1139,6 +1146,10 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setInfo("About", "About", "Menu", 0);
         result.setTicked(false);
         break;
+    case CommandIDs::autoCheckUpdate:
+        result.setInfo("Automatically check for new update", "Check update", "Menu", 0);
+        result.setTicked(Settings::autoCheckNewUpdate);
+        break;
     default:
         break;
     }
@@ -1321,6 +1332,9 @@ bool MainComponent::perform(const InvocationInfo& info)
             "To view source, go to : \n github.com/lucienlefebvre\n");
     }
         break;
+    case CommandIDs::autoCheckUpdate:
+        settings.setAutoCheckUpdate(!Settings::autoCheckNewUpdate);
+        break;
     default:
         return false;
     }
@@ -1366,6 +1380,14 @@ void MainComponent::checkNewVersion()
             result =  currentTokens[0].getIntValue() < thisTokens[0].getIntValue();
 
         if (result)
-            juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::NoIcon, "New version available !", "Check github.com/lucienlefebvre to update");
+        {
+            auto releaseNotes = json->getProperty("body").toString();
+
+            auto updateDial = std::make_unique<updateDialog>(releaseNotes);
+            updateDial->setSize(600, 400);
+            updateDial->setVisible(true);
+
+            juce::DialogWindow::showModalDialog("Update", std::move(updateDial.get()), this, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true);
+        }
     }
 }

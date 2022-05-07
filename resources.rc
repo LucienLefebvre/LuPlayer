@@ -9,16 +9,16 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION  0,9,1,1
+FILEVERSION  0,9,1,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
     BLOCK "040904E4"
     BEGIN
       VALUE "FileDescription",  "MultiPlayer\0"
-      VALUE "FileVersion",  "0.9.1.1\0"
+      VALUE "FileVersion",  "0.9.1.0\0"
       VALUE "ProductName",  "MultiPlayer\0"
-      VALUE "ProductVersion",  "0.9.1.1\0"
+      VALUE "ProductVersion",  "0.9.1.0\0"
     END
   END
 

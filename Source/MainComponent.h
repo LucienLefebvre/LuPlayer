@@ -12,7 +12,7 @@
 #include "Others/StopWatch.h"
 #include "Settings/KeyMapper.h"
 #include "Settings/MidiMapper.h"
-
+#include "Others/updateDialog.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -76,7 +76,8 @@ public:
         setOutMark,
         deleteOutMark,
         documentation,
-        about
+        about,
+        autoCheckUpdate
     };
 
     MainComponent();
@@ -84,6 +85,7 @@ public:
 
     void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
     void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;
+    bool isPreparedToPlay = false;
 
     void paint (juce::Graphics& g) override;
     void resized() override;
