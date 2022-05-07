@@ -3,12 +3,12 @@ LuPlayer is an open source audio player for radio, podcast and streaming content
 
 Key features :
 * Differents modes : playlist, cart, keyboard mapped
+* Midi & OSC control, with fader start
+* Enveloppe Editor
 * EQ & compressor on each sound
 * In & out points
 * Peak, RMS & LU Meter
-* Enveloppe Editor
 * Auto – normalisation at 0LU
-* Midi & OSC control, with fader start
 * Simple recorder with mic input
 * Differents output modes : stereo, double mono (master and cue)
 
@@ -20,7 +20,7 @@ LuPlayer is licensed under GPLv3
 
 ## Framework & Librairies
 LuPlayer is based on [JUCE](https://github.com/juce-framework/JUCE) framework.
-It use the following librairies / modules :
+It uses the following librairies / modules :
 * [FFmpeg](https://github.com/FFmpeg/FFmpeg)
 * [ffmpeg-cpp](https://github.com/Raveler/ffmpeg-cpp)
 * [LUFSmeter](https://github.com/klangfreund/LUFSMeter)
