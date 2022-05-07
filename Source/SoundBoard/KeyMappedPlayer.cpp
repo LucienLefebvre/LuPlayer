@@ -353,9 +353,13 @@ void KeyMappedPlayer::mouseDown(const juce::MouseEvent& event)
 
     if (soundPlayer != nullptr)
     {
-        if (event.mods.isCommandDown())
+        if (event.mods.isAltDown() && event.mods.isCommandDown())
         {
-            soundPlayer->stop();
+            soundPlayer->deleteFile();
+        }
+        else if (event.mods.isCommandDown())
+        {
+            startOrStop();
         }
         else if (event.mods.isAltDown())
         {
