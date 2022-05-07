@@ -64,6 +64,7 @@ public:
 
     static float Settings::maxFaderValueGlobal;
     static juce::Value Settings::maxFaderValue;
+    static bool Settings::enableFaderStart;
     static float Settings::skewFactorGlobal;
     static int Settings::midiShift;
     static int Settings::faderTempTime;
@@ -126,12 +127,6 @@ public:
 
 
 private:
-    juce::TextButton selectFFmpegButton;
-    juce::Label ffmpegPathLabel;
-
-    juce::TextButton selectExiftoolButton;
-    juce::Label exiftoolLabel;
-
     juce::TextButton convertedSoundsButtons;
     juce::Label convertedSoundsLabel;
 
@@ -142,6 +137,8 @@ private:
 
     juce::Slider maxFaderValueSlider;
     juce::Label maxFaderValueLabel;
+
+    juce::ToggleButton faderStartButton;
 
     juce::Label midiShiftLabel;
     juce::Label midiShiftValue;

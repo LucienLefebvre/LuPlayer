@@ -351,12 +351,12 @@ void Playlist::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, co
         if (destinationPlayer->fileLoaded == true)
         {
 
-            if (actualMidiLevels[midiMessageNumber] >= 1 && previousMidiLevels[midiMessageNumber] == 0)
+            if (actualMidiLevels[midiMessageNumber] >= 1 && previousMidiLevels[midiMessageNumber] == 0 && Settings::enableFaderStart)
             {
                 destinationPlayer->transport.setGain(0.0);
                 destinationPlayer->play();
             }
-            else if (actualMidiLevels[midiMessageNumber] == 0 && previousMidiLevels[midiMessageNumber] >= 1)
+            else if (actualMidiLevels[midiMessageNumber] == 0 && previousMidiLevels[midiMessageNumber] >= 1 && Settings::enableFaderStart)
             {
                 destinationPlayer->transport.stop();
             }
@@ -488,15 +488,14 @@ void Playlist::handleFader1(int faderValue)
 
                 if (fader1IsPlaying == false) //if it is not playing
                 {
-                    if (fader1ActualMidiLevel >= 1 && fader1PreviousMidiLevel == 0) //fader start
+                    if (fader1ActualMidiLevel >= 1 && fader1PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                     {
-
                         fader1Start();
                     }
                 }
                 if (fader1IsPlaying == true) //if it is playing
                 {
-                    if (fader1ActualMidiLevel == 0 && fader1PreviousMidiLevel >= 1) //fader stop
+                    if (fader1ActualMidiLevel == 0 && fader1PreviousMidiLevel >= 1 && Settings::enableFaderStart) //fader stop
                     {
                         players[fader1Player]->transport.stop();
                         //fader1IsFlying = false;
@@ -523,14 +522,14 @@ void Playlist::handleFader1OSC(float faderValue)
             {
                 if (fader1IsPlaying == false) //if it is not playing
                 {
-                    if (fader1ActualMidiLevel >= 1 && fader1PreviousMidiLevel == 0) //fader start
+                    if (fader1ActualMidiLevel >= 1 && fader1PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                     {
                         fader1Start();
                     }
                 }
                 if (fader1IsPlaying == true) //if it is playing
                 {
-                    if (fader1ActualMidiLevel == 0 && fader1PreviousMidiLevel >= 1) //fader stop
+                    if (fader1ActualMidiLevel == 0 && fader1PreviousMidiLevel >= 1 && Settings::enableFaderStart) //fader stop
                     {
                         players[fader1Player]->transport.stop();
                     }
@@ -557,14 +556,14 @@ void Playlist::handleFader2(int faderValue)
             {
                 if (fader2IsPlaying == false) //if it is not playing
                 {
-                    if (fader2ActualMidiLevel >= 1 && fader2PreviousMidiLevel == 0) //fader start
+                    if (fader2ActualMidiLevel >= 1 && fader2PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                     {
                         fader2Start();
                     }
                 }
                 if (fader2IsPlaying == true) //if it is playing
                 {
-                    if (fader2ActualMidiLevel == 0 && fader2PreviousMidiLevel >= 1) //fader stop
+                    if (fader2ActualMidiLevel == 0 && fader2PreviousMidiLevel >= 1 && Settings::enableFaderStart) //fader stop
                     {
                         players[fader2Player]->transport.stop();
                         //fader2Stopped = false;
@@ -591,14 +590,14 @@ void Playlist::handleFader2OSC(float faderValue)
             {
                 if (fader2IsPlaying == false) //if it is not playing
                 {
-                    if (fader2ActualMidiLevel >= 1 && fader2PreviousMidiLevel == 0) //fader start
+                    if (fader2ActualMidiLevel >= 1 && fader2PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                     {
                         fader2Start();
                     }
                 }
                 if (fader2IsPlaying == true) //if it is playing
                 {
-                    if (fader2ActualMidiLevel == 0 && fader2PreviousMidiLevel >= 1) //fader stop
+                    if (fader2ActualMidiLevel == 0 && fader2PreviousMidiLevel >= 1 && Settings::enableFaderStart) //fader stop
                     {
                         players[fader2Player]->transport.stop();
                     }
@@ -624,7 +623,7 @@ void Playlist::handleFader3(int faderValue)
             {
                 if (fader1IsPlaying == false) //if it is not playing
                 {
-                    if (fader1ActualMidiLevel >= 1 && fader1PreviousMidiLevel == 0) //fader start
+                    if (fader1ActualMidiLevel >= 1 && fader1PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                     {
                             players[fader1Player]->play();
                             players[fader1Player]->fader1IsPlaying = true;
@@ -634,7 +633,7 @@ void Playlist::handleFader3(int faderValue)
                 }
                 if (fader1IsPlaying == true) //if it is playing
                 {
-                    if (fader1ActualMidiLevel == 0 && fader1PreviousMidiLevel >= 1) //fader stop
+                    if (fader1ActualMidiLevel == 0 && fader1PreviousMidiLevel >= 1 && Settings::enableFaderStart) //fader stop
                     {
                         players[fader1Player]->stopButtonClicked();
                         players[fader1Player]->fader1IsPlaying = false;
@@ -662,7 +661,7 @@ void Playlist::handleFader3OSC(float faderValue)
         {
             if (fader1IsPlaying == false) //if it is not playing
             {
-                if (fader1ActualMidiLevel >= 1 && fader1PreviousMidiLevel == 0) //fader start
+                if (fader1ActualMidiLevel >= 1 && fader1PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                 {
                     players[fader1Player]->play();
                     players[fader1Player]->fader1IsPlaying = true;
@@ -672,7 +671,7 @@ void Playlist::handleFader3OSC(float faderValue)
             }
             if (fader1IsPlaying == true) //if it is playing
             {
-                if (fader1ActualMidiLevel == 0 && fader1PreviousMidiLevel >= 1) //fader stop
+                if (fader1ActualMidiLevel == 0 && fader1PreviousMidiLevel >= 1 && Settings::enableFaderStart) //fader stop
                 {
                     players[fader1Player]->stopButtonClicked();
                     players[fader1Player]->fader1IsPlaying = false;
@@ -698,7 +697,7 @@ void Playlist::handleFader4(int faderValue)
         {
             if (fader2IsPlaying == false) //if it is not playing
             {
-                if (fader2ActualMidiLevel >= 1 && fader2PreviousMidiLevel == 0) //fader start
+                if (fader2ActualMidiLevel >= 1 && fader2PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                 {
                     players[fader2Player]->play();
                     players[fader2Player]->fader2IsPlaying = true;
@@ -709,7 +708,7 @@ void Playlist::handleFader4(int faderValue)
             }
             if (fader2IsPlaying == true) //if it is playing
             {
-                if (fader2ActualMidiLevel == 0 && fader2PreviousMidiLevel >= 1) //fader stop
+                if (fader2ActualMidiLevel == 0 && fader2PreviousMidiLevel >= 1 && Settings::enableFaderStart) //fader stop
                 {
                     players[fader2Player]->stopButtonClicked();
                     players[fader2Player]->fader2IsPlaying = false;
@@ -738,7 +737,7 @@ void Playlist::handleFader4OSC(float faderValue)
         {
             if (fader2IsPlaying == false) //if it is not playing
             {
-                if (fader2ActualMidiLevel >= 1 && fader2PreviousMidiLevel == 0) //fader start
+                if (fader2ActualMidiLevel >= 1 && fader2PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                 {
                     players[fader2Player]->play();
                     players[fader2Player]->fader2IsPlaying = true;
@@ -749,7 +748,7 @@ void Playlist::handleFader4OSC(float faderValue)
             }
             if (fader2IsPlaying == true) //if it is playing
             {
-                if (fader2ActualMidiLevel == 0 && fader2PreviousMidiLevel >= 1) //fader stop
+                if (fader2ActualMidiLevel == 0 && fader2PreviousMidiLevel >= 1 && Settings::enableFaderStart) //fader stop
                 {
                     players[fader2Player]->stopButtonClicked();
                     players[fader2Player]->fader2IsPlaying = false;

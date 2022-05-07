@@ -14,6 +14,7 @@
 float Settings::maxFaderValueGlobal;
 juce::Value Settings::maxFaderValue;
 float Settings::skewFactorGlobal;
+bool Settings::enableFaderStart;
 int Settings::midiShift;
 int Settings::faderTempTime;
 int Settings::preferedMidiDeviceIndex;
@@ -98,6 +99,11 @@ Settings::Settings() : settingsFile(options)
         Settings::skewFactorGlobal = 0.5;
     else
     Settings::skewFactorGlobal = properties.getUserSettings()->getValue("Skew Factor").getFloatValue();
+
+    if (properties.getUserSettings()->getValue("faderStart").isEmpty())
+        Settings::enableFaderStart = 1;
+    else
+        Settings::enableFaderStart = properties.getUserSettings()->getValue("faderStart").getIntValue();
 
     if (properties.getUserSettings()->getValue("Max Fader Value").isEmpty())
         Settings::maxFaderValueGlobal = 0;
@@ -197,7 +203,6 @@ Settings::Settings() : settingsFile(options)
     skewFactorSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
     addAndMakeVisible(skewFactorSlider);
 
-
     skewFactorLabel.setBounds(0, maxFaderValueSlider.getBottom() + spacer, 130, 25);
     addAndMakeVisible(skewFactorLabel);
     skewFactorLabel.setText("Fader Acceleration", juce::NotificationType::dontSendNotification);
@@ -209,31 +214,24 @@ Settings::Settings() : settingsFile(options)
     addAndMakeVisible(skewFactorLabelRight);
     skewFactorLabelRight.setText("Linear", juce::NotificationType::dontSendNotification);
 
-
-    //MIDI SHIFT
-    midiShiftLabel.setBounds(0, skewFactorLabel.getBottom() + spacer, 200, 25);
-    midiShiftLabel.setText("Midi Channel Shift", juce::NotificationType::dontSendNotification);
-    addAndMakeVisible(midiShiftLabel);
-    midiShiftValue.setBounds(200, skewFactorLabel.getBottom() + spacer, 25, 25);
-    midiShiftValue.setText(juce::String(Settings::midiShift), juce::NotificationType::dontSendNotification);
-    addAndMakeVisible(midiShiftValue);
-    midiShiftValue.setEditable(true, true, false);
-    midiShiftValue.addListener(this);
-    midiShiftValue.setJustificationType(juce::Justification::centred);
-    midiShiftValue.setColour(juce::Label::outlineColourId, juce::Colours::black);
+    //FADER START
+    faderStartButton.setToggleState(Settings::enableFaderStart, juce::dontSendNotification);
+    faderStartButton.setButtonText("Enable fader start");
+    faderStartButton.addListener(this);
+    faderStartButton.setBounds(0, skewFactorLabel.getBottom() + spacer, 200, 25);
+    addAndMakeVisible(&faderStartButton);
 
     //FADER TEMP
-    faderTempLabel.setBounds(0, midiShiftLabel.getBottom() + spacer, 200, 25);
+    faderTempLabel.setBounds(0, faderStartButton.getBottom() + spacer, 200, 25);
     faderTempLabel.setText("Fader Temporisation (ms)", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(faderTempLabel);
-    faderTempValue.setBounds(200, midiShiftLabel.getBottom() + spacer, 50, 25);
+    faderTempValue.setBounds(200, faderStartButton.getBottom() + spacer, 50, 25);
     faderTempValue.setText(juce::String(Settings::faderTempTime), juce::NotificationType::dontSendNotification);
     addAndMakeVisible(faderTempValue);
     faderTempValue.setEditable(true, true, false);
     faderTempValue.addListener(this);
     faderTempValue.setJustificationType(juce::Justification::centred);
     faderTempValue.setColour(juce::Label::outlineColourId, juce::Colours::black);
-
 
     //OSC Ports
     addAndMakeVisible(oscPorts);
@@ -407,41 +405,13 @@ void Settings::resized()
 {
 }
 
-void Settings::selectFFmpeg()
-{
-    juce::FileChooser chooser("Select the FFmpeg Executable", juce::File::getSpecialLocation(juce::File::currentApplicationFile), "*FFmpeg.exe");
-    if (chooser.browseForFileToOpen())
-    {
-        juce::File ffmpegExe;
-        ffmpegExe = chooser.getResult();
 
-        Settings::FFmpegPath = ffmpegExe.getFullPathName();
-        properties.getUserSettings()->setValue("FFmpeg Path", Settings::FFmpegPath);
-    }
-    ffmpegPathLabel.setText(Settings::FFmpegPath, juce::NotificationType::dontSendNotification);
-    setOptions();
-    settingsFile.save();
-}
 
 juce::String Settings::getFFmpegPath()
 {
-
     return FFmpegPath;
 }
 
-void Settings::selectExiftool()
-{
-    juce::FileChooser chooser("Select the Exiftool Executable", juce::File::getSpecialLocation(juce::File::currentApplicationFile), "*exiftool.exe");
-    if (chooser.browseForFileToOpen())
-    {
-        juce::File exiftoolexe;
-        exiftoolexe = chooser.getResult();
-
-        Settings::exiftoolPath = exiftoolexe.getFullPathName();
-        properties.getUserSettings()->setValue("Exiftool Path", Settings::exiftoolPath);
-    }
-    exiftoolLabel.setText(Settings::exiftoolPath, juce::NotificationType::dontSendNotification);
-}
 
 juce::String Settings::getExiftoolPath()
 {
@@ -715,6 +685,13 @@ void Settings::buttonClicked(juce::Button* button)
     else if (button == &meterButton)
     {
         setShowMeters(button->getToggleState());
+    }
+    else if (button == &faderStartButton)
+    {
+        Settings::enableFaderStart = button->getToggleState();
+        properties.getUserSettings()->setValue("faderStart", (int)Settings::autoNormalize);
+        properties.saveIfNeeded();
+        settingsFile.save();
     }
 }
 
