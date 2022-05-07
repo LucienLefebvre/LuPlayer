@@ -324,6 +324,8 @@ Player::~Player()
     killThreads();
     denoiser.denoiseDoneBroadcaster->removeChangeListener(this);
     denoiser.processStartedBroadcaster->removeChangeListener(this);
+    luThread.loudnessCalculatedBroadcaster->removeChangeListener(this);
+    ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
     delete playBroadcaster;
     delete cueBroadcaster;
     delete draggedBroadcaster;
@@ -911,11 +913,13 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
             {
                 float enveloppePosition = (nextReadPosition + i) / (float)transport.getTotalLength();
                 float gainToApply = juce::Decibels::decibelsToGain(getEnveloppeValue(enveloppePosition, envP).load() * 24);
-                playerBuffer->applyGain(i, 1, gainToApply);
+                if (playerBuffer != nullptr)
+                    playerBuffer->applyGain(i, 1, gainToApply);
 
                 float cueEnveloppePosition = (cueNextReadPosition + i) / (float)cueTransport.getTotalLength();
                 float cueGainToApply = juce::Decibels::decibelsToGain(getEnveloppeValue(cueEnveloppePosition, envP).load() * 24);
-                cueBuffer->applyGain(i, 1, cueGainToApply);
+                if (cueBuffer != nullptr)
+                    cueBuffer->applyGain(i, 1, cueGainToApply);
             }
         }
 
@@ -924,13 +928,18 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
         else if (cueBuffer != nullptr)
             meterSource.measureBlock(*cueBuffer.get());
 
-        filterProcessor.getNextAudioBlock(playerBuffer.get());
-        cueFilterProcessor.getNextAudioBlock(cueBuffer.get());
+        if (playerBuffer != nullptr)
+            filterProcessor.getNextAudioBlock(playerBuffer.get());
+        if (cueBuffer != nullptr)
+            cueFilterProcessor.getNextAudioBlock(cueBuffer.get());
 
-        compProcessor.getNextAudioBlock(playerBuffer.get());
-        cueCompProcessor.getNextAudioBlock(cueBuffer.get());
+        if (playerBuffer != nullptr)
+            compProcessor.getNextAudioBlock(playerBuffer.get());
+        if (cueBuffer != nullptr)
+            cueCompProcessor.getNextAudioBlock(cueBuffer.get());
 
-        playerBuffer->applyGain(bufferGain.load());
+        if (playerBuffer != nullptr)
+            playerBuffer->applyGain(bufferGain.load());
 
         if (transport.isPlaying() && playerBuffer != nullptr)
         {
@@ -943,14 +952,20 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
             compMeter.setReductionGain(cueCompProcessor.getCompReductionDB());
         }
 
-        bufferToFill.buffer->addFrom(0, 0, *playerBuffer, 0, 0, playerBuffer->getNumSamples());
-        bufferToFill.buffer->addFrom(1, 0, *playerBuffer, 1, 0, playerBuffer->getNumSamples());
+        if (playerBuffer != nullptr)
+        {
+            bufferToFill.buffer->addFrom(0, 0, *playerBuffer, 0, 0, playerBuffer->getNumSamples());
+            bufferToFill.buffer->addFrom(1, 0, *playerBuffer, 1, 0, playerBuffer->getNumSamples());
+        }
 
-        if (denoiser.isVisible())
+        if (denoiser.isVisible() && cueBuffer != nullptr)
             denoiser.transport.getNextAudioBlock(cue);
 
-        cue.buffer->addFrom(0, 0, *cueBuffer, 0, 0, playerBuffer->getNumSamples());
-        cue.buffer->addFrom(1, 0, *cueBuffer, 1, 0, playerBuffer->getNumSamples());
+        if (cueBuffer != nullptr)
+        {
+            cue.buffer->addFrom(0, 0, *cueBuffer, 0, 0, playerBuffer->getNumSamples());
+            cue.buffer->addFrom(1, 0, *cueBuffer, 1, 0, playerBuffer->getNumSamples());
+        }
     }
 }
 
@@ -1004,7 +1019,6 @@ void Player::play(bool launchedByMidi)
         previousSliderValue = 0.0f;
         actualSliderValue = 0.0f;
         volumeSlider.setValue(0.0f);
-
     }
     transport.setPosition(startTime);
     transportStateChanged(Starting);

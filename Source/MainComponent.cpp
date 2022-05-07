@@ -1383,7 +1383,7 @@ void MainComponent::checkNewVersion()
         {
             auto releaseNotes = json->getProperty("body").toString();
 
-            auto updateDial = std::make_unique<updateDialog>(releaseNotes);
+            auto updateDial = std::make_unique<updateDialog>(releaseNotes, &settings);
             updateDial->setSize(600, 400);
             updateDial->setVisible(true);
 
