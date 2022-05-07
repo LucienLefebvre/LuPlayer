@@ -1076,6 +1076,7 @@ void Player::deleteFile()
         fileName.setValue("");
         fileLoaded = false;
         sliderValueToset = 1.0;
+        setGain(1.0f);
         hasBeenNormalized = false;
         setFilterParameters(filterProcessor.makeDefaultFilter());
         createDefaultEnveloppePath();

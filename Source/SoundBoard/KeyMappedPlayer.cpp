@@ -271,6 +271,7 @@ void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
             elapsedTimeLabel->setVisible(false);
             editButton->setVisible(false);
             busyBar->setVisible(false);
+            dBLabel->setVisible(false);
             currentColour = BLUE;
             repaint();
         }
