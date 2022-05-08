@@ -113,7 +113,7 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
         }
         thumbnail->setGainValues(gainValue);
 
-        g.setColour(defaultColour.brighter(0.5f));
+        g.setColour(defaultColour.brighter(0.8f));
         g.setOpacity(1.0);
 
         double thumbnailMiddleTime = (playHeadPosition / (double)getWidth()) * soundPlayer->getLenght();
