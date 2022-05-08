@@ -9,7 +9,7 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
                                      getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true, true)
 {
 
-    logger.reset(juce::FileLogger::createDefaultAppLogger("Multiplayer", "Log.txt", "Multiplayer Log"));
+    logger.reset(juce::FileLogger::createDefaultAppLogger("LuPlayer", "Log.txt", "LuPlayer Log"));
     juce::FileLogger::setCurrentLogger(logger.get());
     juce::FileLogger::getCurrentLogger()->writeToLog("App launch");
 
@@ -1329,7 +1329,7 @@ bool MainComponent::perform(const InvocationInfo& info)
         break;
     case CommandIDs::documentation:
     {
-        juce::File docFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/Documentation/Doc.pdf"));
+        juce::File docFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Documentation/Doc.pdf"));
         if (docFile.existsAsFile())
             juce::Process::openDocument(docFile.getFullPathName(), "");
         break;

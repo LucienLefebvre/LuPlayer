@@ -150,7 +150,7 @@ bool KeyMapper::keyPressed(const juce::KeyPress& key, juce::Component* originati
         repaint();
 
         std::unique_ptr<juce::XmlElement> xml = commandManager->getKeyMappings()->createXml(false);
-        juce::File keyboardMappingFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/keyMapping.xml"));
+        juce::File keyboardMappingFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/keyMapping.xml"));
         xml->writeTo(keyboardMappingFile);
     }
     return false;
@@ -176,7 +176,7 @@ void KeyMapper::setCommandManager(juce::ApplicationCommandManager* cm)
 
 void KeyMapper::loadMappingFile()
 {
-    juce::File keyMappingFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/keyMapping.xml"));
+    juce::File keyMappingFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/keyMapping.xml"));
     if (keyMappingFile.exists())
     {
         juce::XmlDocument xmlDoc(keyMappingFile);

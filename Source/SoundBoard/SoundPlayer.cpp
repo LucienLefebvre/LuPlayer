@@ -625,7 +625,7 @@ void SoundPlayer::savePlaylist()
     multiPlayer.addChildElement(cart);
     auto xmlString = multiPlayer.toString();
 
-    juce::FileChooser chooser("Choose an XML file to save", juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/Saves"), "*.xml");
+    juce::FileChooser chooser("Choose an XML file to save", juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Saves"), "*.xml");
     if (chooser.browseForFileToSave(true))
     {
         juce::File myPlaylistSave;
@@ -712,7 +712,7 @@ void SoundPlayer::loadPlaylist()
     }
     else
     {
-        juce::FileChooser chooser("Choose an XML File to load", juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/Saves"), "*.xml");
+        juce::FileChooser chooser("Choose an XML File to load", juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Saves"), "*.xml");
 
         if (chooser.browseForFileToOpen())
         {

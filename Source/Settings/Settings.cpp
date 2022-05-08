@@ -72,7 +72,7 @@ Settings::Settings() : settingsFile(options)
     options.applicationName = ProjectInfo::projectName;
     options.filenameSuffix = ".settings";
 
-    options.folderName = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer").getFullPathName();
+    options.folderName = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer").getFullPathName();
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     properties.setStorageParameters(options);
 
@@ -95,7 +95,7 @@ Settings::Settings() : settingsFile(options)
     Settings::preferedSoundPlayerMode = properties.getUserSettings()->getValue("PreferedSoundPlayerMode").getIntValue();
 
     if (properties.getUserSettings()->getValue("Converted Sound Path").isEmpty())
-        Settings::convertedSoundsPath = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer").getFullPathName();
+        Settings::convertedSoundsPath = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Sounds").getFullPathName();
     else
         Settings::convertedSoundsPath = properties.getUserSettings()->getValue("Converted Sound Path");
 

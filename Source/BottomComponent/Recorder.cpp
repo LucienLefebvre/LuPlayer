@@ -566,7 +566,7 @@ void Recorder::saveButtonClicked()
         juce::WavAudioFormat audioFormat;
 
         auto parentDir = juce::File(Settings::convertedSoundsPath);
-        const juce::File tempFile(parentDir.getNonexistentChildFile("MultiPlayerRecording", ".wav"));
+        const juce::File tempFile(parentDir.getNonexistentChildFile("LuPlayerRecording", ".wav"));
 
         juce::LAMEEncoderAudioFormat compressedAudioFormat(juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\lame.exe"));
         auto fileStream = std::unique_ptr<juce::FileOutputStream>(myFile.createOutputStream());

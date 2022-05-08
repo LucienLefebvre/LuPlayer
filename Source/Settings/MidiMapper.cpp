@@ -267,14 +267,14 @@ void MidiMapper::saveMidiMapping()
             midiMapping.addChildElement(command);
     }
 
-    juce::File midiMappingFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/midiMapping.xml"));
+    juce::File midiMappingFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/midiMapping.xml"));
     midiMapping.writeTo(midiMappingFile);
     DBG("a");
 }
 
 void MidiMapper::loadMappingFile()
 {
-    juce::File midiMappingFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer/midiMapping.xml"));
+    juce::File midiMappingFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/midiMapping.xml"));
     if (midiMappingFile.exists())
     {
         midiMappings.clear();

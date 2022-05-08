@@ -15,9 +15,9 @@ BEGIN
   BEGIN
     BLOCK "040904E4"
     BEGIN
-      VALUE "FileDescription",  "MultiPlayer\0"
+      VALUE "FileDescription",  "LuPlayer\0"
       VALUE "FileVersion",  "0.9.1.0\0"
-      VALUE "ProductName",  "MultiPlayer\0"
+      VALUE "ProductName",  "LuPlayer\0"
       VALUE "ProductVersion",  "0.9.1.0\0"
     END
   END
