@@ -898,9 +898,10 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
                                     CommandIDs::viewLastPlayedSound,
                                     CommandIDs::lanchRecord,
                                     CommandIDs::goToSoundBrowser,
-                                    CommandIDs::goToRecorder,
                                     CommandIDs::goToClipEditor,
                                     CommandIDs::goToClipEffect,
+                                    CommandIDs::goToRecorder,
+                                    CommandIDs::goToTextEditor,
                                     CommandIDs::spaceBarPlay,
                                     CommandIDs::goToFirst,
                                     CommandIDs::goToNext,
@@ -975,6 +976,11 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setInfo("Display clip effect", "Display clip effect", "Menu", 0);
         result.setTicked(false);
         result.addDefaultKeypress('3', juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::goToTextEditor:
+        result.setInfo("Display text editor", "Display text editor", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('5', juce::ModifierKeys::noModifiers);
         break;
     case CommandIDs::spaceBarPlay:
         result.setInfo("Play next sound in playlist (playlist mode only) or cue play (other modes)", "Play", "Menu", 0);
@@ -1187,6 +1193,10 @@ bool MainComponent::perform(const InvocationInfo& info)
     case CommandIDs::goToClipEffect:
         juce::FileLogger::getCurrentLogger()->writeToLog("view clip effect");
         bottomComponent.getTabbedButtonBar().setCurrentTabIndex(2);
+        break;
+    case CommandIDs::goToTextEditor:
+        juce::FileLogger::getCurrentLogger()->writeToLog("view text editor");
+        bottomComponent.getTabbedButtonBar().setCurrentTabIndex(4);
         break;
     case CommandIDs::spaceBarPlay:
         juce::FileLogger::getCurrentLogger()->writeToLog("space bar play");
