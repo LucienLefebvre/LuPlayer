@@ -643,6 +643,7 @@ juce::XmlElement* SoundPlayer::createPlayerXmlElement(int playerID, int playlist
         e->setAttribute("ID", playerID);
         e->setAttribute("path", soundPlayer->getFilePath());
         e->setAttribute("trimvolume", soundPlayer->getTrimVolume());
+        e->setAttribute("hasBeenNormalized", soundPlayer->getHasBeenNormalized());
         e->setAttribute("islooping", soundPlayer->getIsLooping());
         e->setAttribute("Name", juce::String(soundPlayer->getName()));
         e->setAttribute("isHpfEnabled", soundPlayer->isHpfEnabled());
@@ -849,6 +850,7 @@ void SoundPlayer::loadPlaylist()
 void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID)
 {
     int playerID = e->getIntAttribute("ID");
+    bool hasBeenNormalized = e->getBoolAttribute("hasBeenNormalized");
     juce::String filePath = juce::String(e->getStringAttribute("path"));
     int trimvolume = e->getDoubleAttribute("trimvolume");
     bool islooping = e->getBoolAttribute("islooping");
@@ -879,6 +881,7 @@ void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID
 
     auto* playerToLoad = myPlaylists[playlistID]->players[playerID];
 
+    playerToLoad->setHasBeenNormalized(hasBeenNormalized);
     playerToLoad->verifyAudioFileFormat(filePath);
     playerToLoad->setTrimVolume(trimvolume);
     playerToLoad->setIsLooping(islooping);

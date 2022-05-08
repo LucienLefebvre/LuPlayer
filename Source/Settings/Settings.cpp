@@ -81,7 +81,6 @@ Settings::Settings() : settingsFile(options)
     //LOAD PROPERTIES
     Settings::FFmpegPath = properties.getUserSettings()->getValue("FFmpeg Path");
     Settings::exiftoolPath = properties.getUserSettings()->getValue("Exiftool Path");
-    Settings::convertedSoundsPath = properties.getUserSettings()->getValue("Converted Sound Path");
     Settings::preferedMidiDeviceIndex = properties.getUserSettings()->getValue("Midi Device").getIntValue();
     Settings::midiShift = properties.getUserSettings()->getValue("Midi Shift").getIntValue();
     Settings::adress1 = properties.getUserSettings()->getValue("IP Adress 1");
@@ -94,6 +93,11 @@ Settings::Settings() : settingsFile(options)
     Settings::preferedAudioDeviceType = properties.getUserSettings()->getValue("Audio Device Type");
     Settings::preferedAudioDeviceName = properties.getUserSettings()->getValue("audioDeviceName");
     Settings::preferedSoundPlayerMode = properties.getUserSettings()->getValue("PreferedSoundPlayerMode").getIntValue();
+
+    if (properties.getUserSettings()->getValue("Converted Sound Path").isEmpty())
+        Settings::convertedSoundsPath = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("Multiplayer").getFullPathName();
+    else
+        Settings::convertedSoundsPath = properties.getUserSettings()->getValue("Converted Sound Path");
 
     if (properties.getUserSettings()->getValue("Skew Factor").isEmpty())
         Settings::skewFactorGlobal = 0.5;
