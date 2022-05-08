@@ -1,4 +1,6 @@
 # LuPlayer
+<img src="https://github.com/LucienLefebvre/LuPlayer/blob/630cbe81b4bb0aebbb4800ef041b2ef893128627/icon.png" alt="icon" width="128" height="84"/>
+
 LuPlayer is an open source audio player for radio, podcast and streaming content creators.
 
 Key features :
@@ -12,8 +14,8 @@ Key features :
 * Simple recorder with mic input
 * Differents output modes : stereo, double mono (master and cue)
 
-![Capture 1](https://github.com/LucienLefebvre/LuPlayer/blob/master/Screenshots/Capture_1.PNG?raw=true "Capture 1")
-![Capture 2](https://github.com/LucienLefebvre/LuPlayer/blob/master/Screenshots/Capture_2.PNG?raw=true "Capture 2")
+![Capture 1](https://github.com/LucienLefebvre/LuPlayer/blob/630cbe81b4bb0aebbb4800ef041b2ef893128627/Screenshots/Capture%201.PNG "Capture 1")
+![Capture 2](https://github.com/LucienLefebvre/LuPlayer/blob/630cbe81b4bb0aebbb4800ef041b2ef893128627/Screenshots/Capture%202.PNG "Capture 2")
 
 ## License
 LuPlayer is licensed under GPLv3
