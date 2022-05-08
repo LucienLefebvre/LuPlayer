@@ -1022,6 +1022,8 @@ void Player::launch()
 {
     transport.setPosition(startTime);
     transport.start();
+    if (Settings::viewLastPlayedSound)
+        playerLaunchedBroadcaster->sendChangeMessage();
 }
 
 void Player::stop()
