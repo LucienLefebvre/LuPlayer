@@ -35,6 +35,8 @@ Dans le panneau "Key Mapping", possibilité de choisir entre trois disposition d
 * Control + alt + click : supprime le son
 
 ## Enveloppe editor
+![Capture 1](https://github.com/LucienLefebvre/LuPlayer/blob/630cbe81b4bb0aebbb4800ef041b2ef893128627/Screenshots/enveloppe.PNG "Capture 1")
+
 #### Raccourcis :
 * Molette souris : zoom
 * Control + click : ajoute un point d'enveloppe
