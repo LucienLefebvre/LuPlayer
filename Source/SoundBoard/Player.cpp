@@ -1278,7 +1278,6 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         integratedLoudness = luThread.getILU();
         if (integratedLoudness > 0)
             integratedLoudness = -23;
-        DBG("integrated lloudness : " << integratedLoudness);
         double loudnessDifference = -23. - integratedLoudness;
         trimValueToSet = loudnessDifference;
         luThread.deleteProgressFile();
@@ -1417,7 +1416,6 @@ void Player::sliderValueChanged(juce::Slider* slider)
             if (settings->oscConnected && isEightPlayerMode)
             {
                 juce::String adress = "/8fader" + juce::String(oscIndex) + "gain";
-                DBG("player adress : " << adress);
                 juce::NormalisableRange<float>valueRange(0.0, juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal, false);
                 settings->sender.send(adress, valueRange.convertTo0to1((float)slider->getValue()));
             }
@@ -2101,7 +2099,6 @@ void Player::setPlayerIndex(int i)
 void Player::setOSCIndex(int i)
 {
     oscIndex = i;
-    DBG("osc index : " << i);
 }
 
 double Player::CalculateR128Integrated(std::string filePath)

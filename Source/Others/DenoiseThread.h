@@ -79,14 +79,12 @@ public:
                 + ":nf=" + juce::String(params.noiseFloorDB).toStdString()
                 + ":nt=" + params.noiseType 
                 + ":om=o\" \"" + newConvertedFilesPath + rawnamedoubleslash + "DNS.wav\"");
-        DBG(cmdstring);
         std::wstring w = (utf8_to_utf16(cmdstring));
 
         process.start(cmdstring);
         process.waitForProcessToFinish(30000);
         /////////////////////return created file path
         std::string returnFilePath = std::string(newConvertedFilesPath + "\\" + rawname + "DNS.wav");
-        DBG(returnFilePath);
         std::string returnFilePathBackslah = std::regex_replace(returnFilePath, std::regex(R"(\\)"), R"(\\)");
         returnedFile = juce::String(returnFilePath);
         Settings::tempFiles.add(returnedFile);

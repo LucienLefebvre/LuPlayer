@@ -412,7 +412,6 @@ void FilterEditor::mouseWheelMove(const juce::MouseEvent& event, const juce::Mou
         auto y = event.getEventRelativeTo(filterPoints[i]).getPosition().getY();
         if (filterPoints[i]->contains(juce::Point<int>(x, y)))
         {
-            //DBG("wheel");
             auto* slider = &filterBands[i]->qSlider;
             if (wheel.deltaY > 0)
                 slider->setValue(slider->getValue() * 1.2);

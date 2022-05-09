@@ -169,9 +169,7 @@ public:
             juce::dsp::AudioBlock<float> deesserBlock(*deesserBuffer);
             deesserFilter.process(juce::dsp::ProcessContextReplacing<float>(deesserBlock));
             auto dsFilterRMS = juce::Decibels::gainToDecibels(deesserBuffer->getRMSLevel(0, 0, deesserBuffer->getNumSamples()));
-            DBG(dsFilterRMS);
             auto deesserThreshold = dsFilterRMS;
-            DBG(deesserThreshold);
             deesser.setThreshold(deesserThreshold);
             deesser.process(juce::dsp::ProcessContextReplacing<float>(block));
         }

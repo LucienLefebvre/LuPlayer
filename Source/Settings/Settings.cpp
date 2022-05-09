@@ -168,7 +168,6 @@ Settings::Settings() : settingsFile(options)
 
     HKL currentLayout = GetKeyboardLayout(0);
     unsigned int x = (unsigned int)currentLayout & 0x0000FFFF;
-    DBG(juce::String(x));
     if (x == 1033)
         Settings::keyboardLayout = 1;
     else if (x == 1036)
@@ -715,7 +714,7 @@ juce::Array<int> Settings::getKeyMapping(juce::StringArray s)
     for (int i = 0; i < s.size(); i++)
     {
         r.set(i, properties.getUserSettings()->getValue(s[i]).getIntValue());
-        DBG(r[i]);
+
     }
     return r;
 }
