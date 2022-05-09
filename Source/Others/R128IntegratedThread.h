@@ -16,6 +16,7 @@
 #include "helpers.h"
 #include <regex>
 #include "../Settings/Settings.h"
+#include "../External/LUFSMeter/Ebu128LoudnessMeter.h"
 //==============================================================================
 /*
 */
@@ -25,6 +26,7 @@ public:
     R128IntegratedThread(const juce::String& threadName, size_t threadStackSize = 0) : Thread("R128 Integrated")
     {
         loudnessCalculatedBroadcaster = new juce::ChangeBroadcaster();
+        formatManager.registerBasicFormats();
     }
 
     ~R128IntegratedThread() override
@@ -33,39 +35,32 @@ public:
         stopThread(1000);
     }
 
+    void prepareToPlay(int samplesPerBlockExpected, double sampleRate)
+    {
+        actualSamplesPerBlocksExpected = samplesPerBlockExpected;
+        actualSampleRate = sampleRate;
+        loudnessMeter.prepareToPlay(sampleRate, 2, samplesPerBlockExpected, 20);
+    }
+
     void run()
     {
-        std::string USES_CONVERSION_EX;
-        std::string ffmpegpath = juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\ffmpeg.exe").toStdString();
-        std::string convertedFilesPath = Settings::convertedSoundsPath.toStdString();
-        //////////*****************Create FFMPEG command Line
-        //add double slash to path
-        std::string newFilePath = std::regex_replace(filePath, std::regex(R"(\\)"), R"(\\)");
-        std::string newFFmpegPath = std::regex_replace(ffmpegpath, std::regex(R"(\\)"), R"(\\)");
-        std::string newConvertedFilesPath = std::regex_replace(convertedFilesPath, std::regex(R"(\\)"), R"(\\)");
-        //give Output Directory
-        std::size_t botDirPos = filePath.find_last_of("\\");
-        std::string outputFileDirectory = filePath.substr(0, botDirPos);
-        //give file name with extension
-        std::string fileOutputName = filePath.substr(botDirPos, filePath.length());
-        std::string newFileOutputDir = std::regex_replace(outputFileDirectory, std::regex(R"(\\)"), R"(\\)");
-        size_t lastindex = fileOutputName.find_last_of(".");
-        //give file name without extension and add double dash before
-        std::string rawname = fileOutputName.substr(0, lastindex);
-        std::string rawnamedoubleslash = std::regex_replace(rawname, std::regex(R"(\\)"), R"(\\)");
-        //create entire command string
-        std::string cmdstring = std::string("\"" + newFFmpegPath + "\" -nostats -i \"" + newFilePath + "\" -filter_complex ebur128=framelog=verbose -f null -");
-        std::wstring w = (utf8_to_utf16(cmdstring));
-        LPSTR str = const_cast<LPSTR>(cmdstring.c_str());
-        ////////////Launch FFMPEG
-        process.start(cmdstring);
-        juce::String output = process.readAllProcessOutput();
-        int nullLuIndex = output.indexOfWholeWord("I:");
-        int  iLuIndex = output.indexOfAnyOf("I:", output.length() - 200);
-        juce::String luString = output.substring(iLuIndex + 19, iLuIndex + 21);
-        integratedLoudness = -(luString.getFloatValue());
+        if (juce::AudioFormatReader* reader = formatManager.createReaderFor(juce::File(filePath)))
+        {
+            readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
+            readerBuffer.reset(new juce::AudioBuffer<float>(reader->numChannels, actualSamplesPerBlocksExpected));
+            sourceChannelInfo.reset(new juce::AudioSourceChannelInfo(*readerBuffer.get()));
+            juce::int64 numSamples = reader->lengthInSamples;
 
+            while (numSamples > 0)
+            {
+                readerSource->getNextAudioBlock(*sourceChannelInfo.get());
+                loudnessMeter.processBlock(*readerBuffer.get());
+                numSamples -= actualSamplesPerBlocksExpected;
+            }
+            integratedLoudness = loudnessMeter.getIntegratedLoudness();
+        }
         loudnessCalculatedBroadcaster->sendChangeMessage();
+        loudnessMeter.reset();
     }
 
     void setFilePath(juce::String p)
@@ -104,6 +99,15 @@ public:
     juce::ChangeBroadcaster* loudnessCalculatedBroadcaster;
     double integratedLoudness = 0;
 
+    std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
+    std::unique_ptr<juce::AudioBuffer<float>> readerBuffer;
+    std::unique_ptr<juce::AudioSourceChannelInfo> sourceChannelInfo;
+
+    juce::AudioFormatManager formatManager;
+    Ebu128LoudnessMeter loudnessMeter;
+
+    int actualSamplesPerBlocksExpected = 480;
+    double actualSampleRate = 48000;
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(R128IntegratedThread)
 };

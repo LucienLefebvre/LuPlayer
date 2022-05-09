@@ -874,6 +874,8 @@ void Player::playerPrepareToPlay(int samplesPerBlockExpected, double sampleRate)
 
     meterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
     outMeterSource.resize(2, sampleRate * 0.1 / samplesPerBlockExpected);
+
+    luThread.prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
 }
 
 void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill, const juce::AudioSourceChannelInfo& cue)
