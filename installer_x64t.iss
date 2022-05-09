@@ -7,13 +7,13 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING .ISS SCRIPT FILES!
 
 [Setup]
-OutputBaseFilename=Multiplayer_Beta_V0.9.1.1_x64_setup
-AppName=Multiplayer
+OutputBaseFilename=LuPlayer.9.1.1_x64_setup
+AppName=LuPlayer
 AppVersion=0.9.1.1
 WizardStyle=modern
-DefaultDirName={autopf}\Multiplayer
-DefaultGroupName=Multiplayer
-UninstallDisplayIcon={app}\Multiplayer.exe
+DefaultDirName={autopf}\LuPlayer
+DefaultGroupName=LuPlayer
+UninstallDisplayIcon={app}\LuPlayer.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=userdocs:Inno Setup
@@ -26,7 +26,7 @@ ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 
 [Files]
-Source: "Multiplayer.exe"; DestDir: "{app}"; DestName: "Multiplayer.exe"
+Source: "LuPlayer.exe"; DestDir: "{app}"; DestName: "LuPlayer.exe"
 Source: "Readme.txt"; DestDir: "{app}"; Flags: isreadme
 Source : "ffmpeg.exe"; DestDir: "{app}"
 Source : "ffplay.exe"; DestDir: "{app}"
@@ -40,11 +40,9 @@ Source : "swresample-3.dll"; DestDir: "{app}"
 Source : "swscale-5.dll"; DestDir: "{app}"  
 Source : "postproc-55.dll"; DestDir: "{app}"  
 Source : "lame.exe"; DestDir: "{app}"
-Source : "Multiplayer.touchosc"; DestDir: "{app}"
 Source : "Documentation\Doc.pdf"; DestDir: "{app}\Documentation"
 [Dirs]
-Name: "{userappdata}\Multiplayer\Saves"
+Name: "{userappdata}\LuPlayer\Saves"
+Name: "{userappdata}\LuPlayer\Sounds"
 [Icons]
-Name: "{group}\Multiplayer"; Filename: "{app}\Multiplayer.exe"
-[Registry]
-Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone"; ValueType: string; ValueName: "Value"; ValueData: "Allow"
+Name: "{group}\LuPlayer"; Filename: "{app}\LuPlayer.exe"
