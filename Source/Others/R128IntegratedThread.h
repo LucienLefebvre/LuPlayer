@@ -49,6 +49,7 @@ public:
             readerSource.reset(new juce::AudioFormatReaderSource(reader, true));
             readerBuffer.reset(new juce::AudioBuffer<float>(reader->numChannels, actualSamplesPerBlocksExpected));
             sourceChannelInfo.reset(new juce::AudioSourceChannelInfo(*readerBuffer.get()));
+            loudnessMeter.prepareToPlay(actualSampleRate, reader->numChannels, actualSamplesPerBlocksExpected, 20);
             juce::int64 numSamples = reader->lengthInSamples;
 
             while (numSamples > 0)
@@ -58,7 +59,10 @@ public:
                 numSamples -= actualSamplesPerBlocksExpected;
             }
             integratedLoudness = loudnessMeter.getIntegratedLoudness();
+            if (reader->numChannels == 1)
+                integratedLoudness -= 3;
         }
+
         loudnessCalculatedBroadcaster->sendChangeMessage();
         loudnessMeter.reset();
     }

@@ -462,8 +462,8 @@ void KeyMappedPlayer::timerCallback(int timerID)
             if (soundPlayer->isPlayerPlaying())
             {
                 repaint();
-                nameLabel->setColour(juce::Label::ColourIds::textColourId, currentColour); 
-                elapsedTimeLabel->setColour(juce::Label::ColourIds::textColourId, currentColour); 
+                nameLabel->setColour(juce::Label::ColourIds::textColourId, defaultColour);
+                elapsedTimeLabel->setColour(juce::Label::ColourIds::textColourId, defaultColour);
             }
             else
             {
@@ -494,8 +494,8 @@ void KeyMappedPlayer::setPlayerColours(juce::Colour c)
             currentColour = c;
         else
             currentColour = defaultColour;
-        elapsedTimeLabel->setColour(juce::Label::ColourIds::textColourId, currentColour);
-        nameLabel->setColour(juce::Label::ColourIds::textColourId, currentColour);
+        elapsedTimeLabel->setColour(juce::Label::ColourIds::textColourId, defaultColour);
+        nameLabel->setColour(juce::Label::ColourIds::textColourId, defaultColour);
         colourChangedBroadcaster->sendChangeMessage();
         repaint();
     }
