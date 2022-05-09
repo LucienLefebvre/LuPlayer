@@ -18,6 +18,12 @@
 #include "../BottomComponent/ClipEditor.h"
 #include "../Settings/KeyMapper.h"
 #include "TextEditorTab.h"
+
+#if RFBUILD
+#include "../RF/DataBaseBrowser.h"
+#include "../RF/DistantDataBaseBrowser.h"
+#include "../RF/DataBaseImport.h"
+#endif
 //==============================================================================
 /*
 */
@@ -49,6 +55,12 @@ public:
     juce::MixerAudioSource myMixer;
 
     juce::ChangeBroadcaster* cuePlay;
+
+#if RFBUILD
+    DataBaseBrowser dbBrowser;
+    DataBaseImport dbImport;
+    DistantDataBaseBrowser distantDbBrowser;
+#endif
 
 private:
     void changeListenerCallback(juce::ChangeBroadcaster* source);

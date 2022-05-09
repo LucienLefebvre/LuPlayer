@@ -17,8 +17,6 @@ class FocusAwareTextEditor : public juce::TextEditor
 public :
     FocusAwareTextEditor() = default;
 
-
-
     void parentHierarchyChanged() override
     {
         if (getParentComponent())
@@ -33,7 +31,7 @@ public :
 
     void mouseDown(const juce::MouseEvent& e) override
     {
-        if (getScreenBounds().contains(e.getScreenPosition()))
+        if (getScreenBounds().contains(e.getMouseDownScreenPosition()))
         {
             // Delegate mouse clicks inside the editor to the TextEditor
             // class so as to not break its functionality.
@@ -46,6 +44,14 @@ public :
         }
     }
 
+    void mouseDrag(const juce::MouseEvent& e) override
+    {
+        if (getScreenBounds().contains(e.getMouseDownScreenPosition()))
+        {
+            juce::TextEditor::mouseDrag(e);
+            textFocusGainedBroadcaster->sendChangeMessage();
+        }
+    }
     void escapePressed() override
     {
         textFocusLostBroadcaster->sendChangeMessage();

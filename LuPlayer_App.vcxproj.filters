@@ -2,6 +2,15 @@
 
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="LuPlayer\RF\nanodbc-master\nanodbc">
+      <UniqueIdentifier>{4C7D778A-6A56-9128-9149-19516664618C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuPlayer\RF\nanodbc-master">
+      <UniqueIdentifier>{AD5DA287-F575-A520-D125-DBA4FA903D65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuPlayer\RF">
+      <UniqueIdentifier>{4C576CE3-EC3F-0032-F533-6BF9A49155EC}</UniqueIdentifier>
+    </Filter>
     <Filter Include="LuPlayer\Others">
       <UniqueIdentifier>{2FFD29F7-86F5-E2EA-C1AE-799A2932D6FA}</UniqueIdentifier>
     </Filter>
@@ -487,6 +496,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\RF\nanodbc-master\nanodbc\nanodbc.cpp">
+      <Filter>LuPlayer\RF\nanodbc-master\nanodbc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RF\DataBaseBrowser.cpp">
+      <Filter>LuPlayer\RF</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RF\DataBaseImport.cpp">
+      <Filter>LuPlayer\RF</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RF\DistantDataBaseBrowser.cpp">
+      <Filter>LuPlayer\RF</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Main.cpp">
       <Filter>LuPlayer\Source</Filter>
     </ClCompile>
@@ -2757,6 +2778,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\RF\nanodbc-master\nanodbc\nanodbc.h">
+      <Filter>LuPlayer\RF\nanodbc-master\nanodbc</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RF\DataBaseBrowser.h">
+      <Filter>LuPlayer\RF</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RF\DataBaseImport.h">
+      <Filter>LuPlayer\RF</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RF\DistantDataBaseBrowser.h">
+      <Filter>LuPlayer\RF</Filter>
+    </ClInclude>
     <ClInclude Include="Source\MainComponent.h">
       <Filter>LuPlayer\Source</Filter>
     </ClInclude>
@@ -5336,6 +5369,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Source\RF\sqlconnection.txt">
+      <Filter>LuPlayer\RF</Filter>
+    </None>
     <None Include="icon.png">
       <Filter>LuPlayer\Others</Filter>
     </None>
