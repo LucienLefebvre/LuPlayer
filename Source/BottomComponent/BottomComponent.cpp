@@ -47,6 +47,7 @@ BottomComponent::BottomComponent()
     myMixer.addInputSource(&dbBrowser.resampledSource, false);
     myMixer.addInputSource(&dbImport.resampledSource, false);
     myMixer.addInputSource(&distantDbBrowser.resampledSource, false);    
+    dbBrowser.cuePlay->addChangeListener(this);
     setCurrentTabIndex(5);
 #endif
 }
@@ -68,7 +69,7 @@ void BottomComponent::resized()
     recorderComponent.setBounds(0, 0, getWidth(), getHeight() - 25);
     textEditor.setBounds(0, 0, getWidth(), getHeight() - 30);
     TabbedComponent::resized();
-    getTabbedButtonBar().setBounds(0, 0, getWidth(), 25);
+    getTabbedButtonBar().setBounds(0, 0, getWidth(), tabBarHeight);
 }
 
 void BottomComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
@@ -77,6 +78,10 @@ void BottomComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRa
     myMixer.prepareToPlay(samplesPerBlockExpected, sampleRate);
     recorderComponent.prepareToPlay(samplesPerBlockExpected, sampleRate);
     clipEditor.prepareToPlay(samplesPerBlockExpected, sampleRate);
+
+#if RFBUILD
+    dbBrowser.prepareToPlay(samplesPerBlockExpected, sampleRate);
+#endif
 }
 
 void BottomComponent::tabSelected()
@@ -101,7 +106,17 @@ void BottomComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     else if (source == audioPlaybackDemo.cuePlay)
     {
         cuePlay->sendChangeMessage();
+#if RFBUILD
+        dbBrowser.transport.stop();
+#endif
     }
+#if RFBUILD
+    else if (source == dbBrowser.cuePlay)
+    {
+        audioPlaybackDemo.transportSource.stop();
+        cuePlay->sendChangeMessage();
+    }
+#endif
 }
 
 void BottomComponent::currentTabChanged(int newCurrentTabIndex, const juce::String& newCurrentTabName)
@@ -112,6 +127,9 @@ void BottomComponent::currentTabChanged(int newCurrentTabIndex, const juce::Stri
 void BottomComponent::stopCue() //stop cues on this panel when a cue is launched on the soundplayer
 {
     audioPlaybackDemo.transportSource.stop();
+#if RFBUILD
+    dbBrowser.transport.stop();
+#endif
 }
 
 
@@ -136,6 +154,10 @@ void BottomComponent::spaceBarPressed()
      clipEditor.spaceBarPressed();
     else if (selectedTab.equalsIgnoreCase("Recorder"))
         recorderComponent.cueButtonClicked();
+#if RFBUILD
+    else if (selectedTab.equalsIgnoreCase("Netia DataBase"))
+        dbBrowser.play();
+#endif
 }
 
 void BottomComponent::setOrDeleteStart(bool setOrDelete)
