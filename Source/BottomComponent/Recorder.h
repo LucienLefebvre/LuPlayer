@@ -14,6 +14,8 @@
 #include "../SoundBoard/Player.h"
 #include <Ebu128LoudnessMeter.h>
 #include "../Settings/KeyMapper.h"
+#include "../Settings/Settings.h"
+
 #include <algorithm>
 //==============================================================================
 /*

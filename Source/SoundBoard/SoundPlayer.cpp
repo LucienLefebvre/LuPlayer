@@ -10,7 +10,8 @@
 
 #include <JuceHeader.h>
 #include "SoundPlayer.h"
-#include "../Settings/Settings.h"
+
+using namespace std;
 
 //==============================================================================
 SoundPlayer::SoundPlayer(SoundPlayer::Mode m, Settings* s)
@@ -246,14 +247,14 @@ void SoundPlayer::resized()
         if (Settings::audioOutputMode == 1 || Settings::audioOutputMode == 3)
         {
             int availableHeight = getHeight() - timeLabelHeight - stopWatchHeight;
-            levelMeterHeight = std::min(getHeight() - playersStartHeightPosition - cuelevelMeterMinimumHeight - timeLabelHeight - stopWatchHeight,
+            levelMeterHeight = min(getHeight() - playersStartHeightPosition - cuelevelMeterMinimumHeight - timeLabelHeight - stopWatchHeight,
                 levelMeterMaximumHeight);
             levelMeterHeight = availableHeight / 2;
             meter.setBounds(cueMeterXStart, getHeight() - levelMeterHeight, 80,
-                std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
+                min(getHeight() - playersStartHeightPosition, levelMeterHeight));
             loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7,
                 getHeight() - levelMeterHeight, 25, levelMeterHeight);
-            cuelevelMeterHeight = std::min(getHeight() - playersStartHeightPosition - levelMeterHeight,
+            cuelevelMeterHeight = min(getHeight() - playersStartHeightPosition - levelMeterHeight,
                 cuelevelMeterMaximumHeight);
             int cueMeterYStart = meter.getPosition().getY() - levelMeterHeight;
             cuemeter.setBounds(cueMeterXStart, cueMeterYStart, 80, levelMeterHeight);
@@ -263,10 +264,10 @@ void SoundPlayer::resized()
         }
         else if (Settings::audioOutputMode == 2)
         {
-            levelMeterHeight = std::min(getHeight() - playersStartHeightPosition - timeLabelHeight - stopWatchHeight, levelMeterMaximumHeight);
+            levelMeterHeight = min(getHeight() - playersStartHeightPosition - timeLabelHeight - stopWatchHeight, levelMeterMaximumHeight);
 
             meter.setBounds(playlistViewport.getWidth(), getHeight() - levelMeterHeight,
-                80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));        
+                80, min(getHeight() - playersStartHeightPosition, levelMeterHeight));        
 
             loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7,
                 getHeight() - levelMeterHeight, 25, levelMeterHeight);
@@ -280,7 +281,7 @@ void SoundPlayer::resized()
     {
         levelMeterHeight = getHeight() - timeLabelHeight - stopWatchHeight;
         meter.setBounds(getWidth() - meterWidth - loudnessBarWidth - 7, getHeight() - levelMeterHeight,
-            meterWidth, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
+            meterWidth, min(getHeight() - playersStartHeightPosition, levelMeterHeight));
         loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 5,
             getHeight() - levelMeterHeight, loudnessBarWidth, levelMeterHeight);
         keyMappedSoundboard->setBounds(0, 15, getWidth() - (getWidth() - meter.getX()), getHeight());
@@ -575,9 +576,9 @@ void SoundPlayer::metersInitialize()
     int cueMeterXStart = playlistViewport.getWidth();
     if (Settings::audioOutputMode == 1 || Settings::audioOutputMode == 3)
     {
-        levelMeterHeight = std::min(getHeight() - playersStartHeightPosition - cuelevelMeterMinimumHeight, levelMeterMaximumHeight);
-        meter.setBounds(cueMeterXStart, getHeight() - levelMeterHeight, 80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
-        cuelevelMeterHeight = std::min(getHeight() - playersStartHeightPosition - levelMeterHeight, cuelevelMeterMaximumHeight);
+        levelMeterHeight = min(getHeight() - playersStartHeightPosition - cuelevelMeterMinimumHeight, levelMeterMaximumHeight);
+        meter.setBounds(cueMeterXStart, getHeight() - levelMeterHeight, 80, min(getHeight() - playersStartHeightPosition, levelMeterHeight));
+        cuelevelMeterHeight = min(getHeight() - playersStartHeightPosition - levelMeterHeight, cuelevelMeterMaximumHeight);
         int cueMeterYStart = meter.getPosition().getY() - cuelevelMeterHeight;
         cuemeter.setBounds(cueMeterXStart, cueMeterYStart, 80, cuelevelMeterHeight);
         if (soundPlayerMode == SoundPlayer::Mode::KeyMap)
@@ -587,8 +588,8 @@ void SoundPlayer::metersInitialize()
     }
     else if (Settings::audioOutputMode == 2)
     {
-        levelMeterHeight = std::min(getHeight() - playersStartHeightPosition, levelMeterMaximumHeight);
-        meter.setBounds(playlistViewport.getWidth(), getHeight() - levelMeterHeight, 80, std::min(getHeight() - playersStartHeightPosition, levelMeterHeight));
+        levelMeterHeight = min(getHeight() - playersStartHeightPosition, levelMeterMaximumHeight);
+        meter.setBounds(playlistViewport.getWidth(), getHeight() - levelMeterHeight, 80, min(getHeight() - playersStartHeightPosition, levelMeterHeight));
     }
 }
 

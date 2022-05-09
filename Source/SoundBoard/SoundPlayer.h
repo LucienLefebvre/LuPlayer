@@ -11,14 +11,12 @@
 #pragma once
 
 #include <JuceHeader.h>
+
 #include "Player.h"
 #include "Playlist.h"
+
 #include "../Settings/Settings.h"
-#include <string>
-#include <iostream>
 #include <ff_meters\ff_meters.h>
-#include <memory>
-#include <math.h>
 #include <Ebu128LoudnessMeter.h>
 #include "../Others/LoudnessBar.h"
 #include "../Mixer/Meter.h"
@@ -27,6 +25,7 @@
 #include "../Settings/MidiMapper.h"
 #include "../Mixer/Meter.h"
 #include "../Others/StopWatch.h"
+
 //==============================================================================
 class SoundPlayer : public juce::Component,
                     public juce::ChangeListener,

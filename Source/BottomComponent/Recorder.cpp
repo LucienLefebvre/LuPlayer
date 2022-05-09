@@ -10,7 +10,9 @@
 #define JUCE_USE_LAME_AUDIO_FORMAT 1
 #include <JuceHeader.h>
 #include "Recorder.h"
-#include "../Settings/Settings.h"
+
+using namespace std;
+
 //==============================================================================
 Recorder::Recorder() : editingThumbnailCache(5), editingThumbnail(521, editingFormatManager, editingThumbnailCache)
 
@@ -149,7 +151,7 @@ void Recorder::paint (juce::Graphics& g)
             g.fillRect(thumbnailBounds.getWidth() + leftControlWidth, 0, 4, getHeight());
 
             //DRAW THUMBNAIL
-            thumbnail.drawChannels(g, thumbnailBounds, std::max(thumbnail.getTotalLength() - 10, (double)0), thumbnail.getTotalLength(), 1);
+            thumbnail.drawChannels(g, thumbnailBounds, max(thumbnail.getTotalLength() - 10, (double)0), thumbnail.getTotalLength(), 1);
 
             //DRAW LU METER
             if (Settings::audioOutputMode == 2 || Settings::audioOutputMode == 3)

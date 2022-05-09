@@ -13,16 +13,6 @@
 #pragma once
 #include <JuceHeader.h>
 #include "Player.h"
-#include "../Settings/Settings.h"
-
-#include "Windows.h"
-
-#ifdef UNICODE
-typedef LPWSTR LPTSTR;
-#else
-typedef LPSTR LPTSTR;
-#endif
-//#include <string>
 
 //==============================================================================
 Player::Player(int index, Settings* s)
@@ -1306,6 +1296,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         convertingBar->setVisible(false);
         loadFile(convertedFilePath, true);
         ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
+        conversionFinishedBroadcaster->sendChangeMessage();
         soundEditedBroadcaster->sendChangeMessage();
     }
     else if (source == denoiser.denoiseDoneBroadcaster)
@@ -1353,11 +1344,16 @@ void Player::transportStateChanged(TransportState newState)
         case Starting:
             playerInfoChangedBroadcaster->sendChangeMessage();
             playBroadcaster->sendActionMessage("Play");
+
+            if (transport.getLengthInSeconds() < 6)
+                remainingTimeBroadcaster->sendChangeMessage();
+
             transport.start();
             playButton.setButtonText("Stop");
             openButton.setEnabled(false);
             deleteButton.setEnabled(false);
             soundName.setColour(soundName.textColourId, playerColour);
+
             if (Settings::viewLastPlayedSound)
                 playerLaunchedBroadcaster->sendChangeMessage();
 
@@ -1724,6 +1720,7 @@ void Player::verifyAudioFileFormat(const juce::String& path)
         ffmpegThread.conversionEndedBroadcaster->addChangeListener(this);
         ffmpegThread.setFilePath(path);
         ffmpegThread.shouldMakeProgressFile(false);
+        conversionLaunchedBroadcaster->sendChangeMessage();
         ffmpegThread.startThread();
         convertingBar->setVisible(true);
         convertingBar->setTextToDisplay("Converting...");

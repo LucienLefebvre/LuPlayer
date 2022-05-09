@@ -10,11 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include <stdio.h>
-#include <string>
-#include "Windows.h"
-#include "helpers.h"
-#include <regex>
+
 #include "../Settings/Settings.h"
 #include "../External/LUFSMeter/Ebu128LoudnessMeter.h"
 //==============================================================================
@@ -60,7 +56,7 @@ public:
             }
             integratedLoudness = loudnessMeter.getIntegratedLoudness();
             if (reader->numChannels == 1)
-                integratedLoudness -= 3;
+                integratedLoudness += 3;
         }
 
         loudnessCalculatedBroadcaster->sendChangeMessage();

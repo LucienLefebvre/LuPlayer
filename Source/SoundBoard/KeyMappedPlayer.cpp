@@ -200,6 +200,8 @@ void KeyMappedPlayer::setPlayer(Player* p)
     soundPlayer->enveloppePathChangedBroadcaster->addChangeListener(this);
     soundPlayer->normalizationLaunchedBroadcaster->addChangeListener(this);
     soundPlayer->normalizationFinishedBroadcaster->addChangeListener(this);
+    soundPlayer->conversionLaunchedBroadcaster->addChangeListener(this);
+    soundPlayer->conversionFinishedBroadcaster->addChangeListener(this);
 
     thumbnail = &soundPlayer->getAudioThumbnail();
     playThumbnail = &soundPlayer->getPlayThumbnail();
@@ -289,6 +291,15 @@ void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
             busyBar->setVisible(true);
         }
         else if (source == soundPlayer->normalizationFinishedBroadcaster.get())
+        {
+            busyBar->setVisible(false);
+        }
+        else if (source == soundPlayer->conversionLaunchedBroadcaster.get())
+        {
+            busyBar->setTextToDisplay("Converting...");
+            busyBar->setVisible(true);
+        }
+        else if (source == soundPlayer->conversionFinishedBroadcaster.get())
         {
             busyBar->setVisible(false);
         }
@@ -481,7 +492,8 @@ void KeyMappedPlayer::timerCallback(int timerID)
 
         break;
     case 1:
-        scrollNameLabel();
+        if (nameLabelTextTotalWidth > getWidth())
+            scrollNameLabel();
         break;
     }
 }

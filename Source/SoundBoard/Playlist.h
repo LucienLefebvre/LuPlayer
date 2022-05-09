@@ -9,14 +9,14 @@
 */
 
 #pragma once
-
 #include <JuceHeader.h>
-#include <string>
-#include <iostream>
+
 #include "Player.h"
 #include "../Mixer/Meter.h"
 #include "../Settings/Settings.h"
 #include "../Settings/MidiMapper.h"
+
+#include <algorithm>
 //==============================================================================
 
 class Playlist  : public juce::Component,

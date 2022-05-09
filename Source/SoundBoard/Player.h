@@ -9,19 +9,8 @@
 */
 
 #pragma once
-
 #include <JuceHeader.h>
-#include <string>
-#include <iostream>
-#include <regex>
-#include <cstdio>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <array>
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include "Windows.h"
+
 #include "../Others/PlayHead.h"
 #include "../Others/R128IntegratedThread.h"
 #include "../Mixer/FilterProcessor.h"
@@ -31,10 +20,8 @@
 #include "../Others/ffmpegConvert.h"
 #include "../Others/convertObject.h"
 #include "../Others/Denoiser.h"
+#include "../Settings/Settings.h"
 
-
-
-typedef char* LPSTR;
 //==============================================================================
 class Player : public juce::Component,
     private juce::ChangeListener,
@@ -322,6 +309,8 @@ public:
     std::unique_ptr<juce::ChangeBroadcaster> playerLaunchedBroadcaster;
     std::unique_ptr<juce::ChangeBroadcaster> normalizationLaunchedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
     std::unique_ptr<juce::ChangeBroadcaster> normalizationFinishedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
+    std::unique_ptr<juce::ChangeBroadcaster> conversionLaunchedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
+    std::unique_ptr<juce::ChangeBroadcaster> conversionFinishedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 
     foleys::LevelMeterSource meterSource;
     foleys::LevelMeterSource outMeterSource;

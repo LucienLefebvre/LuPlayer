@@ -12,7 +12,7 @@
 #include <JuceHeader.h>
 #include <stdio.h>
 #include <string>
-#include "Windows.h"
+//#include "Windows.h"
 #include "helpers.h"
 #include <regex>
 #include "../Settings/Settings.h"

@@ -7,11 +7,12 @@
 
   ==============================================================================
 */
-//TODO résoudre bug glisser en haut
 
 #include <JuceHeader.h>
 #include "Playlist.h"
-#include "../Settings/Settings.h"
+
+using namespace std;
+
 //==============================================================================
 Playlist::Playlist(int splaylistType, Settings* s)
 {
@@ -398,12 +399,12 @@ void Playlist::fader1Stop(bool stoppedByFader)
     {
         if (fader2IsPlaying == false)
         {
-            fader2Player = std::max(fader1Player, fader2Player);
-            fader1Player = std::max(fader1Player, fader2Player);
+            fader2Player = max(fader1Player, fader2Player);
+            fader1Player = max(fader1Player, fader2Player);
         }
         else if (fader2IsPlaying == true)
         {
-            fader1Player = std::max(fader1Player, fader2Player) + 1;
+            fader1Player = max(fader1Player, fader2Player) + 1;
         }
     }
     else if (fader2IsPlaying == false)
@@ -411,7 +412,7 @@ void Playlist::fader1Stop(bool stoppedByFader)
         fader2Player--;
         if (fader1StopTime - fader2StartTime < Settings::faderTempTime)
         {
-            fader2Player = std::max(fader2Player, fader1Player);
+            fader2Player = max(fader2Player, fader1Player);
         }
     }
     updateNextPlayer();
@@ -444,12 +445,12 @@ void Playlist::fader2Stop(bool stoppedByFader)
     {
         if (fader1IsPlaying == false)
         {
-            fader1Player = std::max(fader2Player, fader1Player);
-            fader2Player = std::max(fader2Player, fader1Player);
+            fader1Player = max(fader2Player, fader1Player);
+            fader2Player = max(fader2Player, fader1Player);
         }
         else if (fader1IsPlaying == true)
         {
-            fader2Player = std::max(fader2Player, fader1Player) + 1;
+            fader2Player = max(fader2Player, fader1Player) + 1;
         }
     }
     else if (fader1IsPlaying == false)
@@ -457,7 +458,7 @@ void Playlist::fader2Stop(bool stoppedByFader)
         fader1Player--;
         if (fader2StopTime - fader1StartTime < Settings::faderTempTime)
         {
-            fader1Player = std::max(fader2Player, fader1Player);
+            fader1Player = max(fader2Player, fader1Player);
         }
     }
     updateNextPlayer();
@@ -772,7 +773,7 @@ void Playlist::updateNextPlayer()
     if (players[fader2Player] != nullptr)
         fader2Name.setValue(players[fader2Player]->soundName.getText());
 
-    minimumPlayer = std::min(fader1Player, fader2Player);
+    minimumPlayer = min(fader1Player, fader2Player);
     if (playlistType == 0)
     {
         if (fader1Player == fader2Player)
@@ -780,7 +781,7 @@ void Playlist::updateNextPlayer()
         else if (fader1IsPlaying && fader2IsPlaying)
             nextPlayer = -1;
         else if (fader1IsPlaying || fader2IsPlaying)
-            nextPlayer = std::max(fader1Player, fader2Player);
+            nextPlayer = max(fader1Player, fader2Player);
 
         for (auto i = 0; i < playerNumber; i++)
         {
@@ -829,7 +830,7 @@ void Playlist::playersPreviousPositionClicked()
     {
         if ((fader1IsPlaying == 0) && (fader2IsPlaying == 0))
         {
-            nextPlayer = (std::min(fader1Player, fader2Player) - 1);
+            nextPlayer = (min(fader1Player, fader2Player) - 1);
             fader1Player = fader2Player = nextPlayer;
         }
         else if ((fader2IsPlaying == 0) && (fader2Player > (fader1Player + 1)))
@@ -1797,7 +1798,7 @@ void Playlist::assignPlaylistFader(int playerToAssign)
         fader2Player = playerToAssign;
         updateNextPlayer();
     }
-    else if (playerToAssign > std::min(fader1Player, fader2Player))
+    else if (playerToAssign > min(fader1Player, fader2Player))
     {
         if (fader1IsPlaying && !fader2IsPlaying)
             fader2Player = playerToAssign;

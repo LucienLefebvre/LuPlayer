@@ -12,9 +12,9 @@
 #include "convertObject.h"
 #include <stdio.h>
 #include <string>
-#include "Windows.h"
+//#include "Windows.h"
 #include "helpers.h"
-#include <regex>
+
 //==============================================================================
 convertObject::convertObject(juce::String filePath, int lenghtInSeconds, int index) : id(index)
 {
