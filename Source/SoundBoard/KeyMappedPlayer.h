@@ -42,6 +42,8 @@ public:
 
     void updatePlayerInfo();
 
+    void updateInOutPoints();
+
     void shortcutKeyPressed(bool commandDown = false);
 
     void startOrStop();
@@ -86,6 +88,7 @@ private:
     std::unique_ptr<juce::TextButton> editButton;
     std::unique_ptr<juce::Label> dBLabel;
     std::unique_ptr<PlayHead> playHead;
+    std::unique_ptr<PlayHead> outPlayHead;
     std::unique_ptr<juce::ProgressBar> busyBar;
 
     int editButtonWidth = 0;

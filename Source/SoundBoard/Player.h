@@ -17,10 +17,12 @@
 #include "../Mixer/CompProcessor.h"
 #include "../Mixer/Meter.h"
 #include "../Others/gainThumbnail.h"
-#include "../Others/ffmpegConvert.h"
-#include "../Others/convertObject.h"
-#include "../Others/Denoiser.h"
 #include "../Settings/Settings.h"
+#if RFBUILD
+#include "../RF/Denoiser.h"
+#include "../RF/ffmpegConvert.h"
+#include "../RF/convertObject.h"
+#endif
 
 //==============================================================================
 class Player : public juce::Component,
@@ -166,7 +168,6 @@ public:
 
     void setEditedPlayer(bool isEdited);
 
-    void denoiseButtonClicked();
     void killThreads();
     bool isPlayerPlaying();
 
@@ -209,8 +210,12 @@ public:
     void updatePlayHeadPosition();
     void updateInOutMarkPosition();
 
+#if RFBUILD
+    void denoiseButtonClicked();
     void setDenoisedFile(bool loadDenoisedFile);
     bool getDenoisedFileLoaded();
+    std::string FFmpegPath;
+#endif
 
     void setPlayerColour(juce::Colour c, bool sendMessage = true);
     juce::Colour getPlayerColour();
@@ -258,7 +263,6 @@ public:
 
     juce::Value draggedPlayer;
 
-    std::string FFmpegPath;
     std::string convertedFilesPath;
     std::string ExiftoolPath;
     float skewFactor;
@@ -436,7 +440,6 @@ private:
     juce::TextButton envButton;
     juce::TextButton fxButton;
     juce::TextButton normButton;
-    juce::TextButton denoiseButton;
 
     juce::TextButton openButton     { "open" };
     juce::TextButton playButton     { "Play" };
@@ -498,17 +501,20 @@ private:
     Meter outputMeter                                       { Meter::Mode::Stereo };
     Meter compMeter                                         { Meter::Mode::Stereo_ReductionGain };
 
-    ffmpegConvert ffmpegThread{ "convertThread" };
+
     std::unique_ptr<juce::ProgressBar> convertingBar;
     double progress = -1.0;
 
     bool fxEnabled = false;
     bool isEdited = false;
 
+#if RFBUILD
+    ffmpegConvert ffmpegThread{ "convertThread" };
     Denoiser denoiser;
     std::string denoisedFile;
     std::unique_ptr<juce::DialogWindow> denoiseWindow;
     bool denoisedFileLoaded = false;
+#endif
 
     juce::Path enveloppePath;
     bool enveloppeEnabled = false;

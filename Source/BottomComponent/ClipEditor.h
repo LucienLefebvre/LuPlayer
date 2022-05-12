@@ -114,12 +114,15 @@ public:
         normButton->setButtonText("Normalise");
         enveloppeButton->addListener(this);
         normButton->onClick = [this] {if (editedPlayer != nullptr) editedPlayer->normButtonClicked(); };
+
+#if RFBUILD
         //Denoise button
         denoiseButton.reset(new juce::TextButton());
         addAndMakeVisible(denoiseButton.get());
         denoiseButton->setButtonText("Denoiser");
         denoiseButton->addListener(this);
         denoiseButton->onClick = [this] {denoiseButtonClicked(); };
+#endif
         //Open Button
         openButton.reset(new juce::TextButton());
         addAndMakeVisible(openButton.get());
@@ -184,9 +187,11 @@ public:
         enveloppeButton->setBounds(deleteButton->getRight() + 200, 0, barButtonsWidth, toolBarHeight);
         fxButton->setBounds(enveloppeButton->getRight() + spacer, 0, barButtonsWidth, toolBarHeight);
         normButton->setBounds(fxButton->getRight() + spacer, 0, barButtonsWidth, toolBarHeight);
+#if RFBUILD
         denoiseButton->setBounds(normButton->getRight() + spacer, 0, barButtonsWidth, toolBarHeight);
+#endif
 
-        playModeLabel->setBounds(denoiseButton->getRight() + 100, 0, 200, toolBarHeight);
+        playModeLabel->setBounds(normButton->getRight() + 200, 0, 200, toolBarHeight);
         playModeSelector->setBounds(playModeLabel->getRight() + spacer, 0, 200, toolBarHeight);
 
         inOutButtonWidth = getWidth() / 24;
@@ -275,11 +280,9 @@ public:
     {
         if (editedPlayer != nullptr)
         {
-
             //Name
             nameLabel->setText(editedPlayer->getName(), juce::NotificationType::dontSendNotification);
             
-
             //Trim
             trimVolumeSlider->setValue(editedPlayer->getTrimVolume());
 
@@ -328,7 +331,6 @@ public:
                     getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
             }
 
-
             //FX
             if (editedPlayer->isFxEnabled())
             {
@@ -341,6 +343,7 @@ public:
                     getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
             }
 
+#if RFBUILD
             //Denoiser
             if (editedPlayer->getDenoisedFileLoaded())
             {
@@ -351,6 +354,7 @@ public:
                 denoiseButton->setColour(juce::TextButton::ColourIds::buttonColourId,
                     getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
             }
+#endif
 
             //loop
             loopButton->setEnabled(editedPlayer->isCart ? true : false);
@@ -475,6 +479,7 @@ public:
         rightClickDown = false;
     }
 
+#if RFBUILD
     void denoiseButtonClicked()
     {
         if (editedPlayer != nullptr)
@@ -489,6 +494,7 @@ public:
         }
         rightClickDown = false;
     }
+#endif
 
     void colourButtonClicked()
     {
@@ -520,9 +526,11 @@ public:
         enveloppeButton->setEnabled(isEnabled);
         fxButton->setEnabled(isEnabled);
         normButton->setEnabled(isEnabled);
-        denoiseButton->setEnabled(isEnabled);
         openButton->setEnabled(isEnabled);
         deleteButton->setEnabled(isEnabled);
+#if RFBUILD
+        denoiseButton->setEnabled(isEnabled);
+#endif
     }
 
     void setNullPlayer()
@@ -536,12 +544,14 @@ public:
         cueTimeLabel->setText("", juce::NotificationType::dontSendNotification);
         trimVolumeSlider->setValue(0.0);
         enveloppeEditor.setNullPlayer();
-        denoiseButton->setColour(juce::TextButton::ColourIds::buttonColourId,
-            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         enveloppeButton->setColour(juce::TextButton::ColourIds::buttonColourId,
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         fxButton->setColour(juce::TextButton::ColourIds::buttonColourId,
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+#if RFBUILD
+        denoiseButton->setColour(juce::TextButton::ColourIds::buttonColourId,
+            getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+#endif
     }
 
     void setStart()
@@ -621,12 +631,14 @@ public:
     std::unique_ptr<juce::TextButton> enveloppeButton;
     std::unique_ptr<juce::TextButton> fxButton;
     std::unique_ptr<juce::TextButton> normButton;
-    std::unique_ptr<juce::TextButton> denoiseButton;
     std::unique_ptr<juce::TextButton> openButton;
     std::unique_ptr<juce::TextButton> deleteButton;
     std::unique_ptr<juce::TextButton> colourButton;
     std::unique_ptr<juce::Label> playModeLabel;
     std::unique_ptr<juce::ComboBox> playModeSelector;
+#if RFBUILD
+    std::unique_ptr<juce::TextButton> denoiseButton;
+#endif
 
     std::unique_ptr<Meter> meter;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipEditor)

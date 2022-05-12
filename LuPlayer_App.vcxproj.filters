@@ -499,10 +499,16 @@
     <ClCompile Include="Source\RF\nanodbc-master\nanodbc\nanodbc.cpp">
       <Filter>LuPlayer\RF\nanodbc-master\nanodbc</Filter>
     </ClCompile>
+    <ClCompile Include="Source\RF\convertObject.cpp">
+      <Filter>LuPlayer\RF</Filter>
+    </ClCompile>
     <ClCompile Include="Source\RF\DataBaseBrowser.cpp">
       <Filter>LuPlayer\RF</Filter>
     </ClCompile>
     <ClCompile Include="Source\RF\DataBaseImport.cpp">
+      <Filter>LuPlayer\RF</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RF\Denoiser.cpp">
       <Filter>LuPlayer\RF</Filter>
     </ClCompile>
     <ClCompile Include="Source\RF\DistantDataBaseBrowser.cpp">
@@ -537,12 +543,6 @@
     </ClCompile>
     <ClCompile Include="Source\Settings\Settings.cpp">
       <Filter>LuPlayer\Source\Settings</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Others\convertObject.cpp">
-      <Filter>LuPlayer\Source\Others</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Others\Denoiser.cpp">
-      <Filter>LuPlayer\Source\Others</Filter>
     </ClCompile>
     <ClCompile Include="Source\Others\gainThumbnail.cpp">
       <Filter>LuPlayer\Source\Others</Filter>
@@ -2781,13 +2781,25 @@
     <ClInclude Include="Source\RF\nanodbc-master\nanodbc\nanodbc.h">
       <Filter>LuPlayer\RF\nanodbc-master\nanodbc</Filter>
     </ClInclude>
+    <ClInclude Include="Source\RF\convertObject.h">
+      <Filter>LuPlayer\RF</Filter>
+    </ClInclude>
     <ClInclude Include="Source\RF\DataBaseBrowser.h">
       <Filter>LuPlayer\RF</Filter>
     </ClInclude>
     <ClInclude Include="Source\RF\DataBaseImport.h">
       <Filter>LuPlayer\RF</Filter>
     </ClInclude>
+    <ClInclude Include="Source\RF\Denoiser.h">
+      <Filter>LuPlayer\RF</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RF\DenoiseThread.h">
+      <Filter>LuPlayer\RF</Filter>
+    </ClInclude>
     <ClInclude Include="Source\RF\DistantDataBaseBrowser.h">
+      <Filter>LuPlayer\RF</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\RF\ffmpegConvert.h">
       <Filter>LuPlayer\RF</Filter>
     </ClInclude>
     <ClInclude Include="Source\MainComponent.h">
@@ -2817,25 +2829,7 @@
     <ClInclude Include="Source\Settings\Settings.h">
       <Filter>LuPlayer\Source\Settings</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Others\convertObject.h">
-      <Filter>LuPlayer\Source\Others</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Others\Denoiser.h">
-      <Filter>LuPlayer\Source\Others</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Others\DenoiseThread.h">
-      <Filter>LuPlayer\Source\Others</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Others\ffmpegConvert.h">
-      <Filter>LuPlayer\Source\Others</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Others\gainThumbnail.h">
-      <Filter>LuPlayer\Source\Others</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Others\helpers.h">
-      <Filter>LuPlayer\Source\Others</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Others\helpersOLD.h">
       <Filter>LuPlayer\Source\Others</Filter>
     </ClInclude>
     <ClInclude Include="Source\Others\LoudnessBar.h">

@@ -88,14 +88,6 @@ Player::Player(int index, Settings* s)
      normButton.addListener(this);
      normButton.setMouseClickGrabsKeyboardFocus(false);
 
-     addAndMakeVisible(&denoiseButton);
-     denoiseButton.setButtonText("DNS");
-     denoiseButton.onClick = [this] {denoiseButtonClicked(); };
-     denoiseButton.addListener(this);
-     denoiser.denoiseDoneBroadcaster->addChangeListener(this);
-     denoiser.processStartedBroadcaster->addChangeListener(this);
-     denoiseButton.setMouseClickGrabsKeyboardFocus(false);
-
      stopButton.onClick = [this] { stopButtonClicked(); };
      stopButton.setBounds(rightControlsStart + playStopButtonWidth, 0, playStopButtonWidth, 39);
      stopButton.setEnabled(false);
@@ -313,10 +305,7 @@ Player::~Player()
 {
     playerDeletedBroadcaster->sendSynchronousChangeMessage();
     killThreads();
-    denoiser.denoiseDoneBroadcaster->removeChangeListener(this);
-    denoiser.processStartedBroadcaster->removeChangeListener(this);
     luThread.loudnessCalculatedBroadcaster->removeChangeListener(this);
-    ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
     delete playBroadcaster;
     delete cueBroadcaster;
     delete draggedBroadcaster;
@@ -333,6 +322,11 @@ Player::~Player()
     volumeSlider.removeListener(this);
     cueButton.removeListener(this);
     Settings::sampleRateValue.removeListener(this);
+#if RFBUILD
+    denoiser.denoiseDoneBroadcaster->removeChangeListener(this);
+    denoiser.processStartedBroadcaster->removeChangeListener(this);
+    ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
+#endif
 }
 
 void Player::paint (juce::Graphics& g)
@@ -946,8 +940,10 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
         bufferToFill.buffer->addFrom(0, 0, *playerBuffer, 0, 0, playerBuffer->getNumSamples());
         bufferToFill.buffer->addFrom(1, 0, *playerBuffer, 1, 0, playerBuffer->getNumSamples());
 
+#if RFBUILD
         if (denoiser.isVisible())
             denoiser.transport.getNextAudioBlock(cue);
+#endif
 
         cue.buffer->addFrom(0, 0, *cueBuffer, 0, 0, playerBuffer->getNumSamples());
         cue.buffer->addFrom(1, 0, *cueBuffer, 1, 0, playerBuffer->getNumSamples());
@@ -1014,6 +1010,8 @@ void Player::launch()
 {
     transport.setPosition(startTime);
     transport.start();
+    if (Settings::lauchAtZeroDB)
+        bufferGain.store(1.0);
     if (Settings::viewLastPlayedSound)
         playerLaunchedBroadcaster->sendChangeMessage();
 }
@@ -1288,6 +1286,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         soundEditedBroadcaster->sendChangeMessage();
         normalizationFinishedBroadcaster->sendChangeMessage();
     }
+#if RFBUILD
     else if (source == ffmpegThread.conversionEndedBroadcaster)
     {
         juce::FileLogger::getCurrentLogger()->writeToLog("player ffmpeg thread finished");
@@ -1296,20 +1295,6 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         loadFile(convertedFilePath, true);
         ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
         conversionFinishedBroadcaster->sendChangeMessage();
-        soundEditedBroadcaster->sendChangeMessage();
-    }
-    else if (source == denoiser.denoiseDoneBroadcaster)
-    {
-        juce::FileLogger::getCurrentLogger()->writeToLog("player denoise thread finished");
-        std::string n = newName;
-        std::string oldFilePath = loadedFilePath;
-        denoisedFile = denoiser.getDenoisedFile();
-        denoisedFileLoaded = true;
-        loadFile(denoisedFile, true);
-        setName(n);
-        loadedFilePath = oldFilePath;
-        convertingBar->setVisible(false);
-        denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
         soundEditedBroadcaster->sendChangeMessage();
     }
     else if (source == denoiser.processStartedBroadcaster)
@@ -1322,6 +1307,20 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
             convertingBar->setVisible(true);
         }
     }
+    else if (source == denoiser.denoiseDoneBroadcaster)
+    {
+        juce::FileLogger::getCurrentLogger()->writeToLog("player denoise thread finished");
+        std::string n = newName;
+        std::string oldFilePath = loadedFilePath;
+        denoisedFile = denoiser.getDenoisedFile();
+        denoisedFileLoaded = true;
+        loadFile(denoisedFile, true);
+        setName(n);
+        loadedFilePath = oldFilePath;
+        convertingBar->setVisible(false);
+        soundEditedBroadcaster->sendChangeMessage();
+}
+#endif
     playerInfoChangedBroadcaster->sendChangeMessage();
     soundEditedBroadcaster->sendChangeMessage();
 }
@@ -1712,6 +1711,7 @@ void Player::verifyAudioFileFormat(const juce::String& path)
             delete reader;
         }
     }
+#if RFBUILD
     else
     {
         juce::String correctedPath;
@@ -1723,6 +1723,7 @@ void Player::verifyAudioFileFormat(const juce::String& path)
         convertingBar->setVisible(true);
         convertingBar->setTextToDisplay("Converting...");
     }
+#endif
 }
 
 
@@ -2296,6 +2297,7 @@ juce::TextButton* Player::getfxButton()
     return &fxButton;
 }
 
+#if RFBUILD
 void Player::denoiseButtonClicked()
 {
     juce::FileLogger::getCurrentLogger()->writeToLog("player denoise button clicked");
@@ -2319,7 +2321,6 @@ void Player::denoiseButtonClicked()
         denoiser.setTransportGain(trimVolumeSlider.getValue());
         soundEditedBroadcaster->sendChangeMessage();
     }
-
 }
 
 void Player::setDenoisedFile(bool loadDenoisedFile)
@@ -2329,7 +2330,6 @@ void Player::setDenoisedFile(bool loadDenoisedFile)
     {
         std::string n = newName;
         loadFile(loadedFilePath, true);
-        denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         denoisedFileLoaded = false;
         setName(n);
     }
@@ -2340,7 +2340,6 @@ void Player::setDenoisedFile(bool loadDenoisedFile)
             std::string n = newName;
             std::string oldFilePath = loadedFilePath;
             loadFile(denoisedFile, true);
-            denoiseButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
             denoisedFileLoaded = true;
             setName(n);
             loadedFilePath = oldFilePath;
@@ -2353,6 +2352,7 @@ bool Player::getDenoisedFileLoaded()
 {
     return denoisedFileLoaded;
 }
+#endif
 
 void Player::setPlayerColour(juce::Colour c, bool sendMessage)
 {
@@ -2393,12 +2393,14 @@ juce::Colour Player::getPlayerColour()
 void Player::killThreads()
 {
     juce::FileLogger::getCurrentLogger()->writeToLog("player kill threads");
-    ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
+    luThread.killThread();
+#if RFBUILD
     denoiser.denoiseDoneBroadcaster->removeChangeListener(this);
     denoiser.processStartedBroadcaster->removeChangeListener(this);
-    luThread.killThread();
     denoiser.killThread();
+    ffmpegThread.conversionEndedBroadcaster->removeChangeListener(this);
     ffmpegThread.killThread();
+#endif
 }
 
 bool Player::isPlayerPlaying()
@@ -2450,7 +2452,7 @@ juce::String Player::getCueTimeAsString()
 
 void Player::setEnveloppePath(juce::Path& p)
 {
-    const juce::ScopedLock sl();
+    const juce::ScopedLock sl(lock);
     enveloppePath = p;
 }
 
@@ -2591,8 +2593,12 @@ juce::Path Player::createEnveloppePathFromArrays(juce::Array<float> xArray, juce
 
 bool Player::isThreadRunning()
 {
-    if (luThread.isThreadRunning() || ffmpegThread.isThreadRunning() || denoiser.thread.isThreadRunning())
+    if (luThread.isThreadRunning())
         return true;
+#if RFBUILD
+    else if (ffmpegThread.isThreadRunning())
+        return true;
+#endif
     else
         return false;
 }

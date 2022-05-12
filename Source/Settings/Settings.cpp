@@ -94,10 +94,17 @@ Settings::Settings() : settingsFile(options)
     Settings::preferedAudioDeviceName = properties.getUserSettings()->getValue("audioDeviceName");
     Settings::preferedSoundPlayerMode = properties.getUserSettings()->getValue("PreferedSoundPlayerMode").getIntValue();
 
+#if RFBUILD
     if (properties.getUserSettings()->getValue("Converted Sound Path").isEmpty())
-        Settings::convertedSoundsPath = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Sounds").getFullPathName();
+    {
+        juce::File directory = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Sounds");
+        if (directory.createDirectory())
+            Settings::convertedSoundsPath = directory.getFullPathName();
+    }
     else
         Settings::convertedSoundsPath = properties.getUserSettings()->getValue("Converted Sound Path");
+#endif
+
 
     if (properties.getUserSettings()->getValue("Skew Factor").isEmpty())
         Settings::skewFactorGlobal = 0.5;
@@ -353,23 +360,14 @@ Settings::Settings() : settingsFile(options)
     keyMappedRowsValue.setColour(juce::Label::outlineColourId, juce::Colours::black);
 
 
-    //CONVERTED SOUNDS PATH 
-    convertedSoundsLabel.setBounds(200, keyMappedSizeLabel.getBottom() + spacer, 400, 25);
-    addAndMakeVisible(convertedSoundsLabel);
-    convertedSoundsLabel.setText(Settings::convertedSoundsPath, juce::NotificationType::dontSendNotification);
-
-    convertedSoundsButtons.setBounds(1, keyMappedSizeLabel.getBottom() + spacer, 199, 25);
-    convertedSoundsButtons.setButtonText("Select converted sounds folder");
-    addAndMakeVisible(convertedSoundsButtons);
-    convertedSoundsButtons.onClick = [this] { selectSoundsFolder(); };
 
     //AUDIO OUTPUT MODE
     addAndMakeVisible(audioOutputModeLabel);
-    audioOutputModeLabel.setBounds(0, convertedSoundsLabel.getBottom() + spacer, 200, 25);
+    audioOutputModeLabel.setBounds(0, keyMappedRowsLabel.getBottom() + spacer, 200, 25);
     audioOutputModeLabel.setText("Audio Output Mode", juce::NotificationType::sendNotification);
 
     addAndMakeVisible(audioOutputModeListbox);
-    audioOutputModeListbox.setBounds(200, convertedSoundsLabel.getBottom() + spacer, 399, 25);
+    audioOutputModeListbox.setBounds(200, keyMappedRowsLabel.getBottom() + spacer, 399, 25);
     audioOutputModeListbox.addItem("Mono (Left -> Output, Right -> Cue)", 1);
     audioOutputModeListbox.addItem("Stereo 2 Outputs (Output & Cue on same stereo Output)", 2);
     audioOutputModeListbox.setSelectedId(Settings::audioOutputMode);
@@ -377,8 +375,20 @@ Settings::Settings() : settingsFile(options)
 
     keyboardLayoutBroadcaster.reset(new juce::ChangeBroadcaster);
 
+#if RFBUILD
+    //CONVERTED SOUNDS PATH 
+    convertedSoundsLabel.setBounds(200, audioOutputModeLabel.getBottom() + spacer, 400, 25);
+    addAndMakeVisible(convertedSoundsLabel);
+    convertedSoundsLabel.setText(Settings::convertedSoundsPath, juce::NotificationType::dontSendNotification);
+
+    convertedSoundsButtons.setBounds(1, audioOutputModeLabel.getBottom() + spacer, 199, 25);
+    convertedSoundsButtons.setButtonText("Select converted sounds folder");
+    addAndMakeVisible(convertedSoundsButtons);
+    convertedSoundsButtons.onClick = [this] { selectSoundsFolder(); };
+#endif
+
     //SAVE & CLOSE BUTTONS
-    saveButton.setBounds(250, audioOutputModeLabel.getBottom() + spacer, 100, 50);
+    saveButton.setBounds(250, audioOutputModeLabel.getBottom() + 25 + spacer, 100, 50);
     addAndMakeVisible(saveButton);
     saveButton.setButtonText("Save & Close");
     saveButton.onClick = [this] { setOptions();

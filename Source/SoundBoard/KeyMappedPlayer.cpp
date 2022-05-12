@@ -63,6 +63,13 @@ KeyMappedPlayer::KeyMappedPlayer()
 
     playHead.reset(new PlayHead());
     playHead->setMouseClickGrabsKeyboardFocus(false);
+    addChildComponent(playHead.get());
+    playHead->setColour(juce::Colour(0, 196, 255));
+
+    outPlayHead.reset(new PlayHead());
+    outPlayHead->setMouseClickGrabsKeyboardFocus(false);
+    addChildComponent(outPlayHead.get());
+    outPlayHead->setColour(juce::Colour(238, 255, 0));
 
     dBLabel.reset(new juce::Label());
     addChildComponent(dBLabel.get());
@@ -104,7 +111,7 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
             {
                 float time = ((i - thumbnailBounds.getX()) * soundPlayer->getLenght() / thumbnailBounds.getWidth()) / soundPlayer->getLenght();
                 float value = juce::Decibels::decibelsToGain(soundPlayer->getEnveloppeValue(time, *soundPlayer->getEnveloppePath()) * 24);
-                gainValue.set(i, 1.0f);
+                gainValue.set(i, value);
             }
             else
             {
@@ -129,7 +136,7 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
             {
                 float time = ((i - playThumbnailBounds.getX()) * soundPlayer->getLenght() / playThumbnailBounds.getWidth()) / soundPlayer->getLenght();
                 float value = juce::Decibels::decibelsToGain(soundPlayer->getEnveloppeValue(time, *soundPlayer->getEnveloppePath()) * 24);
-                playGainValue.set(i, 1.0f);
+                playGainValue.set(i, value);
             }
             else
             {
@@ -162,7 +169,9 @@ void KeyMappedPlayer::resized()
 
     thumbnailHeight = getHeight() * 3 / 5;
 
-    playHead->setSize(1, thumbnailHeight);
+    playHead->setSize(1, thumbnailHeight * 3 / 4);
+    outPlayHead->setSize(1, thumbnailHeight * 3 / 4);
+    updateInOutPoints();
 
     elapsedTimeWidth = getWidth() * 3 / 5;
     elapsedTimeHeight = getHeight() / 5;
@@ -202,6 +211,7 @@ void KeyMappedPlayer::setPlayer(Player* p)
     soundPlayer->normalizationFinishedBroadcaster->addChangeListener(this);
     soundPlayer->conversionLaunchedBroadcaster->addChangeListener(this);
     soundPlayer->conversionFinishedBroadcaster->addChangeListener(this);
+    soundPlayer->enveloppePathChangedBroadcaster->addChangeListener(this);
 
     thumbnail = &soundPlayer->getAudioThumbnail();
     playThumbnail = &soundPlayer->getPlayThumbnail();
@@ -253,6 +263,7 @@ void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
                 volumeSlider->setVisible(true);
                 elapsedTimeLabel->setVisible(true);
                 editButton->setVisible(true);
+                resized();
             }
         }
         else if (source == thumbnail)
@@ -328,8 +339,34 @@ void KeyMappedPlayer::updatePlayerInfo()
     else
         defaultColour = BLUE;
 
+    if (soundPlayer->isStartTimeSet())
+    {
+        playHead->setVisible(true);
+        updateInOutPoints();
+    }
+    else
+        playHead->setVisible(false);
+
+    if (soundPlayer->isStopTimeSet())
+    {
+        outPlayHead->setVisible(true);
+        updateInOutPoints();
+    }
+    else
+        outPlayHead->setVisible(false);
+
+
     resized();
     repaint();
+}
+
+void KeyMappedPlayer::updateInOutPoints()
+{
+    int playHeadPosition = (soundPlayer->getStart() / soundPlayer->getLenght()) * getWidth();
+    playHead->setTopLeftPosition(playHeadPosition, thumbnailBounds.getY() + thumbnailHeight / 8);
+
+    int outPlayHeadPosition = (soundPlayer->getStop() / soundPlayer->getLenght()) * getWidth();
+    outPlayHead->setTopLeftPosition(outPlayHeadPosition, thumbnailBounds.getY() + thumbnailHeight / 8);
 }
 
 void KeyMappedPlayer::shortcutKeyPressed(bool commandDown)
@@ -478,7 +515,6 @@ void KeyMappedPlayer::timerCallback(int timerID)
             }
             else
             {
-                playHead->setVisible(false);
             }
 
             if (dBLabel->isVisible())
@@ -487,8 +523,6 @@ void KeyMappedPlayer::timerCallback(int timerID)
                     dBLabel->setVisible(false);
             }
         }
-        else
-            playHead->setVisible(false);
 
         break;
     case 1:
