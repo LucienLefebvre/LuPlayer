@@ -1,0 +1,6 @@
+[submodule "source/Externals/LUFSMeter"]
+	path = source/Externals/LUFSMeter
+	url = https://github.com/klangfreund/LUFSMeter
+[submodule "source/Externals/ff_meters"]
+	path = source/Externals/ff_meters
+	url = https://github.com/ffAudio/ff_meters
