@@ -26,8 +26,8 @@
     <Filter Include="LuPlayer\Source\Mixer">
       <UniqueIdentifier>{6854C511-8E99-C1B7-A83E-BBD382F923E5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="LuPlayer\Source\External">
-      <UniqueIdentifier>{E7E3D77D-97C1-6550-1BDA-ED5033659368}</UniqueIdentifier>
+    <Filter Include="LuPlayer\Source\Externals">
+      <UniqueIdentifier>{08625E14-6796-9532-58E5-4DB658F42B6B}</UniqueIdentifier>
     </Filter>
     <Filter Include="LuPlayer\Source\Bottom Panel">
       <UniqueIdentifier>{D5DD91C7-A033-9F41-68D3-951A203077B5}</UniqueIdentifier>
@@ -568,11 +568,11 @@
     <ClCompile Include="Source\Mixer\MixerInput.cpp">
       <Filter>LuPlayer\Source\Mixer</Filter>
     </ClCompile>
-    <ClCompile Include="Source\External\LUFSMeter\Ebu128LoudnessMeter.cpp">
-      <Filter>LuPlayer\Source\External</Filter>
+    <ClCompile Include="Source\Externals\LUFSMeter\Ebu128LoudnessMeter.cpp">
+      <Filter>LuPlayer\Source\Externals</Filter>
     </ClCompile>
-    <ClCompile Include="Source\External\LUFSMeter\filters\SecondOrderIIRFilter.cpp">
-      <Filter>LuPlayer\Source\External</Filter>
+    <ClCompile Include="Source\Externals\LUFSMeter\filters\SecondOrderIIRFilter.cpp">
+      <Filter>LuPlayer\Source\Externals</Filter>
     </ClCompile>
     <ClCompile Include="Source\BottomComponent\BottomComponent.cpp">
       <Filter>LuPlayer\Source\Bottom Panel</Filter>
@@ -586,10 +586,10 @@
     <ClCompile Include="Source\BottomComponent\Recorder.cpp">
       <Filter>LuPlayer\Source\Bottom Panel</Filter>
     </ClCompile>
-    <ClCompile Include="ff_meters\ff_meters\LevelMeter\LevelMeter.cpp">
+    <ClCompile Include="Source\Externals\ff_meters\LevelMeter\LevelMeter.cpp">
       <Filter>JUCE Modules\ff_meters\LevelMeter</Filter>
     </ClCompile>
-    <ClCompile Include="ff_meters\ff_meters\ff_meters.cpp">
+    <ClCompile Include="Source\Externals\ff_meters\ff_meters.cpp">
       <Filter>JUCE Modules\ff_meters</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\JUCE\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
@@ -2901,14 +2901,14 @@
     <ClInclude Include="Source\Mixer\VCA.h">
       <Filter>LuPlayer\Source\Mixer</Filter>
     </ClInclude>
-    <ClInclude Include="Source\External\LUFSMeter\Ebu128LoudnessMeter.h">
-      <Filter>LuPlayer\Source\External</Filter>
+    <ClInclude Include="Source\Externals\LUFSMeter\Ebu128LoudnessMeter.h">
+      <Filter>LuPlayer\Source\Externals</Filter>
     </ClInclude>
-    <ClInclude Include="Source\External\LUFSMeter\MacrosAndJuceHeaders.h">
-      <Filter>LuPlayer\Source\External</Filter>
+    <ClInclude Include="Source\Externals\LUFSMeter\MacrosAndJuceHeaders.h">
+      <Filter>LuPlayer\Source\Externals</Filter>
     </ClInclude>
-    <ClInclude Include="Source\External\LUFSMeter\filters\SecondOrderIIRFilter.h">
-      <Filter>LuPlayer\Source\External</Filter>
+    <ClInclude Include="Source\Externals\LUFSMeter\filters\SecondOrderIIRFilter.h">
+      <Filter>LuPlayer\Source\Externals</Filter>
     </ClInclude>
     <ClInclude Include="Source\BottomComponent\AudioBrowser.h">
       <Filter>LuPlayer\Source\Bottom Panel</Filter>
@@ -2937,31 +2937,31 @@
     <ClInclude Include="Source\BottomComponent\TextEditorTab.h">
       <Filter>LuPlayer\Source\Bottom Panel</Filter>
     </ClInclude>
-    <ClInclude Include="ff_meters\ff_meters\LevelMeter\LevelMeter.h">
+    <ClInclude Include="Source\Externals\ff_meters\LevelMeter\LevelMeter.h">
       <Filter>JUCE Modules\ff_meters\LevelMeter</Filter>
     </ClInclude>
-    <ClInclude Include="ff_meters\ff_meters\LevelMeter\LevelMeterSource.h">
+    <ClInclude Include="Source\Externals\ff_meters\LevelMeter\LevelMeterSource.h">
       <Filter>JUCE Modules\ff_meters\LevelMeter</Filter>
     </ClInclude>
-    <ClInclude Include="ff_meters\ff_meters\LookAndFeel\LevelMeterLookAndFeel.h">
+    <ClInclude Include="Source\Externals\ff_meters\LookAndFeel\LevelMeterLookAndFeel.h">
       <Filter>JUCE Modules\ff_meters\LookAndFeel</Filter>
     </ClInclude>
-    <ClInclude Include="ff_meters\ff_meters\LookAndFeel\LevelMeterLookAndFeelMethods.h">
+    <ClInclude Include="Source\Externals\ff_meters\LookAndFeel\LevelMeterLookAndFeelMethods.h">
       <Filter>JUCE Modules\ff_meters\LookAndFeel</Filter>
     </ClInclude>
-    <ClInclude Include="ff_meters\ff_meters\LookAndFeel\SoundFieldLookAndFeelMethods.h">
+    <ClInclude Include="Source\Externals\ff_meters\LookAndFeel\SoundFieldLookAndFeelMethods.h">
       <Filter>JUCE Modules\ff_meters\LookAndFeel</Filter>
     </ClInclude>
-    <ClInclude Include="ff_meters\ff_meters\Visualisers\OutlineBuffer.h">
+    <ClInclude Include="Source\Externals\ff_meters\Visualisers\OutlineBuffer.h">
       <Filter>JUCE Modules\ff_meters\Visualisers</Filter>
     </ClInclude>
-    <ClInclude Include="ff_meters\ff_meters\Visualisers\StereoFieldBuffer.h">
+    <ClInclude Include="Source\Externals\ff_meters\Visualisers\StereoFieldBuffer.h">
       <Filter>JUCE Modules\ff_meters\Visualisers</Filter>
     </ClInclude>
-    <ClInclude Include="ff_meters\ff_meters\Visualisers\StereoFieldComponent.h">
+    <ClInclude Include="Source\Externals\ff_meters\Visualisers\StereoFieldComponent.h">
       <Filter>JUCE Modules\ff_meters\Visualisers</Filter>
     </ClInclude>
-    <ClInclude Include="ff_meters\ff_meters.h">
+    <ClInclude Include="Source\Externals\ff_meters\ff_meters.h">
       <Filter>JUCE Modules\ff_meters</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h">
@@ -5369,10 +5369,10 @@
     <None Include="icon.png">
       <Filter>LuPlayer\Others</Filter>
     </None>
-    <None Include="ff_meters\ff_meters\LICENSE.md">
+    <None Include="Source\Externals\ff_meters\LICENSE.md">
       <Filter>JUCE Modules\ff_meters</Filter>
     </None>
-    <None Include="ff_meters\ff_meters\README.md">
+    <None Include="Source\Externals\ff_meters\README.md">
       <Filter>JUCE Modules\ff_meters</Filter>
     </None>
     <None Include="..\..\..\..\..\..\JUCE\modules\juce_audio_devices\native\oboe\CMakeLists.txt">

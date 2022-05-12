@@ -98,8 +98,8 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>JuceLibraryCode;ff_meters;C:\JUCE\modules;C:\JUCE\ASIO SDK\common;C:\JUCE\ASIO SDK;C:\local\include\LUFSMeter;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60007;JUCE_MODULE_AVAILABLE_ff_meters=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK=0;JUCE_ASIO=1;JUCE_USE_LAME_AUDIO_FORMAT=1;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;RFBUILD=0;JUCER_VS2019_B10F68A2=1;JUCE_APP_VERSION=0.9.1.0;JUCE_APP_VERSION_HEX=0x90100;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>JuceLibraryCode;Source\Externals;C:\JUCE\modules;C:\JUCE\ASIO SDK\common;C:\JUCE\ASIO SDK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60007;JUCE_MODULE_AVAILABLE_ff_meters=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_ASIO=1;JUCE_USE_LAME_AUDIO_FORMAT=1;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;RFBUILD=0;JUCER_VS2019_B10F68A2=1;JUCE_APP_VERSION=0.9.1.0;JUCE_APP_VERSION_HEX=0x90100;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -109,7 +109,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -139,8 +139,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>JuceLibraryCode;ff_meters;C:\JUCE\modules;C:\JUCE\ASIO SDK\common;C:\JUCE\ASIO SDK;C:\local\include;C:\local\include\LUFSMeter;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp;C:\local\include\ffmpeg-cpp-master\ffmpeg\include;C:\local\include\ffmpeg-cpp-master\lib\x64\Release;C:\local\include\ffmpeg-cpp-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60007;JUCE_MODULE_AVAILABLE_ff_meters=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK=0;JUCE_ASIO=1;JUCE_USE_LAME_AUDIO_FORMAT=1;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;RFBUILD=0;JUCER_VS2019_B10F68A2=1;JUCE_APP_VERSION=0.9.1.0;JUCE_APP_VERSION_HEX=0x90100;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>JuceLibraryCode;Source\Externals;C:\JUCE\modules;C:\JUCE\ASIO SDK\common;C:\JUCE\ASIO SDK;C:\local\include;C:\local\include\LUFSMeter;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp;C:\local\include\ffmpeg-cpp-master\ffmpeg\include;C:\local\include\ffmpeg-cpp-master\lib\x64\Release;C:\local\include\ffmpeg-cpp-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60007;JUCE_MODULE_AVAILABLE_ff_meters=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_ASIO=1;JUCE_USE_LAME_AUDIO_FORMAT=1;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;RFBUILD=0;JUCER_VS2019_B10F68A2=1;JUCE_APP_VERSION=0.9.1.0;JUCE_APP_VERSION_HEX=0x90100;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -150,7 +150,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -187,8 +187,8 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>JuceLibraryCode;ff_meters;C:\JUCE\modules;C:\JUCE\ASIO SDK\common;C:\JUCE\ASIO SDK;C:\local\include;C:\local\include\LUFSMeter;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp;C:\local\include\ffmpeg-cpp-master\ffmpeg\include;C:\local\include\ffmpeg-cpp-master\lib\x64\Release;C:\local\include\ffmpeg-cpp-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60007;JUCE_MODULE_AVAILABLE_ff_meters=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK=0;JUCE_ASIO=1;JUCE_USE_LAME_AUDIO_FORMAT=1;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;RFBUILD=0;JUCER_VS2019_B10F68A2=1;JUCE_APP_VERSION=0.9.1.0;JUCE_APP_VERSION_HEX=0x90100;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>JuceLibraryCode;Source\Externals;C:\JUCE\modules;C:\JUCE\ASIO SDK\common;C:\JUCE\ASIO SDK;C:\local\include;C:\local\include\LUFSMeter;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp;C:\local\include\ffmpeg-cpp-master\ffmpeg\include;C:\local\include\ffmpeg-cpp-master\lib\x64\Release;C:\local\include\ffmpeg-cpp-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60007;JUCE_MODULE_AVAILABLE_ff_meters=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_ASIO=1;JUCE_USE_LAME_AUDIO_FORMAT=1;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;RFBUILD=0;JUCER_VS2019_B10F68A2=1;JUCE_APP_VERSION=0.9.1.0;JUCE_APP_VERSION_HEX=0x90100;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -198,7 +198,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -231,8 +231,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>JuceLibraryCode;ff_meters;C:\JUCE\modules;C:\JUCE\ASIO SDK\common;C:\JUCE\ASIO SDK;C:\local\include;C:\local\include\LUFSMeter;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp;C:\local\include\ffmpeg-cpp-master\ffmpeg\include;C:\local\include\ffmpeg-cpp-master\lib\x64\Release;C:\local\include\ffmpeg-cpp-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60007;JUCE_MODULE_AVAILABLE_ff_meters=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK=0;JUCE_ASIO=1;JUCE_USE_LAME_AUDIO_FORMAT=1;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;RFBUILD=0;JUCER_VS2019_B10F68A2=1;JUCE_APP_VERSION=0.9.1.0;JUCE_APP_VERSION_HEX=0x90100;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>JuceLibraryCode;Source\Externals;C:\JUCE\modules;C:\JUCE\ASIO SDK\common;C:\JUCE\ASIO SDK;C:\local\include;C:\local\include\LUFSMeter;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp;C:\local\include\ffmpeg-cpp-master\ffmpeg\include;C:\local\include\ffmpeg-cpp-master\lib\x64\Release;C:\local\include\ffmpeg-cpp-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60007;JUCE_MODULE_AVAILABLE_ff_meters=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_ASIO=1;JUCE_USE_LAME_AUDIO_FORMAT=1;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_STANDALONE_APPLICATION=1;RFBUILD=0;JUCER_VS2019_B10F68A2=1;JUCE_APP_VERSION=0.9.1.0;JUCE_APP_VERSION_HEX=0x90100;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -242,7 +242,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -305,16 +305,16 @@
     <ClCompile Include="Source\Mixer\InputsControl.cpp"/>
     <ClCompile Include="Source\Mixer\Mixer.cpp"/>
     <ClCompile Include="Source\Mixer\MixerInput.cpp"/>
-    <ClCompile Include="Source\External\LUFSMeter\Ebu128LoudnessMeter.cpp"/>
-    <ClCompile Include="Source\External\LUFSMeter\filters\SecondOrderIIRFilter.cpp"/>
+    <ClCompile Include="Source\Externals\LUFSMeter\Ebu128LoudnessMeter.cpp"/>
+    <ClCompile Include="Source\Externals\LUFSMeter\filters\SecondOrderIIRFilter.cpp"/>
     <ClCompile Include="Source\BottomComponent\BottomComponent.cpp"/>
     <ClCompile Include="Source\BottomComponent\ClipEffect.cpp"/>
     <ClCompile Include="Source\BottomComponent\EnveloppeEditor.cpp"/>
     <ClCompile Include="Source\BottomComponent\Recorder.cpp"/>
-    <ClCompile Include="ff_meters\ff_meters\LevelMeter\LevelMeter.cpp">
+    <ClCompile Include="Source\Externals\ff_meters\LevelMeter\LevelMeter.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="ff_meters\ff_meters\ff_meters.cpp">
+    <ClCompile Include="Source\Externals\ff_meters\ff_meters.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\JUCE\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
@@ -2397,9 +2397,9 @@
     <ClInclude Include="Source\Mixer\Mixer.h"/>
     <ClInclude Include="Source\Mixer\MixerInput.h"/>
     <ClInclude Include="Source\Mixer\VCA.h"/>
-    <ClInclude Include="Source\External\LUFSMeter\Ebu128LoudnessMeter.h"/>
-    <ClInclude Include="Source\External\LUFSMeter\MacrosAndJuceHeaders.h"/>
-    <ClInclude Include="Source\External\LUFSMeter\filters\SecondOrderIIRFilter.h"/>
+    <ClInclude Include="Source\Externals\LUFSMeter\Ebu128LoudnessMeter.h"/>
+    <ClInclude Include="Source\Externals\LUFSMeter\MacrosAndJuceHeaders.h"/>
+    <ClInclude Include="Source\Externals\LUFSMeter\filters\SecondOrderIIRFilter.h"/>
     <ClInclude Include="Source\BottomComponent\AudioBrowser.h"/>
     <ClInclude Include="Source\BottomComponent\BottomComponent.h"/>
     <ClInclude Include="Source\BottomComponent\ClipEditor.h"/>
@@ -2409,15 +2409,15 @@
     <ClInclude Include="Source\BottomComponent\FocusAwareTextEditor.h"/>
     <ClInclude Include="Source\BottomComponent\Recorder.h"/>
     <ClInclude Include="Source\BottomComponent\TextEditorTab.h"/>
-    <ClInclude Include="ff_meters\ff_meters\LevelMeter\LevelMeter.h"/>
-    <ClInclude Include="ff_meters\ff_meters\LevelMeter\LevelMeterSource.h"/>
-    <ClInclude Include="ff_meters\ff_meters\LookAndFeel\LevelMeterLookAndFeel.h"/>
-    <ClInclude Include="ff_meters\ff_meters\LookAndFeel\LevelMeterLookAndFeelMethods.h"/>
-    <ClInclude Include="ff_meters\ff_meters\LookAndFeel\SoundFieldLookAndFeelMethods.h"/>
-    <ClInclude Include="ff_meters\ff_meters\Visualisers\OutlineBuffer.h"/>
-    <ClInclude Include="ff_meters\ff_meters\Visualisers\StereoFieldBuffer.h"/>
-    <ClInclude Include="ff_meters\ff_meters\Visualisers\StereoFieldComponent.h"/>
-    <ClInclude Include="ff_meters\ff_meters.h"/>
+    <ClInclude Include="Source\Externals\ff_meters\LevelMeter\LevelMeter.h"/>
+    <ClInclude Include="Source\Externals\ff_meters\LevelMeter\LevelMeterSource.h"/>
+    <ClInclude Include="Source\Externals\ff_meters\LookAndFeel\LevelMeterLookAndFeel.h"/>
+    <ClInclude Include="Source\Externals\ff_meters\LookAndFeel\LevelMeterLookAndFeelMethods.h"/>
+    <ClInclude Include="Source\Externals\ff_meters\LookAndFeel\SoundFieldLookAndFeelMethods.h"/>
+    <ClInclude Include="Source\Externals\ff_meters\Visualisers\OutlineBuffer.h"/>
+    <ClInclude Include="Source\Externals\ff_meters\Visualisers\StereoFieldBuffer.h"/>
+    <ClInclude Include="Source\Externals\ff_meters\Visualisers\StereoFieldComponent.h"/>
+    <ClInclude Include="Source\Externals\ff_meters\ff_meters.h"/>
     <ClInclude Include="..\..\..\..\..\..\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h"/>
     <ClInclude Include="..\..\..\..\..\..\JUCE\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h"/>
     <ClInclude Include="..\..\..\..\..\..\JUCE\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h"/>
@@ -3221,8 +3221,8 @@
   <ItemGroup>
     <None Include="Source\RF\sqlconnection.txt"/>
     <None Include="icon.png"/>
-    <None Include="ff_meters\ff_meters\LICENSE.md"/>
-    <None Include="ff_meters\ff_meters\README.md"/>
+    <None Include="Source\Externals\ff_meters\LICENSE.md"/>
+    <None Include="Source\Externals\ff_meters\README.md"/>
     <None Include="..\..\..\..\..\..\JUCE\modules\juce_audio_devices\native\oboe\CMakeLists.txt"/>
     <None Include="..\..\..\..\..\..\JUCE\modules\juce_audio_devices\native\oboe\readme.md"/>
     <None Include="..\..\..\..\..\..\JUCE\modules\juce_audio_formats\codecs\flac\Flac Licence.txt"/>

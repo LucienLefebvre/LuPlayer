@@ -7,7 +7,7 @@
 #include "Settings/Settings.h"
 #include "SoundBoard/SoundPlayer.h"
 #include "BottomComponent/BottomComponent.h"
-#include <Ebu128LoudnessMeter.h>
+#include "Externals/LUFSMeter/Ebu128LoudnessMeter.h"
 #include "Mixer/Mixer.h"
 #include "Others/StopWatch.h"
 #include "Settings/KeyMapper.h"

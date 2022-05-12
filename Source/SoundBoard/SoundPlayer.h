@@ -17,7 +17,7 @@
 
 #include "../Settings/Settings.h"
 #include <ff_meters\ff_meters.h>
-#include <Ebu128LoudnessMeter.h>
+#include "../Externals/LUFSMeter/Ebu128LoudnessMeter.h"
 #include "../Others/LoudnessBar.h"
 #include "../Mixer/Meter.h"
 #include "KeyboardMappedSoundboard.h"

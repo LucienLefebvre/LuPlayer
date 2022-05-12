@@ -12,7 +12,7 @@
 #include <JuceHeader.h>
 
 #include "../Settings/Settings.h"
-#include "../External/LUFSMeter/Ebu128LoudnessMeter.h"
+#include "../Externals/LUFSMeter/Ebu128LoudnessMeter.h"
 //==============================================================================
 /*
 */

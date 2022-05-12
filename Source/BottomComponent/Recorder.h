@@ -12,10 +12,10 @@
 #define JUCE_USE_LAME_AUDIO_FORMAT 1
 #include <JuceHeader.h>
 #include "../SoundBoard/Player.h"
-#include <Ebu128LoudnessMeter.h>
+#include "../Externals/LUFSMeter/Ebu128LoudnessMeter.h"
 #include "../Settings/KeyMapper.h"
 #include "../Settings/Settings.h"
-
+#include <ff_meters\ff_meters.h>
 #include <algorithm>
 //==============================================================================
 /*
