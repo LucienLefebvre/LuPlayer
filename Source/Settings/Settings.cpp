@@ -437,11 +437,11 @@ void Settings::selectSoundsFolder()
     juce::FileChooser chooser("Select the Directory for converted sounds", juce::File::getSpecialLocation(juce::File::userDocumentsDirectory));
     if (chooser.browseForDirectory())
     {
-        juce::File SoundsPath;
-        SoundsPath = chooser.getResult();
-        
-        Settings::convertedSoundsPath = SoundsPath.getFullPathName();
-        properties.getUserSettings()->setValue("Converted Sound Path", Settings::convertedSoundsPath);
+            juce::File SoundsPath;
+            SoundsPath = chooser.getResult();
+
+            Settings::convertedSoundsPath = SoundsPath.getFullPathName();
+            properties.getUserSettings()->setValue("Converted Sound Path", Settings::convertedSoundsPath);
     }
     convertedSoundsLabel.setText(Settings::convertedSoundsPath, juce::NotificationType::dontSendNotification);
     properties.saveIfNeeded();

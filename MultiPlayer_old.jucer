@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="tfw8KZ" name="LuPlayer" projectType="guiapp" useAppConfig="0"
+              jucerFormatVersion="1" version="0.9.1.0" compilerFlagSchemes="NewScheme"
+              cppLanguageStandard="17" addUsingNamespaceToJuceHeader="0">
+  <MAINGROUP id="xbXPa2" name="LuPlayer">
+    <GROUP id="{452DBD3D-D27D-A3C6-077B-F2D4C97C0026}" name="RF">
+      <GROUP id="{39F06C6F-647A-9E86-3B03-64D88D031399}" name="nanodbc-master">
+        <GROUP id="{BB28E95F-5967-057C-BEFA-3613E73DB874}" name="nanodbc">
+          <FILE id="sncaQU" name="nanodbc.cpp" compile="0" resource="0" file="Source/RF/nanodbc-master/nanodbc/nanodbc.cpp"/>
+          <FILE id="cI1quO" name="nanodbc.h" compile="0" resource="0" file="Source/RF/nanodbc-master/nanodbc/nanodbc.h"/>
+        </GROUP>
+      </GROUP>
+      <FILE id="Hp2jPx" name="convertObject.cpp" compile="0" resource="0"
+            file="Source/RF/convertObject.cpp"/>
+      <FILE id="F3nZYf" name="convertObject.h" compile="0" resource="0" file="Source/RF/convertObject.h"/>
+      <FILE id="gVpWfb" name="DataBaseBrowser.cpp" compile="0" resource="0"
+            file="Source/RF/DataBaseBrowser.cpp"/>
+      <FILE id="zWlOeg" name="DataBaseBrowser.h" compile="0" resource="0"
+            file="Source/RF/DataBaseBrowser.h"/>
+      <FILE id="AL9l92" name="DataBaseImport.cpp" compile="0" resource="0"
+            file="Source/RF/DataBaseImport.cpp"/>
+      <FILE id="c7TL2n" name="DataBaseImport.h" compile="0" resource="0"
+            file="Source/RF/DataBaseImport.h"/>
+      <FILE id="QCeIyg" name="Denoiser.cpp" compile="0" resource="0" file="Source/RF/Denoiser.cpp"/>
+      <FILE id="yFHof9" name="Denoiser.h" compile="0" resource="0" file="Source/RF/Denoiser.h"/>
+      <FILE id="MrMuaL" name="DenoiseThread.h" compile="0" resource="0" file="Source/RF/DenoiseThread.h"/>
+      <FILE id="rKTulo" name="DistantDataBaseBrowser.cpp" compile="0" resource="0"
+            file="Source/RF/DistantDataBaseBrowser.cpp"/>
+      <FILE id="XTk17v" name="DistantDataBaseBrowser.h" compile="0" resource="0"
+            file="Source/RF/DistantDataBaseBrowser.h"/>
+      <FILE id="MkCCih" name="ffmpegConvert.h" compile="0" resource="0" file="Source/RF/ffmpegConvert.h"/>
+      <FILE id="NxfttX" name="sqlconnection.txt" compile="0" resource="1"
+            file="Source/RF/sqlconnection.txt"/>
+    </GROUP>
+    <GROUP id="{1768BD6A-1763-693F-2E07-6CF180C5BCA1}" name="Others">
+      <FILE id="MfaJgQ" name="icon.png" compile="0" resource="1" file="icon.png"/>
+    </GROUP>
+    <GROUP id="{E792DABC-FB58-F40F-E057-C849A7502DFB}" name="Source">
+      <FILE id="fbwd2r" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="evUBxA" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+      <FILE id="t9bGik" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+      <GROUP id="{A47036D3-C7A7-FA2D-B2CC-41149ADCB2A0}" name="SoundBoard">
+        <FILE id="AJXePf" name="KeyboardMappedSoundboard.cpp" compile="1" resource="0"
+              file="Source/SoundBoard/KeyboardMappedSoundboard.cpp"/>
+        <FILE id="Q5FrnO" name="KeyboardMappedSoundboard.h" compile="0" resource="0"
+              file="Source/SoundBoard/KeyboardMappedSoundboard.h"/>
+        <FILE id="FZHLPe" name="KeyMappedPlayer.cpp" compile="1" resource="0"
+              file="Source/SoundBoard/KeyMappedPlayer.cpp"/>
+        <FILE id="EdCUkh" name="KeyMappedPlayer.h" compile="0" resource="0"
+              file="Source/SoundBoard/KeyMappedPlayer.h"/>
+        <FILE id="QaXMUG" name="Player.cpp" compile="1" resource="0" file="Source/SoundBoard/Player.cpp"/>
+        <FILE id="RvQMXr" name="Player.h" compile="0" resource="0" file="Source/SoundBoard/Player.h"/>
+        <FILE id="WrQC3J" name="Playlist.cpp" compile="1" resource="0" file="Source/SoundBoard/Playlist.cpp"/>
+        <FILE id="ICzAiA" name="Playlist.h" compile="0" resource="0" file="Source/SoundBoard/Playlist.h"/>
+        <FILE id="QLBLvE" name="SoundPlayer.cpp" compile="1" resource="0" file="Source/SoundBoard/SoundPlayer.cpp"/>
+        <FILE id="UdjWAt" name="SoundPlayer.h" compile="0" resource="0" file="Source/SoundBoard/SoundPlayer.h"/>
+      </GROUP>
+      <GROUP id="{87D22A33-F8D4-6640-AEF3-12D6E103EE1A}" name="Settings">
+        <FILE id="swOvDR" name="KeyMapper.cpp" compile="1" resource="0" file="Source/Settings/KeyMapper.cpp"/>
+        <FILE id="LBZ1GX" name="KeyMapper.h" compile="0" resource="0" file="Source/Settings/KeyMapper.h"/>
+        <FILE id="IRNWNF" name="MidiMapper.cpp" compile="1" resource="0" file="Source/Settings/MidiMapper.cpp"/>
+        <FILE id="m7HUIS" name="MidiMapper.h" compile="0" resource="0" file="Source/Settings/MidiMapper.h"/>
+        <FILE id="PTFqri" name="Settings.cpp" compile="1" resource="0" file="Source/Settings/Settings.cpp"/>
+        <FILE id="Svr7x4" name="Settings.h" compile="0" resource="0" file="Source/Settings/Settings.h"/>
+      </GROUP>
+      <GROUP id="{EE489088-1BDF-D0F2-84FF-94A6216F0AC9}" name="Others">
+        <FILE id="lLWyvS" name="gainThumbnail.cpp" compile="1" resource="0"
+              file="Source/Others/gainThumbnail.cpp"/>
+        <FILE id="RhCKBl" name="gainThumbnail.h" compile="0" resource="0" file="Source/Others/gainThumbnail.h"/>
+        <FILE id="BlQDfM" name="LoudnessBar.cpp" compile="1" resource="0" file="Source/Others/LoudnessBar.cpp"/>
+        <FILE id="rpEKbK" name="LoudnessBar.h" compile="0" resource="0" file="Source/Others/LoudnessBar.h"/>
+        <FILE id="ZDXLO5" name="PlayHead.h" compile="0" resource="0" file="Source/Others/PlayHead.h"/>
+        <FILE id="QzTDiI" name="R128IntegratedThread.h" compile="0" resource="0"
+              file="Source/Others/R128IntegratedThread.h"/>
+        <FILE id="yINovr" name="StopWatch.h" compile="0" resource="0" file="Source/Others/StopWatch.h"/>
+        <FILE id="jLHBB6" name="updateDialog.h" compile="0" resource="0" file="Source/Others/updateDialog.h"/>
+      </GROUP>
+      <GROUP id="{19CAD9BF-D209-4EE9-9B1A-28931EAB700D}" name="Mixer">
+        <FILE id="WkDyow" name="ChannelControlPannel.h" compile="0" resource="0"
+              file="Source/Mixer/ChannelControlPannel.h"/>
+        <FILE id="jqznWf" name="CompEditor.h" compile="0" resource="0" file="Source/Mixer/CompEditor.h"/>
+        <FILE id="wYG6sg" name="CompProcessor.h" compile="0" resource="0" file="Source/Mixer/CompProcessor.h"/>
+        <FILE id="XZUeCs" name="DeesserEditor.h" compile="0" resource="0" file="Source/Mixer/DeesserEditor.h"/>
+        <FILE id="jehW3M" name="DynamicsEditor.h" compile="0" resource="0"
+              file="Source/Mixer/DynamicsEditor.h"/>
+        <FILE id="SdSDFX" name="FFTAnalyser.h" compile="0" resource="0" file="Source/Mixer/FFTAnalyser.h"/>
+        <FILE id="q5FXLv" name="FilterBandEditor.h" compile="0" resource="0"
+              file="Source/Mixer/FilterBandEditor.h"/>
+        <FILE id="eHNLeD" name="FilterEditor.cpp" compile="1" resource="0"
+              file="Source/Mixer/FilterEditor.cpp"/>
+        <FILE id="eIs9wa" name="FilterEditor.h" compile="0" resource="0" file="Source/Mixer/FilterEditor.h"/>
+        <FILE id="FBf1hd" name="filterGraphPoint.h" compile="0" resource="0"
+              file="Source/Mixer/filterGraphPoint.h"/>
+        <FILE id="srJQZk" name="FilterProcessor.cpp" compile="1" resource="0"
+              file="Source/Mixer/FilterProcessor.cpp"/>
+        <FILE id="TJx5jW" name="FilterProcessor.h" compile="0" resource="0"
+              file="Source/Mixer/FilterProcessor.h"/>
+        <FILE id="TEZbAE" name="GateEditor.h" compile="0" resource="0" file="Source/Mixer/GateEditor.h"/>
+        <FILE id="Ua6SH1" name="InputPanel.cpp" compile="1" resource="0" file="Source/Mixer/InputPanel.cpp"/>
+        <FILE id="SE7cmF" name="InputPanel.h" compile="0" resource="0" file="Source/Mixer/InputPanel.h"/>
+        <FILE id="iQHX3A" name="InputsControl.cpp" compile="1" resource="0"
+              file="Source/Mixer/InputsControl.cpp"/>
+        <FILE id="QoFUDq" name="InputsControl.h" compile="0" resource="0" file="Source/Mixer/InputsControl.h"/>
+        <FILE id="FDrQ33" name="LimiterEditor.h" compile="0" resource="0" file="Source/Mixer/LimiterEditor.h"/>
+        <FILE id="T6p1Lt" name="Meter.h" compile="0" resource="0" file="Source/Mixer/Meter.h"/>
+        <FILE id="OeSmvp" name="Mixer.cpp" compile="1" resource="0" file="Source/Mixer/Mixer.cpp"/>
+        <FILE id="euPByr" name="Mixer.h" compile="0" resource="0" file="Source/Mixer/Mixer.h"/>
+        <FILE id="jN0aO6" name="MixerInput.cpp" compile="1" resource="0" file="Source/Mixer/MixerInput.cpp"/>
+        <FILE id="qPKZq6" name="MixerInput.h" compile="0" resource="0" file="Source/Mixer/MixerInput.h"/>
+        <FILE id="U1CsT1" name="VCA.h" compile="0" resource="0" file="Source/Mixer/VCA.h"/>
+      </GROUP>
+      <GROUP id="{2745DEA2-F477-068A-6912-ADA44B9EBC65}" name="Externals">
+        <FILE id="HSZhCY" name="Ebu128LoudnessMeter.cpp" compile="1" resource="0"
+              file="Source/Externals/LUFSMeter/Ebu128LoudnessMeter.cpp"/>
+        <FILE id="SCSagh" name="Ebu128LoudnessMeter.h" compile="0" resource="0"
+              file="Source/Externals/LUFSMeter/Ebu128LoudnessMeter.h"/>
+        <FILE id="YdfUGI" name="MacrosAndJuceHeaders.h" compile="0" resource="0"
+              file="Source/Externals/LUFSMeter/MacrosAndJuceHeaders.h"/>
+        <FILE id="NOcvZz" name="SecondOrderIIRFilter.cpp" compile="1" resource="0"
+              file="Source/Externals/LUFSMeter/filters/SecondOrderIIRFilter.cpp"/>
+        <FILE id="ljyw6H" name="SecondOrderIIRFilter.h" compile="0" resource="0"
+              file="Source/Externals/LUFSMeter/filters/SecondOrderIIRFilter.h"/>
+      </GROUP>
+      <GROUP id="{B8EBC8E4-584D-8F2E-4D51-05073EE6595C}" name="Bottom Panel">
+        <FILE id="hdBhCi" name="AudioBrowser.h" compile="0" resource="0" file="Source/BottomComponent/AudioBrowser.h"/>
+        <FILE id="OEV48U" name="BottomComponent.cpp" compile="1" resource="0"
+              file="Source/BottomComponent/BottomComponent.cpp"/>
+        <FILE id="V8hc1S" name="BottomComponent.h" compile="0" resource="0"
+              file="Source/BottomComponent/BottomComponent.h"/>
+        <FILE id="QrcXpo" name="ClipEditor.h" compile="0" resource="0" file="Source/BottomComponent/ClipEditor.h"/>
+        <FILE id="hptUjG" name="ClipEffect.cpp" compile="1" resource="0" file="Source/BottomComponent/ClipEffect.cpp"/>
+        <FILE id="Tc3mIm" name="ClipEffect.h" compile="0" resource="0" file="Source/BottomComponent/ClipEffect.h"/>
+        <FILE id="Dcwozp" name="EnveloppeEditor.cpp" compile="1" resource="0"
+              file="Source/BottomComponent/EnveloppeEditor.cpp"/>
+        <FILE id="VRm0xm" name="EnveloppeEditor.h" compile="0" resource="0"
+              file="Source/BottomComponent/EnveloppeEditor.h"/>
+        <FILE id="wgq9RP" name="EnveloppePoint.h" compile="0" resource="0"
+              file="Source/BottomComponent/EnveloppePoint.h"/>
+        <FILE id="mphZbg" name="FocusAwareTextEditor.h" compile="0" resource="0"
+              file="Source/BottomComponent/FocusAwareTextEditor.h"/>
+        <FILE id="EK7LOl" name="Recorder.cpp" compile="1" resource="0" file="Source/BottomComponent/Recorder.cpp"/>
+        <FILE id="l3b01l" name="Recorder.h" compile="0" resource="0" file="Source/BottomComponent/Recorder.h"/>
+        <FILE id="txqNnM" name="TextEditorTab.h" compile="0" resource="0" file="Source/BottomComponent/TextEditorTab.h"/>
+      </GROUP>
+    </GROUP>
+  </MAINGROUP>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" FF_AUDIO_ALLOW_ALLOCATIONS_IN_MEASURE_BLOCK="0"
+               JUCE_ASIO="1" JUCE_USE_LAME_AUDIO_FORMAT="1"/>
+  <EXPORTFORMATS>
+    <VS2019 targetFolder="C:\Users\DPR\source\repos\LucienLefebvre\LuPlayer"
+            smallIcon="MfaJgQ" bigIcon="MfaJgQ" extraDefs="RFBUILD=0" userNotes="ffmpeg-cpp.lib">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="LuPlayer" headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="LuPlayer" headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\LUFSMeter&#10;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp&#10;C:\local\include\ffmpeg-cpp-master\ffmpeg\include&#10;C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;C:\local\include\ffmpeg-cpp-master\include"
+                       libraryPath="C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;"/>
+        <CONFIGURATION isDebug="1" name="Debug_RF" targetName="LuPlayer" libraryPath="C:\local\include\ffmpeg-cpp-master\lib\x64\Debug&#10;C:\local\lib\debug"
+                       headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\LUFSMeter&#10;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp&#10;C:\local\include\ffmpeg-cpp-master\ffmpeg\include&#10;C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;C:\local\include\ffmpeg-cpp-master\include"/>
+        <CONFIGURATION isDebug="0" name="Release-RF" targetName="LuPlayer" headerPath="C:\JUCE\ASIO SDK\common&#10;C:\JUCE\ASIO SDK&#10;C:\local\include&#10;C:\local\include\LUFSMeter&#10;C:\local\include\ffmpeg-cpp-master\source\ffmpeg-cpp&#10;C:\local\include\ffmpeg-cpp-master\ffmpeg\include&#10;C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;C:\local\include\ffmpeg-cpp-master\include"
+                       libraryPath="C:\local\include\ffmpeg-cpp-master\lib\x64\Release&#10;"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_osc" path="../../modules"/>
+        <MODULEPATH id="juce_dsp" path="../modules"/>
+        <MODULEPATH id="ff_meters" path="Source/Externals"/>
+      </MODULEPATHS>
+    </VS2019>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="ff_meters" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_osc" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <LIVE_SETTINGS>
+    <WINDOWS buildEnabled="0"/>
+  </LIVE_SETTINGS>
+</JUCERPROJECT>

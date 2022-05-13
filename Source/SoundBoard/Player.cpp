@@ -1030,18 +1030,19 @@ void Player::openButtonClicked()
     juce::FileLogger::getCurrentLogger()->writeToLog("player open button clicked");
 
     juce::FileChooser chooser("Choose an audio File", juce::File::getSpecialLocation(juce::File::userDesktopDirectory), "*.wav; *.WAV; *.MP3; *.mp3; *.bwf; *.BWF; *.aiff; *.opus; *.flac"); 
+    auto folderChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
 
-    if (chooser.browseForFileToOpen())
-    {
-        deleteStart();
-        deleteStop();
-        enableHPF(false);
-        juce::File myFile;
-        myFile = chooser.getResult();
-        
-        auto filePath = myFile.getFullPathName();
-        verifyAudioFileFormat(filePath);
-    }
+    chooser.launchAsync(folderChooserFlags, [this](const juce::FileChooser& chooser)
+        {
+            deleteStart();
+            deleteStop();
+            enableHPF(false);
+            juce::File myFile;
+            myFile = chooser.getResult();
+
+            auto filePath = myFile.getFullPathName();
+            verifyAudioFileFormat(filePath);
+        });
 }
 
 void Player::deleteFile()

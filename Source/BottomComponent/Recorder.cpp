@@ -541,80 +541,80 @@ void Recorder::saveButtonClicked()
         chooser.reset(new juce::FileChooser("Choose an audio File", juce::File::getSpecialLocation(juce::File::userDesktopDirectory), "*.mp3"));
     if (chooser->browseForFileToSave(true))
     {
-        juce::File myFile;
-        myFile = chooser->getResult();
+            juce::File myFile;
+            myFile = chooser->getResult();
 
-        if (outputformatManager.getNumKnownFormats() == 0)
-            outputformatManager.registerBasicFormats();
-        std::unique_ptr<juce::AudioFormatReader> reader;
-        reader.reset(outputformatManager.createReaderFor(fileToSave));
-        reader.get()->numChannels = numChannels;
-        int startSample = startTime * actualSampleRate;
-        int endSample = stopTime * actualSampleRate;
-        int numSamples = endSample - startSample;
+            if (outputformatManager.getNumKnownFormats() == 0)
+                outputformatManager.registerBasicFormats();
+            std::unique_ptr<juce::AudioFormatReader> reader;
+            reader.reset(outputformatManager.createReaderFor(fileToSave));
+            reader.get()->numChannels = numChannels;
+            int startSample = startTime * actualSampleRate;
+            int endSample = stopTime * actualSampleRate;
+            int numSamples = endSample - startSample;
 
-        juce::AudioSampleBuffer* buffer = new juce::AudioSampleBuffer(numChannels, numSamples);
+            juce::AudioSampleBuffer* buffer = new juce::AudioSampleBuffer(numChannels, numSamples);
 
-        buffer->clear();
+            buffer->clear();
 
-        if (numChannels == 2)
-        {
-            reader->read(buffer, 0, numSamples, startSample, true, true);
-        }
-        else if (numChannels == 1)
-        {
-            reader->read(buffer, 0, numSamples, startSample, true, false);
-        }
-        juce::WavAudioFormat audioFormat;
+            if (numChannels == 2)
+            {
+                reader->read(buffer, 0, numSamples, startSample, true, true);
+            }
+            else if (numChannels == 1)
+            {
+                reader->read(buffer, 0, numSamples, startSample, true, false);
+            }
+            juce::WavAudioFormat audioFormat;
 
-        auto parentDir = juce::File(Settings::convertedSoundsPath);
-        const juce::File tempFile(parentDir.getNonexistentChildFile("LuPlayerRecording", ".wav"));
+            auto parentDir = juce::File(Settings::convertedSoundsPath);
+            const juce::File tempFile(parentDir.getNonexistentChildFile("LuPlayerRecording", ".wav"));
 
-        juce::LAMEEncoderAudioFormat compressedAudioFormat(juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\lame.exe"));
-        auto fileStream = std::unique_ptr<juce::FileOutputStream>(myFile.createOutputStream());
-        std::unique_ptr<juce::AudioFormatWriter> outputWriter;
+            juce::LAMEEncoderAudioFormat compressedAudioFormat(juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\lame.exe"));
+            auto fileStream = std::unique_ptr<juce::FileOutputStream>(myFile.createOutputStream());
+            std::unique_ptr<juce::AudioFormatWriter> outputWriter;
 
-        
-        if (formatBox.getSelectedId() == 1)
-        {
 
-            if (numChannels == 1)
-                outputWriter.reset(audioFormat.createWriterFor(fileStream.get(), reader->sampleRate, 1, (int)reader->bitsPerSample, juce::StringPairArray(), 0));
-            else if (numChannels == 2)
-                outputWriter.reset(audioFormat.createWriterFor(fileStream.get(), reader->sampleRate, 2, (int)reader->bitsPerSample, juce::StringPairArray(), 0));
-            fileStream.release();
-            if (outputWriter->writeFromAudioSampleBuffer(*buffer, 0, numSamples))
+            if (formatBox.getSelectedId() == 1)
+            {
+
+                if (numChannels == 1)
+                    outputWriter.reset(audioFormat.createWriterFor(fileStream.get(), reader->sampleRate, 1, (int)reader->bitsPerSample, juce::StringPairArray(), 0));
+                else if (numChannels == 2)
+                    outputWriter.reset(audioFormat.createWriterFor(fileStream.get(), reader->sampleRate, 2, (int)reader->bitsPerSample, juce::StringPairArray(), 0));
+                fileStream.release();
+                if (outputWriter->writeFromAudioSampleBuffer(*buffer, 0, numSamples))
                 {
-                 std::unique_ptr<juce::AlertWindow> exportWindow;
-                 exportWindow->showMessageBox(juce::AlertWindow::AlertIconType::InfoIcon, "File exported", "");
+                    std::unique_ptr<juce::AlertWindow> exportWindow;
+                    exportWindow->showMessageBox(juce::AlertWindow::AlertIconType::InfoIcon, "File exported", "");
                 }
-            else
-            {
-                std::unique_ptr<juce::AlertWindow> exportWindow;
-                exportWindow->showMessageBox(juce::AlertWindow::AlertIconType::WarningIcon, "", "Error exporting file");
+                else
+                {
+                    std::unique_ptr<juce::AlertWindow> exportWindow;
+                    exportWindow->showMessageBox(juce::AlertWindow::AlertIconType::WarningIcon, "", "Error exporting file");
+                }
             }
-        }
-        else if (formatBox.getSelectedId() == 2)
-        {
-            if (numChannels == 1)
-                outputWriter.reset(compressedAudioFormat.createWriterFor(fileStream.get(), reader->sampleRate, 1, (int)reader->bitsPerSample, juce::StringPairArray(), 23));
-            else if (numChannels == 2)
-                outputWriter.reset(compressedAudioFormat.createWriterFor(fileStream.get(), reader->sampleRate, 2, (int)reader->bitsPerSample, juce::StringPairArray(), 23));
-            fileStream.release();
-            if (outputWriter->writeFromAudioSampleBuffer(*buffer, 0, numSamples))
+            else if (formatBox.getSelectedId() == 2)
             {
-                std::unique_ptr<juce::AlertWindow> exportWindow;
-                exportWindow->showMessageBox(juce::AlertWindow::AlertIconType::InfoIcon, "File exported", "");
-                outputWriter->flush();
-            } 
-            else
-            {
-                std::unique_ptr<juce::AlertWindow> exportWindow;
-                exportWindow->showMessageBox(juce::AlertWindow::AlertIconType::WarningIcon, "", "Error exporting file");
+                if (numChannels == 1)
+                    outputWriter.reset(compressedAudioFormat.createWriterFor(fileStream.get(), reader->sampleRate, 1, (int)reader->bitsPerSample, juce::StringPairArray(), 23));
+                else if (numChannels == 2)
+                    outputWriter.reset(compressedAudioFormat.createWriterFor(fileStream.get(), reader->sampleRate, 2, (int)reader->bitsPerSample, juce::StringPairArray(), 23));
+                fileStream.release();
+                if (outputWriter->writeFromAudioSampleBuffer(*buffer, 0, numSamples))
+                {
+                    std::unique_ptr<juce::AlertWindow> exportWindow;
+                    exportWindow->showMessageBox(juce::AlertWindow::AlertIconType::InfoIcon, "File exported", "");
+                    outputWriter->flush();
+                }
+                else
+                {
+                    std::unique_ptr<juce::AlertWindow> exportWindow;
+                    exportWindow->showMessageBox(juce::AlertWindow::AlertIconType::WarningIcon, "", "Error exporting file");
+                }
             }
+            delete buffer;
         }
-        delete buffer;
-    }
 }
 
 

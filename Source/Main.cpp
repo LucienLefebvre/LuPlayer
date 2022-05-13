@@ -45,13 +45,13 @@ public:
         if (mainWindow->mainComponent.isPlayingOrRecording())
         {
             std::unique_ptr<juce::AlertWindow> quitWindow;
-            bool result = quitWindow->showOkCancelBox(juce::AlertWindow::QuestionIcon, "Quit ?", "Some sounds are playing");
+            bool result = quitWindow->showOkCancelBox(juce::AlertWindow::QuestionIcon, "Quit ?", "Some sounds are playing", "Yes", "No", nullptr, nullptr);
             if (result == true)
             {
                 if (Settings::tempFiles.size() > 0)
                 {
                     std::unique_ptr<juce::AlertWindow> deleteFilesWindow;
-                    int result = deleteFilesWindow->showYesNoCancelBox(juce::AlertWindow::QuestionIcon, "Delete converted sounds ?", "");
+                    int result = deleteFilesWindow->showYesNoCancelBox(juce::AlertWindow::QuestionIcon, "Delete converted sounds ?", "", "Yes", "No", "Cancel", nullptr, nullptr);
                     if (result == 1)
                     {
                         mainWindow->mainComponent.deleteConvertedFiles();
@@ -73,7 +73,7 @@ public:
         if (Settings::tempFiles.size() > 0 && !mainWindow->mainComponent.hasBeenSaved())
         {
             std::unique_ptr<juce::AlertWindow> deleteFilesWindow;
-            int result = deleteFilesWindow->showYesNoCancelBox(juce::AlertWindow::QuestionIcon, "Delete converted sounds ?", "");
+            int result = deleteFilesWindow->showYesNoCancelBox(juce::AlertWindow::QuestionIcon, "Delete converted sounds ?", "", "Yes", "No", "Cancel", nullptr, nullptr);
             if (result == 1)
             {
                 mainWindow->mainComponent.deleteConvertedFiles();

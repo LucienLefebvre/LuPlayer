@@ -629,9 +629,9 @@ void SoundPlayer::savePlaylist()
     juce::FileChooser chooser("Choose an XML file to save", juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Saves"), "*.xml");
     if (chooser.browseForFileToSave(true))
     {
-        juce::File myPlaylistSave;
-        myPlaylistSave = chooser.getResult();
-        multiPlayer.writeTo(myPlaylistSave);
+            juce::File myPlaylistSave;
+            myPlaylistSave = chooser.getResult();
+            multiPlayer.writeTo(myPlaylistSave);
     }
 }
 
