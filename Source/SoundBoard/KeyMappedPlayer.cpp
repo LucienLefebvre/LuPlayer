@@ -606,3 +606,9 @@ juce::KeyPress KeyMappedPlayer::getShortcut()
 {
     return shortcutKeyPress;
 }
+
+bool KeyMappedPlayer::isFileLoaded()
+{
+    if (soundPlayer != nullptr)
+        return soundPlayer->isFileLoaded();
+}

@@ -94,7 +94,6 @@ Settings::Settings() : settingsFile(options)
     Settings::preferedAudioDeviceName = properties.getUserSettings()->getValue("audioDeviceName");
     Settings::preferedSoundPlayerMode = properties.getUserSettings()->getValue("PreferedSoundPlayerMode").getIntValue();
 
-#if RFBUILD
     if (properties.getUserSettings()->getValue("Converted Sound Path").isEmpty())
     {
         juce::File directory = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Sounds");
@@ -103,8 +102,6 @@ Settings::Settings() : settingsFile(options)
     }
     else
         Settings::convertedSoundsPath = properties.getUserSettings()->getValue("Converted Sound Path");
-#endif
-
 
     if (properties.getUserSettings()->getValue("Skew Factor").isEmpty())
         Settings::skewFactorGlobal = 0.5;
@@ -776,8 +773,6 @@ juce::StringArray Settings::getAcceptedFileFormats()
     juce::StringArray formats;
     formats.add(".wav");
     formats.add(".WAV");
-    formats.add(".bwf");
-    formats.add(".BWF");
     formats.add(".aiff");
     formats.add(".AIFF");
     formats.add(".aif");
@@ -788,5 +783,9 @@ juce::StringArray Settings::getAcceptedFileFormats()
     formats.add(".OPUS");
     formats.add(".mp3");
     formats.add(".MP3");
+#if RFBUILD
+    formats.add(".bwf");
+    formats.add(".BWF");
+#endif
     return formats;
 }

@@ -74,6 +74,8 @@ public:
 
     juce::KeyPress getShortcut();
 
+    bool isFileLoaded();
+
     std::unique_ptr<juce::ChangeBroadcaster> playerDraggedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
     std::unique_ptr<juce::ChangeBroadcaster> colourChangedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 private:

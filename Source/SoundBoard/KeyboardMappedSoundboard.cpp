@@ -88,15 +88,31 @@ void KeyboardMappedSoundboard::prepareToPlay(int samplesPerBlockExpected, double
 void KeyboardMappedSoundboard::fileDragMove(const juce::StringArray& files, int x, int y)
 {
     juce::Point<int> mousePosition(x, y);
-    auto pointOnTopLevel = getLocalPoint(getTopLevelComponent(), mousePosition);
-    for (auto* player : mappedPlayers)
+    auto pointOnTopLevel = getLocalPoint(this, mousePosition);
+    for (int i = 0; i < mappedPlayers.size(); i++)
     {
+        auto player = mappedPlayers[i];
+        player->isDraggedOver(false);
         if (player->getBounds().contains(pointOnTopLevel))
         {
             player->isDraggedOver(true);
+            if (files.size() > 1)
+            {
+                for (int j = 1; j < files.size(); j++)
+                {
+                    if (mappedPlayers[i + j] != nullptr)
+                        mappedPlayers[i + j]->isDraggedOver(true);
+                }
+            }
+            for (int k = i + files.size(); k < mappedPlayers.size(); k++)
+            {
+                if (mappedPlayers[k] != nullptr)
+                    mappedPlayers[k]->isDraggedOver(false);
+            }
+            return;
         }
-        else
-            player->isDraggedOver(false);
+        //else
+        //    player->isDraggedOver(false);
     }
 }
 
@@ -110,27 +126,34 @@ void KeyboardMappedSoundboard::fileDragExit(const juce::StringArray& files, int 
 
 bool KeyboardMappedSoundboard::isInterestedInFileDrag(const juce::StringArray& files)
 {
-    bool isInterested = isInterested;
+    juce::Array<bool> filesResults;
     for (auto file : files)
     {
         juce::File f(file);
-        for (auto format : Settings::getAcceptedFileFormats())
-        {
-            if (f.hasFileExtension(format))
-                return true;
-        }
+        auto formats = Settings::getAcceptedFileFormats();
+        if (!formats.contains(f.getFileExtension()))
+            return false;
     }
-    return false;
+    return true;
 }
 
 void KeyboardMappedSoundboard::filesDropped(const juce::StringArray& files, int x, int y)
 {
     auto pos = juce::Point<int>(x, y);
-    for (auto* player : mappedPlayers)
+    for (int i = 0; i < mappedPlayers.size(); i++)
     {
+        auto player = mappedPlayers[i];
         if (player->getBounds().contains(pos))
         {
             player->loadFile(files[0], "");
+            if (files.size() > 1)
+            {
+                for (int j = 1; j < files.size(); j++)
+                {
+                    if (mappedPlayers[i + j] != nullptr)
+                        mappedPlayers[i + j]->loadFile(files[j], "");
+                }
+            }
         }
         player->isDraggedOver(false);
     }
