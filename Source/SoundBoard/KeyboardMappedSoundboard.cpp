@@ -82,37 +82,47 @@ void KeyboardMappedSoundboard::prepareToPlay(int samplesPerBlockExpected, double
     {
         meter->prepareToPlay(samplesPerBlockExpected, sampleRate);
     }
-
 }
 
 void KeyboardMappedSoundboard::fileDragMove(const juce::StringArray& files, int x, int y)
 {
     juce::Point<int> mousePosition(x, y);
     auto pointOnTopLevel = getLocalPoint(this, mousePosition);
+
+    dragAndDropDestinationPlayers.clear();
+
     for (int i = 0; i < mappedPlayers.size(); i++)
     {
         auto player = mappedPlayers[i];
         player->isDraggedOver(false);
         if (player->getBounds().contains(pointOnTopLevel))
         {
-            player->isDraggedOver(true);
+            int playerID = i;
+            dragAndDropDestinationPlayers.add(player);
             if (files.size() > 1)
             {
                 for (int j = 1; j < files.size(); j++)
                 {
-                    if (mappedPlayers[i + j] != nullptr)
-                        mappedPlayers[i + j]->isDraggedOver(true);
+                    playerID = i + j;
+                    auto otherPlayer = mappedPlayers[playerID];
+                    if (otherPlayer != nullptr)
+                    {
+                        if (otherPlayer->isVisible())
+                            dragAndDropDestinationPlayers.add(otherPlayer);
+                        else
+                        {
+                            playerID = i + j + (10 - Settings::keyMappedSoundboardColumns);
+                            if (mappedPlayers[playerID] != nullptr)
+                                dragAndDropDestinationPlayers.add(mappedPlayers[playerID]);
+                        }
+                    }
                 }
             }
-            for (int k = i + files.size(); k < mappedPlayers.size(); k++)
-            {
-                if (mappedPlayers[k] != nullptr)
-                    mappedPlayers[k]->isDraggedOver(false);
-            }
-            return;
         }
-        //else
-        //    player->isDraggedOver(false);
+    }
+    for (auto player : dragAndDropDestinationPlayers)
+    {
+        player->isDraggedOver(true);
     }
 }
 
@@ -139,24 +149,13 @@ bool KeyboardMappedSoundboard::isInterestedInFileDrag(const juce::StringArray& f
 
 void KeyboardMappedSoundboard::filesDropped(const juce::StringArray& files, int x, int y)
 {
-    auto pos = juce::Point<int>(x, y);
-    for (int i = 0; i < mappedPlayers.size(); i++)
+    for (int i = 0; i < dragAndDropDestinationPlayers.size(); i++)
     {
-        auto player = mappedPlayers[i];
-        if (player->getBounds().contains(pos))
-        {
-            player->loadFile(files[0], "");
-            if (files.size() > 1)
-            {
-                for (int j = 1; j < files.size(); j++)
-                {
-                    if (mappedPlayers[i + j] != nullptr)
-                        mappedPlayers[i + j]->loadFile(files[j], "");
-                }
-            }
-        }
+        auto player = dragAndDropDestinationPlayers[i];
+        player->loadFile(files[i], "");
         player->isDraggedOver(false);
     }
+    dragAndDropDestinationPlayers.clear();
 }
 void KeyboardMappedSoundboard::setDroppedFile(juce::Point<int> p,juce::String path,juce::String name)
 {

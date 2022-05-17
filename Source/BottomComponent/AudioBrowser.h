@@ -242,7 +242,8 @@ public:
         fileFolder = new juce::File(juce::File::getSpecialLocation(juce::File::userDesktopDirectory));
         int flags = juce::FileBrowserComponent::openMode |
             juce::FileBrowserComponent::canSelectFiles |
-            juce::FileBrowserComponent::filenameBoxIsReadOnly;
+            juce::FileBrowserComponent::filenameBoxIsReadOnly |
+            juce::FileBrowserComponent::canSelectMultipleItems;
         m_wcFileFilter = new juce::WildcardFileFilter(("*.wav;*.WAV;*.mp3;*.MP3;*.bwf;*.BWF;*.aif;*.AIF;*.aiff;*.AIFF;*.flac;*.FLAC"), ("*"), ("Audio FIles"));
 
         Settings::sampleRateValue.addListener(this);
