@@ -215,10 +215,13 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
     else if (source == bottomComponent.audioPlaybackDemo.fileDraggedFromBrowser) 
     {
-        std::unique_ptr<juce::StringArray> null = std::make_unique<juce::StringArray >();
+        //std::unique_ptr<juce::StringArray> null = std::make_unique<juce::StringArray >();
+        auto files = bottomComponent.audioPlaybackDemo.getSelectedFiles();
         if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
         {
-            soundPlayers[0]->keyMappedSoundboard->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY());
+            soundPlayers[0]->keyMappedSoundboard->fileDragMove(files, 
+                            getMouseXYRelative().getX(), 
+                            getMouseXYRelative().getY());
         }
         else
         {
@@ -227,13 +230,13 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
             int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
 
             if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
-                soundPlayers[0]->myPlaylists[0]->fileDragMove(*null, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
+                soundPlayers[0]->myPlaylists[0]->fileDragMove(files, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
             else if (getMouseXYRelative().getX() > cartPosition)
-                soundPlayers[0]->myPlaylists[1]->fileDragMove(*null, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
+                soundPlayers[0]->myPlaylists[1]->fileDragMove(files, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
             else
             {
-                soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
-                soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
+                soundPlayers[0]->myPlaylists[0]->fileDragExit(files);
+                soundPlayers[0]->myPlaylists[1]->fileDragExit(files);
             }
         }
         grabKeyboardFocus();
@@ -243,22 +246,27 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         int cartPosition = soundPlayers[0]->playlistbisViewport.getPosition().getX();
         int playlistScrollPosition = soundPlayers[0]->playlistViewport.getViewPositionY();
         int cartScrollPoisiton = soundPlayers[0]->playlistbisViewport.getViewPositionY();
-        std::unique_ptr<juce::StringArray> null = std::make_unique<juce::StringArray >();
-        std::unique_ptr<juce::File> myFile = std::make_unique<juce::File>(bottomComponent.audioPlaybackDemo.fileBrowser->getSelectedFile(0));
+
+        auto files = bottomComponent.audioPlaybackDemo.getSelectedFiles();
         if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap && soundPlayers[0]->keyMappedSoundboard != nullptr)
         {
-            soundPlayers[0]->keyMappedSoundboard->setDroppedFile(getMouseXYRelative(), myFile->getFullPathName(), myFile->getFileNameWithoutExtension());
-            soundPlayers[0]->keyMappedSoundboard->fileDragExit(*null.get());
+            soundPlayers[0]->keyMappedSoundboard->filesDropped(files, getMouseXYRelative().x, getMouseXYRelative().y);
+            soundPlayers[0]->keyMappedSoundboard->fileDragExit(files);
         }
         else
         {
             if (getMouseXYRelative().getX() < (soundPlayers[0]->myPlaylists[0]->getPosition().getX() + soundPlayers[0]->myPlaylists[0]->getWidth()))
-                soundPlayers[0]->myPlaylists[0]->filesDropped(myFile->getFullPathName(), getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
+                soundPlayers[0]->myPlaylists[0]->filesDropped(files, getMouseXYRelative().getX(), getMouseXYRelative().getY() - playlistStartY + playlistScrollPosition);
             else if (getMouseXYRelative().getX() > cartPosition)
-                soundPlayers[0]->myPlaylists[1]->filesDropped(myFile->getFullPathName(), getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
-            soundPlayers[0]->myPlaylists[0]->fileDragExit(*null);
-            soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
+                soundPlayers[0]->myPlaylists[1]->filesDropped(files, getMouseXYRelative().getX() - cartPosition, getMouseXYRelative().getY() - playlistStartY + cartScrollPoisiton);
+            soundPlayers[0]->myPlaylists[0]->fileDragExit(files);
+            soundPlayers[0]->myPlaylists[1]->fileDragExit(files);
         }
+        grabKeyboardFocus();
+    }
+    else if (source == bottomComponent.audioPlaybackDemo.fileDoubleClickBroadcaster.get())
+    {
+        soundPlayers[0]->loadInFirstEmptyPlayer(bottomComponent.audioPlaybackDemo.getSelectedFiles()[0]);
         grabKeyboardFocus();
     }
     else if (source == bottomComponent.recorderComponent.mouseDragInRecorder)//when mouse is dragged in recorder, desactivate shortcuts keys for players
@@ -400,6 +408,13 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
                 soundPlayers[0]->myPlaylists[1]->fileDragExit(*null);
             }
             grabKeyboardFocus();
+        }
+        else if (source == bottomComponent.dbBrowser.fileDoubleClickBroadcaster.get())
+        {
+        juce::String selectedSoundName = bottomComponent.dbBrowser.getSelectedSoundName();
+        juce::String fullPathName = bottomComponent.dbBrowser.getSelectedFile().getFullPathName();
+        soundPlayers[0]->loadInFirstEmptyPlayer(fullPathName, selectedSoundName);
+        grabKeyboardFocus();
         }
         else if (source == bottomComponent.distantDbBrowser.fileDraggedFromDataBase)
         {
@@ -1008,6 +1023,7 @@ void MainComponent::initializeBottomComponent()
     addAndMakeVisible(bottomComponent);
     bottomComponent.audioPlaybackDemo.fileDraggedFromBrowser->addChangeListener(this);
     bottomComponent.audioPlaybackDemo.fileDroppedFromBrowser->addChangeListener(this);
+    bottomComponent.audioPlaybackDemo.fileDoubleClickBroadcaster->addChangeListener(this);
     bottomComponent.recorderComponent.mouseDragInRecorder->addChangeListener(this);
     bottomComponent.recorderComponent.spaceBarKeyPressed->addChangeListener(this);
     bottomComponent.cuePlay->addChangeListener(this);
@@ -1026,6 +1042,7 @@ void MainComponent::initializeBottomComponent()
     bottomComponent.audioPlaybackDemo.fileDroppedFromBrowser->addChangeListener(this);
     bottomComponent.dbBrowser.fileDraggedFromDataBase->addChangeListener(this);
     bottomComponent.dbBrowser.fileDroppedFromDataBase->addChangeListener(this);
+    bottomComponent.dbBrowser.fileDoubleClickBroadcaster->addChangeListener(this);
     bottomComponent.distantDbBrowser.fileDraggedFromDataBase->addChangeListener(this);
     bottomComponent.distantDbBrowser.fileDroppedFromDataBase->addChangeListener(this);
 #endif

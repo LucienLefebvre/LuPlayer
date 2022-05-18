@@ -47,18 +47,19 @@ public:
             sourceChannelInfo.reset(new juce::AudioSourceChannelInfo(*readerBuffer.get()));
             loudnessMeter.prepareToPlay(actualSampleRate, reader->numChannels, actualSamplesPerBlocksExpected, 20);
             juce::int64 numSamples = reader->lengthInSamples;
-
-            while (numSamples > 0)
+            juce::int64 remainingSamples = numSamples;
+            while (remainingSamples > 0)
             {
                 readerSource->getNextAudioBlock(*sourceChannelInfo.get());
                 loudnessMeter.processBlock(*readerBuffer.get());
-                numSamples -= actualSamplesPerBlocksExpected;
+                remainingSamples -= actualSamplesPerBlocksExpected;
+                progress = 1 - ((double)remainingSamples / (double)numSamples);
             }
             integratedLoudness = loudnessMeter.getIntegratedLoudness();
             if (reader->numChannels == 1)
                 integratedLoudness += 3;
         }
-
+        progress = -1;
         loudnessCalculatedBroadcaster->sendChangeMessage();
         loudnessMeter.reset();
     }
@@ -108,6 +109,8 @@ public:
 
     int actualSamplesPerBlocksExpected = 480;
     double actualSampleRate = 48000;
+
+    double progress = 0;
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(R128IntegratedThread)
 };

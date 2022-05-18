@@ -10,19 +10,21 @@ EnveloppeEditor::EnveloppeEditor()
 
     soundColour = BLUE;
 
-    addAndMakeVisible(&playHead);
-    playHead.setColour(juce::Colours::green);
+    //addAndMakeVisible(&playHead);
+    //playHead.setColour(juce::Colours::green);
 
-    addAndMakeVisible(&cuePlayHead);
-    cuePlayHead.setColour(juce::Colours::black);
+    //addAndMakeVisible(&cuePlayHead);
+    //cuePlayHead.setColour(juce::Colours::black);
 
-    addChildComponent(&inMark);
-    inMark.setColour(juce::Colour(0, 196, 255));
+    //addChildComponent(&inMark);
+    //inMark.setColour(juce::Colour(0, 196, 255));
 
-    addChildComponent(&outMark);
-    outMark.setColour(juce::Colour(238, 255, 0));
+    //addChildComponent(&outMark);
+    //outMark.setColour(juce::Colour(238, 255, 0));
 
-    juce::Timer::startTimerHz(60);
+    juce::Timer::startTimerHz(30);
+
+    setBufferedToImage(true);
 }
 
 EnveloppeEditor::~EnveloppeEditor()
@@ -33,8 +35,8 @@ EnveloppeEditor::~EnveloppeEditor()
 //==============================================================================
 void EnveloppeEditor::paint(juce::Graphics& g)
 {
+    DBG("paint");
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-
     if (editedPlayer != nullptr)
     {
         if (editedPlayer->getColourHasChanged())
@@ -195,37 +197,7 @@ void EnveloppeEditor::setEditedPlayer(Player* p)
 void EnveloppeEditor::timerCallback()
 {
     if (editedPlayer != nullptr)
-    {   //transport playhead
-        juce::AudioTransportSource* transport = &editedPlayer->transport;
-        auto audioPosition = (float)transport->getCurrentPosition();
-        auto transportLenght = transport->getLengthInSeconds();
-        auto drawPosition = (timeToX(audioPosition / transportLenght));
-        playHead.setTopLeftPosition(drawPosition, 0);
-
-        //cue transport playhead
-        juce::AudioTransportSource* cueTransport = &editedPlayer->cueTransport;
-        auto cueaudioPosition = (float)cueTransport->getCurrentPosition();
-        auto cuetransportLenght = cueTransport->getLengthInSeconds();
-        auto cuedrawPosition = (timeToX(cueaudioPosition / cuetransportLenght));
-        cuePlayHead.setTopLeftPosition(cuedrawPosition, 0);
-
-        //in mark
-        if (editedPlayer->isStartTimeSet())
-        {
-            inMark.setVisible(true);
-            inMark.setTopLeftPosition(timeToX(editedPlayer->getStart() / editedPlayer->transport.getLengthInSeconds()), 0);
-        }
-        else
-            inMark.setVisible(false);
-
-        //out mark
-        if (editedPlayer->isStopTimeSet())
-        {
-            outMark.setVisible(true);
-            outMark.setTopLeftPosition(timeToX(editedPlayer->getStop() / editedPlayer->transport.getLengthInSeconds()), 0);
-        }
-        else
-            outMark.setVisible(false);
+    {
         if (myPoints[1] != nullptr)
         {//generate random position for debugging
             /*std::random_device rd;

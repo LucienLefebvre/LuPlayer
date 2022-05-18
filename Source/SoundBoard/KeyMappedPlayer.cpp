@@ -74,9 +74,6 @@ KeyMappedPlayer::KeyMappedPlayer()
     dBLabel.reset(new juce::Label());
     addChildComponent(dBLabel.get());
 
-    busyBar.reset(new juce::ProgressBar(busyBarValue));
-    addChildComponent(busyBar.get());
-    busyBar->setAlpha(0.7);
 }
 
 KeyMappedPlayer::~KeyMappedPlayer()
@@ -109,9 +106,9 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
         {
             if (soundPlayer->isEnveloppeEnabled())
             {
-                float time = ((i - thumbnailBounds.getX()) * soundPlayer->getLenght() / thumbnailBounds.getWidth()) / soundPlayer->getLenght();
-                float value = juce::Decibels::decibelsToGain(soundPlayer->getEnveloppeValue(time, *soundPlayer->getEnveloppePath()) * 24);
-                gainValue.set(i, value);
+                //float time = ((i - thumbnailBounds.getX()) * soundPlayer->getLenght() / thumbnailBounds.getWidth()) / soundPlayer->getLenght();
+                //float value = juce::Decibels::decibelsToGain(soundPlayer->getEnveloppeValue(time, *soundPlayer->getEnveloppePath()) * 24);
+                gainValue.set(i, 1.0f);
             }
             else
             {
@@ -134,9 +131,9 @@ void KeyMappedPlayer::paint (juce::Graphics& g)
         {
             if (soundPlayer->isEnveloppeEnabled())
             {
-                float time = ((i - playThumbnailBounds.getX()) * soundPlayer->getLenght() / playThumbnailBounds.getWidth()) / soundPlayer->getLenght();
-                float value = juce::Decibels::decibelsToGain(soundPlayer->getEnveloppeValue(time, *soundPlayer->getEnveloppePath()) * 24);
-                playGainValue.set(i, value);
+                //float time = ((i - playThumbnailBounds.getX()) * soundPlayer->getLenght() / playThumbnailBounds.getWidth()) / soundPlayer->getLenght();
+                //float value = juce::Decibels::decibelsToGain(soundPlayer->getEnveloppeValue(time, *soundPlayer->getEnveloppePath()) * 24);
+                playGainValue.set(i, 1.0f);
             }
             else
             {
@@ -212,6 +209,10 @@ void KeyMappedPlayer::setPlayer(Player* p)
     soundPlayer->conversionLaunchedBroadcaster->addChangeListener(this);
     soundPlayer->conversionFinishedBroadcaster->addChangeListener(this);
     soundPlayer->enveloppePathChangedBroadcaster->addChangeListener(this);
+
+    busyBar.reset(new juce::ProgressBar(soundPlayer->luThread.progress));
+    addChildComponent(busyBar.get());
+    //busyBar->setAlpha(0.7);
 
     thumbnail = &soundPlayer->getAudioThumbnail();
     playThumbnail = &soundPlayer->getPlayThumbnail();

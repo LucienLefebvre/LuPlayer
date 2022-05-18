@@ -925,6 +925,25 @@ void SoundPlayer::positionViewport(int player)
     playlistbisViewport.setViewPosition(0, (player - 1) * 105);
 }
 
+void SoundPlayer::loadInFirstEmptyPlayer(juce::String file, juce::String name)
+{
+    for (int i = 0; i < myPlaylists[0]->players.size(); i++)
+    {
+        auto player = myPlaylists[0]->players[i];
+        if (!player->isFileLoaded())
+        {
+            player->loadFile(file, false);
+            if (name.isNotEmpty())
+                player->setName(name.toStdString());
+            return;
+        }
+    }
+    auto addedPlayer = myPlaylists[0]->addPlayer(myPlaylists[0]->players.size() - 1);
+    addedPlayer->loadFile(file, false);
+    if (name.isNotEmpty())
+        addedPlayer->setName(name.toStdString());
+}
+
 void SoundPlayer::mouseDragGetInfos(int playlistSource, int playerID)
 {
     auto* player = myPlaylists[playlistSource]->players[playerID];
@@ -954,200 +973,93 @@ void SoundPlayer::drawDragLines()
 {
     if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
     {
-        if (myPlaylists[playlistDragSource] != nullptr)
-        {
-            myPlaylists[playlistDragSource]->fileDragPlayerSource = playerDragSource;
-            myPlaylists[playlistDragSource]->dragPaintSourceRectangle = true;
-            for (auto i = 0; i < myPlaylists[0]->players.size(); i++)
-            {
-                if ((getMouseXYRelative().getX() < playlistViewport.getWidth())
-                    && (getMouseXYRelative().getX() > 0)
-                    && (getMouseXYRelative().getY() > (playlistViewport.getPosition().getY() - playlistViewport.getViewPositionY() + (105 * i) + dragZoneHeight)
-                        && (getMouseXYRelative().getY() < (playlistViewport.getPosition().getY() - playlistViewport.getViewPositionY() + (105 * (i + 1) - dragZoneHeight)))))
-                {
-                    if (playlistDragSource == 1)
-                    {
-                        playerMouseDragUp = i;
-                        playlistDragDestination = 0;
-                        myPlaylists[0]->fileDragPlayerDestination = playerMouseDragUp;
-                        destinationPlayerFound = true;
-                        myPlaylists[0]->fileDragPaintRectangle = false;
-                    }
-                    myPlaylists[0]->fileDragPaintLine = false;
-                    myPlaylists[1]->fileDragPaintRectangle = false;
-                    myPlaylists[1]->fileDragPaintLine = false;
-                    insertTop = false;
-                    myPlaylists[0]->repaint();
+        auto* sourcePlayer = myPlaylists[playlistDragSource]->players[playerDragSource];
 
-                }
-                else if (getMouseXYRelative().getY() > (playlistViewport.getPosition().getY() - playlistViewport.getViewPositionY() + (105 * i) + 100 - dragZoneHeight)
-                    && getMouseXYRelative().getY() < (playlistViewport.getPosition().getY() - playlistViewport.getViewPositionY() + (105 * i) + 100 + dragZoneHeight)
-                    && getMouseXYRelative().getX() < playlistViewport.getWidth()
-                    && (getMouseXYRelative().getX() > 0))
-                {
-                    playerMouseDragUp = i;
-                    playlistDragDestination = 0;
-                    if (soundPlayerMode != Mode::EightFaders)
-                        myPlaylists[0]->fileDragPaintLine = true;
-                    myPlaylists[0]->fileDragPaintRectangle = false;
-                    myPlaylists[1]->fileDragPaintRectangle = false;
-                    myPlaylists[1]->fileDragPaintLine = false;
-                    myPlaylists[0]->fileDragPlayerDestination = playerMouseDragUp;
-                    myPlaylists[0]->repaint();
-                    if (soundPlayerMode != Mode::EightFaders)
-                        destinationPlayerFound = true;
-                    insertTop = false;
-                }
-                else if (getMouseXYRelative().getY() < (playlistViewport.getPosition().getY() - playlistViewport.getViewPositionY() + dragZoneHeight)
-                    && getMouseXYRelative().getY() > (playlistViewport.getPosition().getY() - playlistViewport.getViewPositionY() - dragZoneHeight)
-                    && getMouseXYRelative().getX() < playlistViewport.getWidth()
-                    && (getMouseXYRelative().getX() > 0))
-                {
-                    if (soundPlayerMode != Mode::EightFaders)
-                        insertTop = true;
-                    playerMouseDragUp = -1;
-                    playlistDragDestination = 0;
-                    if (!isEightPlayerMode)
-                        myPlaylists[0]->fileDragPaintLine = true;
-                    myPlaylists[0]->fileDragPaintRectangle = false;
-                    myPlaylists[1]->fileDragPaintRectangle = false;
-                    myPlaylists[1]->fileDragPaintLine = false;
-                    myPlaylists[0]->fileDragPlayerDestination = playerMouseDragUp;
-                    myPlaylists[0]->repaint();
-                    if (soundPlayerMode != Mode::EightFaders)
-                        destinationPlayerFound = true;
-                }
-                else if (getMouseXYRelative().getY() < playlistViewport.getPosition().getY()
-                    || getMouseXYRelative().getY() > myPlaylists[0]->players.size() * 105
-                    || getMouseXYRelative().getX() > playlistViewport.getWidth()
-                    || (getMouseXYRelative().getX() < 0))
-                {
-                    myPlaylists[0]->fileDragPaintRectangle = false;
-                    myPlaylists[0]->fileDragPaintLine = false;
-                    myPlaylists[1]->fileDragPaintRectangle = false;
-                    myPlaylists[1]->fileDragPaintLine = false;
-                    destinationPlayerFound = false;
-                    playerMouseDragUp = -1;
-                    playlistDragDestination = -1;
-                    myPlaylists[0]->repaint();
-                    insertTop = false;
-                }
-                myPlaylists[1]->repaint();
-            }
-            if (destinationPlayerFound == false)
+        if (sourcePlayer != nullptr)
+        {
+            draggedSourcePlayer = sourcePlayer;
+            if (sourcePlayer->isFileLoaded())
             {
-                for (auto i = 0; i < myPlaylists[1]->players.size(); i++)
+                draggedDestinationPlayer = nullptr;
+                for (auto player : myPlaylists[0]->players)
+                    player->isDraggedOver(false);
+                for (auto player : myPlaylists[1]->players)
+                    player->isDraggedOver(false);
+                for (int p = 0; p < myPlaylists.size(); p++)
                 {
-                    if ((getMouseXYRelative().getX() > playlistbisViewport.getPosition().getX())
-                        && (getMouseXYRelative().getX() < getParentWidth())
-                        && (getMouseXYRelative().getY() > (playlistbisViewport.getPosition().getY() - playlistbisViewport.getViewPositionY() + (105 * i) + dragZoneHeight)
-                            && (getMouseXYRelative().getY() < (playlistbisViewport.getPosition().getY() - playlistbisViewport.getViewPositionY() + (105 * (i + 1) - dragZoneHeight)))))
+                    myPlaylists[p]->fileDragPlayerDestination = -1;
+                    myPlaylists[p]->fileDragPaintLine = false;
+                    insertTop = false;
+                    myPlaylists[p]->repaint();
+
+                    for (int i = 0; i < myPlaylists[p]->players.size(); i++)
                     {
-                        playerMouseDragUp = i;
-                        playlistDragDestination = 1;
-                        myPlaylists[1]->fileDragPaintRectangle = false;
-                        myPlaylists[1]->fileDragPaintLine = false;
-                        myPlaylists[0]->fileDragPaintRectangle = false;
-                        myPlaylists[0]->fileDragPaintLine = false;
-                        myPlaylists[1]->fileDragPlayerDestination = playerMouseDragUp;
-                        myPlaylists[1]->repaint();
-                        destinationPlayerFound = true;
-                        insertTop = false;
-                    }
-                    else if (getMouseXYRelative().getY() > (playlistbisViewport.getPosition().getY() - playlistbisViewport.getViewPositionY() + (105 * i) + 100 - dragZoneHeight)
-                        && getMouseXYRelative().getY() < (playlistbisViewport.getPosition().getY() - playlistbisViewport.getViewPositionY() + (105 * i) + 100 + dragZoneHeight)
-                        && getMouseXYRelative().getX() > playlistbisViewport.getPosition().getX()
-                        && (getMouseXYRelative().getX() < getParentWidth()))
-                    {
-                        playerMouseDragUp = i;
-                        playlistDragDestination = 1;
-                        if (!isEightPlayerMode)
-                            myPlaylists[1]->fileDragPaintLine = true;
-                        myPlaylists[1]->fileDragPaintRectangle = false;
-                        myPlaylists[0]->fileDragPaintRectangle = false;
-                        myPlaylists[0]->fileDragPaintLine = false;
-                        myPlaylists[1]->fileDragPlayerDestination = playerMouseDragUp;
-                        myPlaylists[1]->repaint();
-                        if (!isEightPlayerMode)
-                            destinationPlayerFound = true;
-                        insertTop = false;
-                    }
-                    else if (getMouseXYRelative().getY() < (playlistbisViewport.getPosition().getY() - playlistbisViewport.getViewPositionY() + dragZoneHeight)
-                        && getMouseXYRelative().getY() > (playlistbisViewport.getPosition().getY() - playlistbisViewport.getViewPositionY() - dragZoneHeight)
-                        && getMouseXYRelative().getX() > playlistbisViewport.getPosition().getX()
-                        && (getMouseXYRelative().getX() < getParentWidth()))
-                    {
-                        if (!isEightPlayerMode)
+                        auto* player = myPlaylists[p]->players[i];
+                        juce::Point<int> mouseGlobal = localPointToGlobal(getMouseXYRelative());
+
+                        if (myPlaylists[p]->players[0]->getScreenBounds().removeFromTop(playerInsertDragZoneHeight).contains(mouseGlobal))
+                        {
                             insertTop = true;
-                        playerMouseDragUp = -1;
-                        playlistDragDestination = 1;
-                        if (!isEightPlayerMode)
-                            myPlaylists[1]->fileDragPaintLine = true;
-                        myPlaylists[1]->fileDragPaintRectangle = false;
-                        myPlaylists[0]->fileDragPaintRectangle = false;
-                        myPlaylists[0]->fileDragPaintLine = false;
-                        myPlaylists[1]->fileDragPlayerDestination = playerMouseDragUp;
-                        myPlaylists[1]->repaint();
-                        destinationPlayerFound = true;
+                            playerMouseDragUp = -1;
+                            myPlaylists[p]->fileDragPlayerDestination = playerMouseDragUp;
+                            playlistDragDestination = p;
+                            myPlaylists[p]->fileDragPaintLine = true;
+                            destinationPlayerFound = true;
+                            myPlaylists[p]->repaint();
+                        }
+                        else if (myPlaylists[p]->players[i]->getScreenBounds().removeFromBottom(playerInsertDragZoneHeight).contains(mouseGlobal))
+                        {
+                            myPlaylists[p]->fileDragPlayerDestination = i;
+                            myPlaylists[p]->fileDragPaintLine = true;
+                            playlistDragDestination = p;
+                            playerMouseDragUp = i;
+                            myPlaylists[p]->repaint();
+                        }
+                        else if (player->getScreenBounds().contains(mouseGlobal) && !player->isFileLoaded())
+                        {
+                            playlistDragDestination = p;
+                            playerMouseDragUp = i;
+                            draggedDestinationPlayer = player;
+                            draggedDestinationPlayer->isDraggedOver(true);
+                            return;
+                        }
                     }
-                    else if (getMouseXYRelative().getY() < playlistbisViewport.getPosition().getY()
-                        || getMouseXYRelative().getY() > myPlaylists[1]->players.size() * 105
-                        || getMouseXYRelative().getX() < playlistbisViewport.getPosition().getX()
-                        || (getMouseXYRelative().getX() > getParentWidth()))
-                    {
-                        myPlaylists[1]->fileDragPaintRectangle = false;
-                        myPlaylists[1]->fileDragPaintLine = false;
-                        myPlaylists[0]->fileDragPaintRectangle = false;
-                        myPlaylists[0]->fileDragPaintLine = false;
-                        insertTop = false;
-                        destinationPlayerFound = false;
-                        playerMouseDragUp = -1;
-                        playlistDragDestination = -1;
-                        myPlaylists[1]->repaint();
-                    }
-                    myPlaylists[0]->repaint();
+                }
+                if (draggedDestinationPlayer != nullptr)
+                {
+                    draggedDestinationPlayer->isDraggedOver(true);
                 }
             }
         }
     }
     else if (soundPlayerMode == Mode::EightFaders)
     {
-        int a = 1;
-        int destinationPlaylist = -1;
-        int destinationPlayer = -1;
         auto* sourcePlayer = myPlaylists[playlistDragSource]->players[playerDragSource];
+
         if (sourcePlayer != nullptr)
         {
+            draggedSourcePlayer = sourcePlayer;
             if (sourcePlayer->isFileLoaded())
             {
+                draggedDestinationPlayer = nullptr;
                 for (int p = 0; p < myPlaylists.size(); p++)
                 {
                     for (int i = 0; i < myPlaylists[p]->players.size(); i++)
                     {
                         auto* player = myPlaylists[p]->players[i];
                         juce::Point<int> mouseGlobal = localPointToGlobal(getMouseXYRelative());
-                        if (player->getScreenBounds().contains(mouseGlobal)
-                            && !player->isFileLoaded())
-                        {
-                            destinationPlaylist = p;
-                            playlistDragDestination = p;
-                            destinationPlayer = i;
-                            playerMouseDragUp = i;
-                            myPlaylists[p]->fileDragPaintRectangle = true;
-                            myPlaylists[p]->fileDragPlayerDestination = destinationPlayer;
-                            myPlaylists[0]->repaint();
-                            myPlaylists[1]->repaint();
-                            break;
-                        }
-                        else
-                        {
-                            myPlaylists[p]->fileDragPaintRectangle = false;
-                            myPlaylists[p]->fileDragPlayerDestination = -1;
-                            //playlistDragDestination = -1;
-                            myPlaylists[0]->repaint();
-                            myPlaylists[1]->repaint();
-                        }
+
+                        if (player->getScreenBounds().contains(mouseGlobal) && !player->isFileLoaded())
+                            draggedDestinationPlayer = player;
                     }
+                }
+                for (auto player : myPlaylists[0]->players)
+                    player->isDraggedOver(false);
+                for (auto player : myPlaylists[1]->players)
+                    player->isDraggedOver(false);
+                if (draggedDestinationPlayer != nullptr)
+                {
+                    draggedDestinationPlayer->isDraggedOver(true);
                 }
             }
         }
@@ -1158,39 +1070,26 @@ void SoundPlayer::mouseDragDefinePlayer()
 {
     if (soundPlayerMode == Mode::OnePlaylistOneCart)
     {
-        if (playlistDragDestination != -1)
-            mouseDragSetInfos(playlistDragDestination, playerMouseDragUp);
-        else
+        if (draggedSourcePlayer != nullptr && draggedDestinationPlayer != nullptr)
         {
-            mouseDragEnd(0);
-            mouseDragEnd(1);
+            draggedDestinationPlayer->setPlayerInfo(draggedSourcePlayer->getPlayerInfo());
+            draggedSourcePlayer->deleteFile();
+
         }
+        else if (playlistDragDestination != -1)
+            mouseDragSetInfos(playlistDragDestination, playerMouseDragUp);
+
     }
     else if (soundPlayerMode == Mode::EightFaders)
     {
-        if (playlistDragDestination != -1
-            && playlistDragSource != -1
-            && playerDragSource != -1
-            && playerMouseDragUp != -1)
+        if (draggedSourcePlayer != nullptr && draggedDestinationPlayer != nullptr)
         {
-            if (myPlaylists[playlistDragSource]->players[playerDragSource] != nullptr 
-                && myPlaylists[playlistDragDestination]->players[playerMouseDragUp] != nullptr)
-            {
-                auto* playerSource = myPlaylists[playlistDragSource]->players[playerDragSource];
-                auto* playerDest = myPlaylists[playlistDragDestination]->players[playerMouseDragUp];
-                if (playerSource->isFileLoaded()
-                    && !playerDest->isFileLoaded()
-                    && myPlaylists[playlistDragDestination]->fileDragPaintRectangle == true)
-                {
-                    mouseDragGetInfos(playlistDragSource, playerDragSource);
-                    setSoundInfos(playlistDragDestination, playerMouseDragUp);
-                    myPlaylists[playlistDragSource]->players[playerDragSource]->deleteFile();
-                    mouseDragEnd(playlistDragDestination);
-                }
-            }
+            draggedDestinationPlayer->setPlayerInfo(draggedSourcePlayer->getPlayerInfo());
+            draggedSourcePlayer->deleteFile();
         }
     }
-
+    mouseDragEnd(0);
+    mouseDragEnd(1);
 }
 
 bool SoundPlayer::isDraggable(int playlistSource, int playerSource, int playlistDestination, int playerDestination)
@@ -1365,6 +1264,13 @@ void SoundPlayer::mouseDragEnd(int playlistDestination)
         myPlaylists[playlistDragSource]->mouseDraggedStartPositionOK = false;
         myPlaylists[playlistDragSource]->grabFocusBroadcaster->sendChangeMessage();
     }
+    clearDragInfos();
+    draggedSourcePlayer = nullptr;
+    draggedDestinationPlayer = nullptr;
+    for (auto player : myPlaylists[0]->players)
+        player->isDraggedOver(false);
+    for (auto player : myPlaylists[1]->players)
+        player->isDraggedOver(false);
 }
 
 void SoundPlayer::checkAndRemovePlayer(int playlist, int player)
@@ -1429,56 +1335,6 @@ void SoundPlayer::reassignFaders(int playerIdDestination, int playerDragSource, 
     }
 
 }
-
-void SoundPlayer::copyPlayingSound()
-{
-    if (myPlaylists[0]->fader1IsPlaying)
-    {
-        if (myPlaylists[0]->players[myPlaylists[0]->fader1Player] != nullptr)
-        {
-            myPlaylists[1]->addPlayer(myPlaylists[1]->players.size() - 1);
-            myPlaylists[1]->players.getLast()->loadFile(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->getFilePath(), false);
-            myPlaylists[1]->players.getLast()->setTrimVolume(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->getTrimVolume());
-            myPlaylists[1]->players.getLast()->setName(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->getName());
-            myPlaylists[1]->players.getLast()->enableHPF(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->isHpfEnabled());
-            if (myPlaylists[0]->players[myPlaylists[0]->fader1Player]->startTimeSet)
-                myPlaylists[1]->players.getLast()->setStartTime(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->getStart());
-            if (myPlaylists[0]->players[myPlaylists[0]->fader1Player]->stopTimeSet)
-                myPlaylists[1]->players.getLast()->setStopTime(myPlaylists[0]->players[myPlaylists[0]->fader1Player]->getStop());
-        }
-    }
-    if (myPlaylists[0]->fader2IsPlaying)
-    {
-        if (myPlaylists[0]->players[myPlaylists[0]->fader2Player] != nullptr)
-        {
-            myPlaylists[1]->addPlayer(myPlaylists[1]->players.size() - 1);
-            myPlaylists[1]->players.getLast()->loadFile(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->getFilePath(), false);
-            myPlaylists[1]->players.getLast()->setTrimVolume(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->getTrimVolume());
-            myPlaylists[1]->players.getLast()->setName(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->getName());
-            myPlaylists[1]->players.getLast()->enableHPF(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->isHpfEnabled());
-            if (myPlaylists[0]->players[myPlaylists[0]->fader2Player]->startTimeSet)
-                myPlaylists[1]->players.getLast()->setStartTime(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->getStart());
-            if (myPlaylists[0]->players[myPlaylists[0]->fader2Player]->stopTimeSet)
-                myPlaylists[1]->players.getLast()->setStopTime(myPlaylists[0]->players[myPlaylists[0]->fader2Player]->getStop());
-        }
-    }
-    if (myPlaylists[0]->spaceBarIsPlaying)
-    {
-        if (myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId] != nullptr)
-        {
-            myPlaylists[1]->addPlayer(myPlaylists[1]->players.size() - 1);
-            myPlaylists[1]->players.getLast()->loadFile(myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->getFilePath(), false);
-            myPlaylists[1]->players.getLast()->setTrimVolume(myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->getTrimVolume());
-            myPlaylists[1]->players.getLast()->setName(myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->getName());
-            myPlaylists[1]->players.getLast()->enableHPF(myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->isHpfEnabled());
-            if (myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->startTimeSet)
-                myPlaylists[1]->players.getLast()->setStartTime(myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->getStart());
-            if (myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->stopTimeSet)
-                myPlaylists[1]->players.getLast()->setStopTime(myPlaylists[0]->players[myPlaylists[0]->spaceBarPlayerId]->getStop());
-        }
-    }
-}
-
 
 void SoundPlayer::setTimerTime(int timertime)
 {

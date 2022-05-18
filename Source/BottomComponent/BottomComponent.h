@@ -67,6 +67,6 @@ private:
     void currentTabChanged(int newCurrentTabIndex, const juce::String& newCurrentTabName);
 
     juce::TextButton soundBrowserButton;
-    int tabBarHeight = 30;
+    int tabBarHeight = 28;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BottomComponent)
 };

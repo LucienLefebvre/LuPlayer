@@ -161,12 +161,12 @@ Settings::Settings() : settingsFile(options)
         Settings::viewLastPlayedSound = properties.getUserSettings()->getValue("viewLastPlayedSound").getIntValue();
 
     if (properties.getUserSettings()->getValue("keyMappedRows").isEmpty())
-        Settings::keyMappedSoundboardRows = 3;
+        Settings::keyMappedSoundboardRows = 2;
     else
         Settings::keyMappedSoundboardRows = properties.getUserSettings()->getValue("keyMappedRows").getIntValue();
 
     if (properties.getUserSettings()->getValue("keyMappedColums").isEmpty())
-        Settings::keyMappedSoundboardColumns = 10;
+        Settings::keyMappedSoundboardColumns = 6;
     else
         Settings::keyMappedSoundboardColumns = properties.getUserSettings()->getValue("keyMappedColums").getIntValue();
 

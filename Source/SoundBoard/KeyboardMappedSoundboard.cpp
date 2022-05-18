@@ -86,11 +86,9 @@ void KeyboardMappedSoundboard::prepareToPlay(int samplesPerBlockExpected, double
 
 void KeyboardMappedSoundboard::fileDragMove(const juce::StringArray& files, int x, int y)
 {
-    juce::Point<int> mousePosition(x, y);
-    auto pointOnTopLevel = getLocalPoint(this, mousePosition);
+    auto pointOnTopLevel = getMouseXYRelative();
 
     dragAndDropDestinationPlayers.clear();
-
     for (int i = 0; i < mappedPlayers.size(); i++)
     {
         auto player = mappedPlayers[i];

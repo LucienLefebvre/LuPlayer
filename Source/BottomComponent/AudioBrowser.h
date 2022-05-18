@@ -244,8 +244,11 @@ public:
             juce::FileBrowserComponent::canSelectFiles |
             juce::FileBrowserComponent::filenameBoxIsReadOnly |
             juce::FileBrowserComponent::canSelectMultipleItems;
+#if RFBUILD
         m_wcFileFilter = new juce::WildcardFileFilter(("*.wav;*.WAV;*.mp3;*.MP3;*.bwf;*.BWF;*.aif;*.AIF;*.aiff;*.AIFF;*.flac;*.FLAC"), ("*"), ("Audio FIles"));
-
+#else
+        m_wcFileFilter = new juce::WildcardFileFilter(("*.wav;*.WAV;*.mp3;*.MP3;*.aif;*.AIF;*.aiff;*.AIFF;*.flac;*.FLAC"), ("*"), ("Audio FIles"));
+#endif
         Settings::sampleRateValue.addListener(this);
 
         // create the browser component
@@ -274,11 +277,6 @@ public:
         timeLabel.setFont(juce::Font(20.00f, juce::Font::plain).withTypefaceStyle("Regular"));
         timeLabel.setJustificationType(juce::Justification::centred);
 
-#if (JUCE_ANDROID || JUCE_IOS)
-        addAndMakeVisible(chooseFileButton);
-        chooseFileButton.addListener(this);
-#else
-
         directoryList.setDirectory(juce::File::getSpecialLocation(juce::File::userDesktopDirectory), true, true);
 
         fileTreeComp.setColour(juce::FileTreeComponent::backgroundColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
@@ -290,7 +288,6 @@ public:
         explanation.setEditable(false, false, false);
         explanation.setColour(juce::TextEditor::textColourId, juce::Colours::black);
         explanation.setColour(juce::TextEditor::backgroundColourId, juce::Colour(0x00000000));
-#endif
 
         addAndMakeVisible(zoomSlider);
         zoomSlider.setRange(0, 1, 0);
@@ -315,15 +312,6 @@ public:
         transportSource.addChangeListener(this);
         thread.startThread(3);
 
-#ifndef JUCE_DEMO_RUNNER
-        juce::RuntimePermissions::request(juce::RuntimePermissions::recordAudio,
-            [this](bool granted)
-            {
-                int numInputChannels = granted ? 2 : 0;
-                audioDeviceManager.initialise(numInputChannels, 2, nullptr, true, {}, nullptr);
-            });
-#endif
-
         setOpaque(true);
         setSize(500, 500);
     }
@@ -337,13 +325,7 @@ public:
         delete fileDroppedFromBrowser;
         delete cuePlay;
         transportSource.setSource(nullptr);
-
-#if (JUCE_ANDROID || JUCE_IOS)
-        chooseFileButton.removeListener(this);
-#else
         fileTreeComp.removeListener(this);
-#endif
-
         thumbnail->removeChangeListener(this);
     }
 
@@ -356,10 +338,15 @@ public:
 
     void mouseUp(const juce::MouseEvent& event)
     {
-        fileDroppedFromBrowser->sendChangeMessage();
+        if (!getScreenBounds().contains(event.getEventRelativeTo(getTopLevelComponent()).getPosition()))
+            fileDroppedFromBrowser->sendChangeMessage();
         setMouseCursor(juce::MouseCursor::NormalCursor);
     }
 
+    void fileDoubleClicked(const juce::File&) override
+    {
+        fileDoubleClickBroadcaster->sendChangeMessage();
+    }
     void paint(juce::Graphics& g) override
     {
         g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
@@ -412,6 +399,16 @@ public:
             startOrStop();
     }
 
+    juce::StringArray getSelectedFiles()
+    {
+        int numFiles = fileBrowser->getNumSelectedFiles();
+        juce::StringArray files;
+        for (auto i = 0; i < numFiles; i++)
+        {
+            files.add(fileBrowser->getSelectedFile(i).getFullPathName());
+        }
+        return files;
+    }
     juce::FileBrowserComponent* fileBrowser;
     juce::File* fileFolder;
     juce::AudioTransportSource transportSource;
@@ -421,6 +418,7 @@ public:
     juce::ChangeBroadcaster* fileDroppedFromBrowser;
     juce::ChangeBroadcaster* cuePlay;
     juce::Label timeLabel;
+    std::unique_ptr<juce::ChangeBroadcaster> fileDoubleClickBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 private:
     // if this PIP is running inside the demo runner, we'll use the shared device manager instead
 #ifndef JUCE_DEMO_RUNNER
@@ -581,7 +579,6 @@ private:
     }
 
     void fileClicked(const juce::File&, const juce::MouseEvent&) override {}
-    void fileDoubleClicked(const juce::File&) override {}
     void browserRootChanged(const juce::File&) override {}
 #endif
 

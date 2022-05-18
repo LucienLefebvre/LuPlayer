@@ -84,6 +84,7 @@ public:
     juce::XmlElement* createPlayerXmlElement(int player, int playlist, juce::XmlElement* e);
     void loadPlaylist();
     void SoundPlayer::positionViewport(int player);
+    void loadInFirstEmptyPlayer(juce::String file, juce::String name = "");
     void SoundPlayer::updateDraggedPlayerDisplay(int playerDragged, int playlistDragged);
 
     juce::MixerAudioSource myMixer;
@@ -143,7 +144,6 @@ private:
     void mouseDragEnd(int playlistDestination);
     void checkAndRemovePlayer(int playlist, int player);
     void reassignFaders(int playerIdDestination, int playerDragSource, int playlistDestination);
-    void copyPlayingSound();
     void changeListenerCallback(juce::ChangeBroadcaster* source);
     //SAVE
     juce::File myFile;
@@ -223,6 +223,11 @@ private:
     int deltaTime = 200;
 
     //DRAG AND DROP
+    Player* draggedSourcePlayer = nullptr;
+    Player* draggedDestinationPlayer = nullptr;
+    Playlist* draggedSourcePlaylist = nullptr;
+    Playlist* draggedDestinationPlaylist = nullptr;
+
     bool destinationPlayerFound = false;
     int dragZoneHeight = 25;
     int playerMouseDrag;

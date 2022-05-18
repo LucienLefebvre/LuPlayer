@@ -287,7 +287,7 @@ Player::Player(int index, Settings* s)
      Settings::audioOutputModeValue.addListener(this);
      setChannelsMapping();
     
-     convertingBar.reset(new juce::ProgressBar(progress));
+     convertingBar.reset(new juce::ProgressBar(luThread.progress));
      addChildComponent(*convertingBar);
      convertingBar->setTextToDisplay("Converting...");
     
@@ -425,6 +425,13 @@ void Player::paint (juce::Graphics& g)
        }
    }
     paintPlayHead(g, thumbnailBounds);
+
+    if (isDragged)
+    {
+        g.setColour(juce::Colours::red);
+        g.setOpacity(0.3f);
+        g.fillRoundedRectangle(0, 0, getWidth(), getHeight(), roundCornerSize);
+    }
 }
 
 //WAVEFORM DRAWING
@@ -1271,7 +1278,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
             cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         }
     }
-    else if (source == luThread.loudnessCalculatedBroadcaster)
+    else if (source == luThread.loudnessCalculatedBroadcaster && isFileLoaded())
     {
         juce::FileLogger::getCurrentLogger()->writeToLog("player lu thread finished");
         integratedLoudness = luThread.getILU();
@@ -2626,7 +2633,7 @@ Player::PlayerInfo Player::getPlayerInfo()
     p.trimVolume = getTrimVolume();
     p.loop = getIsLooping();
     p.hpfEnabled = isHpfEnabled();
-    p.startTime = isStartTimeSet();
+    p.startTimeSet = isStartTimeSet();
     p.stopTimeSet = isStopTimeSet();
     p.startTime = getStart();
     p.stopTime = getStop();
@@ -2661,4 +2668,10 @@ void Player::setPlayerInfo(Player::PlayerInfo p)
     setEnveloppePath(p.enveloppePath);
     if (p.colourHasChanged)
         setPlayerColour(p.playerColour);
+}
+
+void Player::isDraggedOver(bool b)
+{
+    isDragged = b;
+    repaint();
 }

@@ -109,6 +109,7 @@ void Playlist::paint(juce::Graphics& g)
             g.setColour(juce::Colour(37, 45, 49));
             g.drawHorizontalLine((playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)) - 2), 0, getParentWidth());
     }
+
     if (playlistType == 0)
     {
         for (auto i = 0; i < players.size(); i++)
@@ -136,61 +137,18 @@ void Playlist::paint(juce::Graphics& g)
 
     if (dragPaintSourceRectangle == true)
     {
-
         g.setColour(juce::Colour(40, 134, 189));
-        //Draw a rectangle surroundig the player :
-        //two top lines
-        g.drawHorizontalLine((playersStartHeightPosition + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) - 3), 0, getParentWidth());
-        g.drawHorizontalLine((playersStartHeightPosition + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) - 2), 0, getParentWidth());
-        //g.drawHorizontalLine((playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 1), 0, getParentWidth());
-        //two bottoms lines
-        g.drawHorizontalLine((playersStartHeightPosition + (playerHeight + spaceBetweenPlayer) + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) - 3), 0, getParentWidth());
-        g.drawHorizontalLine((playersStartHeightPosition + (playerHeight + spaceBetweenPlayer) + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) - 2), 0, getParentWidth());
-        //two lines at the left
-        g.drawVerticalLine(0, playersStartHeightPosition + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) - 2,
-            playersStartHeightPosition + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) + playerHeight + 2);
-        g.drawVerticalLine(1, playersStartHeightPosition + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) - 2,
-            playersStartHeightPosition + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) + playerHeight + 2);
-        //two lines at the right
-        g.drawVerticalLine(getParentWidth() - 1, playersStartHeightPosition + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) - 2,
-            playersStartHeightPosition + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) + playerHeight + 2);
-        g.drawVerticalLine(getParentWidth() - 2, playersStartHeightPosition + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) - 2,
-            playersStartHeightPosition + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) + playerHeight + 2);
-
-
+        int rectY = playersStartHeightPosition + (fileDragPlayerSource * (playerHeight + spaceBetweenPlayer)) - 2;
+        g.drawRect(0, rectY, getWidth(), playerHeight + 4, 2);
     }
-    g.setColour(juce::Colours::red);
 
     if (fileDragPaintLine == true && !eightPlayerMode)
     {
-        //Draw two lines at the insert position
-        g.drawHorizontalLine((playersStartHeightPosition + (playerHeight + spaceBetweenPlayer) + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 4), 0, getParentWidth());
-        g.drawHorizontalLine((playersStartHeightPosition + (playerHeight + spaceBetweenPlayer) + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 3), 0, getParentWidth());
-        g.drawHorizontalLine((playersStartHeightPosition + (playerHeight + spaceBetweenPlayer) + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 2), 0, getParentWidth());
-        g.drawHorizontalLine((playersStartHeightPosition + (playerHeight + spaceBetweenPlayer) + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 1), 0, getParentWidth());
-    }
-    else if (fileDragPaintRectangle == true && (fileDragPlayerSource != fileDragPlayerDestination))
-    {
-        //Draw a rectangle surroundig the player :
-        //two top lines
-        g.drawHorizontalLine((playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 3), 0, getParentWidth());
-        g.drawHorizontalLine((playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 2), 0, getParentWidth());
-        //g.drawHorizontalLine((playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 1), 0, getParentWidth());
-        //two bottoms lines
-        g.drawHorizontalLine((playersStartHeightPosition + (playerHeight + spaceBetweenPlayer) + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 3), 0, getParentWidth());
-        g.drawHorizontalLine((playersStartHeightPosition + (playerHeight + spaceBetweenPlayer) + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 2), 0, getParentWidth());
-        //two lines at the left
-        g.drawVerticalLine(0, playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 2,
-            playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) + playerHeight + 2);
-        g.drawVerticalLine(1, playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 2,
-            playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) + playerHeight + 2);
-        //two lines at the right
-        g.drawVerticalLine(getParentWidth() - 1, playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 2,
-            playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) + playerHeight + 2);
-        g.drawVerticalLine(getParentWidth() - 2, playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 2,
-            playersStartHeightPosition + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) + playerHeight + 2);
-        if (players[fileDragPlayerDestination] != nullptr)
-            g.fillRect(players[fileDragPlayerDestination]->getBounds());
+        g.setColour(juce::Colours::red);
+        g.setOpacity(0.5);
+        int rectY = playersStartHeightPosition + (playerHeight + spaceBetweenPlayer) + (fileDragPlayerDestination * (playerHeight + spaceBetweenPlayer)) - 4;
+        if (players[0] != nullptr)
+            g.fillRect(players[0]->getX(), rectY, players[0]->getWidth(), 4);
     }
 }
 
@@ -878,11 +836,11 @@ void Playlist::playersNextPositionClicked()
     }
 }
 
-void Playlist::addPlayer(int playerID)
+Player* Playlist::addPlayer(int playerID)
 {
     juce::FileLogger::getCurrentLogger()->writeToLog("Add player");
     int idAddedPlayer = playerID + 1;
-    players.insert(idAddedPlayer, new Player(idAddedPlayer, settings));
+    auto addedPlayer = players.insert(idAddedPlayer, new Player(idAddedPlayer, settings));
     if (players[idAddedPlayer] != nullptr)
     {
         if (eightPlayerMode)
@@ -966,6 +924,7 @@ void Playlist::addPlayer(int playerID)
         setOptions();
         repaint();
     }
+    return addedPlayer;
 }
 
 void Playlist::removePlayer(int playerID)
@@ -1281,7 +1240,7 @@ void Playlist::updateButtonsStates()
 
 void Playlist::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
-    for (auto i = 0; i < playerNumber; i++)
+    for (auto i = 0; i < players.size(); i++)
     {
         if (players[i] != nullptr)
         {
@@ -1481,12 +1440,12 @@ void Playlist::filesDropped(const juce::StringArray& files, int x, int y)
     {
         if (isInterestedInFileDrag(files))
         {
-            if (files.size() > 1)
+            if (files.size() > 1 && !eightPlayerMode)
             {
                 
                 addPlayer(i);
                 players[i + 1]->verifyAudioFileFormat(file);
-                players[i + 1]->setName(droppedName.toStdString());
+                players[i + 1]->setName(droppedName.toStdString()); 
                 i++;
             }
             else if (fileDragPaintLine == true)
@@ -1514,17 +1473,24 @@ void Playlist::filesDropped(const juce::StringArray& files, int x, int y)
             }
             else if (fileDragPaintRectangle == true)
             {
-                players[fileDragPlayerDestination]->verifyAudioFileFormat(file);
-                players[fileDragPlayerDestination]->setName(droppedName.toStdString());
+                if (players[fileDragPlayerDestination] != nullptr)
+                {
+                    players[fileDragPlayerDestination]->verifyAudioFileFormat(file);
+                    players[fileDragPlayerDestination]->setName(droppedName.toStdString());
+                    fileDragPlayerDestination++;
+                }
             }
             droppedName = "";
             updateNextPlayer();
         }
     }
-    if ((files.size() > 1) && fileDragPaintRectangle == true)
+    if ((files.size() > 1) && fileDragPaintRectangle == true && !eightPlayerMode)
         removePlayer(fileDragPlayerDestination);
     fileDragPaintRectangle = false;
     fileDragPaintLine = false;
+    fileDragNumFiles = 1;
+    for (auto player : players)
+        player->isDraggedOver(false);
     repaint();
 }
 
@@ -1537,47 +1503,67 @@ void Playlist::fileDragEnter(const juce::StringArray& files, int x, int y)
 }
 void Playlist::fileDragMove(const juce::StringArray& files, int x, int y)
 {
+    fileDragNumFiles = files.size();
+    auto pointOnTopLevel = getMouseXYRelative();
 
     if (x < getParentWidth())
     {
-        for (auto i = 0; i < playerNumber; i++)
+        for (auto i = 0; i < players.size(); i++)
         {
-            if ((playlistType == 0)|| (playlistType == 1))
-            {
-                if (y < (playersStartHeightPosition + playerInsertDragZoneHeight))
-                {
-                    //Insert at the top
-                    fileDragPlayerDestination = -1;
-                    fileDragPaintRectangle = false;
-                    if (!eightPlayerMode)
-                        fileDragPaintLine = true;
-                }
-                else if ((y > (playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)) + playerHeight - playerInsertDragZoneHeight))
-                    && (y < (playersStartHeightPosition + (i * (playerHeight + spaceBetweenPlayer)) + playerHeight + playerInsertDragZoneHeight)))
-                {
-                    //Insert between players
-                    fileDragPlayerDestination = i;
-                    fileDragPaintRectangle = false;
-                    if (!eightPlayerMode)
-                        fileDragPaintLine = true;
-                }
-                else if ((y > (playersStartHeightPosition + playerInsertDragZoneHeight + (i * (playerHeight + spaceBetweenPlayer))))
-                    && (y < (playersStartHeightPosition - playerInsertDragZoneHeight + playerHeight + (i * (playerHeight + spaceBetweenPlayer)))))
-                {
-                    //replace players
-                    fileDragPlayerDestination = i;
-                    if (players[fileDragPlayerDestination]->fileLoaded == false)
-                        fileDragPaintRectangle = true;
-                    fileDragPaintLine = false;
-                }
-            }
+             if (y < (playersStartHeightPosition + playerInsertDragZoneHeight))
+             {
+                 //Insert at the top
+                 fileDragPlayerDestination = -1;
+                 fileDragPaintRectangle = false;
+                 if (!eightPlayerMode)
+                     fileDragPaintLine = true;
+                 for (auto player : players)
+                     player->isDraggedOver(false);
+             }
+             else if (!eightPlayerMode && 
+                        players[i]->getBounds().removeFromBottom(playerInsertDragZoneHeight * 2).translated(0, playerInsertDragZoneHeight).contains(pointOnTopLevel))
+             {
+                 //Insert between players
+                 fileDragPlayerDestination = i;
+                 fileDragPaintRectangle = false;
+                 if (!eightPlayerMode)
+                     fileDragPaintLine = true;
+                 for (auto player : players)
+                     player->isDraggedOver(false);
+             }          
+             else if (players[i]->getBounds().contains(pointOnTopLevel))
+             {
+                 //replace players
+                 fileDragPlayerDestination = i;
+                 if (players[fileDragPlayerDestination] != nullptr)
+                 {
+                     if (players[fileDragPlayerDestination]->fileLoaded == false)
+                     {
+                         fileDragPaintRectangle = true;
+                         for (auto player : players)
+                             player->isDraggedOver(false);
+                         players[fileDragPlayerDestination]->isDraggedOver(true);
+                         if (files.size() > 1)
+                         {
+                             for (int j = 1; j < files.size(); j++)
+                             {
+                                 if (players[fileDragPlayerDestination + j] != nullptr)
+                                     players[fileDragPlayerDestination + j]->isDraggedOver(true);
+                             }
+                         }
+                     }
+             
+                 }
+                 fileDragPaintLine = false;
+             }
         }
-
     }
     else if (x > playerWidth)
     {
         fileDragPaintRectangle = false;
         fileDragPaintLine = false;
+        for (auto player : players)
+            player->isDraggedOver(false);
     }
     repaint();
 }
@@ -1586,7 +1572,8 @@ void Playlist::fileDragExit(const juce::StringArray& files)
 {
     fileDragPaintRectangle = false;
     fileDragPaintLine = false;
-
+    for (auto player : players)
+        player->isDraggedOver(false);
     repaint();
 }
 

@@ -100,6 +100,7 @@ public:
     bool loadFile(const juce::String& path, bool shouldSendChangeMessage);
     Player::PlayerInfo getPlayerInfo();
     void setPlayerInfo(Player::PlayerInfo p);
+    void isDraggedOver(bool b);
     std::string getFilePath();
 
     void setGain(float g);
@@ -319,6 +320,8 @@ public:
     foleys::LevelMeterSource meterSource;
     foleys::LevelMeterSource outMeterSource;
 
+    R128IntegratedThread luThread{ "Thread" };
+
 private:
     enum TransportState
     {
@@ -379,6 +382,8 @@ private:
     juce::Rectangle<int> thumbnailBounds;
 
     bool endRepainted = false;
+
+    bool isDragged = false;
 
     int roundCornerSize = 10;
     int leftControlsWidth = 50;
@@ -483,7 +488,7 @@ private:
     int previousMidiLevel = 0;
     int actualMidiLevel = 0;
 
-    R128IntegratedThread luThread{"Thread"};
+
     double integratedLoudness = 0.0;
     juce::Label normalizingLabel;
     bool hasBeenNormalized = false;

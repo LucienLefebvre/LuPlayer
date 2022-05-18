@@ -153,6 +153,17 @@ public:
         playModeSelector->addItem("Trigger", 1);
         playModeSelector->addItem("Start / Stop", 2);
         playModeSelector->addListener(this);
+
+        addAndMakeVisible(&playHead);
+        playHead.setColour(juce::Colours::green);
+        addAndMakeVisible(&cuePlayHead);
+        cuePlayHead.setColour(juce::Colours::black);
+        addChildComponent(&inMark);
+        inMark.setColour(juce::Colour(0, 196, 255));
+        inMark.setAlwaysOnTop(true);
+        addChildComponent(&outMark);
+        outMark.setColour(juce::Colour(238, 255, 0));
+        outMark.setAlwaysOnTop(true);
     }
 
     ~ClipEditor() override
@@ -209,6 +220,11 @@ public:
         outButton->setBounds(buttonsSpacer, inLabel->getBottom() + 5, volumeSliderWidth - 2 * buttonsSpacer, 20);
         outLabel->setBounds(buttonsSpacer, outButton->getBottom() + 5, volumeSliderWidth - 2 * buttonsSpacer, 20);
         loopButton->setBounds(buttonsSpacer, outLabel->getBottom() + 5, volumeSliderWidth - 2 * buttonsSpacer, 20);
+
+        playHead.setSize(2, enveloppeEditor.getHeight());
+        cuePlayHead.setSize(2, enveloppeEditor.getHeight());
+        inMark.setSize(2, enveloppeEditor.getHeight());
+        outMark.setSize(2, enveloppeEditor.getHeight());
     }
 
     void setPlayer(Player* p)
@@ -416,6 +432,49 @@ public:
             cueTimeLabel->setText(editedPlayer->getCueTimeAsString(), juce::NotificationType::dontSendNotification);
             meter->setRMSMeterData(editedPlayer->outMeterSource.getRMSLevel(0), editedPlayer->outMeterSource.getRMSLevel(1));
             meter->setPeakMeterDate(editedPlayer->outMeterSource.getMaxLevel(0), editedPlayer->outMeterSource.getMaxLevel(1));
+
+            //Playhead
+            juce::AudioTransportSource* transport = &editedPlayer->transport;
+            auto audioPosition = (float)transport->getCurrentPosition();
+            auto transportLenght = transport->getLengthInSeconds();
+            auto drawPosition = (enveloppeEditor.timeToX(audioPosition / transportLenght));
+            if (drawPosition < 0 || drawPosition > enveloppeEditor.getWidth())
+                drawPosition = -100;
+            playHead.setTopLeftPosition(enveloppeEditor.getX() + drawPosition, enveloppeEditor.getY());
+
+            //Cue Playhead
+            juce::AudioTransportSource* cueTransport = &editedPlayer->cueTransport;
+            auto cueaudioPosition = (float)cueTransport->getCurrentPosition();
+            auto cuetransportLenght = cueTransport->getLengthInSeconds();
+            auto cuedrawPosition = (enveloppeEditor.timeToX(cueaudioPosition / cuetransportLenght));
+            if (cuedrawPosition < 0 || cuedrawPosition > enveloppeEditor.getWidth())
+                cuedrawPosition = -100;
+            cuePlayHead.setTopLeftPosition(enveloppeEditor.getX() + cuedrawPosition, enveloppeEditor.getY());
+
+            //in mark
+            if (editedPlayer->isStartTimeSet())
+            {
+                inMark.setVisible(true);
+                auto inDrawPosition = enveloppeEditor.timeToX(editedPlayer->getStart() / editedPlayer->transport.getLengthInSeconds());
+                if (inDrawPosition < 0 || inDrawPosition > enveloppeEditor.getWidth())
+                    inDrawPosition = -100;
+                inMark.setTopLeftPosition(enveloppeEditor.getX() + inDrawPosition, enveloppeEditor.getY());
+            }
+            else
+                inMark.setVisible(false);
+
+            //out mark
+            if (editedPlayer->isStopTimeSet())
+            {
+                outMark.setVisible(true);
+                auto outDrawPosition = enveloppeEditor.timeToX(editedPlayer->getStop() / editedPlayer->transport.getLengthInSeconds());
+                if (outDrawPosition < 0 || outDrawPosition > enveloppeEditor.getWidth())
+                    outDrawPosition = -100;
+                outMark.setTopLeftPosition(enveloppeEditor.getX() + outDrawPosition, enveloppeEditor.getY());
+            }
+            else
+                outMark.setVisible(false);
+
         }
     }
 
@@ -548,6 +607,8 @@ public:
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         fxButton->setColour(juce::TextButton::ColourIds::buttonColourId,
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        inMark.setVisible(false);
+        outMark.setVisible(false);
 #if RFBUILD
         denoiseButton->setColour(juce::TextButton::ColourIds::buttonColourId,
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
@@ -636,6 +697,11 @@ public:
     std::unique_ptr<juce::TextButton> colourButton;
     std::unique_ptr<juce::Label> playModeLabel;
     std::unique_ptr<juce::ComboBox> playModeSelector;
+
+    PlayHead playHead;
+    PlayHead cuePlayHead;
+    PlayHead inMark;
+    PlayHead outMark;
 #if RFBUILD
     std::unique_ptr<juce::TextButton> denoiseButton;
 #endif

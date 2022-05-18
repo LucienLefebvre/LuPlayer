@@ -69,7 +69,7 @@ public:
     void playersPreviousPositionClicked();
     void playersNextPositionClicked();
 
-    void addPlayer(int playerID);
+    Player* addPlayer(int playerID);
     void removePlayer(int playerID);
     void removeButtonClicked();
 
@@ -155,6 +155,7 @@ public:
     bool dragPaintSourceRectangle = false;
     int fileDragPlayerSource = -1;
     bool mouseDraggedStartPositionOK = false;
+    int fileDragNumFiles = 1;
 
     bool scrollbarShown = false;
 
@@ -257,5 +258,9 @@ private:
 
     Settings* settings;
 
+    juce::Array<Player*> dragAndDropDestinationPlayers;
+    bool dragAndDropFirstPlayerFound = false;
+    bool dragAndDropInsertPlayers = false;
+    int dragAndDropInsertID = -1;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Playlist)
 };
