@@ -716,7 +716,10 @@ bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* origi
     if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap
         && soundPlayers[0]->keyMappedSoundboard != nullptr)
     {
-        soundPlayers[0]->keyMappedSoundboard->keyPressed(key, originatingComponent);
+        if (bottomComponent.clipEditor.wantsKeyPress())
+            bottomComponent.clipEditor.keyPressed(key, originatingComponent);
+        else
+            soundPlayers[0]->keyMappedSoundboard->keyPressed(key, originatingComponent);
     }
     else
     {
@@ -742,6 +745,7 @@ void MainComponent::loadPlaylist()
 {
     juce::FileLogger::getCurrentLogger()->writeToLog("load playlist");
     soundPlayers[0]->loadPlaylist();
+    grabKeyboardFocus();
 }
 
 void MainComponent::valueChanged(juce::Value& value)

@@ -691,6 +691,7 @@ juce::XmlElement* SoundPlayer::createPlayerXmlElement(int playerID, int playlist
         e->setAttribute("playerColour", soundPlayer->getPlayerColour().toString());
         e->setAttribute("playerColourChanged", soundPlayer->getColourHasChanged());
 
+        e->setAttribute("shortcut", soundPlayer->getShortcut().getTextDescription());
         return e;
     }
     else
@@ -917,6 +918,8 @@ void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID
 
     if (e->getBoolAttribute("playerColourChanged"))
         playerToLoad->setPlayerColour(juce::Colour::fromString(e->getStringAttribute("playerColour")), false);
+
+    playerToLoad->setSortcut(juce::KeyPress::createFromDescription(e->getStringAttribute("shortcut")));
 }
 
 

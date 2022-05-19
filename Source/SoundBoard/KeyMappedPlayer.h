@@ -34,6 +34,8 @@ public:
 
     void setShortcut(juce::String s);
 
+    void setShortcut(juce::KeyPress s, bool sendChange = false);
+
     void isDraggedOver(bool b);
 
     void loadFile(juce::String path, juce::String name);
@@ -94,7 +96,6 @@ private:
     std::unique_ptr<juce::ProgressBar> busyBar;
 
     int editButtonWidth = 0;
-    juce::String shortcutKey;
     juce::KeyPress shortcutKeyPress;
     bool isDragged = false;
 

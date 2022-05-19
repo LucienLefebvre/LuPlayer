@@ -25,7 +25,8 @@ class ClipEditor  : public juce::Component,
     public juce::Button::Listener,
     public juce::Label::Listener,
     public juce::ComponentListener,
-    public juce::ComboBox::Listener
+    public juce::ComboBox::Listener,
+    public juce::KeyListener
 {
 public:
     ClipEditor()
@@ -154,6 +155,11 @@ public:
         playModeSelector->addItem("Start / Stop", 2);
         playModeSelector->addListener(this);
 
+        mapButton.reset(new juce::TextButton);
+        addAndMakeVisible(mapButton.get());
+        mapButton->setButtonText("Map");
+        mapButton->onClick = [this] {mapButtonClicked(); };
+
         addAndMakeVisible(&playHead);
         playHead.setColour(juce::Colours::green);
         addAndMakeVisible(&cuePlayHead);
@@ -202,7 +208,8 @@ public:
         denoiseButton->setBounds(normButton->getRight() + spacer, 0, barButtonsWidth, toolBarHeight);
 #endif
 
-        playModeLabel->setBounds(normButton->getRight() + 200, 0, 200, toolBarHeight);
+        mapButton->setBounds(normButton->getRight() + 250, 0, 100, toolBarHeight);
+        playModeLabel->setBounds(normButton->getRight() + 250, 0, 200, toolBarHeight);
         playModeSelector->setBounds(playModeLabel->getRight() + spacer, 0, 200, toolBarHeight);
 
         inOutButtonWidth = getWidth() / 24;
@@ -340,7 +347,6 @@ public:
             {
                 enveloppeButton->setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::green);
             }
-
             else
             {
                 enveloppeButton->setColour(juce::TextButton::ColourIds::buttonColourId,
@@ -352,12 +358,14 @@ public:
             {
                 fxButton->setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::green);
             }
-
             else
             {
                 fxButton->setColour(juce::TextButton::ColourIds::buttonColourId,
                     getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
             }
+
+            //Shortcut
+            mapButton->setButtonText("Key : " + editedPlayer->getShortcut().getTextDescription());
 
 #if RFBUILD
             //Denoiser
@@ -392,11 +400,13 @@ public:
                 playModeLabel->setVisible(true);
                 playModeSelector->setVisible(true);
                 playModeSelector->setSelectedId(editedPlayer->getPlayMode());
+                mapButton->setVisible(true);
             }
             else
             {
                 playModeLabel->setVisible(false);
                 playModeSelector->setVisible(false);
+                mapButton->setVisible(false);
             }
 
         }
@@ -573,8 +583,6 @@ public:
         }
     }
 
-
-
     void enableButttons(bool isEnabled)
     {
         trimVolumeSlider->setEnabled(isEnabled);
@@ -657,6 +665,27 @@ public:
         }
     }
 
+    void mapButtonClicked()
+    {
+        wantKeyPress = true;
+        mapButton->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::red);
+        mapButton->setButtonText("Press...");
+    }
+
+    bool keyPressed(const juce::KeyPress& key, Component* originatingComponent)
+    {
+        mapButton->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+        if (editedPlayer != nullptr)
+            editedPlayer->setSortcut(key);
+        wantKeyPress = false;
+        return false;
+    }
+
+    bool wantsKeyPress()
+    {
+        return wantKeyPress;
+    }
+
     void componentBeingDeleted(juce::Component& component)
     {
         grabFocusBroadcaster->sendChangeMessage();
@@ -668,6 +697,7 @@ public:
 
     bool rightClickDown = false;
     bool commandDown = false;
+    bool wantKeyPress = true;
 
     int dividerBarWidth = 4;
     int volumeSliderWidth = 80;
@@ -697,6 +727,7 @@ public:
     std::unique_ptr<juce::TextButton> colourButton;
     std::unique_ptr<juce::Label> playModeLabel;
     std::unique_ptr<juce::ComboBox> playModeSelector;
+    std::unique_ptr<juce::TextButton> mapButton;
 
     PlayHead playHead;
     PlayHead cuePlayHead;

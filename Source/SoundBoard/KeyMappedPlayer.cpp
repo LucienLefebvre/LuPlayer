@@ -209,6 +209,7 @@ void KeyMappedPlayer::setPlayer(Player* p)
     soundPlayer->conversionLaunchedBroadcaster->addChangeListener(this);
     soundPlayer->conversionFinishedBroadcaster->addChangeListener(this);
     soundPlayer->enveloppePathChangedBroadcaster->addChangeListener(this);
+    soundPlayer->shortcutKeyChanged->addChangeListener(this);
 
     busyBar.reset(new juce::ProgressBar(soundPlayer->luThread.progress));
     addChildComponent(busyBar.get());
@@ -231,9 +232,22 @@ Player* KeyMappedPlayer::getPlayer()
 
 void KeyMappedPlayer::setShortcut(juce::String s)
 {
-    shortcutKey = s;
     shortcutKeyPress = juce::KeyPress::createFromDescription(s);
-    shortcutLabel->setText(shortcutKey, juce::NotificationType::dontSendNotification);
+    shortcutLabel->setText(s, juce::NotificationType::dontSendNotification);
+    if (soundPlayer != nullptr)
+        soundPlayer->setSortcut(shortcutKeyPress);
+}
+
+void KeyMappedPlayer::setShortcut(juce::KeyPress s, bool sendChange)
+{
+    shortcutKeyPress = s;
+    shortcutLabel->setText(shortcutKeyPress.getTextDescription(), juce::NotificationType::dontSendNotification);
+    if (soundPlayer != nullptr)
+    {
+        if (sendChange)
+            soundPlayer->setSortcut(shortcutKeyPress);
+    }
+
 }
 
 void KeyMappedPlayer::isDraggedOver(bool b)
@@ -314,6 +328,10 @@ void KeyMappedPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
         else if (source == soundPlayer->conversionFinishedBroadcaster.get())
         {
             busyBar->setVisible(false);
+        }
+        else if (source == soundPlayer->shortcutKeyChanged.get());
+        {
+            setShortcut(soundPlayer->getShortcut());
         }
     }
 }

@@ -58,6 +58,7 @@ public:
         juce::Path enveloppePath;
         juce::Colour playerColour;
         bool colourHasChanged;
+        juce::KeyPress shortcut;
     };
 
     Player(int index, Settings* s);
@@ -101,6 +102,8 @@ public:
     Player::PlayerInfo getPlayerInfo();
     void setPlayerInfo(Player::PlayerInfo p);
     void isDraggedOver(bool b);
+    void setSortcut(juce::KeyPress s);
+    juce::KeyPress getShortcut();
     std::string getFilePath();
 
     void setGain(float g);
@@ -316,6 +319,7 @@ public:
     std::unique_ptr<juce::ChangeBroadcaster> normalizationFinishedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
     std::unique_ptr<juce::ChangeBroadcaster> conversionLaunchedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
     std::unique_ptr<juce::ChangeBroadcaster> conversionFinishedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
+    std::unique_ptr<juce::ChangeBroadcaster> shortcutKeyChanged = std::make_unique<juce::ChangeBroadcaster>();
 
     foleys::LevelMeterSource meterSource;
     foleys::LevelMeterSource outMeterSource;
@@ -534,6 +538,8 @@ private:
     int playMode = 2;
 
     juce::CriticalSection lock;
+
+    juce::KeyPress shortcutKey;
 
     Settings* settings;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Player)

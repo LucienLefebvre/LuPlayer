@@ -2675,3 +2675,14 @@ void Player::isDraggedOver(bool b)
     isDragged = b;
     repaint();
 }
+
+void Player::setSortcut(juce::KeyPress s)
+{
+    shortcutKey = s;
+    soundEditedBroadcaster->sendChangeMessage();
+}
+
+juce::KeyPress Player::getShortcut()
+{
+    return shortcutKey;
+}
