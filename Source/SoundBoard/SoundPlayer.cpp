@@ -927,21 +927,28 @@ void SoundPlayer::positionViewport(int player)
 
 void SoundPlayer::loadInFirstEmptyPlayer(juce::String file, juce::String name)
 {
-    for (int i = 0; i < myPlaylists[0]->players.size(); i++)
+    for (auto playlist : myPlaylists)
     {
-        auto player = myPlaylists[0]->players[i];
-        if (!player->isFileLoaded())
+        for (auto player : playlist->players)
         {
-            player->loadFile(file, false);
-            if (name.isNotEmpty())
-                player->setName(name.toStdString());
-            return;
+            if (!player->isFileLoaded())
+            {
+                player->loadFile(file, false);
+                if (name.isNotEmpty())
+                    player->setName(name.toStdString());
+                return;
+            }
         }
+        if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
+            break;
     }
-    auto addedPlayer = myPlaylists[0]->addPlayer(myPlaylists[0]->players.size() - 1);
-    addedPlayer->loadFile(file, false);
-    if (name.isNotEmpty())
-        addedPlayer->setName(name.toStdString());
+    if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
+    {
+        auto addedPlayer = myPlaylists[0]->addPlayer(myPlaylists[0]->players.size() - 1);
+        addedPlayer->loadFile(file, false);
+        if (name.isNotEmpty())
+            addedPlayer->setName(name.toStdString());
+    }
 }
 
 void SoundPlayer::mouseDragGetInfos(int playlistSource, int playerID)
