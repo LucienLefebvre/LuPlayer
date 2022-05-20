@@ -1451,24 +1451,42 @@ bool MainComponent::perform(const InvocationInfo& info)
     case CommandIDs::launchPlaylist:
         if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::OnePlaylistOneCart)
         {
-            launchSoundPlayer(SoundPlayer::Mode::OnePlaylistOneCart);
-            settings.setPreferedSoundPlayerMode(1);
+            int choice = checkIfSoundLoaded();
+            if (choice != 0)
+            {
+                launchSoundPlayer(SoundPlayer::Mode::OnePlaylistOneCart);
+                settings.setPreferedSoundPlayerMode(1);
+                if (choice == 1)
+                    reloadTempPlayers();
+            }
             grabKeyboardFocus();
         }
         break;
     case CommandIDs::launch8Faders:
         if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::EightFaders)
         {
-            launchSoundPlayer(SoundPlayer::Mode::EightFaders);
-            settings.setPreferedSoundPlayerMode(2);
+            int choice = checkIfSoundLoaded();
+            if (choice != 0)
+            {
+                launchSoundPlayer(SoundPlayer::Mode::EightFaders);
+                settings.setPreferedSoundPlayerMode(2);
+                if (choice == 1)
+                    reloadTempPlayers();
+            }
             grabKeyboardFocus();
         }
         break;
     case CommandIDs::launchKeyMapped:
         if (soundPlayers[0]->getSoundPlayerMode() != SoundPlayer::Mode::KeyMap)
         {
-            launchSoundPlayer(SoundPlayer::Mode::KeyMap);
-            settings.setPreferedSoundPlayerMode(3);
+            int choice = checkIfSoundLoaded();
+            if (choice != 0)
+            {
+                launchSoundPlayer(SoundPlayer::Mode::KeyMap);
+                settings.setPreferedSoundPlayerMode(3);
+                if (choice == 1)
+                    reloadTempPlayers();
+            }
             grabKeyboardFocus();
         }
         break;
@@ -1568,6 +1586,86 @@ void MainComponent::checkNewVersion()
             updateDial->setVisible(true);
 
             juce::DialogWindow::showModalDialog("Update", std::move(updateDial.get()), this, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true);
+        }
+    }
+}
+
+int MainComponent::checkIfSoundLoaded()
+{
+    int choice = 2;
+    tempPlayers.clear();
+
+    if (soundPlayers[0] != nullptr)
+    {
+        for (auto playlist : soundPlayers[0]->myPlaylists)
+        {
+            for (auto player : playlist->players)
+            {
+                if (player->isFileLoaded())
+                {
+                    tempPlayers.add(player->getPlayerInfo());
+                    choice = 1;
+                }
+            }
+        }
+    }
+
+
+    if (choice == 1)
+    {
+        std::unique_ptr<juce::AlertWindow> soundLoadedWindow;
+        choice = soundLoadedWindow->showYesNoCancelBox(juce::AlertWindow::QuestionIcon, "Keep loaded sounds ?", "Some sounds may still be deleted", "Keep", "Delete", "Cancel", nullptr, nullptr);
+    }
+    return choice;
+}
+
+void MainComponent::reloadTempPlayers()
+{
+    int playerToLoadID = 0;
+    for (int i = 0; i < tempPlayers.size(); i++)
+    {
+        if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::EightFaders)
+        {
+            int tempPlayerId = 0;
+            for (auto playlist : soundPlayers[0]->myPlaylists)
+            {
+                for (auto player : playlist->players)
+                {
+                    player->setPlayerInfo(tempPlayers[tempPlayerId]);
+                    tempPlayerId++;
+                    if (tempPlayers.size() == tempPlayerId)
+                        return;
+                }
+            }
+        }
+        else if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap)
+        {
+            if (soundPlayers[0]->keyMappedSoundboard->mappedPlayers[playerToLoadID] != nullptr)
+            {
+                if (soundPlayers[0]->keyMappedSoundboard->mappedPlayers[playerToLoadID]->isVisible())
+                {
+                    soundPlayers[0]->keyMappedSoundboard->mappedPlayers[playerToLoadID]->getPlayer()->setPlayerInfo(tempPlayers[i]);
+                    playerToLoadID++;
+                }
+
+                else
+                {
+                    while (!soundPlayers[0]->keyMappedSoundboard->mappedPlayers[playerToLoadID]->isVisible())
+                        playerToLoadID++;
+                    soundPlayers[0]->keyMappedSoundboard->mappedPlayers[playerToLoadID]->getPlayer()->setPlayerInfo(tempPlayers[i]);
+                    playerToLoadID++;
+                }
+            }
+        }
+        else if(soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
+        {
+            while (tempPlayers.size() > soundPlayers[0]->myPlaylists[0]->players.size())
+            {
+                soundPlayers[0]->myPlaylists[0]->addPlayer(soundPlayers[0]->myPlaylists[0]->players.size() - 1);
+            }
+            auto playerToLoad = soundPlayers[0]->myPlaylists[0]->players[i];
+            if (playerToLoad != nullptr)
+                playerToLoad->setPlayerInfo(tempPlayers[i]);
         }
     }
 }

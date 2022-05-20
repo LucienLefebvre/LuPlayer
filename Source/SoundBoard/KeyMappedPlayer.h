@@ -80,6 +80,7 @@ public:
 
     std::unique_ptr<juce::ChangeBroadcaster> playerDraggedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
     std::unique_ptr<juce::ChangeBroadcaster> colourChangedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
+    std::unique_ptr<juce::ChangeBroadcaster> shortcutChangedBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 private:
     //Player dummyPlayer;
     Player* soundPlayer = 0;

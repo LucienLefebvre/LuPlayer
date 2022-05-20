@@ -145,6 +145,9 @@ private:
     void launchSoundPlayer(SoundPlayer::Mode m);
     void stopWatchShortcuPressed();
 
+    int checkIfSoundLoaded();
+    void reloadTempPlayers();
+
     juce::AudioDeviceSelectorComponent audioSetupComp;
     juce::AudioDeviceManager::AudioDeviceSetup deviceSetup;
     juce::AudioDeviceManager::LevelMeter levelMeter;
@@ -195,5 +198,7 @@ private:
     bool initializationFocusGained = false;
 
     std::unique_ptr<juce::FileLogger> logger;
+
+    juce::Array<Player::PlayerInfo> tempPlayers;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

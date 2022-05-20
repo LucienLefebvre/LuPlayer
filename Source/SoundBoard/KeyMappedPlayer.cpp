@@ -179,8 +179,22 @@ void KeyMappedPlayer::resized()
     shortcutLabelHeight = getHeight();
     shortcutLabel->setSize(shortcutLabelWidth, shortcutLabelHeight);
     shortcutLabel->setCentrePosition(getWidth() / 2, getHeight() / 2);
-    shortcutLabel->setFont(juce::Font(getWidth(), juce::Font::plain).withTypefaceStyle("Regular"));
+    juce::Font labelFont(juce::Font(getWidth(), juce::Font::plain).withTypefaceStyle("Regular"));
+    if (shortcutLabel->getText().isNotEmpty() && labelFont.getHeight() > 0 && getWidth() > 0)
+    {
+        if (labelFont.getStringWidth(shortcutLabel->getText()) > getWidth())
+        {
+            while (labelFont.getStringWidth(shortcutLabel->getText()) > getWidth())
+            {
+                int fontHeight = labelFont.getHeight();
+                labelFont.setHeight(fontHeight - 1);
+            }
+        }
+    }
+        //labelFont = labelFont.withHorizontalScale(0.2);
+    shortcutLabel->setFont(labelFont);
     shortcutLabel->setJustificationType(juce::Justification::centred);
+
 
     editButtonWidth = 3 * getWidth() / 10;
     editButton->setBounds(elapsedTimeWidth, elapsedTimeHeight, editButtonWidth, elapsedTimeHeight);
@@ -209,7 +223,7 @@ void KeyMappedPlayer::setPlayer(Player* p)
     soundPlayer->conversionLaunchedBroadcaster->addChangeListener(this);
     soundPlayer->conversionFinishedBroadcaster->addChangeListener(this);
     soundPlayer->enveloppePathChangedBroadcaster->addChangeListener(this);
-    soundPlayer->shortcutKeyChanged->addChangeListener(this);
+    //soundPlayer->shortcutKeyChanged->addChangeListener(this);
 
     busyBar.reset(new juce::ProgressBar(soundPlayer->luThread.progress));
     addChildComponent(busyBar.get());
@@ -234,20 +248,24 @@ void KeyMappedPlayer::setShortcut(juce::String s)
 {
     shortcutKeyPress = juce::KeyPress::createFromDescription(s);
     shortcutLabel->setText(s, juce::NotificationType::dontSendNotification);
-    if (soundPlayer != nullptr)
+    if (soundPlayer != nullptr) 
+    {
         soundPlayer->setSortcut(shortcutKeyPress);
+    }
+
 }
 
 void KeyMappedPlayer::setShortcut(juce::KeyPress s, bool sendChange)
 {
     shortcutKeyPress = s;
     shortcutLabel->setText(shortcutKeyPress.getTextDescription(), juce::NotificationType::dontSendNotification);
+    resized();
     if (soundPlayer != nullptr)
     {
         if (sendChange)
             soundPlayer->setSortcut(shortcutKeyPress);
+        shortcutChangedBroadcaster->sendChangeMessage();
     }
-
 }
 
 void KeyMappedPlayer::isDraggedOver(bool b)
@@ -599,7 +617,6 @@ void KeyMappedPlayer::scrollNameLabel()
                 {
                     nameLabel->setTopLeftPosition(-nameLabelScrollX, 0);
                 }
-
             }
         }
     }
@@ -608,7 +625,7 @@ void KeyMappedPlayer::scrollNameLabel()
 void KeyMappedPlayer::editButtonClicked()
 {
     if (soundPlayer != nullptr)
-        soundPlayer->envButtonClicked();
+        soundPlayer->envButtonClicked(false);
 }
 
 void KeyMappedPlayer::setPlayerDefaultColour(juce::Colour c)

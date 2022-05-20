@@ -1015,12 +1015,15 @@ void Player::play(bool launchedByMidi)
 
 void Player::launch()
 {
-    transport.setPosition(startTime);
-    transport.start();
-    if (Settings::lauchAtZeroDB)
-        bufferGain.store(1.0);
-    if (Settings::viewLastPlayedSound)
-        playerLaunchedBroadcaster->sendChangeMessage();
+    if (isFileLoaded())
+    {
+        transport.setPosition(startTime);
+        transport.start();
+        if (Settings::lauchAtZeroDB)
+            bufferGain.store(1.0);
+        if (Settings::viewLastPlayedSound)
+            playerLaunchedBroadcaster->sendChangeMessage();
+    }
 }
 
 void Player::stop()
@@ -1704,34 +1707,37 @@ void Player::setRightFaderAssigned(bool isFaderRightAssigned)
 
 void Player::verifyAudioFileFormat(const juce::String& path)
 {
-    juce::FileLogger::getCurrentLogger()->writeToLog("player verify audio file format");
-    juce::File file(path);
-    if ((file.getFileExtension() == juce::String(".wav")) || (file.getFileExtension() == juce::String(".WAV"))
-        || (file.getFileExtension() == juce::String(".mp3")) || (file.getFileExtension() == juce::String(".MP3"))
-        || (file.getFileExtension() == juce::String(".flac")) || (file.getFileExtension() == juce::String(".FLAC"))
-        || (file.getFileExtension() == juce::String(".aif")) || (file.getFileExtension() == juce::String(".AIF"))
-        || (file.getFileExtension() == juce::String(".aiff")) || (file.getFileExtension() == juce::String(".AIFF")))
+    if (path.isNotEmpty())
     {
+        juce::FileLogger::getCurrentLogger()->writeToLog("player verify audio file format");
         juce::File file(path);
-        if (juce::AudioFormatReader* reader = formatManager.createReaderFor(file))
+        if ((file.getFileExtension() == juce::String(".wav")) || (file.getFileExtension() == juce::String(".WAV"))
+            || (file.getFileExtension() == juce::String(".mp3")) || (file.getFileExtension() == juce::String(".MP3"))
+            || (file.getFileExtension() == juce::String(".flac")) || (file.getFileExtension() == juce::String(".FLAC"))
+            || (file.getFileExtension() == juce::String(".aif")) || (file.getFileExtension() == juce::String(".AIF"))
+            || (file.getFileExtension() == juce::String(".aiff")) || (file.getFileExtension() == juce::String(".AIFF")))
         {
-            loadFile(file.getFullPathName(), true);
-            delete reader;
+            juce::File file(path);
+            if (juce::AudioFormatReader* reader = formatManager.createReaderFor(file))
+            {
+                loadFile(file.getFullPathName(), true);
+                delete reader;
+            }
         }
-    }
 #if RFBUILD
-    else
-    {
-        juce::String correctedPath;
-        ffmpegThread.conversionEndedBroadcaster->addChangeListener(this);
-        ffmpegThread.setFilePath(path);
-        ffmpegThread.shouldMakeProgressFile(false);
-        conversionLaunchedBroadcaster->sendChangeMessage();
-        ffmpegThread.startThread();
-        convertingBar->setVisible(true);
-        convertingBar->setTextToDisplay("Converting...");
-    }
+        else
+        {
+            juce::String correctedPath;
+            ffmpegThread.conversionEndedBroadcaster->addChangeListener(this);
+            ffmpegThread.setFilePath(path);
+            ffmpegThread.shouldMakeProgressFile(false);
+            conversionLaunchedBroadcaster->sendChangeMessage();
+            ffmpegThread.startThread();
+            convertingBar->setVisible(true);
+            convertingBar->setTextToDisplay("Converting...");
+        }
 #endif
+    }
 }
 
 
@@ -1844,7 +1850,7 @@ float Player::getTrimVolume()
 
 void Player::setTrimVolume(double trimVolume)
 {
-    trimVolumeSlider.setValue(trimVolume);
+    trimValueToSet = trimVolume;
 }
 
 bool Player::getIsLooping()
@@ -2218,7 +2224,7 @@ void Player::fxButtonClicked()
     }
 }
 
-void Player::envButtonClicked()
+void Player::envButtonClicked(bool enable)
 {
     juce::FileLogger::getCurrentLogger()->writeToLog("player enveloppe button clicked");
     if (rightClickDown)
@@ -2226,12 +2232,16 @@ void Player::envButtonClicked()
         setEnveloppeEnabled(!enveloppeEnabled);
         rightClickDown = false;
     }
-    else
+    else if (enable == true)
     {
         if (!enveloppeEnabled)
         {
             setEnveloppeEnabled(true);
         }
+        envButtonBroadcaster->sendChangeMessage();
+    }
+    else if (enable == false)
+    {
         envButtonBroadcaster->sendChangeMessage();
     }
     soundEditedBroadcaster->sendChangeMessage();
@@ -2448,9 +2458,15 @@ GainThumbnail& Player::getPlayThumbnail()
 {
     return playThumbnail;
 }
+
 juce::String Player::getRemainingTimeAsString()
 {
     return remainingTimeString;
+}
+
+juce::String Player::getElapsedTimeAsString()
+{
+    return elapsedTimeLabel.getText();
 }
 
 juce::String Player::getCueTimeAsString()
@@ -2666,7 +2682,7 @@ void Player::setPlayerInfo(Player::PlayerInfo p)
     setCompParameters(p.compParams);
     setEnveloppeEnabled(p.enveloppeEnabled, false, false);
     setEnveloppePath(p.enveloppePath);
-    if (p.colourHasChanged)
+    if (p.colourHasChanged && p.playerColour != BLUE)
         setPlayerColour(p.playerColour);
 }
 

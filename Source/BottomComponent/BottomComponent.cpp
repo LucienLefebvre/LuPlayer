@@ -22,12 +22,12 @@ BottomComponent::BottomComponent()
     addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
     addTab("Text Editor", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &textEditor, false);
 
-    getTabbedButtonBar().setTabBackgroundColour(0, ORANGE.darker(0.5));
+    /*getTabbedButtonBar().setTabBackgroundColour(0, ORANGE.darker(0.5));
     getTabbedButtonBar().setTabBackgroundColour(1, BLUE.darker(0.5));
     getTabbedButtonBar().setTabBackgroundColour(2, BLUE.darker(0.5));
     getTabbedButtonBar().setTabBackgroundColour(3, juce::Colours::red.darker(0.5));
     getTabbedButtonBar().setTabBackgroundColour(4, juce::Colours::yellow.darker(0.5));
-    getTabbedButtonBar().setAlpha(0.8);
+    getTabbedButtonBar().setAlpha(0.8);*/
 
     setTabBarDepth(tabBarHeight);
     setCurrentTabIndex(0);
@@ -55,9 +55,9 @@ BottomComponent::BottomComponent()
     myMixer.addInputSource(&distantDbBrowser.resampledSource, false);    
     dbBrowser.cuePlay->addChangeListener(this);
     setCurrentTabIndex(5);
-    getTabbedButtonBar().setTabBackgroundColour(5, ORANGE.darker(0.5));
+    /*getTabbedButtonBar().setTabBackgroundColour(5, ORANGE.darker(0.5));
     getTabbedButtonBar().setTabBackgroundColour(6, ORANGE.darker(0.5));
-    getTabbedButtonBar().setTabBackgroundColour(7, juce::Colours::saddlebrown.darker(0.5));
+    getTabbedButtonBar().setTabBackgroundColour(7, juce::Colours::saddlebrown.darker(0.5));*/
 #endif
 }
 

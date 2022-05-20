@@ -161,7 +161,7 @@ public:
     void setDraggedPlayer();
 
     void fxButtonClicked();
-    void envButtonClicked();
+    void envButtonClicked(bool enable = true);
     juce::TextButton* getfxButton();
 
     void bypassFX(bool isBypassed, bool shouldSendMessage = true);
@@ -184,6 +184,7 @@ public:
     GainThumbnail& getPlayThumbnail();
 
     juce::String getRemainingTimeAsString();
+    juce::String getElapsedTimeAsString();
     juce::String getCueTimeAsString();
 
     void setEnveloppePath(juce::Path& p);

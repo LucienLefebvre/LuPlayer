@@ -298,6 +298,7 @@ void SoundPlayer::initializeKeyMapPlayer()
         myPlaylists[0]->addPlayer(i);
         auto addedPlayer = keyMappedSoundboard->addPlayer(myPlaylists[0]->players[i]);
         addedPlayer->playerDraggedBroadcaster->addChangeListener(keyMappedSoundboard.get());
+        addedPlayer->shortcutChangedBroadcaster->addChangeListener(keyMappedSoundboard.get());
         addedPlayer->addMouseListener(keyMappedSoundboard.get(), true);
     }
     keyMappedSoundboard->setShortcutKeys();
@@ -626,7 +627,7 @@ void SoundPlayer::savePlaylist()
     multiPlayer.addChildElement(cart);
     auto xmlString = multiPlayer.toString();
 
-    juce::FileChooser chooser("Choose an XML file to save", juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Saves"), "*.xml");
+    juce::FileChooser chooser("Choose an XML file to save", juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer"), "*.xml");
     if (chooser.browseForFileToSave(true))
     {
             juce::File myPlaylistSave;
@@ -714,7 +715,7 @@ void SoundPlayer::loadPlaylist()
     }
     else
     {
-        juce::FileChooser chooser("Choose an XML File to load", juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Saves"), "*.xml");
+        juce::FileChooser chooser("Choose an XML File to load", juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer"), "*.xml");
 
         if (chooser.browseForFileToOpen())
         {
@@ -854,7 +855,7 @@ void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID
     int playerID = e->getIntAttribute("ID");
     bool hasBeenNormalized = e->getBoolAttribute("hasBeenNormalized");
     juce::String filePath = juce::String(e->getStringAttribute("path"));
-    int trimvolume = e->getDoubleAttribute("trimvolume");
+    double trimvolume = e->getDoubleAttribute("trimvolume");
     bool islooping = e->getBoolAttribute("islooping");
     std::string name = (e->getStringAttribute("Name")).toStdString();
     bool hpfEnabled = e->getBoolAttribute("isHpfEnabled");
@@ -885,7 +886,6 @@ void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID
 
     playerToLoad->setHasBeenNormalized(hasBeenNormalized);
     playerToLoad->verifyAudioFileFormat(filePath);
-    playerToLoad->setTrimVolume(trimvolume);
     playerToLoad->setIsLooping(islooping);
     playerToLoad->setName(name);
     playerToLoad->enableHPF(hpfEnabled);
@@ -902,7 +902,7 @@ void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID
         filterParams.add(e->getStringAttribute("filterParams" + juce::String(i)));
     }
     playerToLoad->getFilterProcessor().setFilterParametersAsArray(filterParams);
-    playerToLoad->bypassFX(e->getBoolAttribute("isBypassed"));
+    playerToLoad->bypassFX(e->getBoolAttribute("isBypassed"), false);
 
     //Enveloppe
     playerToLoad->setEnveloppeEnabled(e->getBoolAttribute("enveloppeEnabled"));
@@ -920,6 +920,7 @@ void SoundPlayer::loadXMLElement(juce::XmlElement* e, int player, int playlistID
         playerToLoad->setPlayerColour(juce::Colour::fromString(e->getStringAttribute("playerColour")), false);
 
     playerToLoad->setSortcut(juce::KeyPress::createFromDescription(e->getStringAttribute("shortcut")));
+    playerToLoad->setTrimVolume(trimvolume);
 }
 
 
@@ -930,20 +931,40 @@ void SoundPlayer::positionViewport(int player)
 
 void SoundPlayer::loadInFirstEmptyPlayer(juce::String file, juce::String name)
 {
-    for (auto playlist : myPlaylists)
+    if (soundPlayerMode == SoundPlayer::Mode::KeyMap)
     {
-        for (auto player : playlist->players)
+        if (keyMappedSoundboard != nullptr)
         {
-            if (!player->isFileLoaded())
+            for (auto player : keyMappedSoundboard->mappedPlayers)
             {
-                player->loadFile(file, false);
-                if (name.isNotEmpty())
-                    player->setName(name.toStdString());
-                return;
+                auto playerSource = player->getPlayer();
+                if (!playerSource->isFileLoaded() && player->isVisible())
+                {
+                    playerSource->loadFile(file, false);
+                    if (name.isNotEmpty())
+                        playerSource->setName(name.toStdString());
+                    return;
+                }
             }
         }
-        if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
-            break;
+    }
+    else
+    {
+        for (auto playlist : myPlaylists)
+        {
+            for (auto player : playlist->players)
+            {
+                if (!player->isFileLoaded())
+                {
+                    player->loadFile(file, false);
+                    if (name.isNotEmpty())
+                        player->setName(name.toStdString());
+                    return;
+                }
+            }
+            if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
+                break;
+        }
     }
     if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
     {

@@ -45,6 +45,10 @@ public:
         nameLabel->addListener(this);
         nameLabel->setEditable(false, true);
         nameLabel->setInterceptsMouseClicks(false, false);
+        //Remaining time label
+        remainingTimeLabel.reset(new juce::Label);
+        addAndMakeVisible(remainingTimeLabel.get());
+        remainingTimeLabel->setFont(juce::Font(25.0f, juce::Font::bold).withTypefaceStyle("Regular"));
 
         //Trim Volume Slider
         trimVolumeSlider.reset(new juce::Slider);
@@ -216,9 +220,11 @@ public:
         enveloppeEditor.setBounds(volumeSliderWidth + dividerBarWidth, toolBarHeight, getWidth() - volumeSliderWidth - meterWidth - dividerBarWidth * 2 - 2, getHeight() - toolBarHeight - bottomButtonHeight - 2);
         meter->setBounds(getWidth() - meterWidth, 0, meterWidth, getHeight());
 
-        nameLabel->setBounds(enveloppeEditor.getX(), getHeight() - nameLabelHeight - 3, enveloppeEditor.getWidth(), nameLabelHeight);
+        remainingTimeLabel->setBounds(enveloppeEditor.getX(), getHeight() - nameLabelHeight - 3, 200, nameLabelHeight);
+        nameLabel->setBounds(remainingTimeLabel->getX(), getHeight() - nameLabelHeight - 3, enveloppeEditor.getWidth() - 200, nameLabelHeight);
 
-        cueButton->setBounds(buttonsSpacer, toolBarHeight + 6, volumeSliderWidth - 2 * buttonsSpacer, 40);
+
+        cueButton->setBounds(buttonsSpacer, toolBarHeight + 6, volumeSliderWidth - 2 * buttonsSpacer, 35);
         trimVolumeSlider->setSize(volumeSliderWidth, volumeSliderWidth);
         trimVolumeSlider->setCentrePosition(volumeSliderWidth / 2, cueButton->getBottom() + volumeSliderWidth / 2);
 
@@ -484,6 +490,17 @@ public:
             }
             else
                 outMark.setVisible(false);
+            if (editedPlayer->isPlayerPlaying())
+            {
+                juce::String labelStrring = editedPlayer->getElapsedTimeAsString() + " / " + editedPlayer->getRemainingTimeAsString();
+                remainingTimeLabel->setText(labelStrring, juce::dontSendNotification);
+                remainingTimeLabel->setColour(juce::Label::ColourIds::textColourId, juce::Colours::green);
+            }
+            else
+            {
+                remainingTimeLabel->setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
+                remainingTimeLabel->setText(editedPlayer->getCueTimeAsString(), juce::dontSendNotification);
+            }
 
         }
     }
@@ -667,17 +684,29 @@ public:
 
     void mapButtonClicked()
     {
-        wantKeyPress = true;
-        mapButton->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::red);
-        mapButton->setButtonText("Press...");
+        if (wantKeyPress == false)
+        {
+            wantKeyPress = true;
+            mapButton->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::red);
+            mapButton->setButtonText("Press...");
+        }
+        else
+        {
+            mapButton->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+            mapButton->setButtonText("Key : " + editedPlayer->getShortcut().getTextDescription());
+            wantKeyPress = false;
+        }
     }
 
     bool keyPressed(const juce::KeyPress& key, Component* originatingComponent)
     {
-        mapButton->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
-        if (editedPlayer != nullptr)
-            editedPlayer->setSortcut(key);
-        wantKeyPress = false;
+        if (wantKeyPress == true)
+        {
+            mapButton->setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
+            if (editedPlayer != nullptr)
+                editedPlayer->setSortcut(key);
+            wantKeyPress = false;
+        }
         return false;
     }
 
@@ -697,7 +726,7 @@ public:
 
     bool rightClickDown = false;
     bool commandDown = false;
-    bool wantKeyPress = true;
+    bool wantKeyPress = false;
 
     int dividerBarWidth = 4;
     int volumeSliderWidth = 80;
@@ -728,6 +757,7 @@ public:
     std::unique_ptr<juce::Label> playModeLabel;
     std::unique_ptr<juce::ComboBox> playModeSelector;
     std::unique_ptr<juce::TextButton> mapButton;
+    std::unique_ptr<juce::Label> remainingTimeLabel;
 
     PlayHead playHead;
     PlayHead cuePlayHead;

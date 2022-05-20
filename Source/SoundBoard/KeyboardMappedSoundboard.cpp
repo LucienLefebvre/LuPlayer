@@ -275,7 +275,7 @@ bool KeyboardMappedSoundboard::keyPressed(const juce::KeyPress& key, juce::Compo
     }
     for (auto player : mappedPlayers)
     {
-        if (key.isKeyCode(player->getShortcut().getKeyCode()))
+        if (key.isKeyCode(player->getShortcut().getKeyCode()) && player->isVisible())
         {
             player->shortcutKeyPressed(isCommandDown);
         }
@@ -308,6 +308,22 @@ void KeyboardMappedSoundboard::changeListenerCallback(juce::ChangeBroadcaster* s
             //    else
             //        meters[i]->setMeterColour(juce::Colour(229, 149, 0));
             //}
+        }
+        else if (source == mappedPlayers[i]->shortcutChangedBroadcaster.get())
+        {
+            auto originatingPlayer = mappedPlayers[i];
+            juce::KeyPress newKeyPress = originatingPlayer->getShortcut();
+            for (auto player : mappedPlayers)
+            {
+                if (player->getShortcut() == newKeyPress
+                    && player != originatingPlayer
+                    && newKeyPress.getTextDescription() != "")
+                {
+                    player->setShortcut(juce::KeyPress::createFromDescription(""), true);
+                    DBG("set shortcut");
+                }
+
+            }
         }
     }
 }
