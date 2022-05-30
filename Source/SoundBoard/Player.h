@@ -488,6 +488,7 @@ private:
     float oldThumbnailOffset = 0;
 
     bool drawCue = false;
+    juce::uint32 cueDrawStartTime = juce::Time::getMillisecondCounter();
 
     float floatMidiMessageValue = 0;
     int previousMidiLevel = 0;

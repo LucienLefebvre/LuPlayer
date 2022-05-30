@@ -668,8 +668,8 @@ void Player::updateCuePlayHeadPosition(bool forceUpdate)
             cuePlayHead.setVisible(true);
             cuePlayHead.setTopLeftPosition(cuedrawPosition, 0);
         }
-        else
-            cuePlayHead.setVisible(false);
+        /*else
+            cuePlayHead.setVisible(false);*/
     }
 
     //CUE TIME LABEL
@@ -706,10 +706,17 @@ void Player::updateCuePlayHeadPosition(bool forceUpdate)
         cueTimeLabel.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
         cueTimeLabel.setColour(juce::Label::ColourIds::backgroundColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         cueTimeLabel.setAlpha(0.7);
+        cueDrawStartTime = juce::Time::getMillisecondCounter();
     }
     else
     {
+        //cueTimeLabel.setVisible(false);
+    }
+
+    if (juce::Time::getMillisecondCounter() - cueDrawStartTime > 2000)
+    {
         cueTimeLabel.setVisible(false);
+        cuePlayHead.setVisible(false);
     }
 }
 
@@ -1213,6 +1220,8 @@ void Player::cueButtonClicked()
             cueTransport.setPosition(0.0);
             cueButton.setButtonText("Cue");
             cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+            cuePlayHead.setVisible(false);
+            cueTimeLabel.setVisible(false);
         }
     }
     soundEditedBroadcaster->sendChangeMessage();
@@ -1279,6 +1288,8 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
             cueTransport.setPosition(0.0);
             cueButton.setButtonText("Cue");
             cueButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+            cuePlayHead.setVisible(false);
+            cueTimeLabel.setVisible(false);
         }
     }
     else if (source == luThread.loudnessCalculatedBroadcaster && isFileLoaded())
@@ -2306,6 +2317,8 @@ void Player::setEditedPlayer(bool b)
             envButton.setColour(juce::TextButton::ColourIds::buttonColourId, BLUE);
         else
             envButton.setColour(juce::TextButton::ColourIds::buttonColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        cuePlayHead.setVisible(false);
+        cueTimeLabel.setVisible(false);
     }
     soundEditedBroadcaster->sendChangeMessage();
 }

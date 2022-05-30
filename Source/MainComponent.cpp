@@ -1610,7 +1610,6 @@ int MainComponent::checkIfSoundLoaded()
         }
     }
 
-
     if (choice == 1)
     {
         std::unique_ptr<juce::AlertWindow> soundLoadedWindow;
