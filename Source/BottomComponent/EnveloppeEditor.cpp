@@ -10,18 +10,6 @@ EnveloppeEditor::EnveloppeEditor()
 
     soundColour = BLUE;
 
-    //addAndMakeVisible(&playHead);
-    //playHead.setColour(juce::Colours::green);
-
-    //addAndMakeVisible(&cuePlayHead);
-    //cuePlayHead.setColour(juce::Colours::black);
-
-    //addChildComponent(&inMark);
-    //inMark.setColour(juce::Colour(0, 196, 255));
-
-    //addChildComponent(&outMark);
-    //outMark.setColour(juce::Colour(238, 255, 0));
-
     juce::Timer::startTimerHz(30);
 
     setBufferedToImage(true);
@@ -401,10 +389,6 @@ void EnveloppeEditor::mouseMove(const juce::MouseEvent& e)
                 drawPointInfo = false;
                 repaint();
             }
-        }
-        for (int i = 0; i < linesArray.size(); i++)
-        {
-
         }
     }
 }

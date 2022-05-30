@@ -254,6 +254,8 @@ public:
             enveloppeEditor.setEditedPlayer(editedPlayer);
             editedPlayer->soundEditedBroadcaster->addChangeListener(this);
             editedPlayer->playerDeletedBroadcaster->addChangeListener(this);
+            playHead.setVisible(true);
+            cuePlayHead.setVisible(true);
             enableButttons(true);
             updateInfos();
         }
@@ -626,6 +628,7 @@ public:
         outLabel->setText("", juce::NotificationType::dontSendNotification);
         loopButton->setToggleState(false, juce::NotificationType::dontSendNotification);
         cueTimeLabel->setText("", juce::NotificationType::dontSendNotification);
+        remainingTimeLabel->setText("", juce::dontSendNotification);
         trimVolumeSlider->setValue(0.0);
         enveloppeEditor.setNullPlayer();
         enveloppeButton->setColour(juce::TextButton::ColourIds::buttonColourId,
@@ -634,6 +637,8 @@ public:
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         inMark.setVisible(false);
         outMark.setVisible(false);
+        playHead.setVisible(false);
+        cuePlayHead.setVisible(false);
 #if RFBUILD
         denoiseButton->setColour(juce::TextButton::ColourIds::buttonColourId,
             getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));

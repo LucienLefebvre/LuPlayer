@@ -713,7 +713,7 @@ void Player::updateCuePlayHeadPosition(bool forceUpdate)
         //cueTimeLabel.setVisible(false);
     }
 
-    if (juce::Time::getMillisecondCounter() - cueDrawStartTime > 2000)
+    if (juce::Time::getMillisecondCounter() - cueDrawStartTime > 5000)
     {
         cueTimeLabel.setVisible(false);
         cuePlayHead.setVisible(false);
@@ -1495,6 +1495,7 @@ void Player::mouseDown(const juce::MouseEvent& event)
             drawCue = true;
             mouseIsDragged = true;
             envButtonBroadcaster->sendChangeMessage();
+            updateCuePlayHeadPosition(true);
             repaintThumbnail();
         }
     }
