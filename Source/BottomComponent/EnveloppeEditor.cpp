@@ -120,12 +120,12 @@ void EnveloppeEditor::paint(juce::Graphics& g)
             g.setColour(juce::Colours::white);
             g.setOpacity(0.15);
             g.fillRoundedRectangle(xPos, yPos,
-                45, 25, 5);
+                50, 25, 5);
 
             g.setColour(juce::Colours::white);
             auto roundedGain = std::ceil(myPoints[pointInfoToDraw]->getYPos() * (float)scale * 10.0) / 10.0;
             g.drawText(juce::String(roundedGain) << "dB",
-                xPos, yPos, 45, 25, juce::Justification::centred);
+                xPos, yPos, 50, 25, juce::Justification::centred);
         }
     }
 }
@@ -157,6 +157,7 @@ void EnveloppeEditor::resized()
     outMark.setSize(2, getHeight());
     thumbnailBounds.setBounds(0, 0, getWidth(), getHeight());
     scaleButton.setBounds(getWidth() - scaleButtonWidth, getHeight() - scaleButtonHeight, scaleButtonWidth, scaleButtonHeight);
+    DBG("resized");
     repaint();
 }
 
@@ -381,7 +382,13 @@ void EnveloppeEditor::mouseMove(const juce::MouseEvent& e)
             {
                 drawPointInfo = true;
                 pointInfoToDraw = i;
-                repaint();
+                if (myPoints[i]->getPos() != myPoints[i]->getLastPointPosition())
+                {
+                    DBG("point repaint");
+                    repaint();
+                }
+
+                myPoints[i]->setLastPointPosition(myPoints[i]->getPos());
                 return;
             }
             else if (drawPointInfo == true)
@@ -391,6 +398,7 @@ void EnveloppeEditor::mouseMove(const juce::MouseEvent& e)
             }
         }
     }
+    lastMousePos = mousePos;
 }
 
 void EnveloppeEditor::mouseUp(const juce::MouseEvent& e)

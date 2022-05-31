@@ -2430,6 +2430,7 @@
     <ClInclude Include="Source\Others\LoudnessBar.h"/>
     <ClInclude Include="Source\Others\PlayHead.h"/>
     <ClInclude Include="Source\Others\R128IntegratedThread.h"/>
+    <ClInclude Include="Source\Others\SignalGenerator.h"/>
     <ClInclude Include="Source\Others\StopWatch.h"/>
     <ClInclude Include="Source\Others\updateDialog.h"/>
     <ClInclude Include="Source\Mixer\ChannelControlPannel.h"/>

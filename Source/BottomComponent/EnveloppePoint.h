@@ -117,10 +117,21 @@ public:
     {
         setCanMoveTime(!isFixed);
     }
+
+    void setLastPointPosition(juce::Point<float> p)
+    {
+        lastPoinPosition = p;
+    }
+
+    juce::Point<float> getLastPointPosition()
+    {
+        return lastPoinPosition;
+    }
 private:
     float xPos = 0.0;
     float yPos = 0.0;
     int size = 10;
+    juce::Point<float> lastPoinPosition{ 0 ,0 };
     bool canMoveTime = true;
     juce::Colour pointColour;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnveloppePoint)

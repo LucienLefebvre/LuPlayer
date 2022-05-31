@@ -117,5 +117,7 @@ private:
 
     juce::Array<float> dBLines{ -0.75f, -0.5f, -0.25, 0.25f, 0.5f, 0.75f };
     juce::Array<int> timeLines;
+
+    juce::Point<int> lastMousePos{ 0, 0 };
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnveloppeEditor)
 };

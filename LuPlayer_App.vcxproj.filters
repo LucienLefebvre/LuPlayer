@@ -2919,6 +2919,9 @@
     <ClInclude Include="Source\Others\R128IntegratedThread.h">
       <Filter>LuPlayer\Source\Others</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Others\SignalGenerator.h">
+      <Filter>LuPlayer\Source\Others</Filter>
+    </ClInclude>
     <ClInclude Include="Source\Others\StopWatch.h">
       <Filter>LuPlayer\Source\Others</Filter>
     </ClInclude>

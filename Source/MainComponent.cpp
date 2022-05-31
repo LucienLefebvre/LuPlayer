@@ -178,7 +178,25 @@ void MainComponent::midiMapperButtonClicked()
             midiMapper.setWantsKeyPress(false);
             grabKeyboardFocus();
         }));
+}
 
+void MainComponent::signalGeneratorButtonClicked()
+{
+    juce::DialogWindow::LaunchOptions o;
+    o.content.setNonOwned(&signalGenerator);
+    o.content->setSize(200, 200);
+    o.dialogTitle = TRANS("Signal Generator");
+    o.dialogBackgroundColour = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
+    o.escapeKeyTriggersCloseButton = true;
+    o.useNativeTitleBar = false;
+    o.resizable = false;
+    juce::DialogWindow* window = o.launchAsync();
+
+    juce::ModalComponentManager::getInstance()->attachCallback(window, juce::ModalCallbackFunction::create([this](int r)
+        {
+            signalGenerator.setEnabled(false);
+            grabKeyboardFocus();
+        }));
 }
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
@@ -516,6 +534,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     isPreparedToPlay = false;
 
     bottomComponent.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    signalGenerator.prepareToPlay(samplesPerBlockExpected, sampleRate);
 
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
     actualSampleRate = sampleRate;
@@ -548,6 +567,9 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 
             if (soundPlayers[0] != nullptr)
                 soundPlayers[0]->getNextAudioBlock(*playAudioSource.get(), *cueAudioSource.get());
+
+            if (signalGenerator.isEnabled())
+                signalGenerator.getNextAudioBlock(*playAudioSource.get());
 
             bufferToFill.clearActiveBufferRegion();
             bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
@@ -601,6 +623,9 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             bufferToFill.buffer->addFrom(0, 0, *bottomComponentBuffer.get(), 0, 0, bufferToFill.buffer->getNumSamples());
             bufferToFill.buffer->addFrom(1, 0, *bottomComponentBuffer.get(), 1, 0, bufferToFill.buffer->getNumSamples());
 
+            if (signalGenerator.isEnabled())
+                signalGenerator.getNextAudioBlock(bufferToFill);
+
             if (!bottomComponent.recorderComponent.isEnabled())
             {
                 if (soundPlayers[0] != nullptr)
@@ -626,6 +651,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                     bufferToFill.buffer->copyFrom(1, 0, *newOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
                 }
             }
+
         }
     }
 }
@@ -997,8 +1023,10 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
     }
     else if (menuIndex == 2)
     {
-        menu.addCommandItem(&commandManager, CommandIDs::showIndividualMeters, "Show individuals meters");
+        menu.addCommandItem(&commandManager, CommandIDs::showSignalGenerator, "Show signal generator");
         menu.addCommandItem(&commandManager, CommandIDs::showTimer, "Show timer");
+        menu.addSeparator();
+        menu.addCommandItem(&commandManager, CommandIDs::showIndividualMeters, "Show individuals meters");
         menu.addCommandItem(&commandManager, CommandIDs::showEnveloppe, "Show enveloppe on clip");
         menu.addCommandItem(&commandManager, CommandIDs::viewLastPlayedSound, "Show last played sound in panel");
     }
@@ -1104,7 +1132,8 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
                                     CommandIDs::deleteOutMark,
                                     CommandIDs::documentation,
                                     CommandIDs::about,
-                                    CommandIDs::autoCheckUpdate };
+                                    CommandIDs::autoCheckUpdate,
+                                    CommandIDs::showSignalGenerator };
     commands.addArray(c);
 }
 
@@ -1121,6 +1150,10 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setInfo("Show / hide timer", "Show / hide timer", "Menu", 0);
         result.setTicked(soundPlayers[0]->mainStopWatch.isVisible());
         result.addDefaultKeypress('t', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::showSignalGenerator:
+        result.setInfo("Show signal generator", "Signal generator", "Menu", 0);
+        result.setTicked(false);
         break;
     case CommandIDs::lanchRecord:
         result.setInfo("Launch record", "Launch record", "Menu", 0);
@@ -1343,6 +1376,9 @@ bool MainComponent::perform(const InvocationInfo& info)
         juce::FileLogger::getCurrentLogger()->writeToLog("show timer");
         soundPlayers[0]->mainStopWatch.setVisible(!soundPlayers[0]->mainStopWatch.isVisible());
         soundPlayers[0]->resized();
+        break;
+    case CommandIDs::showSignalGenerator:
+        signalGeneratorButtonClicked();
         break;
     case CommandIDs::lanchRecord:
         juce::FileLogger::getCurrentLogger()->writeToLog("launch record");

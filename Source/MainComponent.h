@@ -13,6 +13,7 @@
 #include "Settings/KeyMapper.h"
 #include "Settings/MidiMapper.h"
 #include "Others/updateDialog.h"
+#include "Others/SignalGenerator.h"
 #include <string>
 #include <iostream>
 #include <memory>
@@ -78,7 +79,8 @@ public:
         deleteOutMark,
         documentation,
         about,
-        autoCheckUpdate
+        autoCheckUpdate,
+        showSignalGenerator
     };
 
     MainComponent();
@@ -134,6 +136,8 @@ private:
     void audioSettingsButtonClicked();
     void keyMapperButtonClicked();
     void midiMapperButtonClicked();
+    void signalGeneratorButtonClicked();
+
     void valueChanged(juce::Value& value);
     void buttonClicked(juce::Button* button) override;
 
@@ -200,5 +204,7 @@ private:
     std::unique_ptr<juce::FileLogger> logger;
 
     juce::Array<Player::PlayerInfo> tempPlayers;
+
+    SignalGenerator signalGenerator;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
