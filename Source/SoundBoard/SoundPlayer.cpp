@@ -940,7 +940,7 @@ void SoundPlayer::loadInFirstEmptyPlayer(juce::String file, juce::String name)
                 auto playerSource = player->getPlayer();
                 if (!playerSource->isFileLoaded() && player->isVisible())
                 {
-                    playerSource->loadFile(file, false);
+                    playerSource->verifyAudioFileFormat(file);
                     if (name.isNotEmpty())
                         playerSource->setName(name.toStdString());
                     return;
@@ -956,7 +956,7 @@ void SoundPlayer::loadInFirstEmptyPlayer(juce::String file, juce::String name)
             {
                 if (!player->isFileLoaded())
                 {
-                    player->loadFile(file, false);
+                    player->verifyAudioFileFormat(file);
                     if (name.isNotEmpty())
                         player->setName(name.toStdString());
                     return;
@@ -969,7 +969,7 @@ void SoundPlayer::loadInFirstEmptyPlayer(juce::String file, juce::String name)
     if (soundPlayerMode == SoundPlayer::Mode::OnePlaylistOneCart)
     {
         auto addedPlayer = myPlaylists[0]->addPlayer(myPlaylists[0]->players.size() - 1);
-        addedPlayer->loadFile(file, false);
+        addedPlayer->verifyAudioFileFormat(file);
         if (name.isNotEmpty())
             addedPlayer->setName(name.toStdString());
     }

@@ -1331,6 +1331,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
     else if (source == denoiser.denoiseDoneBroadcaster)
     {
+        float tempTrimVolume = trimVolumeSlider.getValue();
         juce::FileLogger::getCurrentLogger()->writeToLog("player denoise thread finished");
         std::string n = newName;
         std::string oldFilePath = loadedFilePath;
@@ -1341,6 +1342,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         loadedFilePath = oldFilePath;
         convertingBar->setVisible(false);
         soundEditedBroadcaster->sendChangeMessage();
+        trimValueToSet = tempTrimVolume;
 }
 #endif
     playerInfoChangedBroadcaster->sendChangeMessage();
@@ -1799,12 +1801,14 @@ bool Player::loadFile(const juce::String& path, bool shouldSendChangeMessage)
         waveformPainted = false;
         fileLoaded = true;
         enableButtons(true);
+
+        if (Settings::autoNormalize && !hasBeenNormalized)
+        {
+            normalize(loadedFilePath);
+        }
     }
     //R128
-    if (Settings::autoNormalize && !hasBeenNormalized)
-    {
-        normalize(loadedFilePath);
-    }
+
     //cue transport
     if (juce::AudioFormatReader* cuereader = formatManager.createReaderFor(file))
     {
@@ -2351,6 +2355,8 @@ void Player::denoiseButtonClicked()
         denoiseWindow->showDialog("Denoiser - " + soundName.getText(), &denoiser, this, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), true);
         denoiser.setFilePath(loadedFilePath);
         denoiser.setTransportGain(trimVolumeSlider.getValue());
+        denoiser.processStartedBroadcaster->addChangeListener(this);
+        denoiser.denoiseDoneBroadcaster->addChangeListener(this);
         soundEditedBroadcaster->sendChangeMessage();
     }
 }
@@ -2358,6 +2364,7 @@ void Player::denoiseButtonClicked()
 void Player::setDenoisedFile(bool loadDenoisedFile)
 {
     juce::FileLogger::getCurrentLogger()->writeToLog("player set denoised file");
+    float tempTrimVolume = getTrimVolume();
     if (!loadDenoisedFile)
     {
         std::string n = newName;
@@ -2377,6 +2384,7 @@ void Player::setDenoisedFile(bool loadDenoisedFile)
             loadedFilePath = oldFilePath;
         }
     }
+    trimValueToSet = tempTrimVolume;
     soundEditedBroadcaster->sendChangeMessage();
 }
 

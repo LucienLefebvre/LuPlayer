@@ -1403,6 +1403,21 @@ void Playlist::spaceBarStop()
                 spaceBarPlayerId++;
                 fader1Player++;
                 fader2Player++;
+                if (players[spaceBarPlayerId] != nullptr)
+                {
+                    while (!players[spaceBarPlayerId]->isFileLoaded())
+                    {
+                        if (players[spaceBarPlayerId + 1] != nullptr)
+                        {
+                            juce::FileLogger::getCurrentLogger()->writeToLog("increment space bar player id");
+                            spaceBarPlayerId++;
+                            fader1Player++;
+                            fader2Player++;
+                        }
+                        else
+                            break;
+                    }
+                }
             }
             if (spaceBarPlayerId == players.size())
             {

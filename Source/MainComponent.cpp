@@ -590,7 +590,6 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             }
             else if (bottomComponent.recorderComponent.isEnabled())
             {
-                newOutputBuffer.reset(new juce::AudioBuffer<float>(2, bufferToFill.buffer->getNumSamples()));
                 bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer.get(), inputBuffer.get(), newOutputBuffer.get(), 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
                 if (bottomComponent.recorderComponent.enableMonitoring.getToggleState())
                 {
