@@ -57,6 +57,7 @@ public:
     void setViewLastPlayed(bool show);
     void setKeyboardLayout(int layout);
     void setAutoCheckUpdate(bool check);
+    void setOSCEnabled(bool enabled);
     static juce::StringArray getAcceptedFileFormats();
     juce::TextButton saveButton;
 
@@ -68,9 +69,11 @@ public:
     static float Settings::skewFactorGlobal;
     static int Settings::midiShift;
     static int Settings::faderTempTime;
+    static int Settings::faderDelayTime;
     static int Settings::preferedMidiDeviceIndex;
     static int Settings::inOscPort;
     static int Settings::outOscPort;
+    static bool Settings::OSCEnabled;
     static juce::String Settings::adress1;
     static juce::String Settings::adress2;
     static juce::String Settings::adress3;
@@ -145,6 +148,9 @@ private:
 
     juce::Label faderTempLabel;
     juce::Label faderTempValue;
+
+    juce::Label faderDelayLabel;
+    juce::Label faderDelayValue;
 
     juce::Label localIpAdressLabel;
     juce::Label localIpAdressValue;

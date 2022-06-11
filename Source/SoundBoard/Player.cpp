@@ -285,6 +285,7 @@ Player::Player(int index, Settings* s)
     
      Settings::sampleRateValue.addListener(this);
      Settings::audioOutputModeValue.addListener(this);
+     faderDelayThread.delayBroadcaster->addChangeListener(this);
      setChannelsMapping();
     
      convertingBar.reset(new juce::ProgressBar(luThread.progress));
@@ -1003,7 +1004,7 @@ std::atomic<float> Player::getEnveloppeValue(float x, juce::Path& p)
 }
 
 //Play Control
-void Player::play(bool launchedByMidi)
+void Player::play(bool launchedByMidi, bool delayStart)
 {
     const juce::MessageManagerLock mmLock;
     if (launchedByMidi)
@@ -1015,9 +1016,16 @@ void Player::play(bool launchedByMidi)
         actualSliderValue = 0.0f;
         volumeSlider.setValue(0.0f);
     }
-    transport.setPosition(startTime);
-    transportStateChanged(Starting);
-    soundEditedBroadcaster->sendChangeMessage();
+    if (delayStart)
+    {
+        faderDelayThread.startThread();
+    }
+    else
+    {
+        transport.setPosition(startTime);
+        transportStateChanged(Starting);
+        soundEditedBroadcaster->sendChangeMessage();
+    }
 }
 
 void Player::launch()
@@ -1307,6 +1315,10 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         hasBeenNormalized = true;
         soundEditedBroadcaster->sendChangeMessage();
         normalizationFinishedBroadcaster->sendChangeMessage();
+    }
+    else if (source == faderDelayThread.delayBroadcaster.get())
+    {
+        play();
     }
 #if RFBUILD
     else if (source == ffmpegThread.conversionEndedBroadcaster)

@@ -143,7 +143,8 @@ SoundPlayer::SoundPlayer(SoundPlayer::Mode m, Settings* s)
         getChildComponent(i)->setMouseClickGrabsKeyboardFocus(false);
     }
 
-    OSCInitialize();
+    if (Settings::OSCEnabled)
+        OSCInitialize();
 }
 
 SoundPlayer::~SoundPlayer()
@@ -1671,7 +1672,6 @@ void SoundPlayer::timerCallback()
 
 void SoundPlayer::OSCInitialize()
 {
-
     if (oscConnected == false)
     {
         if (receiver.connect(juce::int32(Settings::inOscPort)) && settings->sender.connect(Settings::ipAdress, juce::int32(Settings::outOscPort)))
@@ -1783,7 +1783,7 @@ void SoundPlayer::handleOSCEightFaders(const juce::OSCMessage& message)
             }
             return;
         }
-        adress = "/push" + juce::String(i);
+        adress = "/8fader" + juce::String(i) + "push";
         if (message.getAddressPattern().matches(adress))
         {
             if (message.size() == 1 && message[0].getFloat32() == 1)

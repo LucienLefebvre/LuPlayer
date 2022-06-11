@@ -17,7 +17,9 @@ float Settings::skewFactorGlobal;
 bool Settings::enableFaderStart;
 int Settings::midiShift;
 int Settings::faderTempTime;
+int Settings::faderDelayTime;
 int Settings::preferedMidiDeviceIndex;
+bool Settings::OSCEnabled;
 int Settings::inOscPort;
 int Settings::outOscPort;
 juce::String Settings::adress1;
@@ -130,6 +132,11 @@ Settings::Settings() : settingsFile(options)
     else
         Settings::faderTempTime = properties.getUserSettings()->getValue("Fader Temp").getIntValue();
 
+    if (properties.getUserSettings()->getValue("FaderDelay").isEmpty())
+        Settings::faderDelayTime = 50;
+    else
+        Settings::faderDelayTime = properties.getUserSettings()->getValue("FaderDelay").getIntValue();
+
     if (properties.getUserSettings()->getValue("Launchatzero").isEmpty())
         Settings::lauchAtZeroDB = true;
     else
@@ -187,6 +194,11 @@ Settings::Settings() : settingsFile(options)
         Settings::autoCheckNewUpdate = 1;
     else
         Settings::autoCheckNewUpdate = properties.getUserSettings()->getValue("autoCheckUpdate").getIntValue();
+
+    if (properties.getUserSettings()->getValue("OSCEnabled").isEmpty())
+        Settings::OSCEnabled = 0;
+    else
+        Settings::OSCEnabled = properties.getUserSettings()->getValue("OSCEnabled").getIntValue();
     
     //MAX FADER LEVEL
     maxFaderValueSlider.setBounds(150, 0, 450, 25);
@@ -239,6 +251,18 @@ Settings::Settings() : settingsFile(options)
     faderTempValue.addListener(this);
     faderTempValue.setJustificationType(juce::Justification::centred);
     faderTempValue.setColour(juce::Label::outlineColourId, juce::Colours::black);
+
+    //FADER DELAY
+    faderDelayLabel.setBounds(300, faderStartButton.getBottom() + spacer, 200, 25);
+    faderDelayLabel.setText("Fader start delay (ms)", juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(faderDelayLabel);
+    faderDelayValue.setBounds(500, faderStartButton.getBottom() + spacer, 50, 25);
+    faderDelayValue.setText(juce::String(Settings::faderDelayTime), juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(faderDelayValue);
+    faderDelayValue.setEditable(true, true, false);
+    faderDelayValue.addListener(this);
+    faderDelayValue.setJustificationType(juce::Justification::centred);
+    faderDelayValue.setColour(juce::Label::outlineColourId, juce::Colours::black);
 
     //OSC Ports
     addAndMakeVisible(oscPorts);
@@ -498,8 +522,25 @@ void Settings::labelTextChanged(juce::Label* labelThatHasChanged)
     }
     else if (labelThatHasChanged == &faderTempValue)
     {
-        Settings::faderTempTime = (faderTempValue.getTextValue()).toString().getIntValue();
-        properties.getUserSettings()->setValue("Fader Temp", Settings::faderTempTime);
+        int value = (faderTempValue.getTextValue()).toString().getIntValue();
+        if (value >= 0)
+        {
+            Settings::faderTempTime = value;
+            properties.getUserSettings()->setValue("Fader Temp", Settings::faderTempTime);
+        }
+        else
+            faderTempValue.setText(juce::String(Settings::faderTempTime), juce::dontSendNotification);
+    }
+    else if (labelThatHasChanged == &faderDelayValue)
+    {
+        int value = (faderDelayValue.getTextValue()).toString().getIntValue();
+        if (value >= 0)
+        {
+            Settings::faderDelayTime = value;
+            properties.getUserSettings()->setValue("FaderDelay", Settings::faderDelayTime);
+        }
+        else
+            faderDelayValue.setText(juce::String(Settings::faderDelayTime), juce::dontSendNotification);
     }
     else if (labelThatHasChanged == &ipAdress1)
     {
@@ -764,6 +805,14 @@ void Settings::setAutoCheckUpdate(bool check)
 {
     Settings::autoCheckNewUpdate = check;
     properties.getUserSettings()->setValue("autoCheckUpdate", (int)Settings::autoCheckNewUpdate);
+    properties.saveIfNeeded();
+    settingsFile.save();
+}
+
+void Settings::setOSCEnabled(bool enabled)
+{
+    Settings::OSCEnabled = enabled;
+    properties.getUserSettings()->setValue("OSCEnabled", (int)Settings::OSCEnabled);
     properties.saveIfNeeded();
     settingsFile.save();
 }

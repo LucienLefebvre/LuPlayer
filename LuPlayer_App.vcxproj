@@ -2426,6 +2426,7 @@
     <ClInclude Include="Source\Settings\KeyMapper.h"/>
     <ClInclude Include="Source\Settings\MidiMapper.h"/>
     <ClInclude Include="Source\Settings\Settings.h"/>
+    <ClInclude Include="Source\Others\DelayThread.h"/>
     <ClInclude Include="Source\Others\gainThumbnail.h"/>
     <ClInclude Include="Source\Others\LoudnessBar.h"/>
     <ClInclude Include="Source\Others\PlayHead.h"/>

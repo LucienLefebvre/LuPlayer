@@ -2907,6 +2907,9 @@
     <ClInclude Include="Source\Settings\Settings.h">
       <Filter>LuPlayer\Source\Settings</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Others\DelayThread.h">
+      <Filter>LuPlayer\Source\Others</Filter>
+    </ClInclude>
     <ClInclude Include="Source\Others\gainThumbnail.h">
       <Filter>LuPlayer\Source\Others</Filter>
     </ClInclude>

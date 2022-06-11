@@ -1019,6 +1019,7 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
         menu.addCommandItem(&commandManager, CommandIDs::audioSettings, "Audio settings");
         menu.addCommandItem(&commandManager, CommandIDs::keyboardMapping, "Keyboard shortcuts");
         menu.addCommandItem(&commandManager, CommandIDs::midiMapping, "Midi mapping");
+        menu.addCommandItem(&commandManager, CommandIDs::enableOSC, "Enable OSC");
     }
     else if (menuIndex == 2)
     {
@@ -1132,6 +1133,7 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
                                     CommandIDs::documentation,
                                     CommandIDs::about,
                                     CommandIDs::autoCheckUpdate,
+                                    CommandIDs::enableOSC,
                                     CommandIDs::showSignalGenerator };
     commands.addArray(c);
 }
@@ -1358,6 +1360,10 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setInfo("Automatically check for new update", "Check update", "Menu", 0);
         result.setTicked(Settings::autoCheckNewUpdate);
         break;
+    case CommandIDs::enableOSC:
+        result.setInfo("Enable OSC", "Enable OSC", "Menu", 0);
+        result.setTicked(Settings::OSCEnabled);
+        break;
     default:
         break;
     }
@@ -1567,6 +1573,11 @@ bool MainComponent::perform(const InvocationInfo& info)
         break;
     case CommandIDs::autoCheckUpdate:
         settings.setAutoCheckUpdate(!Settings::autoCheckNewUpdate);
+        break;
+    case CommandIDs::enableOSC:
+        settings.setOSCEnabled(!Settings::OSCEnabled);
+        if (Settings::OSCEnabled)
+            soundPlayers[0]->OSCInitialize();
         break;
     default:
         return false;

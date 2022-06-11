@@ -13,6 +13,7 @@
 
 #include "../Others/PlayHead.h"
 #include "../Others/R128IntegratedThread.h"
+#include "../Others/DelayThread.h"
 #include "../Mixer/FilterProcessor.h"
 #include "../Mixer/CompProcessor.h"
 #include "../Mixer/Meter.h"
@@ -82,7 +83,7 @@ public:
     void setRightFaderAssigned(bool isFaderRightAssigned);
     void assignNextPlayer();
 
-    void play(bool launchedByMidi = false);
+    void play(bool launchedByMidi = false, bool delayStart = false);
     void launch();
     void stop();
     void playButtonClicked();
@@ -326,7 +327,7 @@ public:
     foleys::LevelMeterSource outMeterSource;
 
     R128IntegratedThread luThread{ "Thread" };
-
+    DelayThread faderDelayThread{ "Thread" };
 private:
     enum TransportState
     {

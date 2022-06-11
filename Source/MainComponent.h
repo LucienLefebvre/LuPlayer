@@ -80,7 +80,8 @@ public:
         documentation,
         about,
         autoCheckUpdate,
-        showSignalGenerator
+        showSignalGenerator,
+        enableOSC
     };
 
     MainComponent();
