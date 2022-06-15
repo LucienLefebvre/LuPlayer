@@ -304,10 +304,20 @@ void SoundPlayer::initializeKeyMapPlayer()
     }
     keyMappedSoundboard->setShortcutKeys();
     keyMappedSoundboard->resized();
+
+    int OSCindex = 1;
     for (auto player : myPlaylists[0]->players)
     {
         player->setPlayerColour(juce::Colour(40, 134, 189));
         player->setIsCart(true);
+        player->setOSCIndex(OSCindex);
+        OSCindex++;
+    }
+    auto secondPlaylist = myPlaylists[1];
+    if (secondPlaylist != nullptr)
+    {
+        for (auto player : secondPlaylist->players)
+            player->setOSCIndex(-1);
     }
     keyMappedSoundboard->prepareToPlay(actualSamplesPerBlockExpected, actualSampleRate);
 }
@@ -1594,7 +1604,7 @@ void SoundPlayer::timerCallback()
     timeLabel.setText(time->toString(false, true, true, true), juce::NotificationType::dontSendNotification);
 
     //OSC SEND
-    if (oscConnected)
+    if (oscConnected && Settings::OSCEnabled)
     {
         if (soundPlayerMode == Mode::OnePlaylistOneCart)
         {
@@ -1750,15 +1760,21 @@ void SoundPlayer::handleOSCKeyMap(const juce::OSCMessage& message)
 {
     for (int i = 0; i < 30; i++)
     {
-        juce::String adress = "/push" + juce::String(i + 1);
+        juce::String adress = "/kmpush" + juce::String(i + 1);
         if (message.getAddressPattern().matches(adress))
         {
             if (message.size() == 1 && message[0].isFloat32())
             {
-                auto* player = myPlaylists[0]->players[i];
-                if (player != nullptr)
+                if (message[0].getFloat32() == 1)
                 {
-                    player->play(true);
+                    auto* player = myPlaylists[0]->players[i];
+                    if (player != nullptr)
+                    {
+                        if (!player->isPlayerPlaying())
+                            player->play();
+                        else
+                            player->stop();
+                    }
                 }
             }
             return;

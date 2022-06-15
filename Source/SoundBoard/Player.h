@@ -334,7 +334,8 @@ private:
         Stopped ,
         Starting,
         Stopping,
-        Playing
+        Playing,
+        FaderDelay
     };
 
     void cueStopButtonClicked();

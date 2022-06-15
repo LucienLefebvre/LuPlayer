@@ -534,7 +534,7 @@ void Settings::labelTextChanged(juce::Label* labelThatHasChanged)
     else if (labelThatHasChanged == &faderDelayValue)
     {
         int value = (faderDelayValue.getTextValue()).toString().getIntValue();
-        if (value >= 0)
+        if (value >= 0 && value < 50)
         {
             Settings::faderDelayTime = value;
             properties.getUserSettings()->setValue("FaderDelay", Settings::faderDelayTime);
@@ -762,7 +762,6 @@ juce::Array<int> Settings::getKeyMapping(juce::StringArray s)
     for (int i = 0; i < s.size(); i++)
     {
         r.set(i, properties.getUserSettings()->getValue(s[i]).getIntValue());
-
     }
     return r;
 }

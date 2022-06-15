@@ -24,6 +24,7 @@ Player::Player(int index, Settings* s)
 
      juce::MultiTimer::startTimer(0, 50);
      juce::MultiTimer::startTimer(1, 500);
+     juce::MultiTimer::startTimer(2, 2000);
 
      state = Stopped;
 
@@ -182,7 +183,7 @@ Player::Player(int index, Settings* s)
      soundName.setBounds(leftControlsWidth + borderRectangleWidth, 80, 330, 20);
      soundName.setJustificationType(juce::Justification::centred);
      soundName.setFont(juce::Font(19.0f, juce::Font::bold).withTypefaceStyle("Regular"));
-     soundName.setText(juce::String(""), juce::NotificationType::dontSendNotification);
+     soundName.setText(juce::String(""), juce::NotificationType::sendNotification);
      soundName.setWantsKeyboardFocus(false);
      soundName.setMouseClickGrabsKeyboardFocus(false);
      soundName.addListener(this);
@@ -337,7 +338,7 @@ void Player::paint (juce::Graphics& g)
     g.setOpacity(1.0);
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));  
     outputMeter.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-    if (state == Playing)
+    if (state == Playing || state == FaderDelay)
     {
         if (stopTime - transport.getCurrentPosition() < 6)
         {
@@ -452,7 +453,7 @@ void Player::paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& 
 
 void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds, float thumbnailZoomValue)
 {
-    if (state == Playing)
+    if (state == Playing || state == FaderDelay)
     {
         if ((stopTime - transport.getCurrentPosition() < 6))
             g.setColour(juce::Colours::red);
@@ -481,7 +482,7 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
     }
     thumbnail.setGainValues(gainValue);
 
-    if (isNextPlayer || state == Playing)
+    if (isNextPlayer || state == Playing || state == FaderDelay)
         g.setColour(playerColour);
     else
         g.setColour(juce::Colour(229, 149, 0));
@@ -646,10 +647,56 @@ void Player::timerCallback(int timerID)
     {
         if (settings != nullptr)
         {
-            if (settings->oscConnected && transport.isPlaying())
+            if (Settings::OSCEnabled && settings->oscConnected)
             {
-                juce::String adress = "/time" + juce::String(oscIndex);
-                settings->sender.send(adress, remainingTimeLabel.getText());
+                if (isEightPlayerMode)
+                {
+                    juce::String adress = "/8faderstime" + juce::String(oscIndex);
+                    settings->sender.send(adress, remainingTimeLabel.getText());
+                }
+                else
+                {
+                    juce::String adress = "/time" + juce::String(oscIndex);
+                    settings->sender.send(adress, remainingTimeLabel.getText());
+
+                    adress = "/kmtime" + juce::String(oscIndex);
+                    settings->sender.send(adress, remainingTimeLabel.getText());
+                }
+            }
+        }
+    }
+    else if (timerID == 2)
+    {
+        if (settings != nullptr)
+        {
+            if (Settings::OSCEnabled && settings->oscConnected)
+            {
+                if (isEightPlayerMode)
+                {
+                    juce::String adress = "/8faderstime" + juce::String(oscIndex);
+                    settings->sender.send(adress, remainingTimeLabel.getText());
+
+                    adress = "/8fader" + juce::String(oscIndex) + "gain";
+                    juce::NormalisableRange<float>valueRange(0.0, juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal, false);
+                    settings->sender.send(adress, valueRange.convertTo0to1((float)volumeSlider.getValue()));
+
+                    adress = "/8faderslabel" + juce::String(oscIndex);
+                    settings->sender.send(adress, juce::String(getName()));
+                }
+                else
+                {
+                    juce::String adress = "/time" + juce::String(oscIndex);
+                    settings->sender.send(adress, remainingTimeLabel.getText());
+
+                    adress = "/kmtime" + juce::String(oscIndex);
+                    settings->sender.send(adress, remainingTimeLabel.getText());
+
+                    adress = "/name" + juce::String(oscIndex);
+                    settings->sender.send(adress, juce::String(getName()));
+
+                    adress = "/kmname" + juce::String(oscIndex);
+                    settings->sender.send(adress, juce::String(getName()));
+                }
             }
         }
     }
@@ -1019,6 +1066,7 @@ void Player::play(bool launchedByMidi, bool delayStart)
     if (delayStart)
     {
         faderDelayThread.startThread();
+        state = FaderDelay;
     }
     else
     {
@@ -1090,7 +1138,7 @@ void Player::deleteFile()
         enableHPF(false, false);
         newName = "";
         trimVolumeSlider.setValue(juce::Decibels::decibelsToGain(0.0));
-        soundName.setText("", juce::NotificationType::dontSendNotification);
+        soundName.setText("", juce::NotificationType::sendNotification);
         fileName.setValue("");
         fileLoaded = false;
         sliderValueToset = 1.0;
@@ -1391,15 +1439,6 @@ void Player::transportStateChanged(TransportState newState)
             if (Settings::viewLastPlayedSound)
                 playerLaunchedBroadcaster->sendChangeMessage();
 
-            if (settings != nullptr)
-            {
-                if (settings->oscConnected)
-                {
-                    juce::String adress = "/push" + juce::String(oscIndex);
-                    settings->sender.send(adress, 1);
-                }
-            }
-
             break;
         case Stopping:
             playerInfoChangedBroadcaster->sendChangeMessage();
@@ -1410,18 +1449,29 @@ void Player::transportStateChanged(TransportState newState)
             deleteButton.setEnabled(true);
             stopButtonClickedBool == false;
             soundName.setColour(soundName.textColourId, juce::Colours::white);
-
-            if (settings != nullptr)
-            {
-                if (settings->oscConnected)
-                {
-                    juce::String adress = "/push" + juce::String(oscIndex);
-                    settings->sender.send(adress, 0);
-                }
-            }
             break;       
         }
 
+    }
+    if (settings != nullptr)
+    {
+        if (Settings::OSCEnabled && settings->oscConnected)
+        {
+            int value = isPlayerPlaying() ? 1 : 0;
+            if (isEightPlayerMode)
+            {
+                juce::String adress = "/8fader" + juce::String(oscIndex) + "push";
+                settings->sender.send(adress, value);
+            }
+            else
+            {
+                juce::String adress = "/push" + juce::String(oscIndex);
+                settings->sender.send(adress, value);
+
+                adress = "/kmpush" + juce::String(oscIndex);
+                settings->sender.send(adress, value);
+            }
+        }
     }
     soundEditedBroadcaster->sendChangeMessage();
 }
@@ -1448,7 +1498,7 @@ void Player::sliderValueChanged(juce::Slider* slider)
 
         if (settings != nullptr)
         {
-            if (settings->oscConnected && isEightPlayerMode)
+            if (settings->oscConnected && isEightPlayerMode && Settings::OSCEnabled)
             {
                 juce::String adress = "/8fader" + juce::String(oscIndex) + "gain";
                 juce::NormalisableRange<float>valueRange(0.0, juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal, false);
@@ -1914,7 +1964,7 @@ void Player::setName(std::string Name, bool sendMessage)
     newName = Name;
     if (!newName.empty())
     {
-        soundName.setText(newName, juce::NotificationType::dontSendNotification);
+        soundName.setText(newName, juce::NotificationType::sendNotification);
         if (sendMessage)
             soundEditedBroadcaster->sendChangeMessage();
     }
@@ -2666,10 +2716,18 @@ void Player::labelTextChanged(juce::Label* labelThatHasChanged)
     soundEditedBroadcaster->sendChangeMessage();
     if (settings != nullptr)
     {
-        if (settings->oscConnected)
+        if (settings->oscConnected && Settings::OSCEnabled)
         {
-            juce::String adress = "/name" + juce::String(oscIndex);
-            settings->sender.send(adress, labelThatHasChanged->getText());
+            if (isEightPlayerMode)
+            {
+                juce::String adress = "/8faderslabel" + juce::String(oscIndex);
+                settings->sender.send(adress, juce::String(getName()));
+            }
+            else
+            {
+                juce::String adress = "/name" + juce::String(oscIndex);
+                settings->sender.send(adress, juce::String(getName()));
+            }
         }
     }
 }   
