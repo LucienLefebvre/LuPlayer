@@ -1710,7 +1710,12 @@ void MainComponent::reloadTempPlayers()
                 else
                 {
                     while (!soundPlayers[0]->keyMappedSoundboard->mappedPlayers[playerToLoadID]->isVisible())
-                        playerToLoadID++;
+                    {
+                        if (soundPlayers[0]->keyMappedSoundboard->mappedPlayers[playerToLoadID + 1] != nullptr)
+                            playerToLoadID++;
+                        else
+                            break;
+                    }
                     soundPlayers[0]->keyMappedSoundboard->mappedPlayers[playerToLoadID]->getPlayer()->setPlayerInfo(tempPlayers[i]);
                     playerToLoadID++;
                 }
