@@ -59,6 +59,7 @@ Dans le panneau "Key Mapping", possibilité de choisir entre trois disposition d
 
 ## OSC
 Pour pouvoir contrôler avec un Smartphone, il faut une application (5€ sur le Play Storeou sur l’App Store).
+
 Il faut que le téléphone et le PC soit sur le même réseau WIFI / Ethernet.
 
 ###Configuration :
