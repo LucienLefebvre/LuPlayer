@@ -1560,10 +1560,7 @@ bool MainComponent::perform(const InvocationInfo& info)
         break;
     case CommandIDs::documentation:
     {
-        juce::URL("")
-        juce::File docFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Documentation/Doc.pdf"));
-        if (docFile.existsAsFile())
-            juce::Process::openDocument(docFile.getFullPathName(), "");
+        juce::URL("https://github.com/LucienLefebvre/LuPlayer/blob/master/Documentation/Manual.md").launchInDefaultBrowser();
         break;
     }
     case CommandIDs::about:
