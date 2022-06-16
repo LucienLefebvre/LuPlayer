@@ -70,6 +70,7 @@ public:
     static int Settings::midiShift;
     static int Settings::faderTempTime;
     static int Settings::faderDelayTime;
+    static int Settings::lastSecondsTime;
     static int Settings::preferedMidiDeviceIndex;
     static int Settings::inOscPort;
     static int Settings::outOscPort;
@@ -103,6 +104,7 @@ public:
     static bool Settings::lauchAtZeroDB;
     static bool Settings::mouseWheelControlVolume;
     static bool Settings::autoNormalize;
+    static double Settings::normTarget;
     static bool Settings::showMeter;
     static juce::Value Settings::showMeterValue;
     static bool Settings::viewLastPlayedSound;
@@ -125,9 +127,7 @@ public:
     std::unique_ptr<juce::ChangeBroadcaster> keyMappedSoundboardSize = std::make_unique<juce::ChangeBroadcaster>();
 
     juce::OSCSender sender;
-    bool oscConnected = true;
-
-
+    bool oscConnected = false;
 
 private:
     juce::TextButton convertedSoundsButtons;
@@ -152,6 +152,9 @@ private:
     juce::Label faderDelayLabel;
     juce::Label faderDelayValue;
 
+    juce::Label lastSecondsLabel;
+    juce::Label lastSecondsValue;
+
     juce::Label localIpAdressLabel;
     juce::Label localIpAdressValue;
 
@@ -170,6 +173,9 @@ private:
 
     juce::Label normalizeLabel;
     juce::ToggleButton normalizeButton;
+
+    juce::Label normalizeTargetLabel;
+    juce::Label normalizeTargetValue;
 
     juce::Label meterLabel;
     juce::ToggleButton meterButton;

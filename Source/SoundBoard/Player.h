@@ -99,6 +99,7 @@ public:
     void setCuePlayHeadVisible(bool isVisible);
 
     void verifyAudioFileFormat(const juce::String& path);
+    void launchFFMPEGThread(juce::String path);
     bool loadFile(const juce::String& path, bool shouldSendChangeMessage);
     Player::PlayerInfo getPlayerInfo();
     void setPlayerInfo(Player::PlayerInfo p);

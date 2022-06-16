@@ -191,7 +191,6 @@ void KeyMappedPlayer::resized()
             }
         }
     }
-        //labelFont = labelFont.withHorizontalScale(0.2);
     shortcutLabel->setFont(labelFont);
     shortcutLabel->setJustificationType(juce::Justification::centred);
 
@@ -223,11 +222,9 @@ void KeyMappedPlayer::setPlayer(Player* p)
     soundPlayer->conversionLaunchedBroadcaster->addChangeListener(this);
     soundPlayer->conversionFinishedBroadcaster->addChangeListener(this);
     soundPlayer->enveloppePathChangedBroadcaster->addChangeListener(this);
-    //soundPlayer->shortcutKeyChanged->addChangeListener(this);
 
     busyBar.reset(new juce::ProgressBar(soundPlayer->luThread.progress));
     addChildComponent(busyBar.get());
-    //busyBar->setAlpha(0.7);
 
     thumbnail = &soundPlayer->getAudioThumbnail();
     playThumbnail = &soundPlayer->getPlayThumbnail();
@@ -235,7 +232,6 @@ void KeyMappedPlayer::setPlayer(Player* p)
     playThumbnail->addChangeListener(this);
     juce::MultiTimer::startTimer(0, 50);
     juce::MultiTimer::startTimer(1, 50);
-
 }
 
 Player* KeyMappedPlayer::getPlayer()

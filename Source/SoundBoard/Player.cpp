@@ -340,7 +340,7 @@ void Player::paint (juce::Graphics& g)
     outputMeter.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     if (state == Playing || state == FaderDelay)
     {
-        if (stopTime - transport.getCurrentPosition() < 6)
+        if (stopTime - transport.getCurrentPosition() < Settings::lastSecondsTime)
         {
             g.setColour(juce::Colours::red);
             outputMeter.setColour(juce::Colours::red);
@@ -397,7 +397,7 @@ void Player::paint (juce::Graphics& g)
            g.fillRoundedRectangle(x, y, width, height, 3);
        }
    
-       if (((stopTime - transport.getCurrentPosition() < 6)) && fileLoaded == true && state == Playing)
+       if (((stopTime - transport.getCurrentPosition() < Settings::lastSecondsTime)) && fileLoaded == true && state == Playing)
        {
            if (faderLeftAssigned == true)
            {
@@ -415,7 +415,7 @@ void Player::paint (juce::Graphics& g)
                g.fillRoundedRectangle(x, y, width, height, 3);
            }
      
-           if ((stopTime - transport.getCurrentPosition() < 6) && fileLoaded == true && state == Playing)
+           if ((stopTime - transport.getCurrentPosition() < Settings::lastSecondsTime) && fileLoaded == true && state == Playing)
            {
                if (faderRightAssigned == true)
                {
@@ -455,7 +455,7 @@ void Player::paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& th
 {
     if (state == Playing || state == FaderDelay)
     {
-        if ((stopTime - transport.getCurrentPosition() < 6))
+        if ((stopTime - transport.getCurrentPosition() < Settings::lastSecondsTime))
             g.setColour(juce::Colours::red);
         else
             g.setColour(juce::Colours::green);
@@ -604,7 +604,7 @@ void Player::timerCallback(int timerID)
 {
     if (timerID == 0)
     {
-        if (((stopTime - transport.getCurrentPosition() < 6)) && fileLoaded == true && state == Playing)
+        if (((stopTime - transport.getCurrentPosition() < Settings::lastSecondsTime)) && fileLoaded == true && state == Playing)
         {
             if (endRepainted == false)
             {
@@ -811,7 +811,7 @@ void Player::updateInOutMarkPosition()
     if (startTimeSet)
     {
         auto startDrawPosition = (startTime * (float)thumbnailBounds.getWidth() / transport.getLengthInSeconds()) + (float)thumbnailBounds.getX();
-        if (startDrawPosition > waveformThumbnailXStart && startDrawPosition < rightControlsStart)
+        if (startDrawPosition > (leftControlsWidth + borderRectangleWidth) && startDrawPosition < rightControlsStart)
         {
             inMark.setVisible(true);
             inMark.setTopLeftPosition(startDrawPosition, 0);
@@ -821,11 +821,12 @@ void Player::updateInOutMarkPosition()
     }
     else
         inMark.setVisible(false);
+
     if (stopTimeSet)
     {
 
         auto startDrawPosition = (stopTime * (float)thumbnailBounds.getWidth() / transport.getLengthInSeconds()) + (float)thumbnailBounds.getX();
-        if (startDrawPosition > waveformThumbnailXStart && startDrawPosition < rightControlsStart)
+        if (startDrawPosition > (leftControlsWidth + borderRectangleWidth) && startDrawPosition < rightControlsStart)
         {
             outMark.setVisible(true);
             outMark.setTopLeftPosition(startDrawPosition, 0);
@@ -865,7 +866,7 @@ void Player::updateRemainingTime()
         remainingTimeString = juce::String(remainingTimeMinuts) + ":" + juce::String(remainingTimeSeconds);
     remainingTimeLabel.setText(remainingTimeString, juce::NotificationType::dontSendNotification);
 
-    if (remainingTimeString.equalsIgnoreCase("0:05"))
+    if (remainingTimeString.equalsIgnoreCase("0:0" + juce::String(Settings::lastSecondsTime)))
     {
         remainingTimeBroadcaster->sendChangeMessage();
         repaint();
@@ -1354,7 +1355,7 @@ void Player::changeListenerCallback(juce::ChangeBroadcaster* source)
         integratedLoudness = luThread.getILU();
         if (integratedLoudness > 0)
             integratedLoudness = -23;
-        double loudnessDifference = -23. - integratedLoudness;
+        double loudnessDifference = Settings::normTarget -23. - integratedLoudness;
         trimValueToSet = loudnessDifference;
         luThread.deleteProgressFile();
         normalizingLabel.setVisible(false);
@@ -1427,7 +1428,7 @@ void Player::transportStateChanged(TransportState newState)
             playerInfoChangedBroadcaster->sendChangeMessage();
             playBroadcaster->sendActionMessage("Play");
 
-            if (transport.getLengthInSeconds() < 6)
+            if (transport.getLengthInSeconds() < Settings::lastSecondsTime)
                 remainingTimeBroadcaster->sendChangeMessage();
 
             transport.start();
@@ -1799,23 +1800,29 @@ void Player::verifyAudioFileFormat(const juce::String& path)
                 loadFile(file.getFullPathName(), true);
                 delete reader;
             }
+            else
+                launchFFMPEGThread(path);
         }
 #if RFBUILD
         else
         {
-            juce::String correctedPath;
-            ffmpegThread.conversionEndedBroadcaster->addChangeListener(this);
-            ffmpegThread.setFilePath(path);
-            ffmpegThread.shouldMakeProgressFile(false);
-            conversionLaunchedBroadcaster->sendChangeMessage();
-            ffmpegThread.startThread();
-            convertingBar->setVisible(true);
-            convertingBar->setTextToDisplay("Converting...");
+            launchFFMPEGThread(path);
         }
 #endif
     }
 }
 
+void Player::launchFFMPEGThread(juce::String path)
+{
+    juce::String correctedPath;
+    ffmpegThread.conversionEndedBroadcaster->addChangeListener(this);
+    ffmpegThread.setFilePath(path);
+    ffmpegThread.shouldMakeProgressFile(false);
+    conversionLaunchedBroadcaster->sendChangeMessage();
+    ffmpegThread.startThread();
+    convertingBar->setVisible(true);
+    convertingBar->setTextToDisplay("Converting...");
+}
 
 bool Player::loadFile(const juce::String& path, bool shouldSendChangeMessage)
 {
@@ -2512,7 +2519,7 @@ bool Player::isPlayerPlaying()
 
 bool Player::isLastSeconds()
 {
-    if (stopTime - transport.getCurrentPosition() < 6)
+    if (stopTime - transport.getCurrentPosition() < Settings::lastSecondsTime)
         return true;
     else
         return false;

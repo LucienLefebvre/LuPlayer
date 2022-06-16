@@ -1692,20 +1692,18 @@ void SoundPlayer::OSCInitialize()
         }
 
         receiver.addListener(this);
-        addListener(this, "/1/fader1");
-        addListener(this, "/1/fader2");
-        addListener(this, "/1/fader3");
-        addListener(this, "/1/fader4");
-        addListener(this, "/1/push1");
-        addListener(this, "/1/push2");
-        addListener(this, "/1/push3");
-        addListener(this, "/1/push4");
-        addListener(this, "/1/up");
-        addListener(this, "/1/reset");
-        addListener(this, "/1/down");
-        addListener(this, "/2/multipush1");
-
-
+        //addListener(this, "/1/fader1");
+        //addListener(this, "/1/fader2");
+        //addListener(this, "/1/fader3");
+        //addListener(this, "/1/fader4");
+        //addListener(this, "/1/push1");
+        //addListener(this, "/1/push2");
+        //addListener(this, "/1/push3");
+        //addListener(this, "/1/push4");
+        //addListener(this, "/1/up");
+        //addListener(this, "/1/reset");
+        //addListener(this, "/1/down");
+        //addListener(this, "/2/multipush1");
     }
     else if (oscConnected == true)
     {

@@ -3,12 +3,10 @@
 
     MainComponent.cpp
     Created: 26 Jan 2021 7:36:59pm
-    Author:  Lucien
+    Author:  Lucien Lefebvre
 
   ==============================================================================
 */
-//#define RFBUILD 1
-
 #include "MainComponent.h"
 
 bool MainComponent::exitAnswered;
@@ -650,7 +648,6 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
                     bufferToFill.buffer->copyFrom(1, 0, *newOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
                 }
             }
-
         }
     }
 }
@@ -738,7 +735,12 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
 
 bool MainComponent::keyPressed(const juce::KeyPress &key, juce::Component* originatingComponent)
 {
-    if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap
+    if (key == juce::KeyPress::tabKey)
+    {
+        grabKeyboardFocus();
+        return true;
+    }
+    else if (soundPlayers[0]->soundPlayerMode == SoundPlayer::Mode::KeyMap
         && soundPlayers[0]->keyMappedSoundboard != nullptr)
     {
         if (bottomComponent.clipEditor.wantsKeyPress())
@@ -1558,6 +1560,7 @@ bool MainComponent::perform(const InvocationInfo& info)
         break;
     case CommandIDs::documentation:
     {
+        juce::URL("")
         juce::File docFile(juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Documentation/Doc.pdf"));
         if (docFile.existsAsFile())
             juce::Process::openDocument(docFile.getFullPathName(), "");

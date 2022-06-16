@@ -113,7 +113,9 @@ public:
         {
 
             setVisible(true);
-            //setUsingNativeTitleBar(true);
+#if RFBUILD
+            setUsingNativeTitleBar(true);
+#endif
             mainComponent.setSize(getWidth(), getHeight());
             setContentOwned (&mainComponent, true);
             setResizable(true, false);
