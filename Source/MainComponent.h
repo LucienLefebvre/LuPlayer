@@ -38,6 +38,7 @@ public:
     {
         startTimer = 1,
         showTimer,
+        showClock,
         showIndividualMeters,
         showEnveloppe,
         viewLastPlayedSound,

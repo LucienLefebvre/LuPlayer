@@ -1001,7 +1001,7 @@ void MainComponent::stopWatchShortcuPressed()
 
 juce::StringArray MainComponent::getMenuBarNames()
 {
-    return { "File", "Settings", "View", "Soundplayer Mode", "Help" };
+    return { "File", "Settings", "Soundplayer Mode", "View", "Tools", "Help" };
 }
 
 juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String& menuName)
@@ -1025,20 +1025,24 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
     }
     else if (menuIndex == 2)
     {
-        menu.addCommandItem(&commandManager, CommandIDs::showSignalGenerator, "Show signal generator");
+        menu.addCommandItem(&commandManager, CommandIDs::launchPlaylist, "One playlist, one cart");
+        menu.addCommandItem(&commandManager, CommandIDs::launch8Faders, "Eight faders");
+        menu.addCommandItem(&commandManager, CommandIDs::launchKeyMapped, "Keyboard Mapped");
+    }
+    else if (menuIndex == 3)
+    {
+        menu.addCommandItem(&commandManager, CommandIDs::showClock, "Show clock");
         menu.addCommandItem(&commandManager, CommandIDs::showTimer, "Show timer");
         menu.addSeparator();
         menu.addCommandItem(&commandManager, CommandIDs::showIndividualMeters, "Show individuals meters");
         menu.addCommandItem(&commandManager, CommandIDs::showEnveloppe, "Show enveloppe on clip");
         menu.addCommandItem(&commandManager, CommandIDs::viewLastPlayedSound, "Show last played sound in panel");
     }
-    else if (menuIndex == 3)
-    {
-        menu.addCommandItem(&commandManager, CommandIDs::launchPlaylist, "One playlist, one cart");
-        menu.addCommandItem(&commandManager, CommandIDs::launch8Faders, "Eight faders");
-        menu.addCommandItem(&commandManager, CommandIDs::launchKeyMapped, "Keyboard Mapped");
-    }
     else if (menuIndex == 4)
+    {
+        menu.addCommandItem(&commandManager, CommandIDs::showSignalGenerator, "Show signal generator");
+    }
+    else if (menuIndex == 5)
     {
         menu.addCommandItem(&commandManager, CommandIDs::documentation, "Documentation");
         menu.addCommandItem(&commandManager, CommandIDs::about, "About");
@@ -1093,6 +1097,7 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
 {
     juce::Array<juce::CommandID> c{ CommandIDs::startTimer,
                                     CommandIDs::showTimer,
+                                    CommandIDs::showClock,
                                     CommandIDs::showIndividualMeters,
                                     CommandIDs::showEnveloppe,
                                     CommandIDs::viewLastPlayedSound,
@@ -1151,8 +1156,12 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         break;
     case CommandIDs::showTimer:
         result.setInfo("Show / hide timer", "Show / hide timer", "Menu", 0);
-        result.setTicked(soundPlayers[0]->mainStopWatch.isVisible());
+        result.setTicked(Settings::showTimer);
         result.addDefaultKeypress('t', juce::ModifierKeys::commandModifier);
+        break;
+    case CommandIDs::showClock:
+        result.setInfo("Show / hide clock", "Show / hide clock", "Menu", 0);
+        result.setTicked(Settings::showClock);
         break;
     case CommandIDs::showSignalGenerator:
         result.setInfo("Show signal generator", "Signal generator", "Menu", 0);
@@ -1381,7 +1390,12 @@ bool MainComponent::perform(const InvocationInfo& info)
         break;
     case CommandIDs::showTimer:
         juce::FileLogger::getCurrentLogger()->writeToLog("show timer");
-        soundPlayers[0]->mainStopWatch.setVisible(!soundPlayers[0]->mainStopWatch.isVisible());
+        settings.setShowTimer(!Settings::showTimer);
+        soundPlayers[0]->resized();
+        break;
+    case CommandIDs::showClock:
+        juce::FileLogger::getCurrentLogger()->writeToLog("show clock");
+        settings.setShowClock(!Settings::showClock);
         soundPlayers[0]->resized();
         break;
     case CommandIDs::showSignalGenerator:

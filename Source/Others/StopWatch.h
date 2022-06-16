@@ -30,6 +30,7 @@ public:
         timeLabel.reset(new juce::Label());
         addAndMakeVisible(timeLabel.get());
         timeLabel->setMouseClickGrabsKeyboardFocus(false);
+        timeLabel->setText("0:00", juce::dontSendNotification);
 
         startStopButton.reset(new juce::TextButton());
         addAndMakeVisible(startStopButton.get());

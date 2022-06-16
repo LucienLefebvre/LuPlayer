@@ -74,7 +74,7 @@ Recorder::Recorder() : editingThumbnailCache(5), editingThumbnail(521, editingFo
     soundSlider.setColour(juce::Slider::ColourIds::textBoxOutlineColourId, getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
     addChildComponent(&micLabel);
-    micLabel.setText("Mic Level", juce::NotificationType::dontSendNotification);
+    micLabel.setText("Input Level", juce::NotificationType::dontSendNotification);
     micLabel.setJustificationType(juce::Justification::centred);
 
     addChildComponent(&soundLabel);
@@ -227,7 +227,9 @@ void Recorder::resized()
     enabledButton.setBounds(0, 0, 150, 25);
     recordButton.setBounds(0, 60, 125, 25);
     saveButton.setBounds(0, 120, 55, 25);
+#if RFBUILD
     formatBox.setBounds(57, 120, 68, 25);
+#endif
     meter.setBounds((getWidth() - leftControlWidth)/2 + leftControlWidth + 4, getHeight()/2 - 60, - 4 + (getWidth() - leftControlWidth) / 2, 80);
     thumbnailBounds.setBounds(leftControlWidth, 0, (getWidth() - leftControlWidth) / 2, getHeight());
     editingThumbnailBounds.setBounds(leftControlWidth, 0, getWidth() - leftControlWidth, getHeight());
@@ -260,26 +262,21 @@ void Recorder::recordAudioBuffer(juce::AudioBuffer<float>* soundBuffer, juce::Au
 {
     const juce::ScopedLock sl(writerLock);
 
-    //create two audio buffers
     juce::AudioBuffer<float> recordingMicBuffer(numChannels, actualSamplesPerBlockExpected);
     juce::AudioBuffer<float> recordingSoundBuffer(numChannels, actualSamplesPerBlockExpected);
     recordingSoundBuffer.clear();
     recordingMicBuffer.clear();
-    //Copy from the original buffer
+
     auto* inBufferL = micBuffer->getReadPointer(0);
     auto* inBufferR = micBuffer->getReadPointer(1);
     recordingMicBuffer.copyFrom(0, 0, inBufferL, actualSamplesPerBlockExpected);
     if (numChannels == 2)
     recordingMicBuffer.copyFrom(1, 0, inBufferR, actualSamplesPerBlockExpected);
-    //recordingMicBuffer.copyFrom(1, 0, *micBuffer, 1, 0, actualSamplesPerBlockExpected);
 
-
-    //copy the buffer comming from the soundplayer
     recordingSoundBuffer.copyFrom(0, 0, *soundBuffer, 0, 0, actualSamplesPerBlockExpected);
     if (numChannels == 2)
     recordingSoundBuffer.copyFrom(1, 0, *soundBuffer, 1, 0, actualSamplesPerBlockExpected);
 
-    //add them to the recording buffer and apply gain
     juce::AudioBuffer<float> recordingBuffer(2, actualSamplesPerBlockExpected);
     recordingBuffer.clear();
     recordingBuffer.addFrom(0, 0, recordingMicBuffer, 0, 0, actualSamplesPerBlockExpected, juce::Decibels::decibelsToGain(micSlider.getValue()));
@@ -293,7 +290,6 @@ void Recorder::recordAudioBuffer(juce::AudioBuffer<float>* soundBuffer, juce::Au
     {
         activeWriter.load()->write(recordingBuffer.getArrayOfReadPointers(), recordingBuffer.getNumSamples());
 
-        // Create an AudioBuffer to wrap our incoming data, note that this does no allocations or copies, it simply references our input data
         juce::AudioBuffer<float> buffer(const_cast<float**> (recordingBuffer.getArrayOfReadPointers()), thumbnail.getNumChannels(), recordingBuffer.getNumSamples());
         thumbnail.addBlock(nextSampleNum, buffer, 0, recordingBuffer.getNumSamples());
         nextSampleNum += recordingBuffer.getNumSamples();
@@ -424,24 +420,6 @@ void Recorder::stopRecording()
 {
     stop();
 
-#if JUCE_CONTENT_SHARING
-    SafePointer<AudioRecordingDemo> safeThis(this);
-    File fileToShare = lastRecording;
-
-    ContentSharer::getInstance()->shareFiles(Array<URL>({ URL(fileToShare) }),
-        [safeThis, fileToShare](bool success, const String& error)
-        {
-            if (fileToShare.existsAsFile())
-                fileToShare.deleteFile();
-
-            if (!success && error.isNotEmpty())
-            {
-                NativeMessageBox::showMessageBoxAsync(AlertWindow::WarningIcon,
-                    "Sharing Error",
-                    error);
-            }
-        });
-#endif
     fileToSave = lastRecording;
     loadFile(fileToSave.getFullPathName());
 
@@ -535,10 +513,15 @@ void Recorder::timerCallback()
 
 void Recorder::saveButtonClicked()
 {
+#if RFBUILD
     if (formatBox.getSelectedId() == 1)
         chooser.reset(new juce::FileChooser("Choose an audio File", juce::File::getSpecialLocation(juce::File::userDesktopDirectory), "*.wav"));
     else if (formatBox.getSelectedId() == 2)
         chooser.reset(new juce::FileChooser("Choose an audio File", juce::File::getSpecialLocation(juce::File::userDesktopDirectory), "*.mp3"));
+#else
+    chooser.reset(new juce::FileChooser("Choose an audio File", juce::File::getSpecialLocation(juce::File::userDesktopDirectory), "*.wav"));
+#endif
+
     if (chooser->browseForFileToSave(true))
     {
             juce::File myFile;
@@ -570,14 +553,15 @@ void Recorder::saveButtonClicked()
             auto parentDir = juce::File(Settings::convertedSoundsPath);
             const juce::File tempFile(parentDir.getNonexistentChildFile("LuPlayerRecording", ".wav"));
 
+#if RFBUILD
             juce::LAMEEncoderAudioFormat compressedAudioFormat(juce::String(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\lame.exe"));
+#endif
             auto fileStream = std::unique_ptr<juce::FileOutputStream>(myFile.createOutputStream());
             std::unique_ptr<juce::AudioFormatWriter> outputWriter;
 
 
             if (formatBox.getSelectedId() == 1)
             {
-
                 if (numChannels == 1)
                     outputWriter.reset(audioFormat.createWriterFor(fileStream.get(), reader->sampleRate, 1, (int)reader->bitsPerSample, juce::StringPairArray(), 0));
                 else if (numChannels == 2)
@@ -594,6 +578,7 @@ void Recorder::saveButtonClicked()
                     exportWindow->showMessageBox(juce::AlertWindow::AlertIconType::WarningIcon, "", "Error exporting file");
                 }
             }
+#if RFBUILD
             else if (formatBox.getSelectedId() == 2)
             {
                 if (numChannels == 1)
@@ -613,6 +598,7 @@ void Recorder::saveButtonClicked()
                     exportWindow->showMessageBox(juce::AlertWindow::AlertIconType::WarningIcon, "", "Error exporting file");
                 }
             }
+#endif
             delete buffer;
         }
 }

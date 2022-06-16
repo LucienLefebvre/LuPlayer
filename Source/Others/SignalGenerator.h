@@ -66,7 +66,7 @@ public:
         addAndMakeVisible(levelSlider.get());
         levelSlider->setSliderStyle(juce::Slider::SliderStyle::LinearHorizontal);
         levelSlider->setRange(-60.0, 0.0, 1);
-        levelSlider->setTextValueSuffix("dB");
+        levelSlider->setTextValueSuffix("dBFS");
         levelSlider->setValue(-18.0f);
         levelSlider->setSkewFactor(2, false);
         levelSlider->addListener(this);

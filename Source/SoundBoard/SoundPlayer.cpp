@@ -194,10 +194,27 @@ void SoundPlayer::paint (juce::Graphics& g)
 
 void SoundPlayer::resized()
 {
-    if (mainStopWatch.isVisible())
+    if (Settings::showTimer)
+    {
         stopWatchHeight = 25;
+        mainStopWatch.setVisible(true);
+    }
     else
+    {
         stopWatchHeight = 0;
+        mainStopWatch.setVisible(false);
+    }
+
+    if (Settings::showClock)
+    {
+        timeLabelHeight = 35;
+        timeLabel.setVisible(true);
+    }
+    else
+    {
+        timeLabelHeight = 0;
+        timeLabel.setVisible(false);
+    }
 
     if (soundPlayerMode != SoundPlayer::Mode::KeyMap)
     {

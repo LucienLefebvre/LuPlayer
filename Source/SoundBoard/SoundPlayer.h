@@ -127,6 +127,7 @@ public:
     bool perform(const InvocationInfo& info);
 
     StopWatch mainStopWatch;
+    juce::Label timeLabel;
 private:
     void timerCallback();
     void valueChanged(juce::Value& value);
@@ -196,7 +197,6 @@ private:
     juce::TextButton removePlayerCart;
 
     //Label
-    juce::Label timeLabel;
     int timeLabelWidth = 120;
     int timeLabelHeight = 35;
     //MIDI

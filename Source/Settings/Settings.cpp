@@ -48,6 +48,8 @@ bool Settings::lauchAtZeroDB;
 bool Settings::mouseWheelControlVolume;
 bool Settings::autoNormalize;
 double Settings::normTarget;
+bool Settings::showClock;
+bool Settings::showTimer;
 bool Settings::showMeter;
 juce::Value Settings::showMeterValue;
 int Settings::outputChannelsNumber;
@@ -72,145 +74,7 @@ bool Settings::autoCheckNewUpdate;
 //==============================================================================
 Settings::Settings() : settingsFile(options)
 {
-    //OPTIONS
-    options.applicationName = ProjectInfo::projectName;
-    options.filenameSuffix = ".settings";
-
-    options.folderName = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer").getFullPathName();
-    options.storageFormat = juce::PropertiesFile::storeAsXML;
-    properties.setStorageParameters(options);
-
-
-
-    //LOAD PROPERTIES
-    Settings::FFmpegPath = properties.getUserSettings()->getValue("FFmpeg Path");
-    Settings::exiftoolPath = properties.getUserSettings()->getValue("Exiftool Path");
-    Settings::preferedMidiDeviceIndex = properties.getUserSettings()->getValue("Midi Device").getIntValue();
-    Settings::midiShift = properties.getUserSettings()->getValue("Midi Shift").getIntValue();
-    Settings::adress1 = properties.getUserSettings()->getValue("IP Adress 1");
-    Settings::adress2 = properties.getUserSettings()->getValue("IP Adress 2");
-    Settings::adress3 = properties.getUserSettings()->getValue("IP Adress 3");
-    Settings::adress4 = properties.getUserSettings()->getValue("IP Adress 4");
-    Settings::ipAdress = properties.getUserSettings()->getValue("IP Adress");
-    Settings::inOscPort = properties.getUserSettings()->getValue("In OSC Port").getIntValue();
-    Settings::outOscPort = properties.getUserSettings()->getValue("Out OSC Port").getIntValue();
-    Settings::preferedAudioDeviceType = properties.getUserSettings()->getValue("Audio Device Type");
-    Settings::preferedAudioDeviceName = properties.getUserSettings()->getValue("audioDeviceName");
-    Settings::preferedSoundPlayerMode = properties.getUserSettings()->getValue("PreferedSoundPlayerMode").getIntValue();
-
-    if (properties.getUserSettings()->getValue("Converted Sound Path").isEmpty())
-    {
-        juce::File directory = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Sounds");
-        if (directory.createDirectory())
-            Settings::convertedSoundsPath = directory.getFullPathName();
-    }
-    else
-        Settings::convertedSoundsPath = properties.getUserSettings()->getValue("Converted Sound Path");
-
-    if (properties.getUserSettings()->getValue("Skew Factor").isEmpty())
-        Settings::skewFactorGlobal = 0.5;
-    else
-    Settings::skewFactorGlobal = properties.getUserSettings()->getValue("Skew Factor").getFloatValue();
-
-    if (properties.getUserSettings()->getValue("faderStart").isEmpty())
-        Settings::enableFaderStart = 1;
-    else
-        Settings::enableFaderStart = properties.getUserSettings()->getValue("faderStart").getIntValue();
-
-    if (properties.getUserSettings()->getValue("Max Fader Value").isEmpty())
-        Settings::maxFaderValueGlobal = 0;
-    else
-        Settings::maxFaderValueGlobal = properties.getUserSettings()->getValue("Max Fader Value").getFloatValue();
-    Settings::maxFaderValue = Settings::maxFaderValueGlobal;
-
-    if (properties.getUserSettings()->getValue("Audio Output Mode").isEmpty())
-        Settings::audioOutputMode = 2;
-    else
-        Settings::audioOutputMode = properties.getUserSettings()->getValue("Audio Output Mode").getIntValue();
-    audioOutputModeValue = Settings::audioOutputMode;
-
-    if (properties.getUserSettings()->getValue("Fader Temp").isEmpty())
-        Settings::faderTempTime = 1000;
-    else
-        Settings::faderTempTime = properties.getUserSettings()->getValue("Fader Temp").getIntValue();
-
-    if (properties.getUserSettings()->getValue("FaderDelay").isEmpty())
-        Settings::faderDelayTime = 40;
-    else
-        Settings::faderDelayTime = properties.getUserSettings()->getValue("FaderDelay").getIntValue();
-
-    if (properties.getUserSettings()->getValue("LastSeconds").isEmpty())
-        Settings::lastSecondsTime = 5;
-    else
-        Settings::lastSecondsTime = properties.getUserSettings()->getValue("LastSeconds").getIntValue();
-
-    if (properties.getUserSettings()->getValue("Launchatzero").isEmpty())
-        Settings::lauchAtZeroDB = true;
-    else
-    Settings::lauchAtZeroDB = properties.getUserSettings()->getValue("Launchatzero").getIntValue();
-
-    if (properties.getUserSettings()->getValue("MouseWheelControl").isEmpty())
-        Settings::mouseWheelControlVolume = true;
-    else
-        Settings::mouseWheelControlVolume = properties.getUserSettings()->getValue("MouseWheelControl").getIntValue();
-
-    if (properties.getUserSettings()->getValue("AutoNormalize").isEmpty())
-        Settings::autoNormalize = true;
-    else
-        Settings::autoNormalize = properties.getUserSettings()->getValue("AutoNormalize").getIntValue();
-
-    if (properties.getUserSettings()->getValue("NormTarget").isEmpty())
-        Settings::normTarget = 0;
-    else
-        Settings::normTarget = properties.getUserSettings()->getValue("NormTarget").getIntValue();
-
-    if (properties.getUserSettings()->getValue("ShowMeter").isEmpty())
-        Settings::showMeter = true;
-    else
-        Settings::showMeter = properties.getUserSettings()->getValue("ShowMeter").getIntValue();
-
-    if (properties.getUserSettings()->getValue("ShowEnveloppe").isEmpty())
-        Settings::showEnveloppe = false;
-    else
-        Settings::showEnveloppe = properties.getUserSettings()->getValue("ShowEnveloppe").getIntValue();
-
-    if (properties.getUserSettings()->getValue("viewLastPlayedSound").isEmpty())
-        Settings::viewLastPlayedSound = false;
-    else
-        Settings::viewLastPlayedSound = properties.getUserSettings()->getValue("viewLastPlayedSound").getIntValue();
-
-    if (properties.getUserSettings()->getValue("keyMappedRows").isEmpty())
-        Settings::keyMappedSoundboardRows = 2;
-    else
-        Settings::keyMappedSoundboardRows = properties.getUserSettings()->getValue("keyMappedRows").getIntValue();
-
-    if (properties.getUserSettings()->getValue("keyMappedColums").isEmpty())
-        Settings::keyMappedSoundboardColumns = 6;
-    else
-        Settings::keyMappedSoundboardColumns = properties.getUserSettings()->getValue("keyMappedColums").getIntValue();
-
-    HKL currentLayout = GetKeyboardLayout(0);
-    unsigned int x = (unsigned int)currentLayout & 0x0000FFFF;
-    if (x == 1033)
-        Settings::keyboardLayout = 1;
-    else if (x == 1036)
-        Settings::keyboardLayout = 2;
-    else if (x == 1031)
-        Settings::keyboardLayout = 3;
-    else if (properties.getUserSettings()->getValue("keyboardLayout").isEmpty())
-        Settings::keyboardLayout = 1;
-    else
-        Settings::keyboardLayout = properties.getUserSettings()->getValue("keyboardLayout").getIntValue();
-
-    if (properties.getUserSettings()->getValue("autoCheckUpdate").isEmpty())
-        Settings::autoCheckNewUpdate = 1;
-    else
-        Settings::autoCheckNewUpdate = properties.getUserSettings()->getValue("autoCheckUpdate").getIntValue();
-
-    if (properties.getUserSettings()->getValue("OSCEnabled").isEmpty())
-        Settings::OSCEnabled = 0;
-    else
-        Settings::OSCEnabled = properties.getUserSettings()->getValue("OSCEnabled").getIntValue();
+    loadFromXML();
     
     //MAX FADER LEVEL
     maxFaderValueSlider.setBounds(150, 0, 450, 25);
@@ -278,7 +142,7 @@ Settings::Settings() : settingsFile(options)
 
     //AUTO NORMALIZE
     addAndMakeVisible(&normalizeButton);
-    normalizeButton.setButtonText("Auto normalize sounds at 0 LU");
+    normalizeButton.setButtonText("Auto normalize sounds LU");
     normalizeButton.setBounds(0, faderTempValue.getBottom() + spacer, 200, 25);
     normalizeButton.setToggleState(Settings::autoNormalize, juce::NotificationType::dontSendNotification);
     normalizeButton.addListener(this);
@@ -350,11 +214,6 @@ Settings::Settings() : settingsFile(options)
     keyMappedRowsValue.setEditable(true);
     keyMappedRowsValue.addListener(this);
     keyMappedRowsValue.setColour(juce::Label::outlineColourId, juce::Colours::black);
-
-    ////OSC Ports
-   //addAndMakeVisible(oscPorts);
-   //oscPorts.setText("OSC", juce::NotificationType::dontSendNotification);
-   //oscPorts.setBounds(0, faderTempValue.getBottom() + spacer, leftColumnWidth, 25);
 
    //OUT
     addAndMakeVisible(oscOutPortLabel);
@@ -485,7 +344,158 @@ void Settings::resized()
 {
 }
 
+void Settings::loadFromXML()
+{
+    //OPTIONS
+    options.applicationName = ProjectInfo::projectName;
+    options.filenameSuffix = ".settings";
 
+    options.folderName = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer").getFullPathName();
+    options.storageFormat = juce::PropertiesFile::storeAsXML;
+    properties.setStorageParameters(options);
+
+
+
+    //LOAD PROPERTIES
+    Settings::FFmpegPath = properties.getUserSettings()->getValue("FFmpeg Path");
+    Settings::exiftoolPath = properties.getUserSettings()->getValue("Exiftool Path");
+    Settings::preferedMidiDeviceIndex = properties.getUserSettings()->getValue("Midi Device").getIntValue();
+    Settings::midiShift = properties.getUserSettings()->getValue("Midi Shift").getIntValue();
+    Settings::adress1 = properties.getUserSettings()->getValue("IP Adress 1");
+    Settings::adress2 = properties.getUserSettings()->getValue("IP Adress 2");
+    Settings::adress3 = properties.getUserSettings()->getValue("IP Adress 3");
+    Settings::adress4 = properties.getUserSettings()->getValue("IP Adress 4");
+    Settings::ipAdress = properties.getUserSettings()->getValue("IP Adress");
+    Settings::inOscPort = properties.getUserSettings()->getValue("In OSC Port").getIntValue();
+    Settings::outOscPort = properties.getUserSettings()->getValue("Out OSC Port").getIntValue();
+    Settings::preferedAudioDeviceType = properties.getUserSettings()->getValue("Audio Device Type");
+    Settings::preferedAudioDeviceName = properties.getUserSettings()->getValue("audioDeviceName");
+    Settings::preferedSoundPlayerMode = properties.getUserSettings()->getValue("PreferedSoundPlayerMode").getIntValue();
+
+    if (properties.getUserSettings()->getValue("Converted Sound Path").isEmpty())
+    {
+        juce::File directory = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile("LuPlayer/Sounds");
+        if (directory.createDirectory())
+            Settings::convertedSoundsPath = directory.getFullPathName();
+    }
+    else
+        Settings::convertedSoundsPath = properties.getUserSettings()->getValue("Converted Sound Path");
+
+    if (properties.getUserSettings()->getValue("Skew Factor").isEmpty())
+        Settings::skewFactorGlobal = 0.5;
+    else
+        Settings::skewFactorGlobal = properties.getUserSettings()->getValue("Skew Factor").getFloatValue();
+
+    if (properties.getUserSettings()->getValue("faderStart").isEmpty())
+        Settings::enableFaderStart = 1;
+    else
+        Settings::enableFaderStart = properties.getUserSettings()->getValue("faderStart").getIntValue();
+
+    if (properties.getUserSettings()->getValue("Max Fader Value").isEmpty())
+        Settings::maxFaderValueGlobal = 0;
+    else
+        Settings::maxFaderValueGlobal = properties.getUserSettings()->getValue("Max Fader Value").getFloatValue();
+    Settings::maxFaderValue = Settings::maxFaderValueGlobal;
+
+    if (properties.getUserSettings()->getValue("Audio Output Mode").isEmpty())
+        Settings::audioOutputMode = 2;
+    else
+        Settings::audioOutputMode = properties.getUserSettings()->getValue("Audio Output Mode").getIntValue();
+    audioOutputModeValue = Settings::audioOutputMode;
+
+    if (properties.getUserSettings()->getValue("Fader Temp").isEmpty())
+        Settings::faderTempTime = 1000;
+    else
+        Settings::faderTempTime = properties.getUserSettings()->getValue("Fader Temp").getIntValue();
+
+    if (properties.getUserSettings()->getValue("FaderDelay").isEmpty())
+        Settings::faderDelayTime = 40;
+    else
+        Settings::faderDelayTime = properties.getUserSettings()->getValue("FaderDelay").getIntValue();
+
+    if (properties.getUserSettings()->getValue("LastSeconds").isEmpty())
+        Settings::lastSecondsTime = 5;
+    else
+        Settings::lastSecondsTime = properties.getUserSettings()->getValue("LastSeconds").getIntValue();
+
+    if (properties.getUserSettings()->getValue("Launchatzero").isEmpty())
+        Settings::lauchAtZeroDB = true;
+    else
+        Settings::lauchAtZeroDB = properties.getUserSettings()->getValue("Launchatzero").getIntValue();
+
+    if (properties.getUserSettings()->getValue("MouseWheelControl").isEmpty())
+        Settings::mouseWheelControlVolume = true;
+    else
+        Settings::mouseWheelControlVolume = properties.getUserSettings()->getValue("MouseWheelControl").getIntValue();
+
+    if (properties.getUserSettings()->getValue("AutoNormalize").isEmpty())
+        Settings::autoNormalize = true;
+    else
+        Settings::autoNormalize = properties.getUserSettings()->getValue("AutoNormalize").getIntValue();
+
+    if (properties.getUserSettings()->getValue("NormTarget").isEmpty())
+        Settings::normTarget = 0;
+    else
+        Settings::normTarget = properties.getUserSettings()->getValue("NormTarget").getIntValue();
+
+    if (properties.getUserSettings()->getValue("ShowMeter").isEmpty())
+        Settings::showMeter = true;
+    else
+        Settings::showMeter = properties.getUserSettings()->getValue("ShowMeter").getIntValue();
+
+    if (properties.getUserSettings()->getValue("ShowEnveloppe").isEmpty())
+        Settings::showEnveloppe = false;
+    else
+        Settings::showEnveloppe = properties.getUserSettings()->getValue("ShowEnveloppe").getIntValue();
+
+    if (properties.getUserSettings()->getValue("viewLastPlayedSound").isEmpty())
+        Settings::viewLastPlayedSound = false;
+    else
+        Settings::viewLastPlayedSound = properties.getUserSettings()->getValue("viewLastPlayedSound").getIntValue();
+
+    if (properties.getUserSettings()->getValue("keyMappedRows").isEmpty())
+        Settings::keyMappedSoundboardRows = 2;
+    else
+        Settings::keyMappedSoundboardRows = properties.getUserSettings()->getValue("keyMappedRows").getIntValue();
+
+    if (properties.getUserSettings()->getValue("keyMappedColums").isEmpty())
+        Settings::keyMappedSoundboardColumns = 6;
+    else
+        Settings::keyMappedSoundboardColumns = properties.getUserSettings()->getValue("keyMappedColums").getIntValue();
+
+    HKL currentLayout = GetKeyboardLayout(0);
+    unsigned int x = (unsigned int)currentLayout & 0x0000FFFF;
+    if (x == 1033)
+        Settings::keyboardLayout = 1;
+    else if (x == 1036)
+        Settings::keyboardLayout = 2;
+    else if (x == 1031)
+        Settings::keyboardLayout = 3;
+    else if (properties.getUserSettings()->getValue("keyboardLayout").isEmpty())
+        Settings::keyboardLayout = 1;
+    else
+        Settings::keyboardLayout = properties.getUserSettings()->getValue("keyboardLayout").getIntValue();
+
+    if (properties.getUserSettings()->getValue("autoCheckUpdate").isEmpty())
+        Settings::autoCheckNewUpdate = 1;
+    else
+        Settings::autoCheckNewUpdate = properties.getUserSettings()->getValue("autoCheckUpdate").getIntValue();
+
+    if (properties.getUserSettings()->getValue("OSCEnabled").isEmpty())
+        Settings::OSCEnabled = 0;
+    else
+        Settings::OSCEnabled = properties.getUserSettings()->getValue("OSCEnabled").getIntValue();
+
+    if (properties.getUserSettings()->getValue("ShowClock").isEmpty())
+        Settings::showClock = true;
+    else
+        Settings::showClock = properties.getUserSettings()->getValue("ShowClock").getIntValue();
+
+    if (properties.getUserSettings()->getValue("ShowTimer").isEmpty())
+        Settings::showTimer = false;
+    else
+        Settings::showTimer = properties.getUserSettings()->getValue("ShowTimer").getIntValue();
+}
 
 juce::String Settings::getFFmpegPath()
 {
@@ -875,6 +885,22 @@ void Settings::setOSCEnabled(bool enabled)
 {
     Settings::OSCEnabled = enabled;
     properties.getUserSettings()->setValue("OSCEnabled", (int)Settings::OSCEnabled);
+    properties.saveIfNeeded();
+    settingsFile.save();
+}
+
+void Settings::setShowClock(bool show)
+{
+    Settings::showClock = show;
+    properties.getUserSettings()->setValue("ShowClock", (int)Settings::showClock);
+    properties.saveIfNeeded();
+    settingsFile.save();
+}
+
+void Settings::setShowTimer(bool show)
+{
+    Settings::showTimer = show;
+    properties.getUserSettings()->setValue("ShowTimer", (int)Settings::showTimer);
     properties.saveIfNeeded();
     settingsFile.save();
 }

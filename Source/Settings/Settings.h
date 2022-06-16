@@ -26,6 +26,8 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
+    void loadFromXML();
+
     juce::String Settings::getFFmpegPath();
 
     void Settings::setOptions();
@@ -58,6 +60,8 @@ public:
     void setKeyboardLayout(int layout);
     void setAutoCheckUpdate(bool check);
     void setOSCEnabled(bool enabled);
+    void setShowClock(bool show);
+    void setShowTimer(bool show);
     static juce::StringArray getAcceptedFileFormats();
     juce::TextButton saveButton;
 
@@ -105,6 +109,8 @@ public:
     static bool Settings::mouseWheelControlVolume;
     static bool Settings::autoNormalize;
     static double Settings::normTarget;
+    static bool Settings::showClock;
+    static bool Settings::showTimer;
     static bool Settings::showMeter;
     static juce::Value Settings::showMeterValue;
     static bool Settings::viewLastPlayedSound;
