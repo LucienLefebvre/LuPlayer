@@ -5,6 +5,7 @@
 
 /Source/RF
 /Builds
+/Others
 /Doc
 /JuceLibraryCode
 /exiftool
@@ -18,6 +19,7 @@
 /MultiPlayer.jucer
 /Readme.txt
 /Lame.exe
+/installer_x64t.iss
 
 # User-specific files
 *.rsuser
