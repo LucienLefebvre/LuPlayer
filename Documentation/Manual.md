@@ -45,7 +45,6 @@ Un double click sur un son le charge dans le premier lecteur vide.
 Possibilité de glisser - déposer plusieurs sons : maintenir shift pour les sélectionner, et toujours maintenir shift lors du glisser - déposer.
 
 # Clip Editor
-![Capture 1](https://github.com/LucienLefebvre/LuPlayer/blob/630cbe81b4bb0aebbb4800ef041b2ef893128627/Screenshots/enveloppe.PNG "Capture 1")
 
 ### Raccourcis :
 * Molette souris : zoom
@@ -56,7 +55,6 @@ Possibilité de glisser - déposer plusieurs sons : maintenir shift pour les sé
 
 
 # Fenêtre de paramètres (General Settings)
-![Settings 1](https://github.com/LucienLefebvre/LuPlayer/blob/1ac6a7d5dc1a1379a7906baab0fd985a6c05bc54/Screenshots/settings.PNG "Settings")
 * "Fader maximum value" : définit la valeur maxium du fader du controlleur MIDI ou OSC
 * "Fader acceleration" : définit la courbe d'accélération du controleur MIDI ou OSC.
 * "Enable fader start" : active ou désactive le lancement des sons en levant le fader du controlleur MIDI.
