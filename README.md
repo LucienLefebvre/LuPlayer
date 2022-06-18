@@ -16,6 +16,7 @@ Key features :
 
 ![Capture 1](https://github.com/LucienLefebvre/LuPlayer/blob/630cbe81b4bb0aebbb4800ef041b2ef893128627/Screenshots/Capture%201.PNG "Capture 1")
 ![Capture 2](https://github.com/LucienLefebvre/LuPlayer/blob/630cbe81b4bb0aebbb4800ef041b2ef893128627/Screenshots/Capture%202.PNG "Capture 2")
+![Capture 3](https://github.com/LucienLefebvre/LuPlayer/blob/1ac6a7d5dc1a1379a7906baab0fd985a6c05bc54/Screenshots/Capture_3.PNG "Capture 3")
 
 ## License
 LuPlayer is licensed under GPLv3
