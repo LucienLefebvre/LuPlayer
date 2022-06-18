@@ -73,7 +73,7 @@ Player::Player(int index, Settings* s)
 
      addAndMakeVisible(&envButton);
      envButton.setButtonText("ENV");
-     envButton.onClick = [this] {envButtonClicked(); };
+     envButton.onClick = [this] {envButtonClicked(false); };
      envButton.addListener(this);
      envButton.setMouseClickGrabsKeyboardFocus(false);
 
@@ -1559,12 +1559,14 @@ void Player::mouseDown(const juce::MouseEvent& event)
             thumbnailDrawSize = thumbnailDrawEnd - thumbnailDrawStart;
             drawCue = true;
             mouseIsDragged = true;
-            envButtonBroadcaster->sendChangeMessage();
+
+            if (Settings::showInBottomPanel)
+                envButtonBroadcaster->sendChangeMessage();
+
             updateCuePlayHeadPosition(true);
             repaintThumbnail();
         }
     }
-
 }
 
 void Player::mouseUp(const juce::MouseEvent& event)

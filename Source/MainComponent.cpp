@@ -1034,13 +1034,15 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
         menu.addCommandItem(&commandManager, CommandIDs::showClock, "Show clock");
         menu.addCommandItem(&commandManager, CommandIDs::showTimer, "Show timer");
         menu.addSeparator();
-        menu.addCommandItem(&commandManager, CommandIDs::showIndividualMeters, "Show individuals meters");
-        menu.addCommandItem(&commandManager, CommandIDs::showEnveloppe, "Show enveloppe on clip");
+        menu.addCommandItem(&commandManager, CommandIDs::showInBottomPanel, "Show clicked sound sound in panel");
         menu.addCommandItem(&commandManager, CommandIDs::viewLastPlayedSound, "Show last played sound in panel");
+        menu.addCommandItem(&commandManager, CommandIDs::showEnveloppe, "Show enveloppe on clip");
+        menu.addSeparator();
+        menu.addCommandItem(&commandManager, CommandIDs::showIndividualMeters, "Show individuals meters");
     }
     else if (menuIndex == 4)
     {
-        menu.addCommandItem(&commandManager, CommandIDs::showSignalGenerator, "Show signal generator");
+        menu.addCommandItem(&commandManager, CommandIDs::showSignalGenerator, "Signal generator");
     }
     else if (menuIndex == 5)
     {
@@ -1101,6 +1103,7 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
                                     CommandIDs::showIndividualMeters,
                                     CommandIDs::showEnveloppe,
                                     CommandIDs::viewLastPlayedSound,
+                                    CommandIDs::showInBottomPanel,
                                     CommandIDs::lanchRecord,
                                     CommandIDs::goToSoundBrowser,
                                     CommandIDs::goToClipEditor,
@@ -1356,8 +1359,12 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setTicked(Settings::showEnveloppe);
         break;
     case CommandIDs::viewLastPlayedSound:
-        result.setInfo("Automatic show last played sound in bottom panel", "View last played sound", "Menu", 0);
+        result.setInfo("Show last played sound in bottom panel", "View last played sound", "Menu", 0);
         result.setTicked(Settings::viewLastPlayedSound);
+        break;
+    case CommandIDs::showInBottomPanel:
+        result.setInfo("Show clicked sound in bottom panel", "View sound in bottom panel", "Menu", 0);
+        result.setTicked(Settings::showInBottomPanel);
         break;
     case CommandIDs::documentation:
         result.setInfo("Show documentation", "Documentation", "Menu", 0);
@@ -1571,6 +1578,9 @@ bool MainComponent::perform(const InvocationInfo& info)
         break;
     case CommandIDs::viewLastPlayedSound:
         settings.setViewLastPlayed(!Settings::viewLastPlayedSound);
+        break;
+    case CommandIDs::showInBottomPanel:
+        settings.setShowInBottomPanel(!Settings::showInBottomPanel);
         break;
     case CommandIDs::documentation:
     {

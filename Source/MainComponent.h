@@ -42,6 +42,7 @@ public:
         showIndividualMeters,
         showEnveloppe,
         viewLastPlayedSound,
+        showInBottomPanel,
         lanchRecord,
         goToSoundBrowser,
         goToClipEditor,

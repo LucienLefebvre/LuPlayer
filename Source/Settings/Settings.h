@@ -57,6 +57,7 @@ public:
     void setShowMeters(bool show);
     void setShowEnveloppe(bool show);
     void setViewLastPlayed(bool show);
+    void setShowInBottomPanel(bool show);
     void setKeyboardLayout(int layout);
     void setAutoCheckUpdate(bool check);
     void setOSCEnabled(bool enabled);
@@ -114,6 +115,7 @@ public:
     static bool Settings::showMeter;
     static juce::Value Settings::showMeterValue;
     static bool Settings::viewLastPlayedSound;
+    static bool Settings::showInBottomPanel;
     static bool Settings::showEnveloppe;
 
     static int Settings::draggedPlaylist;

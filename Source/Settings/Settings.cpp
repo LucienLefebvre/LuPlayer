@@ -65,6 +65,7 @@ int Settings::preferedSoundPlayerMode;
 
 bool Settings::showEnveloppe;
 bool Settings::viewLastPlayedSound;
+bool Settings::showInBottomPanel;
 
 int Settings::keyboardLayout;
 int Settings::keyMappedSoundboardRows;
@@ -452,6 +453,11 @@ void Settings::loadFromXML()
         Settings::viewLastPlayedSound = false;
     else
         Settings::viewLastPlayedSound = properties.getUserSettings()->getValue("viewLastPlayedSound").getIntValue();
+
+    if (properties.getUserSettings()->getValue("showInBottomPanel").isEmpty())
+        Settings::showInBottomPanel = true;
+    else
+        Settings::showInBottomPanel = properties.getUserSettings()->getValue("showInBottomPanel").getIntValue();
 
     if (properties.getUserSettings()->getValue("keyMappedRows").isEmpty())
         Settings::keyMappedSoundboardRows = 2;
@@ -860,6 +866,14 @@ void Settings::setViewLastPlayed(bool show)
 {
     Settings::viewLastPlayedSound = show;
     properties.getUserSettings()->setValue("viewLastPlayedSound", (int)Settings::viewLastPlayedSound);
+    properties.saveIfNeeded();
+    settingsFile.save();
+}
+
+void Settings::setShowInBottomPanel(bool show)
+{
+    Settings::showInBottomPanel = show;
+    properties.getUserSettings()->setValue("showInBottomPanel", (int)Settings::showInBottomPanel);
     properties.saveIfNeeded();
     settingsFile.save();
 }
