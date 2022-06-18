@@ -53,7 +53,10 @@ Possibilité de glisser - déposer plusieurs sons : maintenir shift pour les sé
 * Click droit sur un point : supprime ce point
 * Control + click sur le bouton "enveloppe" : réinitialise l'enveloppe
 
+
+
 # Fenêtre de paramètres (General Settings)
+![Settings 1](https://github.com/LucienLefebvre/LuPlayer/blob/1ac6a7d5dc1a1379a7906baab0fd985a6c05bc54/Screenshots/settings.PNG "Settings")
 * "Fader maximum value" : définit la valeur maxium du fader du controlleur MIDI ou OSC
 * "Fader acceleration" : définit la courbe d'accélération du controleur MIDI ou OSC.
 * "Enable fader start" : active ou désactive le lancement des sons en levant le fader du controlleur MIDI.
