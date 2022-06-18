@@ -71,7 +71,7 @@ Possibilité de glisser - déposer plusieurs sons : maintenir shift pour les sé
 * "Audio output mode" : Mono : sortie principale à gauche, pré-écoute (cue) à droite. Réduction mono : L+R. Stéréo : sortie principale et pré-écoute sur la même sortie.
 
 # OSC
-Pour pouvoir contrôler avec un Smartphone, il faut une application (5€ sur le Play Storeou sur l’App Store).
+Pour pouvoir contrôler avec un Smartphone, il faut une [application](https://hexler.net/touchosc-mk1) (5€ sur le Play Store ou sur l’Apple Store).
 
 Il faut que le téléphone et le PC soient sur le même réseau WIFI / Ethernet.
 
