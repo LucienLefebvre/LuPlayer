@@ -617,10 +617,6 @@ void Player::timerCallback(int timerID)
         volumeLabel.setText(juce::String(round(juce::Decibels::gainToDecibels(bufferGain.load()))), juce::dontSendNotification);
         trimVolumeSlider.setValue(trimValueToSet);
 
-        if ((float)transport.getCurrentPosition() > stopTime)
-        {
-
-        }
         if ((float)cueTransport.getCurrentPosition() > stopTime)
         {
             if (stopCueTransportOut)
@@ -647,7 +643,7 @@ void Player::timerCallback(int timerID)
     {
         if (settings != nullptr)
         {
-            if (Settings::OSCEnabled && settings->oscConnected)
+            if (Settings::OSCEnabled)
             {
                 if (isEightPlayerMode)
                 {
@@ -669,14 +665,14 @@ void Player::timerCallback(int timerID)
     {
         if (settings != nullptr)
         {
-            if (Settings::OSCEnabled && settings->oscConnected)
+            if (Settings::OSCEnabled)
             {
                 if (isEightPlayerMode)
                 {
                     juce::String adress = "/8faderstime" + juce::String(oscIndex);
                     settings->sender.send(adress, remainingTimeLabel.getText());
 
-                    adress = "/8fader" + juce::String(oscIndex) + "gain";
+                    adress = "/8fadersgain" + juce::String(oscIndex);
                     juce::NormalisableRange<float>valueRange(0.0, juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal, false);
                     settings->sender.send(adress, valueRange.convertTo0to1((float)volumeSlider.getValue()));
 
@@ -696,6 +692,9 @@ void Player::timerCallback(int timerID)
 
                     adress = "/kmname" + juce::String(oscIndex);
                     settings->sender.send(adress, juce::String(getName()));
+
+                    adress = "/kmshortcut" + juce::String(oscIndex);
+                    settings->sender.send(adress, juce::String(getShortcut().getTextDescription()));
                 }
             }
         }
@@ -950,6 +949,7 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
                     if (looping)
                     {
                         transport.setPosition(startTime);
+                        endRepainted = false;
                         shouldRepaint.store(true);
                     }
                     else
@@ -1052,7 +1052,7 @@ std::atomic<float> Player::getEnveloppeValue(float x, juce::Path& p)
 }
 
 //Play Control
-void Player::play(bool launchedByMidi, bool delayStart)
+void Player::play(bool launchedByMidi, bool delayStart, bool launchoAtZero)
 {
     const juce::MessageManagerLock mmLock;
     if (launchedByMidi)
@@ -1064,6 +1064,8 @@ void Player::play(bool launchedByMidi, bool delayStart)
         actualSliderValue = 0.0f;
         volumeSlider.setValue(0.0f);
     }
+    if (launchoAtZero)
+        sliderValueToset = 1.f;
     if (delayStart)
     {
         faderDelayThread.startThread();
@@ -1456,12 +1458,12 @@ void Player::transportStateChanged(TransportState newState)
     }
     if (settings != nullptr)
     {
-        if (Settings::OSCEnabled && settings->oscConnected)
+        if (Settings::OSCEnabled)
         {
             int value = isPlayerPlaying() ? 1 : 0;
             if (isEightPlayerMode)
             {
-                juce::String adress = "/8fader" + juce::String(oscIndex) + "push";
+                juce::String adress = "/8faderspush" + juce::String(oscIndex);
                 settings->sender.send(adress, value);
             }
             else
@@ -1499,9 +1501,9 @@ void Player::sliderValueChanged(juce::Slider* slider)
 
         if (settings != nullptr)
         {
-            if (settings->oscConnected && isEightPlayerMode && Settings::OSCEnabled)
+            if (Settings::OSCEnabled && isEightPlayerMode)
             {
-                juce::String adress = "/8fader" + juce::String(oscIndex) + "gain";
+                juce::String adress = "/8fadersgain" + juce::String(oscIndex);
                 juce::NormalisableRange<float>valueRange(0.0, juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal, false);
                 settings->sender.send(adress, valueRange.convertTo0to1((float)slider->getValue()));
             }
@@ -2725,7 +2727,7 @@ void Player::labelTextChanged(juce::Label* labelThatHasChanged)
     soundEditedBroadcaster->sendChangeMessage();
     if (settings != nullptr)
     {
-        if (settings->oscConnected && Settings::OSCEnabled)
+        if (Settings::OSCEnabled)
         {
             if (isEightPlayerMode)
             {

@@ -44,6 +44,8 @@ public:
 
     void assignLeftFader(int playerID);
     void assignRightFader(int playerID);
+    void fader1Start(bool isLaunchedByOsc = false);
+    void fader2Start(bool isLaunchedByOsc = false);
     void fader1Stop(bool stoppedByFader);
     void fader2Stop(bool stoppedByFader);
 
@@ -52,6 +54,10 @@ public:
     void handleFader2(int faderValue);
     void handleFader2OSC(float faderValue);
     void handleFader3(int faderValue);
+    void playFader(int faderToPlay);
+    void stopFader(int faderToStop);
+    bool isFader1Playing();
+    bool isFader2Playing();
     void handleFader3OSC(float faderValue);
     void handleFader4(int faderValue);
     void handleFader4OSC(float faderValue);
@@ -182,8 +188,6 @@ private:
     void timerCallback();
     void assignPlaylistFader(int playerToAssign);
     void buttonClicked(juce::Button* b) override;
-    void fader1Start();
-    void fader2Start();
     void valueChanged(juce::Value& value);
     void updateDraggedPlayerDisplay();
     void actionListenerCallback(const juce::String& message);

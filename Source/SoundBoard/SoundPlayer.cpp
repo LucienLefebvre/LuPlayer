@@ -1699,7 +1699,7 @@ void SoundPlayer::timerCallback()
 
 void SoundPlayer::OSCInitialize()
 {
-    if (oscConnected == false)
+    if (Settings::OSCEnabled)
     {
         if (receiver.connect(juce::int32(Settings::inOscPort)) && settings->sender.connect(Settings::ipAdress, juce::int32(Settings::outOscPort)))
         {
@@ -1722,7 +1722,7 @@ void SoundPlayer::OSCInitialize()
         //addListener(this, "/1/down");
         //addListener(this, "/2/multipush1");
     }
-    else if (oscConnected == true)
+    else
     {
         OSCClean();
         if (receiver.disconnect())   // [13]
@@ -1754,7 +1754,7 @@ void SoundPlayer::OSCClean()
         {
             juce::String adress = "/8faderstime" + juce::String(i);
             settings->sender.send(adress, juce::String());
-            adress = "/8fader" + juce::String(i) + "gain";
+            adress = "/8fadersgain" + juce::String(i);
             settings->sender.send(adress, (float)0.0);
             adress = "/8faderslabel" + juce::String(i);
             settings->sender.send(adress, juce::String());
@@ -1786,7 +1786,7 @@ void SoundPlayer::handleOSCKeyMap(const juce::OSCMessage& message)
                     if (player != nullptr)
                     {
                         if (!player->isPlayerPlaying())
-                            player->play();
+                            player->launch();
                         else
                             player->stop();
                     }
@@ -1805,7 +1805,7 @@ void SoundPlayer::handleOSCEightFaders(const juce::OSCMessage& message)
         auto playerID = i < 5 ? i - 1 : i - 5;
         auto player = myPlaylists[playlistID]->players[playerID];
 
-        juce::String adress = "/8fader" + juce::String(i) + "gain";
+        juce::String adress = "/8fadersgain" + juce::String(i);
         if (message.getAddressPattern().matches(adress))
         {
             if (message.size() == 1 && message[0].isFloat32() && player != nullptr)
@@ -1814,7 +1814,7 @@ void SoundPlayer::handleOSCEightFaders(const juce::OSCMessage& message)
             }
             return;
         }
-        adress = "/8fader" + juce::String(i) + "push";
+        adress = "/8faderspush" + juce::String(i);
         if (message.getAddressPattern().matches(adress))
         {
             if (message.size() == 1 && message[0].getFloat32() == 1)
@@ -1882,11 +1882,15 @@ void SoundPlayer::handleOSCPlaylist(const juce::OSCMessage& message)
                     {
                         if (myPlaylists[0]->fader1IsPlaying == false)
                         {
-                            juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal);
-                            myPlaylists[0]->handleFader1OSC(0);
-                            myPlaylists[0]->handleFader1OSC(valueToSendNorm.convertTo0to1(1.));
-                            fader1OSCLaunched = true;
+                            //juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal);
+                            //myPlaylists[0]->handleFader1OSC(0);
+                            //myPlaylists[0]->handleFader1OSC(valueToSendNorm.convertTo0to1(1.));
+                            myPlaylists[0]->fader1Start(true);
+                            myPlaylists[0]->handleFader1OSC(1);
+                            //fader1OSCLaunched = true;
                         }
+                        else
+                            myPlaylists[0]->fader1Stop(true);
                     }
                 }
             }
@@ -1906,12 +1910,11 @@ void SoundPlayer::handleOSCPlaylist(const juce::OSCMessage& message)
                     {
                         if (myPlaylists[0]->fader2IsPlaying == false)
                         {
-                            juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal);
-                            myPlaylists[0]->handleFader2OSC(0);
-                            myPlaylists[0]->handleFader2OSC(valueToSendNorm.convertTo0to1(1.));
-                            fader2OSCLaunched = true;
-
+                            myPlaylists[0]->fader2Start(true);
+                            myPlaylists[0]->handleFader2OSC(1);
                         }
+                        else
+                            myPlaylists[0]->fader2Stop(true);
                     }
                 }
             }
@@ -1929,14 +1932,14 @@ void SoundPlayer::handleOSCPlaylist(const juce::OSCMessage& message)
                 {
                     if (myPlaylists[1]->players[myPlaylists[1]->fader1Player]->fileLoaded == true)
                     {
-                        if (myPlaylists[1]->fader1IsPlaying == false)
+                        if (!myPlaylists[1]->isFader1Playing())
                         {
-                            juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal);
-                            myPlaylists[1]->handleFader3OSC(0);
-                            myPlaylists[1]->handleFader3OSC(valueToSendNorm.convertTo0to1(1.));
-                            sender->send("/1/fader3", valueToSendNorm.convertTo0to1(1.));
-                            sender->send("/1/fader3", valueToSendNorm.convertTo0to1(1.));
+                            myPlaylists[1]->playFader(1);
+                            if (Settings::lauchAtZeroDB)
+                                myPlaylists[1]->handleFader1OSC(1);
                         }
+                        else
+                            myPlaylists[1]->stopFader(1);
                     }
                 }
             }
@@ -1953,14 +1956,14 @@ void SoundPlayer::handleOSCPlaylist(const juce::OSCMessage& message)
                 {
                     if (myPlaylists[1]->players[myPlaylists[1]->fader2Player]->fileLoaded == true)
                     {
-                        if (myPlaylists[1]->fader2IsPlaying == false)
+                        if (!myPlaylists[1]->isFader2Playing())
                         {
-                            juce::NormalisableRange<float>valueToSendNorm(0., juce::Decibels::decibelsToGain(Settings::maxFaderValueGlobal), 0.001, Settings::skewFactorGlobal);
-                            myPlaylists[1]->handleFader4OSC(0);
-                            myPlaylists[1]->handleFader4OSC(valueToSendNorm.convertTo0to1(1.));
-                            sender->send("/1/fader4", valueToSendNorm.convertTo0to1(1.));
-                            sender->send("/1/fader4", valueToSendNorm.convertTo0to1(1.));
+                            myPlaylists[1]->playFader(2);
+                            if (Settings::lauchAtZeroDB)
+                                myPlaylists[1]->handleFader2OSC(1);
                         }
+                        else
+                            myPlaylists[1]->stopFader(2);
                     }
                 }
             }

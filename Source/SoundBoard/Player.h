@@ -83,7 +83,7 @@ public:
     void setRightFaderAssigned(bool isFaderRightAssigned);
     void assignNextPlayer();
 
-    void play(bool launchedByMidi = false, bool delayStart = false);
+    void play(bool launchedByMidi = false, bool delayStart = false, bool launchoAtZero = false);
     void launch();
     void stop();
     void playButtonClicked();

@@ -40,9 +40,15 @@ Source : "swresample-3.dll"; DestDir: "{app}"
 Source : "swscale-5.dll"; DestDir: "{app}"  
 Source : "postproc-55.dll"; DestDir: "{app}"  
 Source : "lame.exe"; DestDir: "{app}"
-Source : "Documentation\Doc.pdf"; DestDir: "{app}\Documentation"
+
+Source : "\TouchOSC Templates\Eight faders.touchosc"; DestDir: "{app}\TouchOSC Templates"
+Source : "\TouchOSC Templates\KeyMap 6x2.touchosc"; DestDir: "{app}\TouchOSC Templates"
+Source : "\TouchOSC Templates\KeyMap 10x3.touchosc"; DestDir: "{app}\TouchOSC Templates"
+Source : "\TouchOSC Templates\Playlist.touchosc"; DestDir: "{app}\TouchOSC Templates"
+
 [Dirs]
 Name: "{userappdata}\LuPlayer\Saves"
 Name: "{userappdata}\LuPlayer\Sounds"
+
 [Icons]
 Name: "{group}\LuPlayer"; Filename: "{app}\LuPlayer.exe"

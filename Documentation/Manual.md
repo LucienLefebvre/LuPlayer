@@ -29,7 +29,8 @@ Cartouchier simple : chaque son de un à huit est assigné à un fader. Possibil
 
 ## 3. Keyboard Mapped
 Cartouchier se basant des les touches du clavier, peut aller jusque 30 lecteurs.
-Dans le panneau "Key Mapping", possibilité de choisir entre trois disposition de clavier : QWERTY
+Dans le panneau "Key Mapping", possibilité de choisir entre trois disposition de clavier : QWERTY, AZERTY, QWERTZ
+Possibilité de changer le raccourci clavier, en cliquant sur le bouton "Key" dans le panneau "Clip Editor".
 #### Raccourcis :
 * Control + click : play / stop
 * Molette souris : volume

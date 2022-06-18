@@ -327,10 +327,10 @@ void Playlist::handleIncomingMidiMessageEightPlayers(juce::MidiInput* source, co
     const juce::ScopedValueSetter<bool> scopedInputFlag(isAddingFromMidiInput, true);
 }
 
-void Playlist::fader1Start()
+void Playlist::fader1Start(bool isLaunchedByOsc)
 {
     juce::FileLogger::getCurrentLogger()->writeToLog("fader 1 start");
-    players[fader1Player]->play(true, true);
+    players[fader1Player]->play(isLaunchedByOsc ? false :  true, true);
     players[fader1Player]->fader1IsPlaying = true;
     fader1IsPlaying = true;
     fader1Stopped = false;
@@ -375,11 +375,11 @@ void Playlist::fader1Stop(bool stoppedByFader)
     }
     updateNextPlayer();
 }
-void Playlist::fader2Start()
+void Playlist::fader2Start(bool isLaunchedByOsc)
 {
     juce::FileLogger::getCurrentLogger()->writeToLog("fader 2 start");
     players[fader2Player]->transport.setGain(0.0);
-    players[fader2Player]->play(true, true);
+    players[fader2Player]->play(isLaunchedByOsc ? false : true, true);
     players[fader2Player]->fader2IsPlaying = true;
     fader2IsPlaying = true;
     fader2StartPlayer = fader2Player;
@@ -483,7 +483,7 @@ void Playlist::handleFader1OSC(float faderValue)
                 {
                     if (fader1ActualMidiLevel >= 1 && fader1PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                     {
-                        fader1Start();
+                        //fader1Start();
                     }
                 }
                 if (fader1IsPlaying == true) //if it is playing
@@ -551,7 +551,7 @@ void Playlist::handleFader2OSC(float faderValue)
                 {
                     if (fader2ActualMidiLevel >= 1 && fader2PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                     {
-                        fader2Start();
+                        //fader2Start();
                     }
                 }
                 if (fader2IsPlaying == true) //if it is playing
@@ -611,6 +611,63 @@ void Playlist::handleFader3(int faderValue)
             fader1PreviousMidiLevel = fader1ActualMidiLevel;
 }
 
+
+void Playlist::playFader(int faderToPlay)
+{
+    if (faderToPlay == 1)
+    {
+        if (players[fader1Player] != nullptr)
+        {
+            if (!players[fader1Player]->isPlayerPlaying())
+                players[fader1Player]->play();
+        }
+            
+    }
+    else if (faderToPlay == 2)
+    {
+        if (players[fader2Player] != nullptr)
+        {
+            if (!players[fader2Player]->isPlayerPlaying())
+                players[fader2Player]->play();
+        }
+    }
+}
+
+void Playlist::stopFader(int faderToStop)
+{
+    if (faderToStop == 1)
+    {
+        if (players[fader1Player] != nullptr)
+        {
+                players[fader1Player]->stop();
+        }
+
+    }
+    else if (faderToStop == 2)
+    {
+        if (players[fader2Player] != nullptr)
+        {
+                players[fader2Player]->stop();
+        }
+    }
+}
+
+bool Playlist::isFader1Playing()
+{
+    if (players[fader1Player] != nullptr)
+    {
+        return players[fader1Player]->isPlayerPlaying();
+    }
+}
+
+bool Playlist::isFader2Playing()
+{
+    if (players[fader2Player] != nullptr)
+    {
+        return players[fader2Player]->isPlayerPlaying();
+    }
+}
+
 void Playlist::handleFader3OSC(float faderValue)
 {
     fader1ActualMidiLevel = juce::int32(faderValue * 127);
@@ -622,7 +679,7 @@ void Playlist::handleFader3OSC(float faderValue)
             {
                 if (fader1ActualMidiLevel >= 1 && fader1PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                 {
-                    players[fader1Player]->play();
+                    //players[fader1Player]->play();
                     players[fader1Player]->fader1IsPlaying = true;
                     fader1IsPlaying = true;
                     fader1PreviousMidiLevel = fader1ActualMidiLevel;
@@ -698,7 +755,7 @@ void Playlist::handleFader4OSC(float faderValue)
             {
                 if (fader2ActualMidiLevel >= 1 && fader2PreviousMidiLevel == 0 && Settings::enableFaderStart) //fader start
                 {
-                    players[fader2Player]->play();
+                    //players[fader2Player]->play();
                     players[fader2Player]->fader2IsPlaying = true;
                     fader2IsPlaying = true;
                     fader2PreviousMidiLevel = fader2ActualMidiLevel;
