@@ -7,7 +7,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING .ISS SCRIPT FILES!
 
 [Setup]
-OutputBaseFilename=LuPlayer.9.1.1_x64_setup
+OutputBaseFilename=LuPlayer_0.9.1.1_x64_setup
 AppName=LuPlayer
 AppVersion=0.9.1.1
 WizardStyle=modern
@@ -26,7 +26,7 @@ ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 
 [Files]
-Source: "LuPlayer.exe"; DestDir: "{app}"; DestName: "LuPlayer.exe"
+Source: "LuPlayer_RF.exe"; DestDir: "{app}"; DestName: "LuPlayer.exe"
 Source: "Readme.txt"; DestDir: "{app}"; Flags: isreadme
 Source : "ffmpeg.exe"; DestDir: "{app}"
 Source : "ffplay.exe"; DestDir: "{app}"
@@ -41,10 +41,10 @@ Source : "swscale-5.dll"; DestDir: "{app}"
 Source : "postproc-55.dll"; DestDir: "{app}"  
 Source : "lame.exe"; DestDir: "{app}"
 
-Source : "\TouchOSC Templates\Eight faders.touchosc"; DestDir: "{app}\TouchOSC Templates"
-Source : "\TouchOSC Templates\KeyMap 6x2.touchosc"; DestDir: "{app}\TouchOSC Templates"
-Source : "\TouchOSC Templates\KeyMap 10x3.touchosc"; DestDir: "{app}\TouchOSC Templates"
-Source : "\TouchOSC Templates\Playlist.touchosc"; DestDir: "{app}\TouchOSC Templates"
+Source : "/TouchOSC Templates\Eight faders.touchosc"; DestDir: "{app}\TouchOSC Templates"
+Source : "/TouchOSC Templates\KeyMap 6x2.touchosc"; DestDir: "{app}\TouchOSC Templates"
+Source : "/TouchOSC Templates\KeyMap 10x3.touchosc"; DestDir: "{app}\TouchOSC Templates"
+Source : "/TouchOSC Templates\Playlist.touchosc"; DestDir: "{app}\TouchOSC Templates"
 
 [Dirs]
 Name: "{userappdata}\LuPlayer\Saves"

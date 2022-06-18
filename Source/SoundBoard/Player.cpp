@@ -1816,8 +1816,10 @@ void Player::verifyAudioFileFormat(const juce::String& path)
     }
 }
 
+
 void Player::launchFFMPEGThread(juce::String path)
 {
+#if RFBUILD
     juce::String correctedPath;
     ffmpegThread.conversionEndedBroadcaster->addChangeListener(this);
     ffmpegThread.setFilePath(path);
@@ -1826,6 +1828,7 @@ void Player::launchFFMPEGThread(juce::String path)
     ffmpegThread.startThread();
     convertingBar->setVisible(true);
     convertingBar->setTextToDisplay("Converting...");
+#endif
 }
 
 bool Player::loadFile(const juce::String& path, bool shouldSendChangeMessage)
