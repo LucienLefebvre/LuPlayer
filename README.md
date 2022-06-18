@@ -24,7 +24,5 @@ LuPlayer is licensed under GPLv3
 ## Framework & Librairies
 LuPlayer is based on [JUCE](https://github.com/juce-framework/JUCE) framework.
 It uses the following librairies / modules :
-* [FFmpeg](https://github.com/FFmpeg/FFmpeg)
-* [ffmpeg-cpp](https://github.com/Raveler/ffmpeg-cpp)
 * [LUFSmeter](https://github.com/klangfreund/LUFSMeter)
 * [ff_meters](https://github.com/ffAudio/ff_meters)
