@@ -4,17 +4,23 @@ Téléchargez simplement l'éxecutable, et lancez le.
 Si, au lancement, le message d'erreur "VCRUNTIME140_1.dll est introuvable" apparaît, il faut télécharger et installer [Microsoft Visual C++ Redistribuable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 # Trois modes de lecteurs de sons différents :
 ## 1. **One playlist, one cart**
-#### Liste de lecture (gauche)
+### Liste de lecture (gauche)
 Le son prêt à être joué est coloré en orange.
 La liste de lecture se contrôle soit avec les faders 1 et 2, soit avec la barre d'espace. Un son se lance avec un des deux
 faders, le son suivant se lancera avec l'autre fader. À la fin de la lecture, la liste de lecture passera au son suivant
 lorsque l'on ramènera le fader à 0.
+
+De chaque côté du lecteur, un petit carré rouge indique sur quel fader est assigné le lecteur.
+
 On peut également lancer un son avec la barre d’espace, lorsque la lecture est terminée, la liste de lecture passe au
 son suivant.
-#### Cartouchier (droite) :
+
+### Cartouchier (droite) :
 Le cartouchier se contrôle avec les faders 3 et 4. Pour assigner un fader à un son, cliquer sur le bouton d'assignation
-à droite ou à gauche du son.
+à gauche (fader 3) ou à droite (fader 4) du son.
+
 Les sons peuvent également se lancer avec des raccourcis clavier (par défaut : Fn1 -> Fn12) , pour les 12 premiers sons. 
+
 Le son prêt à être joué est coloré en orange, il devient vert lorsqu’il est en lecture, et rouge lorsqu’il reste moins de 5
 secondes
 
@@ -46,13 +52,14 @@ Possibilité de glisser - déposer plusieurs sons : maintenir shift pour les sé
 
 # Clip Editor
 
-### Raccourcis :
+### Raccourcis souris :
 * Molette souris : zoom
 * Control + click : ajoute un point d'enveloppe
 * Click droit sur un point : supprime ce point
 * Control + click sur le bouton "enveloppe" : réinitialise l'enveloppe
 
-
+### Raccourcis clavier par défault :
+* i : place le point d'entrée
 
 # Fenêtre de paramètres (General Settings)
 * "Fader maximum value" : définit la valeur maxium du fader du controlleur MIDI ou OSC
