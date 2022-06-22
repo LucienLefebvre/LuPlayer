@@ -63,6 +63,7 @@ Possibilité de glisser - déposer plusieurs sons : maintenir shift pour les sé
 
 ### Raccourcis souris :
 * Molette souris : zoom
+* Shift + glisser : défilement horizontal
 * Control + click : ajoute un point d'enveloppe
 * Click droit sur un point : supprime ce point
 * Control + click sur le bouton "enveloppe" : réinitialise l'enveloppe
