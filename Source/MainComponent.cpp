@@ -1590,9 +1590,10 @@ bool MainComponent::perform(const InvocationInfo& info)
     case CommandIDs::about:
     {
         juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::NoIcon, "About",
+            "LuPlayer V0.9.1.1\n"
             "Licensed under GPLv3\n"
             "Developped by Lucien Lefebvre\n"
-            "To view source, go to : \n github.com/lucienlefebvre\n");
+            "To view source, go to : \n github.com/lucienlefebvre/LuPlayer\n");
     }
         break;
     case CommandIDs::autoCheckUpdate:

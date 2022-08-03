@@ -254,7 +254,7 @@ int EnveloppeEditor::gainToY(float gain)
 
 void EnveloppeEditor::mouseDown(const juce::MouseEvent& e)
 {
-    if (e.mods.isAltDown())
+    if (e.getNumberOfClicks() == 2)
     {
         thumbnailHorizontalZoom = 1.0;
         thumbnailRange = thumbnailRange.withStartAndLength(0.0, 1.0);

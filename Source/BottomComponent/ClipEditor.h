@@ -166,14 +166,21 @@ public:
 
         addAndMakeVisible(&playHead);
         playHead.setColour(juce::Colours::green);
+        playHead.addMouseListener(&enveloppeEditor, false);
+
         addAndMakeVisible(&cuePlayHead);
         cuePlayHead.setColour(juce::Colours::black);
+        cuePlayHead.addMouseListener(&enveloppeEditor, false);
+
         addChildComponent(&inMark);
         inMark.setColour(juce::Colour(0, 196, 255));
         inMark.setAlwaysOnTop(true);
+        inMark.addMouseListener(&enveloppeEditor, false);
+
         addChildComponent(&outMark);
         outMark.setColour(juce::Colour(238, 255, 0));
         outMark.setAlwaysOnTop(true);
+        outMark.addMouseListener(&enveloppeEditor, false);
     }
 
     ~ClipEditor() override
