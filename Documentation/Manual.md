@@ -115,3 +115,29 @@ Du côté du portable, il faut juste faire l’inverse : dans TouchOSC, mettre l
 
 Des templates se trouvent dans le dossier "TouchOSC templates"
 
+### Liste des commandes OSC (X étant le numéro de lecteur) :
+#### Playlist
+| Fonction | Commande |
+| ----- | ----- |
+| Niveau | /1/faderX |
+| Nom | /1/soundnameX |
+| Temps restant | /1/remainingX |
+| Son suivant | /1/down |
+| Son précédent | /1/up |
+| Revenir au début | /1/reset |
+
+#### Eight Faders
+| Fonction | Commande |
+| ----- | ----- |
+| Niveau | 8fadersgainX |
+| Lecture | 8faderspushX |
+| Nom | 8faderslabelX |
+| Temps restant | 8faderstimeX |
+
+#### KeyMap
+| Fonction | Commande |
+| ----- | ----- |
+| Lecture | kmpushX |
+| Temps restant | kmtimeX |
+| Nom | kmnameX |
+| Raccourci | kmshortcutX |
