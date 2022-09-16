@@ -38,58 +38,59 @@ Simple cart with eight players : each sound is assigned to a midi fader. Sounds 
 * A right click on the high pass filter button (HPF) allows to set the frequency.
 
 ## 3. Keyboard Mapped
-Cartouchier se basant des les touches du clavier, peut aller jusque 30 lecteurs.
-Dans le panneau "Key Mapping", possibilité de choisir entre trois disposition de clavier : QWERTY, AZERTY, QWERTZ
-Possibilité de changer le raccourci clavier, en cliquant sur le bouton "Key" dans le panneau "Clip Editor".
-#### Raccourcis :
+Cart with up to 30 players, launched by keyboard.
+In "Settings -> "Keyboards shortcuts", possibility to choose between differents base keyboard layout : QWERTY, AZERTY and QWERTZ.
+Possibility to change each key mappings, by clicking on the button "key" in the clip editor panel.
+
+#### Shortcuts :
 * Control + click : play / stop
-* Molette souris : volume
-* Click + glisser : volume
-* Double click : réinitialise le volume à 0dB
-* Control + molette souris : trim volume
-* Alt + click + glisser : déplace un son d'un lecteur à un autre
-* Control + alt + click : supprime le son
+* Mouse wheel : volume
+* Click + drag : volume
+* Double click : reset volume at 0dB
+* Control + mouse wheel : trim volume
+* Alt + click + drag : move a sound from a player to another
+* Control + alt + click : delete sound
 
 # Sound Browser
-Un double click sur un son le charge dans le premier lecteur vide.
-Possibilité de glisser - déposer plusieurs sons : maintenir shift pour les sélectionner, et toujours maintenir shift lors du glisser - déposer.
+A double click on a sound load it in the first empty player.
+Possibility to drag & drop multiple sound : maintain shift to select them, and keep maintening shift while drag & dropping.
 
 # Clip Editor
 
-### Raccourcis souris :
-* Molette souris : zoom
-* Shift + glisser : défilement horizontal
-* Control + click : ajoute un point d'enveloppe
-* Click droit sur un point : supprime ce point
-* Control + click sur le bouton "enveloppe" : réinitialise l'enveloppe
+### Mouse shortcuts :
+* Mouse wheel : zoom
+* Shift + drag : horizontal scroll
+* Control + click : add enveloppe point
+* Right click on enveloppe point : delete enveloppe point
+* Control + click on the "enveloppe" button : reset the enveloppe
 
-### Raccourcis clavier par défault :
-* i : place le point d'entrée
-* o : place le point de sortie
-* k : supprime le point d'entrée
-* l : supprime le point de sortie
-* c : lance la pré-écoute au curseur
-* x : lance la pré-écoute au début du son
-* v : lance la pré-écoute cinq secondes avant la fin du son
+### Default keyboards shortcuts (note that keyboard shortcuts are disabled in keyboard mapped mode) :
+* i : set an in mark
+* o : set an out mark
+* k : delete in mark
+* l : delete out mark
+* c : launch cue at cursor
+* x : launch cue at sound start
+* v : launch cue 5 seconds before sound end
 
-# Fenêtre de paramètres (General Settings)
-* "Fader maximum value" : définit la valeur maxium du fader du controlleur MIDI ou OSC
-* "Fader acceleration" : définit la courbe d'accélération du controleur MIDI ou OSC.
-* "Enable fader start" : active ou désactive le lancement des sons en levant le fader du controlleur MIDI.
-* "Fader start delay" : ajoute un court délai lors du lancement en fader start via midi, de manière à ne pas "manger" le début du son
-* "Fader temporisation" : en mode "Playlist", temps de "faux départ". Si le son est arrêté avant cette durée, la liste de lecture ne passe pas au son suivant.
-* "Auto normalize sounds at 0LU" : si activé, les sons se normaliseront automatiquement à 0LU lors de leurs chargement dans un lecteur.
-* "Normalisation target" : niveau auquel les sons sont normalisés, en LU.
-* "Show individual meter" : affiche un indicateur de niveau pour chaque lecteur.
-* "Last seconds warning" : à partir de cette durée restante, le son deviendra rouge
-* "Always launch sounds at 0dB" : si activé, le niveau sera ramené à 0dB à chaque lancement de son.
-* "Mouse wheel control volume" : si activé, la molette de la souris peut modifier le niveau et le niveau de trim de chaque son, lorsqu'elle est sur le paramètre.
-* "Key mapped soundboard colums" : définit le nombre de lecteurs en mode "Key Mapped Soundboard".
-* "OSC outgoing port, incoming port, IP" : voir paragraphe OSC.
-* "Audio output mode" : Mono : sortie principale à gauche, pré-écoute (cue) à droite. Réduction mono : L+R. Stéréo : sortie principale et pré-écoute sur la même sortie.
+# General settings window :
+* "Fader maximum value" : set the maximal value of the midi or OSC fader
+* "Fader acceleration" : set the acceleration curve of the midi or OSC fader
+* "Enable fader start" : enable fader start (sound are launched when a fader is opened)
+* "Fader start delay" : add a short delay when launching a sound by fader start, in order to keep transients at the beginning of the sound
+* * "Fader temporisation" : in playlist mode, time of "false start" : if the sound is stopped before this time, the playlist will not skip to the next sound
+* "Auto normalize sounds at 0LU" : if enabled, sound will be automatically normalized in LU when they are loaded in a player
+* "Normalization target" : target level for normalization, in LU
+* "Show individual meter" : show an individual meter for each player
+* "Last seconds warning" : sound will become red from this remaining time
+* "Always launch sounds at 0dB" : if enabled, sound level will be bring to 0dB when launched
+* "Mouse wheel control volume" : allows mouse wheel to control volume and trim volume of each sound, when hoovering the parameter
+* "Key mapped soundboard colums / rows" : set the number of players in "keyboard mapped" mode
+* "OSC outgoing port, incoming port, IP" : see OSC paragraphe below.
+* "Audio output mode" : Mono : main output (mono-reduced L+R) left, cue output right. Stereo : main output and cue on same stereo output.
 
 # OSC
-Pour pouvoir contrôler avec un Smartphone, il faut une [application](https://hexler.net/touchosc-mk1) (5€ sur le Play Store ou sur l’Apple Store).
+In order to control LuPlayer with a smartphone, you will need an OSC app (for exemple, templates provided for [touchOSC mk1](https://hexler.net/touchosc-mk1)
 
 Il faut que le téléphone et le PC soient sur le même réseau WIFI / Ethernet.
 
