@@ -78,7 +78,7 @@ Possibility to drag & drop multiple sound : maintain shift to select them, and k
 * "Fader acceleration" : set the acceleration curve of the midi or OSC fader
 * "Enable fader start" : enable fader start (sound are launched when a fader is opened)
 * "Fader start delay" : add a short delay when launching a sound by fader start, in order to keep transients at the beginning of the sound
-* * "Fader temporisation" : in playlist mode, time of "false start" : if the sound is stopped before this time, the playlist will not skip to the next sound
+* "Fader temporisation" : in playlist mode, time of "false start" : if the sound is stopped before this time, the playlist will not skip to the next sound
 * "Auto normalize sounds at 0LU" : if enabled, sound will be automatically normalized in LU when they are loaded in a player
 * "Normalization target" : target level for normalization, in LU
 * "Show individual meter" : show an individual meter for each player
@@ -87,10 +87,10 @@ Possibility to drag & drop multiple sound : maintain shift to select them, and k
 * "Mouse wheel control volume" : allows mouse wheel to control volume and trim volume of each sound, when hoovering the parameter
 * "Key mapped soundboard colums / rows" : set the number of players in "keyboard mapped" mode
 * "OSC outgoing port, incoming port, IP" : see OSC paragraphe below.
-* "Audio output mode" : Mono : main output (mono-reduced L+R) left, cue output right. Stereo : main output and cue on same stereo output.
+* "Audio output mode" : * Mono : main output (mono-reduced L+R) left, cue output right. * Stereo : main output and cue on same stereo output.
 
 # OSC
-In order to control LuPlayer with a smartphone, you will need an OSC app (for exemple, templates provided for [touchOSC mk1](https://hexler.net/touchosc-mk1)
+In order to control LuPlayer with a smartphone, you will need an OSC app (for exemple, templates provided for [touchOSC mk1](https://hexler.net/touchosc-mk1) )
 
 Il faut que le téléphone et le PC soient sur le même réseau WIFI / Ethernet.
 
