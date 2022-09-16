@@ -87,53 +87,49 @@ Possibility to drag & drop multiple sound : maintain shift to select them, and k
 * "Mouse wheel control volume" : allows mouse wheel to control volume and trim volume of each sound, when hoovering the parameter
 * "Key mapped soundboard colums / rows" : set the number of players in "keyboard mapped" mode
 * "OSC outgoing port, incoming port, IP" : see OSC paragraphe below.
-* "Audio output mode" : * Mono : main output (mono-reduced L+R) left, cue output right. * Stereo : main output and cue on same stereo output.
+* "Audio output mode" : Mono : main output (mono-reduced L+R) left, cue output right. Stereo : main output and cue on same stereo output.
 
 # OSC
-In order to control LuPlayer with a smartphone, you will need an OSC app (for exemple, templates provided for [touchOSC mk1](https://hexler.net/touchosc-mk1) )
-
-Il faut que le téléphone et le PC soient sur le même réseau WIFI / Ethernet.
+In order to control LuPlayer with a smartphone, you will need an OSC control app (for exemple, templates provided for [touchOSC mk1](https://hexler.net/touchosc-mk1) )
+The OSC app should be on the same network than the PC.
 
 ### Configuration :
-#### Côté PC
-Dans l’application, cliquer sur “Settings”. Il faut donner 3 paramètres : les ports entrants et sortants, et l’adresse IP du téléphone.
+#### PC side
+Three parameters in general settings : outgoing port, incoming port, and IP adress of OSC controller.
 
-Dans les ports entrants et sortants, l’usage c’est de mettre 8000 pour Outgoing et 8001 pour Incoming.
+For outgoing and incoming port, usage is to set 8000 for outgoing and 8001 for incoming.
+The IP adress of the OSC controller should be displayed in the app, for example it can be found on the configuration panel of TouchOSC.
 
-Pour l’adresse IP du téléphone, elle est affichée dans le panneau de configuration de TouchOSC.
+It may be needed to open ports in windows firewall :
+In Windows, search "Windows Defender Firewall with Advanced Security", click on "Inbound rules", and click on "New rule" on the right.
+Select "Port", in the next window select "UDP" and enter the port set previously in incoming port (8000 for the previous example). Click next, select "Allow the connection", next autorize three domains, and give a name.
 
-Il se peut qu'il faille ouvrir les ports dans le pare-feu. Dans Windows, chercher “Pare -feu Windows Defender avec fonctions avancées de sécurité”-> Règles de trafic entrant -> nouvelle règle.
+#### OSC Controller side (example for TouchOSC)
+In touch OSC, just cross the parameters : 8001 in outgoing port, 8000 in incoming port, and you can find the PC IP adress by right clicking on network icon, then properties.
 
-Sélectionner “Port”, dans la fenêtre d’après sélectionner “UDP” et mettre port 8001 (pour l’exemple précédent, cela doit correspondre au port Incoming). Faire suivant, “autoriser la connexion”, suivant, autoriser les trois domaines, et enfin donner un nom.
-
-#### Côté Téléphone
-Du côté du portable, il faut juste faire l’inverse : dans TouchOSC, mettre l’IP du PC en Host (pour la trouver, dans Windows clic en bas à droite sur l’icône Ethernet ou WIFI, puis propriété, et descendre tout en bas. Elle est affichée aussi dans le panneau d’options de l’applications, mais il arrive aussi que ce ne soit pas la bonne). Pour les ports, 8001 en Outgoing et 8000 en Incoming.
-
-Des templates se trouvent dans le dossier "TouchOSC templates"
-
-### Liste des commandes OSC (X étant le numéro de lecteur) :
+### OSC commands (X being the player number) :
 #### Playlist
-| Fonction | Commande |
+| Function | Command |
 | ----- | ----- |
-| Niveau | /1/faderX |
-| Nom | /1/soundnameX |
-| Temps restant | /1/remainingX |
-| Son suivant | /1/down |
-| Son précédent | /1/up |
-| Revenir au début | /1/reset |
+| Level | /1/faderX |
+| Name | /1/soundnameX |
+| Remaining time | /1/remainingX |
+| Next Sound| /1/down |
+| Previous sound | /1/up |
+| Go to first sound | /1/reset |
 
 #### Eight Faders
-| Fonction | Commande |
+| Function | Command |
 | ----- | ----- |
-| Niveau | 8fadersgainX |
-| Lecture | 8faderspushX |
-| Nom | 8faderslabelX |
-| Temps restant | 8faderstimeX |
+| Level | 8fadersgainX |
+| Play | 8faderspushX |
+| Name | 8faderslabelX |
+| Remaining time | 8faderstimeX |
 
 #### KeyMap
-| Fonction | Commande |
+| Function | Command |
 | ----- | ----- |
-| Lecture | kmpushX |
-| Temps restant | kmtimeX |
-| Nom | kmnameX |
-| Raccourci | kmshortcutX |
+| Play | kmpushX |
+| Remaining Time | kmtimeX |
+| Name | kmnameX |
+| Shortcut | kmshortcutX |
