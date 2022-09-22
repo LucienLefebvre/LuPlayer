@@ -3,6 +3,8 @@
 
 LuPlayer is an open source audio player for radio, podcast and streaming content creators.
 
+Visit [LuPlayer.org](http://luplayer.org) to download.
+
 Key features :
 * Differents modes : playlist, 8 sounds cart, keyboard mapped
 * Midi & OSC control, with fader start
