@@ -1593,6 +1593,8 @@ bool MainComponent::perform(const InvocationInfo& info)
             "LuPlayer V0.9.1.1\n"
             "Licensed under GPLv3\n"
             "Developped by Lucien Lefebvre\n"
+            "luplayer.org\n"
+            "contact@luplayer.org\n"
             "To view source, go to : \n github.com/lucienlefebvre/LuPlayer\n");
     }
         break;
