@@ -141,6 +141,16 @@ public:
             mainComponent.grabKeyboardFocus();
         }
 
+        void minimisationStateChanged(bool isNowMinimised) override
+        {
+            if (isNowMinimised)
+                DBG("minimised");
+            else
+            {
+                mainComponent.grabKeyboardFocus();
+            }
+        }
+
         MainComponent mainComponent;
     private:
 
