@@ -109,27 +109,27 @@ In touch OSC, just cross the parameters : 8001 in outgoing port, 8000 in incomin
 
 ### OSC commands (X being the player number) :
 #### Playlist
-| Function | Command |
-| ----- | ----- |
-| Level | /1/faderX |
-| Name | /1/soundnameX |
-| Remaining time | /1/remainingX |
-| Next Sound| /1/down |
-| Previous sound | /1/up |
-| Go to first sound | /1/reset |
+| Function | Command | Type |
+| ----- | ----- | ---- |
+| Level | /1/faderX | float32 |
+| Name | /1/soundnameX | OSC-String |
+| Remaining time | /1/remainingX | OSC-String |
+| Next Sound| /1/down | float32 |
+| Previous sound | /1/up | float32 |
+| Go to first sound | /1/reset | float32 |
 
 #### Eight Faders
-| Function | Command |
-| ----- | ----- |
-| Level | 8fadersgainX |
-| Play | 8faderspushX |
-| Name | 8faderslabelX |
-| Remaining time | 8faderstimeX |
+| Function | Command | Type |
+| ----- | ----- | ---- |
+| Level | 8fadersgainX | float32 |
+| Play | 8faderspushX | float32 |
+| Name | 8faderslabelX | OSC-String |
+| Remaining time | 8faderstimeX | OSC-String |
 
 #### KeyMap
-| Function | Command |
-| ----- | ----- |
-| Play | kmpushX |
-| Remaining Time | kmtimeX |
-| Name | kmnameX |
-| Shortcut | kmshortcutX |
+| Function | Command | Type |
+| ----- | ----- | ---- |
+| Play | kmpushX | float32 |
+| Remaining Time | kmtimeX | OSC-String |
+| Name | kmnameX |  OSC-String |
+| Shortcut | kmshortcutX | OSC-String |
