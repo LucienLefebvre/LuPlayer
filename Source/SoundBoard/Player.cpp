@@ -960,7 +960,7 @@ void Player::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill,
             }
         }
 
-        if (enveloppeEnabled)
+        if (enveloppeEnabled && state == Playing)
         {
             juce::Path envP = enveloppePath;
             for (int i = 0; i < bufferToFill.numSamples; i++)

@@ -673,8 +673,11 @@ void MainComponent::resized()
 
     horizontalDividerBar.get()->setBounds(0, 200 - bottomHeight, getWidth(), 8);
     Component* comps[] = { soundPlayers[0], horizontalDividerBar.get(), &bottomComponent };
-    if (showMixer)
+
+    if (showMixer) {
         myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - 4, true, false);
+
+    }
     else
         myLayout.layOutComponents(comps, 3, 0, playersStartHeightPosition, getWidth(), getHeight() - playersStartHeightPosition - 4, true, false);
 }
