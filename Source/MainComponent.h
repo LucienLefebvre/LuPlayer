@@ -196,7 +196,11 @@ private:
     std::unique_ptr<juce::AudioBuffer<float>> inputBuffer;
     std::unique_ptr<juce::AudioBuffer<float>> outputBuffer;
     std::unique_ptr<juce::AudioBuffer<float>> newOutputBuffer;
+    std::unique_ptr<juce::AudioBuffer<float>> loudnessMeterBuffer;
+
     std::unique_ptr<juce::AudioSourceChannelInfo> cueAudioSource;
+    std::unique_ptr<juce::AudioSourceChannelInfo> bufferAudioSource;
+
     std::unique_ptr<juce::AudioBuffer<float>> cueBuffer;
     std::unique_ptr<juce::AudioSourceChannelInfo> playAudioSource;
     std::unique_ptr<juce::AudioSourceChannelInfo> bottomComponentSource;

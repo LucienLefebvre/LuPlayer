@@ -29,8 +29,8 @@ MainComponent::MainComponent() : juce::AudioAppComponent(deviceManager),
     else if (micAutorisation.equalsIgnoreCase("Allow"))
         numInputsChannels = 2;
 
-    setAudioChannels(numInputsChannels, 2);
-    tryPreferedAudioDevice(2);
+    setAudioChannels(numInputsChannels, 4);
+    tryPreferedAudioDevice(4);
 
     juce::MultiTimer::startTimer(0, 50);
     juce::MultiTimer::startTimer(1, 3000);
@@ -218,7 +218,7 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
             settings.setPreferedAudioDevice(deviceManager.getAudioDeviceSetup());
             settings.updateSampleRateValue(deviceManager.getAudioDeviceSetup().sampleRate);
             settings.saveOptions();
-            Settings::outputChannelsNumber = deviceManager.getCurrentAudioDevice()->getOutputChannelNames().size();
+            Settings::outputChannelsNumber = deviceManager.getAudioDeviceSetup().outputChannels.countNumberOfSetBits();
             auto midiInputs = juce::MidiInput::getAvailableDevices();
             for (auto input : midiInputs)
             {
@@ -537,6 +537,10 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     actualSamplesPerBlockExpected = samplesPerBlockExpected;
     actualSampleRate = sampleRate;
 
+
+    int numOutputChannels = deviceManager.getAudioDeviceSetup().outputChannels.countNumberOfSetBits();
+    if (Settings::audioOutputMode == 2 || Settings::audioOutputMode == 1) numOutputChannels = 2;
+
     inputBuffer.reset(new juce::AudioBuffer<float>(2, samplesPerBlockExpected));
     outputBuffer.reset(new juce::AudioBuffer<float>(2, samplesPerBlockExpected));
     playAudioSource.reset(new juce::AudioSourceChannelInfo(*outputBuffer));
@@ -556,7 +560,72 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 {
     if (soundPlayers[0] != nullptr && soundboardLaunched && isPreparedToPlay)
     {
-        if (Settings::audioOutputMode == 1)
+     if (Settings::audioOutputMode == 3 && (bufferToFill.buffer->getNumChannels() > 3))
+        {
+         inputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
+         inputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
+
+         outputBuffer->clear();
+         cueBuffer->clear();
+
+         bufferToFill.clearActiveBufferRegion();
+
+         if (soundPlayers[0] != nullptr)
+             soundPlayers[0]->getNextAudioBlock(*playAudioSource.get(), *cueAudioSource.get());
+
+         if (signalGenerator.isEnabled())
+             signalGenerator.getNextAudioBlock(*playAudioSource.get());
+
+         bufferToFill.clearActiveBufferRegion();
+         bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
+         bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
+         bufferToFill.buffer->copyFrom(2, 0, *cueBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
+         bufferToFill.buffer->copyFrom(3, 0, *cueBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
+
+         bottomComponent.myMixer.getNextAudioBlock(*bottomComponentSource.get());
+         bufferToFill.buffer->addFrom(2, 0, *bottomComponentBuffer.get(), 0, 0, bufferToFill.buffer->getNumSamples());
+         bufferToFill.buffer->addFrom(3, 0, *bottomComponentBuffer.get(), 0, 0, bufferToFill.buffer->getNumSamples());
+         cueBuffer->addFrom(0, 0, *bottomComponentBuffer.get(), 0, 0, bufferToFill.buffer->getNumSamples());
+         cueBuffer->addFrom(1, 0, *bottomComponentBuffer.get(), 1, 0, bufferToFill.buffer->getNumSamples());
+
+
+        if (!bottomComponent.recorderComponent.isEnabled())
+        {
+            if (soundPlayers[0] != nullptr) {
+                soundPlayers[0]->meterSource.measureBlock(*bufferToFill.buffer);
+                soundPlayers[0]->loudnessMeter.processBlock(*playAudioSource.get()->buffer);
+                soundPlayers[0]->newMeter->measureBlock(bufferToFill.buffer);
+                soundPlayers[0]->cueloudnessMeter.processBlock(*cueBuffer);
+                soundPlayers[0]->cuemeterSource.measureBlock(*cueBuffer);
+            }
+        }
+        else if (bottomComponent.recorderComponent.isEnabled() && soundPlayers[0] != nullptr)
+        {
+            outputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
+            outputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
+
+            bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer.get(), inputBuffer.get(), newOutputBuffer.get(), 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
+
+            //bufferToFill.clearActiveBufferRegion();
+            //bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
+            //bufferToFill.buffer->copyFrom(1, 0, *outputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
+            //bufferToFill.buffer->copyFrom(2, 0, *cueBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
+            //bufferToFill.buffer->copyFrom(3, 0, *cueBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
+
+            soundPlayers[0]->meterSource.measureBlock(*bufferToFill.buffer);
+            soundPlayers[0]->loudnessMeter.processBlock(*playAudioSource.get()->buffer);
+            soundPlayers[0]->newMeter->measureBlock(bufferToFill.buffer);
+            soundPlayers[0]->cueloudnessMeter.processBlock(*cueBuffer);
+            soundPlayers[0]->cuemeterSource.measureBlock(*cueBuffer);
+
+            if (bottomComponent.recorderComponent.enableMonitoring.getToggleState())
+            {
+                bufferToFill.buffer->copyFrom(0, 0, *newOutputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
+                bufferToFill.buffer->copyFrom(1, 0, *newOutputBuffer, 1, 0, bufferToFill.buffer->getNumSamples());
+            }
+        }
+        }
+        else if (Settings::audioOutputMode == 1)
         {      
             inputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
 
@@ -612,6 +681,8 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             inputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
             
             bufferToFill.clearActiveBufferRegion();
+            outputBuffer->clear();
+            cueBuffer->clear();
 
             if (soundPlayers[0] != nullptr)
                 soundPlayers[0]->getNextAudioBlock(bufferToFill, bufferToFill);
@@ -623,19 +694,20 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             if (signalGenerator.isEnabled())
                 signalGenerator.getNextAudioBlock(bufferToFill);
 
+            outputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
+            outputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
+
             if (!bottomComponent.recorderComponent.isEnabled())
             {
                 if (soundPlayers[0] != nullptr)
                     soundPlayers[0]->meterSource.measureBlock(*bufferToFill.buffer);
                 if (soundPlayers[0] != nullptr)
-                    soundPlayers[0]->loudnessMeter.processBlock(*bufferToFill.buffer);
+                    soundPlayers[0]->loudnessMeter.processBlock(*outputBuffer);
                 if (soundPlayers[0] != nullptr)
                     soundPlayers[0]->newMeter->measureBlock(bufferToFill.buffer);
             }
             else if (bottomComponent.recorderComponent.isEnabled() && soundPlayers[0] != nullptr)
             {
-                outputBuffer->copyFrom(0, 0, *bufferToFill.buffer, 0, 0, bufferToFill.buffer->getNumSamples());
-                outputBuffer->copyFrom(1, 0, *bufferToFill.buffer, 1, 0, bufferToFill.buffer->getNumSamples());
                 bottomComponent.recorderComponent.recordAudioBuffer(outputBuffer.get(), inputBuffer.get(), newOutputBuffer.get(), 2, actualSampleRate, bufferToFill.buffer->getNumSamples());
                 bufferToFill.clearActiveBufferRegion();
                 bufferToFill.buffer->copyFrom(0, 0, *outputBuffer, 0, 0, bufferToFill.buffer->getNumSamples());
@@ -1593,7 +1665,7 @@ bool MainComponent::perform(const InvocationInfo& info)
     case CommandIDs::about:
     {
         juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::NoIcon, "About",
-            "LuPlayer V0.9.1.1\n"
+            "LuPlayer V0.9.2\n"
             "Licensed under GPLv3\n"
             "Developped by Lucien Lefebvre\n"
             "luplayer.org\n"

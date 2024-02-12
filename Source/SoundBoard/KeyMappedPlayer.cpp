@@ -276,6 +276,10 @@ void KeyMappedPlayer::loadFile(juce::String path, juce::String name)
     {
       soundPlayer->verifyAudioFileFormat(path);
       soundPlayer->setName(name.toStdString());
+      nameLabelScrollX = 0;
+      scrollLabel = true;
+      nameLabelTextTotalWidth = nameLabel->getFont().getStringWidth(nameLabel->getText());
+
     }
 
 }

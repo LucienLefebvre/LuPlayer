@@ -150,7 +150,7 @@ Settings::Settings() : settingsFile(options)
 
     //NORMALIZE TARGET
     normalizeTargetLabel.setBounds(300, faderTempValue.getBottom() + spacer, 200, 25);
-    normalizeTargetLabel.setText("Normalisation target (LU)", juce::NotificationType::dontSendNotification);
+    normalizeTargetLabel.setText("Normalization target (LU)", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(normalizeTargetLabel);
     normalizeTargetValue.setBounds(500, faderTempValue.getBottom() + spacer, 50, 25);
     normalizeTargetValue.setText(juce::String(Settings::normTarget), juce::NotificationType::dontSendNotification);
@@ -285,6 +285,11 @@ Settings::Settings() : settingsFile(options)
     audioOutputModeListbox.setBounds(200, oscInPortLabel.getBottom() + spacer, 399, 25);
     audioOutputModeListbox.addItem("Mono (Left -> Output, Right -> Cue)", 1);
     audioOutputModeListbox.addItem("Stereo 2 Outputs (Output & Cue on same stereo Output)", 2);
+    audioOutputModeListbox.addItem("Stereo 4 Outputs(Output on first pair, Cue on second)", 3);
+
+    //if (Settings::outputChannelsNumber <= 4)
+    //    audioOutputModeListbox.setItemEnabled(3, false);
+
     audioOutputModeListbox.setSelectedId(Settings::audioOutputMode);
     audioOutputModeListbox.addListener(this);
 

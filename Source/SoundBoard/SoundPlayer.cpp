@@ -267,15 +267,15 @@ void SoundPlayer::resized()
             int availableHeight = getHeight() - timeLabelHeight - stopWatchHeight;
             levelMeterHeight = min(getHeight() - playersStartHeightPosition - cuelevelMeterMinimumHeight - timeLabelHeight - stopWatchHeight,
                 levelMeterMaximumHeight);
-            levelMeterHeight = availableHeight / 2;
+            levelMeterHeight = availableHeight / 3 * 2;
+            cueLevelMeterHeight = availableHeight / 3;
             meter.setBounds(cueMeterXStart, getHeight() - levelMeterHeight, 80,
                 min(getHeight() - playersStartHeightPosition, levelMeterHeight));
             loudnessBarComponent.setBounds(meter.getBounds().getTopRight().getX() + 7,
                 getHeight() - levelMeterHeight, 25, levelMeterHeight);
-            cuelevelMeterHeight = min(getHeight() - playersStartHeightPosition - levelMeterHeight,
-                cuelevelMeterMaximumHeight);
-            int cueMeterYStart = meter.getPosition().getY() - levelMeterHeight;
-            cuemeter.setBounds(cueMeterXStart, cueMeterYStart, 80, levelMeterHeight);
+            
+            int cueMeterYStart = meter.getPosition().getY() - cueLevelMeterHeight;
+            cuemeter.setBounds(cueMeterXStart, cueMeterYStart, 80, cueLevelMeterHeight);
 
             timeLabel.setBounds(playlistViewport.getRight(), 0, timeLabelWidth, timeLabelHeight);
             mainStopWatch.setBounds(timeLabel.getX(), timeLabel.getBottom(), timeLabelWidth, stopWatchHeight);

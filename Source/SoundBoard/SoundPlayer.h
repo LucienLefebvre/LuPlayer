@@ -176,6 +176,7 @@ private:
     //METERS
     int levelMeterMaximumHeight = 510;
     int levelMeterHeight;
+    int cueLevelMeterHeight;
     int cuelevelMeterMaximumHeight = 300;
     int cuelevelMeterMinimumHeight = 150;
     int cuelevelMeterHeight;
