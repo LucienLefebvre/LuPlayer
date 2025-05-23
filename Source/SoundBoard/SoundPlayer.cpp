@@ -982,7 +982,7 @@ void SoundPlayer::loadInFirstEmptyPlayer(juce::String file, juce::String name)
         {
             for (auto player : playlist->players)
             {
-                if (!player->isFileLoaded())
+                if (!player->isLoadingFile)
                 {
                     player->verifyAudioFileFormat(file);
                     if (name.isNotEmpty())

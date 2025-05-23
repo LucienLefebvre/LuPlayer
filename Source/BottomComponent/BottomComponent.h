@@ -18,6 +18,7 @@
 #include "../BottomComponent/ClipEditor.h"
 #include "../Settings/KeyMapper.h"
 #include "TextEditorTab.h"
+#include "LuplayerUpload.h"
 
 #if RFBUILD
 #include "../RF/DataBaseBrowser.h"
@@ -51,6 +52,7 @@ public:
     ClipEditor clipEditor;
     ClipEffect clipEffect;
     TextEditorTab textEditor;
+    LuplayerUpload luplayerUpload;
 
     juce::MixerAudioSource myMixer;
 

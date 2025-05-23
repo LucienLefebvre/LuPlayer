@@ -1790,6 +1790,7 @@ void Player::verifyAudioFileFormat(const juce::String& path)
 {
     if (path.isNotEmpty())
     {
+		isLoadingFile = true;
         juce::FileLogger::getCurrentLogger()->writeToLog("player verify audio file format");
         juce::File file(path);
         if ((file.getFileExtension() == juce::String(".wav")) || (file.getFileExtension() == juce::String(".WAV"))
@@ -1810,6 +1811,7 @@ void Player::verifyAudioFileFormat(const juce::String& path)
 #if RFBUILD
         else
         {
+            DBG("1");
             launchFFMPEGThread(path);
         }
 #endif

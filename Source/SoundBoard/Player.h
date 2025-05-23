@@ -329,6 +329,9 @@ public:
 
     R128IntegratedThread luThread{ "Thread" };
     DelayThread faderDelayThread{ "Thread" };
+
+    bool isLoadingFile = false;
+
 private:
     enum TransportState
     {
@@ -521,6 +524,7 @@ private:
 
     bool fxEnabled = false;
     bool isEdited = false;
+
 
 #if RFBUILD
     ffmpegConvert ffmpegThread{ "convertThread" };

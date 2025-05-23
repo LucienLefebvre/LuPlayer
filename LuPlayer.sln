@@ -1,5 +1,6 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2019
+# Visual Studio Version 16
 
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuPlayer - App", "LuPlayer_App.vcxproj", "{05955D26-5CB7-5094-26F0-FB5FE555F9BC}"
 EndProject

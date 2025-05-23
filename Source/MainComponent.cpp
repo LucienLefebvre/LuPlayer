@@ -285,6 +285,21 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
         soundPlayers[0]->loadInFirstEmptyPlayer(bottomComponent.audioPlaybackDemo.getSelectedFiles()[0]);
         grabKeyboardFocus();
     }
+    else if (source == bottomComponent.luplayerUpload.loadIntoPlayerBroadcaster.get())
+    {
+        auto filesToLoad = bottomComponent.luplayerUpload.getFilesToLoad();
+        for (int i = 0; i < filesToLoad.size(); i++)
+        {
+            const AudioFileInfo& file = filesToLoad[i];
+            juce::File juceFile(file.file.getFullPathName());
+            DBG("File to load: " << juceFile.getFullPathName());
+            DBG("File name: " << juceFile.getFileName());
+            DBG("File exists: " << (juceFile.existsAsFile() ? "yes" : "no"));
+            soundPlayers[0]->loadInFirstEmptyPlayer(juceFile.getFullPathName(), file.name);
+        }
+
+        grabKeyboardFocus();
+    }
     else if (source == bottomComponent.recorderComponent.mouseDragInRecorder)//when mouse is dragged in recorder, desactivate shortcuts keys for players
     {
         soundPlayers[0]->draggedPlaylist = -1;
@@ -1076,7 +1091,7 @@ void MainComponent::stopWatchShortcuPressed()
 
 juce::StringArray MainComponent::getMenuBarNames()
 {
-    return { "File", "Settings", "Soundplayer Mode", "View", "Tools", "Help" };
+    return { "File", "Settings", "Soundplayer Mode", "View", "Tools","LuPlayer Upload", "Help" };
 }
 
 juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String& menuName)
@@ -1085,6 +1100,8 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
 
     if (menuIndex == 0)
     {
+        menu.addCommandItem(&commandManager, CommandIDs::newPlaylist, "New");
+        menu.addSeparator();
         menu.addCommandItem(&commandManager, CommandIDs::open, "Open");
         menu.addCommandItem(&commandManager, CommandIDs::save, "Save");
         menu.addSeparator();
@@ -1119,13 +1136,28 @@ juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String
     {
         menu.addCommandItem(&commandManager, CommandIDs::showSignalGenerator, "Signal generator");
     }
-    else if (menuIndex == 5)
+    else if (menuIndex == 6)
     {
         menu.addCommandItem(&commandManager, CommandIDs::documentation, "Documentation");
         menu.addCommandItem(&commandManager, CommandIDs::about, "About");
         menu.addCommandItem(&commandManager, CommandIDs::autoCheckUpdate, "Automatically check for new update");
     }
+    else if (menuIndex == 5) // "Upload" is the 7th menu (index 6)
+    {
+        menu.addCommandItem(&commandManager, CommandIDs::upload, "Import");
+
+    }
     return menu;
+}
+
+void MainComponent::menuBarItemSelected(int menuItemID, int topLevelMenuIndex)
+{
+    // 6 is the index for "LuPlayer Upload"
+    if (topLevelMenuIndex == 6)
+    {
+        // Call your popup directly
+        bottomComponent.luplayerUpload.showUuidPopup();
+    }
 }
 
 void MainComponent::menuItemSelected(int menuItemID, int topLevelMenuIndex)
@@ -1143,6 +1175,7 @@ void MainComponent::initializeBottomComponent()
     bottomComponent.recorderComponent.spaceBarKeyPressed->addChangeListener(this);
     bottomComponent.cuePlay->addChangeListener(this);
     bottomComponent.clipEditor.grabFocusBroadcaster->addChangeListener(this);
+	bottomComponent.luplayerUpload.loadIntoPlayerBroadcaster->addChangeListener(this);
 
     bottomComponent.setName("bottom component");
     bottomComponent.setWantsKeyboardFocus(false);
@@ -1151,6 +1184,8 @@ void MainComponent::initializeBottomComponent()
     bottomComponent.getTabbedButtonBar().getTabButton(1)->addMouseListener(this, false);
     bottomComponent.getTabbedButtonBar().getTabButton(2)->addMouseListener(this, false);
     bottomComponent.getTabbedButtonBar().getTabButton(3)->addMouseListener(this, false);
+    bottomComponent.getTabbedButtonBar().getTabButton(4)->addMouseListener(this, false);
+
 
 #if RFBUILD
     bottomComponent.audioPlaybackDemo.fileDraggedFromBrowser->addChangeListener(this);
@@ -1201,6 +1236,7 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
                                     CommandIDs::play10,
                                     CommandIDs::play11,
                                     CommandIDs::play12,
+                                    CommandIDs::newPlaylist,
                                     CommandIDs::save,
                                     CommandIDs::open,
                                     CommandIDs::quit,
@@ -1219,7 +1255,8 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID>& commands)
                                     CommandIDs::about,
                                     CommandIDs::autoCheckUpdate,
                                     CommandIDs::enableOSC,
-                                    CommandIDs::showSignalGenerator };
+                                    CommandIDs::showSignalGenerator,
+                                    CommandIDs::upload };
     commands.addArray(c);
 }
 
@@ -1227,6 +1264,11 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
 {
     switch (commandID)
     {
+    case CommandIDs::newPlaylist:
+        result.setInfo("Start Timer", "Start Timer", "Menu", 0);
+        result.setTicked(false);
+        result.addDefaultKeypress('t', juce::ModifierKeys::noModifiers);
+        break;
     case CommandIDs::startTimer:
         result.setInfo("Start Timer", "Start Timer", "Menu", 0);
         result.setTicked(false);
@@ -1457,6 +1499,10 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setInfo("Enable OSC", "Enable OSC", "Menu", 0);
         result.setTicked(Settings::OSCEnabled);
         break;
+    case CommandIDs::upload:
+        result.setInfo("upload", "Import sounds from LuPlayer Upload", "Menu", 0);
+        result.setTicked(false);
+        break;
     default:
         break;
     }
@@ -1565,6 +1611,23 @@ bool MainComponent::perform(const InvocationInfo& info)
     case CommandIDs::play12:
         soundPlayers[0]->playPlayer(11);
         break;
+    case CommandIDs::newPlaylist:
+    {
+        juce::FileLogger::getCurrentLogger()->writeToLog("new playlist");
+        juce::AlertWindow::showOkCancelBox(
+            juce::AlertWindow::AlertIconType::WarningIcon,
+            "Confirm New Playlist",
+            "This will delete all sounds.",
+            "OK", "Cancel",
+            nullptr,
+            juce::ModalCallbackFunction::create([this](int result)
+                {
+                    if (result != 0) // OK/Yes pressed
+                        launchSoundPlayer(SoundPlayer::Mode(Settings::preferedSoundPlayerMode));
+                })
+        );
+        break;
+    }
     case CommandIDs::save:
         savePlaylist();
         break;
@@ -1665,7 +1728,7 @@ bool MainComponent::perform(const InvocationInfo& info)
     case CommandIDs::about:
     {
         juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::NoIcon, "About",
-            "LuPlayer V0.9.2\n"
+            "LuPlayer V0.9.3\n"
             "Licensed under GPLv3\n"
             "Developped by Lucien Lefebvre\n"
             "luplayer.org\n"
@@ -1680,6 +1743,14 @@ bool MainComponent::perform(const InvocationInfo& info)
         settings.setOSCEnabled(!Settings::OSCEnabled);
         if (Settings::OSCEnabled)
             soundPlayers[0]->OSCInitialize();
+        break;
+    case CommandIDs::upload:
+        bottomComponent.luplayerUpload.showUuidPopup();
+#if RFBUILD
+        bottomComponent.setCurrentTabIndex(6);
+#else 
+        bottomComponent.setCurrentTabIndex(5);
+#endif
         break;
     default:
         return false;

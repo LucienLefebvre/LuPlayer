@@ -21,13 +21,9 @@ BottomComponent::BottomComponent()
     addTab("Clip Effect", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &clipEffect, false);
     addTab("Recorder", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &recorderComponent, false);
     addTab("Text Editor", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &textEditor, false);
-
-    /*getTabbedButtonBar().setTabBackgroundColour(0, ORANGE.darker(0.5));
-    getTabbedButtonBar().setTabBackgroundColour(1, BLUE.darker(0.5));
-    getTabbedButtonBar().setTabBackgroundColour(2, BLUE.darker(0.5));
-    getTabbedButtonBar().setTabBackgroundColour(3, juce::Colours::red.darker(0.5));
-    getTabbedButtonBar().setTabBackgroundColour(4, juce::Colours::yellow.darker(0.5));
-    getTabbedButtonBar().setAlpha(0.8);*/
+#if !RFBUILD
+    addTab("Luplayer Upload", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &luplayerUpload, false);
+#endif
 
     setTabBarDepth(tabBarHeight);
     setCurrentTabIndex(0);
@@ -48,7 +44,7 @@ BottomComponent::BottomComponent()
 
 #if RFBUILD
     addTab("Netia DataBase", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &dbBrowser, false);
-    addTab("Distant DataBase", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &distantDbBrowser, false);
+    addTab("Luplayer Upload", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &luplayerUpload, false);
     addTab("Netia Database Import", getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId), &dbImport, false);
     myMixer.addInputSource(&dbBrowser.resampledSource, false);
     myMixer.addInputSource(&dbImport.resampledSource, false);

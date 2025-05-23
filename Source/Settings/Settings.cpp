@@ -302,7 +302,7 @@ Settings::Settings() : settingsFile(options)
     convertedSoundsLabel.setText(Settings::convertedSoundsPath, juce::NotificationType::dontSendNotification);
 
     convertedSoundsButtons.setBounds(1, audioOutputModeLabel.getBottom() + spacer, 199, 25);
-    convertedSoundsButtons.setButtonText("Select converted sounds folder");
+    convertedSoundsButtons.setButtonText("Select sounds folder");
     addAndMakeVisible(convertedSoundsButtons);
     convertedSoundsButtons.onClick = [this] { selectSoundsFolder(); };
 #endif

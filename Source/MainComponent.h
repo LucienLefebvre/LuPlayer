@@ -83,7 +83,9 @@ public:
         about,
         autoCheckUpdate,
         showSignalGenerator,
-        enableOSC
+        enableOSC,
+        upload,
+		newPlaylist,
     };
 
     MainComponent();
@@ -131,7 +133,7 @@ private:
     void channelsMapping();
     void tryPreferedAudioDevice(int outputChannelsNeeded);
     void releaseResources();
-
+    void menuBarItemSelected(int menuItemID, int topLevelMenuIndex);
     void midiInitialize();
     void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) override;
 

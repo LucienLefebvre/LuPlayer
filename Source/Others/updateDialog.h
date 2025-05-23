@@ -28,7 +28,7 @@ public:
         newVersionLabel->setFont(juce::Font(30));
         newVersionLabel->setJustificationType(juce::Justification::centred);
 
-        downloadButton.reset(new juce::HyperlinkButton("Go to download page", juce::URL("https://github.com/LucienLefebvre/LuPlayer/releases")));
+        downloadButton.reset(new juce::HyperlinkButton("Go to download page", juce::URL("https://luplayer.org")));
         addAndMakeVisible(downloadButton.get());
         downloadButton->setFont(juce::Font(30), false);
 

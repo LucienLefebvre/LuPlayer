@@ -112,7 +112,7 @@ private :
     double actualSampleRate;
     int actualSamplesPerBlockExpected;
     juce::dsp::FFT                              fft{14};
-    juce::dsp::WindowingFunction<float> window  {fft.getSize(), juce::dsp::WindowingFunction<float>::hann, true};
+    juce::dsp::WindowingFunction<float> window{ static_cast<size_t>(fft.getSize()), juce::dsp::WindowingFunction<float>::hann, true };
     juce::AbstractFifo fifo                     { 48000 };
     juce::AudioBuffer<float> fifoBuffer;
     juce::AudioBuffer<float> fftBuffer          { 1, fft.getSize() * 2 };

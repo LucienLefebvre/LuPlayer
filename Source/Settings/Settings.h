@@ -52,6 +52,7 @@ public:
     int Settings::getAudioOutputMode();
     void Settings::setPreferedSoundPlayerMode(int p);
     int Settings::getPreferedSoundPlayerMode();
+
     void setKeyMapping(juce::Array<int> c, juce::StringArray s);
     juce::Array<int> getKeyMapping(juce::StringArray s);
     void setShowMeters(bool show);
